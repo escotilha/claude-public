@@ -2,42 +2,70 @@
   "hooks": {
     "SessionStart": [
       {
-        "type": "command",
-        "command": "git-autosave > /tmp/git-autosave.log 2>&1 &"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git-autosave > /tmp/git-autosave.log 2>&1 &"
+          }
+        ]
       },
       {
-        "type": "command",
-        "command": "echo '=== CORE MEMORY ===' && cat \"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/core-memory.json\" 2>/dev/null || echo 'No core memory found'"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '=== CORE MEMORY ===' && cat \"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/core-memory.json\" 2>/dev/null || echo 'No core memory found'"
+          }
+        ]
       }
     ],
     "SubagentStop": [
       {
-        "type": "command",
-        "command": "rm -rf /tmp/claude-agent-* 2>/dev/null || true"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rm -rf /tmp/claude-agent-* 2>/dev/null || true"
+          }
+        ]
       }
     ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit|NotebookEdit",
-        "type": "command",
-        "command": "\"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/hooks/format-file.sh\""
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/hooks/format-file.sh\""
+          }
+        ]
       }
     ],
     "PreToolUse": [
       {
         "matcher": "Bash",
-        "type": "command",
-        "command": "echo '{\"additionalContext\": \"Working directory: '$(pwd)'. Git branch: '$(git branch --show-current 2>/dev/null || echo none)'. Project: '$(basename $(git rev-parse --show-toplevel 2>/dev/null) 2>/dev/null || basename $(pwd))'\"}'"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"additionalContext\": \"Working directory: '$(pwd)'. Git branch: '$(git branch --show-current 2>/dev/null || echo none)'. Project: '$(basename $(git rev-parse --show-toplevel 2>/dev/null) 2>/dev/null || basename $(pwd))'\"}'"
+          }
+        ]
       }
     ],
     "Stop": [
       {
-        "type": "prompt",
-        "prompt": "Before ending: If you made code changes, did you verify they compile/pass tests? If not, consider running /verify."
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Before ending: If you made code changes, did you verify they compile/pass tests? If not, consider running /verify."
+          }
+        ]
       },
       {
-        "type": "command",
-        "command": "\"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/hooks/session-end.sh\""
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/hooks/session-end.sh\""
+          }
+        ]
       }
     ]
   },

@@ -1,13 +1,11 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-02-02",
-  "lastConsolidation": "2026-02-02T22:30:00Z",
-
+  "lastUpdated": "2026-02-03",
+  "lastConsolidation": "2026-02-03T14:03:09Z",
   "criticalContext": {
     "iCloudSetup": "ALL Claude setup files are stored in iCloud. Always check these paths first.",
     "importance": "This is the source of truth for all Claude Code configuration"
   },
-
   "paths": {
     "root": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup",
     "skills": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/skills",
@@ -17,26 +15,35 @@
     "rules": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/rules",
     "plans": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/plans"
   },
-
   "userProfile": {
     "name": "Pierre Schurmann",
     "username": "psm2",
     "role": "Software developer / M&A analyst at Nuvini Group",
-    "expertise": ["TypeScript", "React", "Next.js", "Supabase", "Claude Code"],
+    "expertise": [
+      "TypeScript",
+      "React",
+      "Next.js",
+      "Supabase",
+      "Claude Code"
+    ],
     "workContext": "Building AI-powered tools, M&A analysis systems, and autonomous coding agents",
     "communicationStyle": "direct, technical, minimal"
   },
-
   "preferences": {
     "packageManager": "pnpm",
     "deployment": {
       "primary": "Railway",
       "static": "Vercel",
-      "alternatives": ["Cloudflare Workers"]
+      "alternatives": [
+        "Cloudflare Workers"
+      ]
     },
     "database": {
       "primary": "Supabase (PostgreSQL)",
-      "alternatives": ["Neon", "PlanetScale"]
+      "alternatives": [
+        "Neon",
+        "PlanetScale"
+      ]
     },
     "codeStyle": {
       "principle": "minimal, no over-engineering",
@@ -67,7 +74,6 @@
       "avoid": "Redux (too verbose)"
     }
   },
-
   "stablePatterns": {
     "projectStructure": "feature folders with colocation",
     "apiDesign": "REST with consistent error responses",
@@ -75,7 +81,6 @@
     "errorHandling": "fail fast, explicit error types",
     "gitWorkflow": "feature branches, atomic commits"
   },
-
   "beliefs": [
     "Simple solutions are better than clever ones",
     "Delete code rather than comment it out",
@@ -84,16 +89,18 @@
     "Working software over comprehensive documentation",
     "Three similar lines of code is better than a premature abstraction"
   ],
-
   "projectContext": {
-    "activeProjects": ["Contably", "AgentCreator", "M&A Toolkit"],
+    "activeProjects": [
+      "Contably",
+      "AgentCreator",
+      "M&A Toolkit"
+    ],
     "techStack": {
       "Contably": "Next.js + Supabase + Brazil accounting integrations",
       "AgentCreator": "Agent orchestration platform",
       "MnA": "Financial analysis and document extraction"
     }
   },
-
   "toolIntegrations": {
     "notion": {
       "configured": true,
@@ -115,7 +122,10 @@
     "supabase": {
       "configured": true,
       "usage": "Database, auth, storage for projects",
-      "projects": ["Contably", "AgentCreator"]
+      "projects": [
+        "Contably",
+        "AgentCreator"
+      ]
     },
     "railway": {
       "configured": true,
@@ -133,7 +143,10 @@
     "resend": {
       "configured": true,
       "usage": "Transactional email sending",
-      "verifiedDomains": ["nuvini.ai", "contably.ai"],
+      "verifiedDomains": [
+        "nuvini.ai",
+        "contably.ai"
+      ],
       "fromAddresses": [
         "claudia@nuvini.ai",
         "cris@nuvini.ai",
@@ -154,11 +167,16 @@
     "cloudflare": {
       "configured": true,
       "usage": "DNS management",
-      "profiles": ["business", "personal"],
-      "managedDomains": ["contably.ai", "nuvini.ai"]
+      "profiles": [
+        "business",
+        "personal"
+      ],
+      "managedDomains": [
+        "contably.ai",
+        "nuvini.ai"
+      ]
     }
   },
-
   "mcpServers": {
     "available": [
       "memory",
@@ -186,7 +204,6 @@
       ]
     }
   },
-
   "memoryConfig": {
     "relevanceThreshold": 5,
     "decayThresholdDays": 90,
