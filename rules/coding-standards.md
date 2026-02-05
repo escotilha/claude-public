@@ -2,6 +2,34 @@
 
 Global conventions that apply across all projects.
 
+## Language Preferences
+
+- Primary languages: TypeScript (primary), Python, Shell scripts
+- Use TypeScript for new code unless otherwise specified
+- Python for backend services, scripts, and data processing
+- Shell scripts for automation and CI/CD tasks
+
+## Deployment Workflow
+
+When updating or deploying, complete the full workflow:
+
+1. Check current version (`git log -1`, check package.json)
+2. Pull updates (`git pull origin main`)
+3. Run tests (`npm test` or `pytest`)
+4. Deploy (`npm run deploy` or equivalent)
+5. Confirm deployment succeeded
+
+Never stop mid-workflow. Each step must be confirmed before proceeding.
+
+## Installation & Setup
+
+For installation or setup tasks, provide complete steps in one response rather than incremental guidance. Include:
+
+- All dependencies and prerequisites
+- Full command sequences
+- Expected outputs or success indicators
+- Troubleshooting for common issues
+
 ## Code Quality
 
 - Write self-documenting code with clear variable and function names
