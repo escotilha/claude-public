@@ -524,6 +524,17 @@ Then account is created and JWT returned
 
 ---
 
+## Model Configuration
+
+This skill uses Claude Opus 4.6 for maximum capability. Use `/fast` to toggle faster responses when time is critical.
+
+## Hook Events
+
+This skill leverages:
+
+- **TeammateIdle**: Triggers when a worker agent goes idle (swarm mode)
+- **TaskCompleted**: Triggers when a stage task is marked completed
+
 ## Quick Commands
 
 | Command         | Action                               |

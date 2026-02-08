@@ -1278,6 +1278,17 @@ This prevents task list clutter during long review sessions.
 
 ---
 
+## Model Configuration
+
+This skill uses Claude Opus 4.6 for maximum capability. Use `/fast` to toggle faster responses when time is critical.
+
+## Hook Events
+
+This skill leverages:
+
+- **TeammateIdle**: Triggers when a teammate goes idle (swarm mode)
+- **TaskCompleted**: Triggers when a task is marked completed
+
 ## Quick Commands
 
 | Command                 | Action                                      |

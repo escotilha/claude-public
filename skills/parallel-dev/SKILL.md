@@ -549,6 +549,17 @@ if (hasCycle(graph)) {
 }
 ```
 
+## Model Configuration
+
+This skill uses Claude Opus 4.6 for maximum capability. Use `/fast` to toggle faster responses when time is critical.
+
+## Hook Events
+
+This skill leverages:
+
+- **TeammateIdle**: Triggers when a worker agent goes idle
+- **TaskCompleted**: Triggers when a feature task is marked completed
+
 ## Best Practices
 
 1. **Keep features independent** - Minimize shared file modifications

@@ -385,6 +385,10 @@ Deliver:
 - Growth: +XX.X% (green) or -XX.X% (red)
 - Whole numbers: X,XXX
 
+## PDF Handling
+
+For PDFs over 10 pages, use the `pages` parameter when reading: `Read(file_path="doc.pdf", pages="1-5")`. Maximum 20 pages per request.
+
 ## Error Handling
 
 If data is missing:

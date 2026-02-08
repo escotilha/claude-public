@@ -8,6 +8,7 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
+  - LSP
 color: #FBBF24
 model: sonnet
 memory: project

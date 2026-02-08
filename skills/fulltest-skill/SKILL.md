@@ -641,6 +641,13 @@ Claude will analyze the current session and help identify configuration issues, 
 
 ---
 
+## Hook Events
+
+This skill leverages:
+
+- **TeammateIdle**: Triggers when a tester/fixer goes idle (swarm mode)
+- **TaskCompleted**: Triggers when a test task is marked completed
+
 ## Task Cleanup
 
 Use `TaskUpdate` with `status: "deleted"` to clean up completed or stale task chains:
