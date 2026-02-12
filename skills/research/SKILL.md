@@ -274,8 +274,10 @@ mcp__memory__create_entities({
 
 ### Tweets/X Posts
 
-- WebFetch often fails on tweets — use WebSearch as primary
-- Search for: `site:x.com "<tweet author>" "<key phrase>"` or search for the topic directly
+- Use the FixTweet API: replace `x.com` or `twitter.com` with `api.fxtwitter.com` in the URL
+- Example: `https://x.com/user/status/123` → `WebFetch https://api.fxtwitter.com/user/status/123`
+- Prompt WebFetch to return: author, date, full text, media descriptions, engagement stats, and quoted tweet content
+- If FixTweet fails, fall back to WebSearch: `site:x.com "<tweet author>" "<key phrase>"`
 - Also check if there's a linked article, repo, or demo
 - Focus on: what product/tool/technique is being announced
 
