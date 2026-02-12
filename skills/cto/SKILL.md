@@ -195,6 +195,21 @@ Repository patterns inform:
 - Previous architectural decisions
 - Code organization
 
+### Directive Language
+
+When prompting subagents or analyzing code, use thorough directive language:
+
+- "Analyze **deeply** — understand all intricacies of how this system works"
+- "Read **in great detail** — trace every data flow and edge case"
+- "Investigate the **full dependency chain**, not just the immediate callers"
+
+**Anti-patterns to enforce during review:**
+
+- Flag unnecessary comments and jsdocs that add no value
+- Flag `any` or `unknown` types in TypeScript — require explicit types
+- Flag disabled linter rules without justification
+- Recommend running `tsc --noEmit` continuously during implementation
+
 ### Step 2: Codebase Discovery
 
 **Detect tech stack:**

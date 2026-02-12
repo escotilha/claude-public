@@ -8,6 +8,7 @@ model: opus
 permissionMode: plan
 allowed-tools:
   - Read
+  - Write
   - Glob
   - Grep
   - Bash
@@ -61,6 +62,19 @@ For each approach:
 - Select an approach with clear reasoning
 - Document what we're explicitly NOT doing and why
 - Define the first concrete step
+
+## Output Mode
+
+By default, output the analysis in chat. If the argument includes a file path (e.g., `/first-principles "auth redesign" --output analysis.md`), or if the problem is complex enough to warrant a persistent artifact, write the full analysis to a markdown file instead.
+
+When writing to file:
+
+1. Write `first-principles-analysis.md` (or user-specified path) in the project root
+2. Include all 6 steps with findings, trade-offs, and the action plan
+3. Tell the user: "Analysis written to `<path>` — review, annotate inline, and I'll iterate"
+4. If the user re-invokes with the same file, read their inline annotations and update the analysis
+
+This produces a persistent, reviewable artifact rather than ephemeral chat output.
 
 ## Rules
 
