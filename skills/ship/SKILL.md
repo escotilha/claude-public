@@ -135,6 +135,85 @@ A disciplined 7-phase skill that takes a feature from idea to production. Each p
 
 ---
 
+## Startup Prompt (MANDATORY)
+
+Before any execution, present the user with a configuration summary and ask for adjustments. This runs every time unless `--resume` is passed (resume uses saved slots).
+
+### Step 1: Environment Detection
+
+Silently detect what's available:
+
+```bash
+# Detect package manager from lockfile
+[ -f pnpm-lock.yaml ] && PKG_MANAGER=pnpm
+[ -f bun.lockb ] && PKG_MANAGER=bun
+
+# Check gh CLI
+gh auth status &>/dev/null && GH_AVAILABLE=true
+
+# Check for existing learnings
+[ -f .claude/ship/learnings.json ] && LEARNINGS_EXIST=true
+
+# Check for Playwright config
+[ -f playwright.config.ts ] && PLAYWRIGHT_AVAILABLE=true
+
+# Check for existing ship config
+[ -f .claude/ship/config.json ] && CONFIG_EXISTS=true
+```
+
+### Step 2: Present Configuration Card
+
+Use AskUserQuestion to show the resolved configuration:
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║ /ship — Configuration                                        ║
+╠══════════════════════════════════════════════════════════════╣
+║                                                               ║
+║  Slot        │ Value       │ Why                              ║
+║  ────────────┼─────────────┼──────────────────────────────    ║
+║  agent       │ claude-code │ default                          ║
+║  workspace   │ worktree    │ default                          ║
+║  tracker     │ state-file  │ default                          ║
+║  notifier    │ console     │ default                          ║
+║  qa          │ playwright  │ playwright.config.ts detected    ║
+║  learnings   │ local+mcp   │ default (MCP Memory available)  ║
+║  vcs         │ git         │ default                          ║
+║                                                               ║
+║  Project: my-app │ Framework: Next.js │ PM: pnpm             ║
+║                                                               ║
+╠══════════════════════════════════════════════════════════════╣
+║                                                               ║
+║  Recommendations based on your environment:                   ║
+║  • gh CLI authenticated → consider vcs=gh-pr for auto-PRs    ║
+║  • Past learnings found (12 entries) → routing will use them ║
+║  • Playwright detected → QA auto-set to playwright           ║
+║                                                               ║
+╠══════════════════════════════════════════════════════════════╣
+║                                                               ║
+║  Options:                                                     ║
+║  [1] Proceed with these settings                              ║
+║  [2] Change slots (I'll ask which ones)                       ║
+║  [3] Save these settings as project default                   ║
+║  [4] Show me what each slot does                              ║
+║                                                               ║
+╚══════════════════════════════════════════════════════════════╝
+```
+
+### Step 3: Handle Response
+
+- **Option 1** → proceed to Phase 0/1
+- **Option 2** → ask "Which slots do you want to change?" then present each selected slot with its options
+- **Option 3** → write `.claude/ship/config.json` with current resolved slots, then proceed
+- **Option 4** → show the full slot reference table (below), then re-prompt
+
+### Skip Prompt
+
+- `--resume` skips prompt and uses slots from saved `state.json`
+- In `agent-spawned` invocation context, prompt is automatically skipped
+
+---
+
 ## Slot Configuration
 
 This skill uses a plugin-slot architecture. Each slot has a default but can be swapped without rewriting the skill. Override via `.claude/ship/config.json`.

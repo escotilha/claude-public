@@ -135,6 +135,110 @@ Reads `master-project.json` and parallelizes stages based on their `dependsOn` a
 /parallel-dev --config parallel-features.json
 ```
 
+## Startup Prompt (MANDATORY)
+
+Before any execution, present the user with a configuration summary and ask for adjustments. This runs every time unless `--quick` is passed.
+
+### Step 1: Environment Detection
+
+Silently detect what's available:
+
+```bash
+# Check ao CLI
+command -v ao &>/dev/null && AO_AVAILABLE=true
+
+# Check gh CLI + auth
+gh auth status &>/dev/null && GH_AVAILABLE=true
+
+# Check CI config
+[ -d .github/workflows ] && CI_CONFIGURED=true
+
+# Check existing config file
+[ -f .parallel-dev-config.json ] && CONFIG_EXISTS=true
+
+# Check Docker
+command -v docker &>/dev/null && DOCKER_AVAILABLE=true
+```
+
+### Step 2: Present Configuration Card
+
+Use AskUserQuestion to show the resolved configuration and ask for changes:
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║ /parallel-dev — Configuration                                ║
+╠══════════════════════════════════════════════════════════════╣
+║                                                               ║
+║  Slot        │ Value          │ Why                           ║
+║  ────────────┼────────────────┼─────────────────────────────  ║
+║  agent       │ claude-code    │ default (ao not detected)     ║
+║  workspace   │ git-worktree   │ default                       ║
+║  tracker     │ state-file     │ default                       ║
+║  notifier    │ console        │ default                       ║
+║  terminal    │ inline         │ default                       ║
+║  ci          │ github-actions │ .github/workflows/ detected   ║
+║  merger      │ git-merge      │ default                       ║
+║                                                               ║
+║  Features: 3 parsed │ Parallel: 2 │ Blocked: 1               ║
+║                                                               ║
+╠══════════════════════════════════════════════════════════════╣
+║                                                               ║
+║  Recommendations based on your environment:                   ║
+║  • gh CLI authenticated → consider merger=gh-pr for PRs       ║
+║  • Docker available → consider workspace=docker for isolation ║
+║  • No CI workflows → ci will be set to none automatically     ║
+║                                                               ║
+╠══════════════════════════════════════════════════════════════╣
+║                                                               ║
+║  Options:                                                     ║
+║  [1] Proceed with these settings                              ║
+║  [2] Change slots (I'll ask which ones)                       ║
+║  [3] Save these settings as project default                   ║
+║  [4] Show me what each slot does                              ║
+║                                                               ║
+╚══════════════════════════════════════════════════════════════╝
+```
+
+### Step 3: Handle Response
+
+- **Option 1** → proceed directly
+- **Option 2** → ask "Which slots do you want to change?" then present each selected slot with its options
+- **Option 3** → write `.parallel-dev-config.json` with current resolved slots, then proceed
+- **Option 4** → show the full slot reference table (below), then re-prompt
+
+### Step 4: Feature Summary
+
+After slot confirmation, show parsed features before spawning:
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║ Features to build:                                           ║
+╠──────────────────┬────────────┬──────────────────────────────╣
+║ Feature          │ Type       │ Depends On                   ║
+╠──────────────────┼────────────┼──────────────────────────────╣
+║ auth             │ backend    │ —                            ║
+║ api-endpoints    │ api        │ —                            ║
+║ dashboard        │ frontend   │ auth, api-endpoints          ║
+╠──────────────────────────────────────────────────────────────╣
+║ Execution plan: Round 1 → auth + api-endpoints (parallel)    ║
+║                  Round 2 → dashboard (after deps complete)   ║
+╠──────────────────────────────────────────────────────────────╣
+║ Ready to start? [Y/n]                                        ║
+╚══════════════════════════════════════════════════════════════╝
+```
+
+### Skip Prompt
+
+To bypass the interactive prompt (e.g., when invoked by another skill):
+
+```bash
+/parallel-dev --quick    # Uses defaults + config file, no prompt
+```
+
+In `agent-spawned` invocation context, the prompt is automatically skipped (verbosity: minimal).
+
+---
+
 ## Slot Configuration
 
 This skill uses a plugin-slot architecture. Each slot has a default implementation but can be swapped without rewriting the skill. Override slots via `--slot.<name>=<value>` or in `.parallel-dev-config.json`.
