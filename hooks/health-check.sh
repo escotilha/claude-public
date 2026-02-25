@@ -29,19 +29,11 @@ if ! command -v npx &>/dev/null; then
     log "✗ CRITICAL: npx not found - MCP servers will fail"
 fi
 
-# Check memory file exists and is accessible
-MEMORY_FILE="$HOME/Library/Mobile Documents/com~apple~CloudDocs/Claude/memory.jsonl"
-if [ -f "$MEMORY_FILE" ]; then
-    log "✓ Memory file: OK ($MEMORY_FILE)"
+# Check claude-setup git repo
+if [ -d "$HOME/.claude-setup/.git" ]; then
+    log "✓ claude-setup repo: OK ($HOME/.claude-setup)"
 else
-    log "⚠ Memory file not found - will be created on first use"
-fi
-
-# Check if iCloud is syncing (optional)
-if [ -d "$HOME/Library/Mobile Documents/com~apple~CloudDocs" ]; then
-    log "✓ iCloud Drive: Available"
-else
-    log "⚠ iCloud Drive: Not available"
+    log "✗ claude-setup repo not found at $HOME/.claude-setup"
 fi
 
 # Check PostgreSQL (if DATABASE_URL is set)
