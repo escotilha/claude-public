@@ -8,10 +8,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "git-autosave > /tmp/git-autosave.log 2>&1 &"
-          },
-          {
-            "type": "command",
             "command": "echo '=== CORE MEMORY ===' && cat \"$HOME/.claude-setup/memory/core-memory.json\" 2>/dev/null || echo 'No core memory found'"
           }
         ]
@@ -145,24 +141,17 @@
   "plansDirectory": "~/.claude-setup/plans",
   "skipDangerousModePermissionPrompt": true,
   "mcpSearchAutoThreshold": 15,
-  "default_arguments": [
-    "--dangerously-skip-permissions"
-  ],
+  "default_arguments": ["--dangerously-skip-permissions"],
   "mcp": {
     "mcpServers": {
       "sequential-thinking": {
         "command": "npx",
-        "args": [
-          "-y",
-          "@modelcontextprotocol/server-sequential-thinking"
-        ],
+        "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
         "description": "Sequential thinking and problem solving"
       },
       "memory": {
         "command": "node",
-        "args": [
-          "$HOME/.claude-setup/mcp-servers/memory-turso/dist/index.js"
-        ],
+        "args": ["$HOME/.claude-setup/mcp-servers/memory-turso/dist/index.js"],
         "env": {
           "TURSO_DATABASE_URL": "libsql://claude-memory-escotilha.aws-us-east-1.turso.io",
           "TURSO_AUTH_TOKEN": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3Njk2MDg3ODIsImlkIjoiZDUyM2I3OWEtZjA1My00M2U4LThhOGQtNjYwZTc1MmE0ZTY5IiwicmlkIjoiYTI3NDM2NWEtOWY3ZS00MTVlLTgxNTYtYzQxYzk2MWY4YTM0In0._TaT30NMCijZJhWyPmx_EGSzntWpyawyLoGh_JgASaHbrPkPNabsLsCfrArwLCCK1VBK9jE3NhSr9WLe_38gDg",
@@ -172,18 +161,12 @@
       },
       "playwright": {
         "command": "npx",
-        "args": [
-          "-y",
-          "@anthropic/mcp-playwright"
-        ],
+        "args": ["-y", "@anthropic/mcp-playwright"],
         "description": "Browser automation with Playwright"
       },
       "github": {
         "command": "npx",
-        "args": [
-          "-y",
-          "@modelcontextprotocol/server-github"
-        ],
+        "args": ["-y", "@modelcontextprotocol/server-github"],
         "env": {
           "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
         },
@@ -191,10 +174,7 @@
       },
       "brave-search": {
         "command": "npx",
-        "args": [
-          "-y",
-          "@modelcontextprotocol/server-brave-search"
-        ],
+        "args": ["-y", "@modelcontextprotocol/server-brave-search"],
         "env": {
           "BRAVE_API_KEY": "${BRAVE_API_KEY}"
         },
@@ -211,10 +191,7 @@
       },
       "resend": {
         "command": "npx",
-        "args": [
-          "-y",
-          "@modelcontextprotocol/server-resend"
-        ],
+        "args": ["-y", "@modelcontextprotocol/server-resend"],
         "env": {
           "RESEND_API_KEY": "${RESEND_API_KEY}"
         },
@@ -222,10 +199,7 @@
       },
       "slack": {
         "command": "npx",
-        "args": [
-          "-y",
-          "@modelcontextprotocol/server-slack"
-        ],
+        "args": ["-y", "@modelcontextprotocol/server-slack"],
         "env": {
           "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
           "SLACK_TEAM_ID": "${SLACK_TEAM_ID}"
@@ -234,10 +208,7 @@
       },
       "notion": {
         "command": "npx",
-        "args": [
-          "-y",
-          "@modelcontextprotocol/server-notion"
-        ],
+        "args": ["-y", "@modelcontextprotocol/server-notion"],
         "env": {
           "NOTION_API_KEY": "${NOTION_API_KEY}"
         },
@@ -258,26 +229,17 @@
       },
       "chrome-devtools": {
         "command": "npx",
-        "args": [
-          "-y",
-          "chrome-devtools-mcp@latest"
-        ],
+        "args": ["-y", "chrome-devtools-mcp@latest"],
         "description": "Chrome DevTools for browser automation and testing"
       },
       "google-workspace": {
         "command": "npx",
-        "args": [
-          "-y",
-          "@presto-ai/google-workspace-mcp"
-        ],
+        "args": ["-y", "@presto-ai/google-workspace-mcp"],
         "description": "Gmail, Calendar, Drive, Docs, Sheets - OAuth authenticated"
       },
       "firecrawl": {
         "command": "npx",
-        "args": [
-          "-y",
-          "firecrawl-mcp"
-        ],
+        "args": ["-y", "firecrawl-mcp"],
         "env": {
           "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
         },
@@ -285,9 +247,7 @@
       },
       "browserless": {
         "command": "node",
-        "args": [
-          "/Users/ps/.claude/mcp-servers/browserless-mcp/dist/index.js"
-        ],
+        "args": ["/Users/ps/.claude/mcp-servers/browserless-mcp/dist/index.js"],
         "env": {
           "BROWSERLESS_HOST": "${BROWSERLESS_HOST}",
           "BROWSERLESS_PORT": "${BROWSERLESS_PORT}",

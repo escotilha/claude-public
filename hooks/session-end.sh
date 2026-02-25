@@ -42,6 +42,19 @@ cat > "$SESSION_FILE" << EOF
 }
 EOF
 
+# Auto-sync claude-setup if there are changes
+SETUP_DIR="$HOME/.claude-setup"
+if [ -d "$SETUP_DIR/.git" ]; then
+  if ! git -C "$SETUP_DIR" diff --quiet 2>/dev/null || \
+     ! git -C "$SETUP_DIR" diff --cached --quiet 2>/dev/null || \
+     [ -n "$(git -C "$SETUP_DIR" ls-files --others --exclude-standard 2>/dev/null)" ]; then
+    git -C "$SETUP_DIR" add -A 2>/dev/null
+    git -C "$SETUP_DIR" commit -m "auto: sync claude-setup" --quiet 2>/dev/null
+    git -C "$SETUP_DIR" push origin master --quiet 2>/dev/null &
+    echo "claude-setup synced to GitHub" >&2
+  fi
+fi
+
 # Log reminder to stderr (stdout must be valid JSON for Claude Code hooks)
 echo "Session logged: $SESSION_FILE" >&2
 
