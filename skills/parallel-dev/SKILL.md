@@ -593,6 +593,8 @@ Spawn specialized agents per worktree using `run_in_background: true` with `isol
 
 The `isolation: "worktree"` parameter is the officially supported pattern for agent isolation in parallel development workflows. It ensures each agent operates in its own isolated worktree context.
 
+> **Remote Monitoring:** After dispatching agents, remind the user: _"To monitor this session from another device, run `/remote-control` or `/rc`."_ This lets you step away from the terminal while agents work.
+
 **Agent Selection Logic:**
 
 | Feature Type         | Agent           | Rationale                     |
@@ -604,6 +606,8 @@ The `isolation: "worktree"` parameter is the officially supported pattern for ag
 | `testing`, `e2e`     | testing-agent   | Test writing, coverage        |
 | `devops`, `deploy`   | devops-agent    | CI/CD, Docker, cloud          |
 | unspecified          | general-purpose | Flexible, all-around          |
+
+> **Tip:** Agents are now running in parallel in isolated worktrees. This session will be active for a while. Run `/remote-control` (or `/rc`) to connect from your phone or another browser — your local filesystem, MCP servers, and project config all stay available. Requires Pro/Max plan.
 
 ### Phase 4: Progress Monitoring
 

@@ -269,6 +269,8 @@ ls -la tsconfig.json .eslintrc* .prettierrc* jest.config* vitest.config* playwri
 
 ### Step 3: Swarm Mode Analysis (Recommended for Full Reviews)
 
+> **Remote Monitoring:** Before spawning the swarm, remind the user: _"To monitor this session from another device, run `/remote-control` or `/rc`."_ Swarm analysis runs for several minutes — Remote Control lets you approve/review from phone or browser while analysts work.
+
 When performing a comprehensive review, spawn parallel specialist analysts using TeammateTool:
 
 #### 3.1: Spawn Specialist Swarm

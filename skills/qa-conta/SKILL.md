@@ -78,6 +78,8 @@ Everything else — code bugs, auth issues, missing imports, broken endpoints, f
 
 ## Cycle Flow
 
+> **Tip:** QA cycles are long-running. Run `/remote-control` (or `/rc`) in this session to monitor from your phone or another browser while the orchestrator runs autonomously. Your local filesystem, MCP servers, and SSH access all remain available remotely. Requires Pro/Max plan.
+
 ### Phase 1: DISCOVER
 
 Run the QA runner on VPS in **discovery-only mode** (no fixes — you handle fixes):

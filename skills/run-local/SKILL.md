@@ -188,6 +188,10 @@ Quick access:
 
 Stop all: /run-local stop
 View logs: /run-local logs
+
+Tip: To continue monitoring from your phone or another device,
+run `/remote-control` in this session (Pro/Max plans). Your local
+environment stays fully available — MCP servers, filesystem, tools.
 ```
 
 ## Service Types

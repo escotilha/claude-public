@@ -145,6 +145,17 @@ Only skip skills when:
 3. No skill covers the task at all
 4. The task is pure conversation/explanation (no implementation)
 
+## Remote Monitoring (Remote Control)
+
+Long-running skills like `/parallel-dev`, `/cto` (swarm), `/qa-cycle`, and `/fulltest-skill` can be monitored from any browser or mobile device using Claude Code Remote Control (Pro/Max, research preview).
+
+- **From within a session:** type `/remote-control` or `/rc`
+- **From CLI:** `claude remote-control` (supports `--verbose`, `--sandbox`, `--no-sandbox`)
+- Uses outbound HTTPS polling only — no inbound ports needed
+- Sessions reconnect automatically after network drops
+
+Useful for fire-and-forget workflows: launch the skill locally, then monitor/approve from phone.
+
 ## Composing Skills
 
 Many tasks benefit from chaining skills:
