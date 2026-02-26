@@ -5,6 +5,9 @@ Personal Claude Code configuration for ps. This directory contains agents, skill
 ## Quick Start
 
 ```bash
+# First time setup - build local MCP servers
+./setup-mcp-servers.sh
+
 # Start Claude Code with all configurations loaded
 claude
 
