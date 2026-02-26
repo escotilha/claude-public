@@ -1,0 +1,64 @@
+#!/bin/bash
+input=$(cat)
+
+# Model
+MODEL=$(echo "$input" | jq -r '.model.display_name // "?"')
+
+# Context
+PCT=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
+PCT=${PCT:-0}
+
+# Progress bar (20 chars wide)
+FILLED=$((PCT * 20 / 100))
+EMPTY=$((20 - FILLED))
+BAR=$(printf "%${FILLED}s" | tr ' ' '█')$(printf "%${EMPTY}s" | tr ' ' '░')
+
+# Color based on context usage
+if [ "$PCT" -ge 90 ]; then
+  CLR='\033[31m'  # red
+elif [ "$PCT" -ge 70 ]; then
+  CLR='\033[33m'  # yellow
+else
+  CLR='\033[32m'  # green
+fi
+RST='\033[0m'
+DIM='\033[2m'
+BOLD='\033[1m'
+CYAN='\033[36m'
+MAGENTA='\033[35m'
+BLUE='\033[34m'
+
+# Cost
+COST=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+COST_FMT=$(printf '$%.2f' "$COST")
+
+# Duration
+DUR_MS=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+MINS=$((DUR_MS / 60000))
+SECS=$(((DUR_MS % 60000) / 1000))
+if [ "$MINS" -gt 0 ]; then
+  DUR_FMT="${MINS}m${SECS}s"
+else
+  DUR_FMT="${SECS}s"
+fi
+
+# Lines changed
+ADDED=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+REMOVED=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
+
+# Git info
+BRANCH=""
+DIRTY=""
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  BRANCH=$(git branch --show-current 2>/dev/null)
+  if [ -n "$(git status --porcelain 2>/dev/null | head -1)" ]; then
+    DIRTY="*"
+  fi
+fi
+
+# Working directory (shortened)
+DIR=$(echo "$input" | jq -r '.workspace.current_dir // "?"')
+DIR=${DIR##*/}
+
+# Build output
+echo -e "${BOLD}${CYAN}${MODEL}${RST} ${DIM}|${RST} ${CLR}${BAR}${RST} ${PCT}% ${DIM}|${RST} ${MAGENTA}${COST_FMT}${RST} ${DIM}|${RST} ${DUR_FMT} ${DIM}|${RST} ${BLUE}${BRANCH}${DIRTY}${RST} ${DIM}|${RST} ${DIR} ${DIM}|${RST} ${DIM}+${ADDED} -${REMOVED}${RST}"
