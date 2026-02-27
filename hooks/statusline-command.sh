@@ -1,6 +1,12 @@
 #!/bin/bash
 input=$(cat)
 
+# Account (logged-in Claude Code user)
+ACCOUNT=$(claude config get account 2>/dev/null | tr -d '[:space:]')
+if [ -z "$ACCOUNT" ]; then
+  ACCOUNT=$(whoami)
+fi
+
 # Model
 MODEL=$(echo "$input" | jq -r '.model.display_name // "?"')
 
@@ -68,4 +74,4 @@ if [ -n "$ADDED_DIRS" ]; then
 fi
 
 # Build output
-echo -e "${BOLD}${CYAN}${MODEL}${RST} ${DIM}|${RST} ${CLR}${BAR}${RST} ${PCT}% ${DIM}|${RST} ${MAGENTA}${COST_FMT}${RST} ${DIM}|${RST} ${DUR_FMT} ${DIM}|${RST} ${BLUE}${BRANCH}${DIRTY}${RST} ${DIM}|${RST} ${DIR}${ADDED_DIRS_FMT} ${DIM}|${RST} ${DIM}+${ADDED} -${REMOVED}${RST}"
+echo -e "${DIM}${ACCOUNT}${RST} ${DIM}|${RST} ${BOLD}${CYAN}${MODEL}${RST} ${DIM}|${RST} ${CLR}${BAR}${RST} ${PCT}% ${DIM}|${RST} ${MAGENTA}${COST_FMT}${RST} ${DIM}|${RST} ${DUR_FMT} ${DIM}|${RST} ${BLUE}${BRANCH}${DIRTY}${RST} ${DIM}|${RST} ${DIR}${ADDED_DIRS_FMT} ${DIM}|${RST} ${DIM}+${ADDED} -${REMOVED}${RST}"
