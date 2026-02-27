@@ -48,6 +48,18 @@ else
   DUR_FMT="${SECS}s"
 fi
 
+# Tokens (cumulative session totals)
+IN_TOK=$(echo "$input" | jq -r '.context_window.total_input_tokens // 0')
+OUT_TOK=$(echo "$input" | jq -r '.context_window.total_output_tokens // 0')
+TOTAL_TOK=$((IN_TOK + OUT_TOK))
+if [ "$TOTAL_TOK" -ge 1000000 ]; then
+  TOK_FMT=$(printf '%.1fM' "$(echo "$TOTAL_TOK / 1000000" | bc -l)")
+elif [ "$TOTAL_TOK" -ge 1000 ]; then
+  TOK_FMT=$(printf '%.1fK' "$(echo "$TOTAL_TOK / 1000" | bc -l)")
+else
+  TOK_FMT="${TOTAL_TOK}"
+fi
+
 # Lines changed
 ADDED=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
 REMOVED=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
@@ -74,4 +86,4 @@ if [ -n "$ADDED_DIRS" ]; then
 fi
 
 # Build output
-echo -e "${DIM}${ACCOUNT}${RST} ${DIM}|${RST} ${BOLD}${CYAN}${MODEL}${RST} ${DIM}|${RST} ${CLR}${BAR}${RST} ${PCT}% ${DIM}|${RST} ${MAGENTA}${COST_FMT}${RST} ${DIM}|${RST} ${DUR_FMT} ${DIM}|${RST} ${BLUE}${BRANCH}${DIRTY}${RST} ${DIM}|${RST} ${DIR}${ADDED_DIRS_FMT} ${DIM}|${RST} ${DIM}+${ADDED} -${REMOVED}${RST}"
+echo -e "${DIM}${ACCOUNT}${RST} ${DIM}|${RST} ${BOLD}${CYAN}${MODEL}${RST} ${DIM}|${RST} ${CLR}${BAR}${RST} ${PCT}% ${DIM}|${RST} ${MAGENTA}${COST_FMT}${RST} ${DIM}|${RST} ${DIM}${TOK_FMT}tok${RST} ${DIM}|${RST} ${DUR_FMT} ${DIM}|${RST} ${BLUE}${BRANCH}${DIRTY}${RST} ${DIM}|${RST} ${DIR}${ADDED_DIRS_FMT} ${DIM}|${RST} ${DIM}+${ADDED} -${REMOVED}${RST}"
