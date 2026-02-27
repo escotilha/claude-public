@@ -25,7 +25,6 @@ allowed-tools:
   - TeamDelete
   - SendMessage
   - AskUserQuestion
-disable-model-invocation: true
 slots:
   runtime:
     default: "node"
