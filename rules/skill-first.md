@@ -30,6 +30,7 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Git worktree management       | `/maketree`             | Create/manage isolated worktrees            |
 | Refactor for clarity          | `/simplify`             | Clean up code after long session or PR      |
 | Parallel codebase migration   | `/batch`                | Repetitive changes across many files        |
+| Revert a feature/track        | `/revert-track`         | Undo a feature, phase, or commit range      |
 
 ### QA & Testing
 
