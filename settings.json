@@ -265,6 +265,11 @@
           "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
         },
         "description": "Web scraping, crawling, search, and autonomous data extraction via Firecrawl"
+      },
+      "ScraplingServer": {
+        "command": "/Users/psm2/.local/bin/scrapling",
+        "args": ["mcp"],
+        "description": "Stealth web scraping with anti-bot bypass, TLS fingerprint impersonation, and adaptive element tracking"
       }
     }
   }
