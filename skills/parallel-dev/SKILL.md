@@ -1077,7 +1077,17 @@ if (hasCycle(graph)) {
 
 ## Model Configuration
 
-This skill uses Claude Opus 4.6 for maximum capability. Use `/fast` to toggle faster responses when time is critical.
+This skill uses Claude Opus 4.6 as the orchestrator. Feature agents use tiered model selection per `model-tier-strategy.md`:
+
+| Agent Task                   | Model  | Rationale                                   |
+| ---------------------------- | ------ | ------------------------------------------- |
+| Orchestrator (this skill)    | opus   | Dependency resolution, synthesis, decisions |
+| Feature implementation       | sonnet | Code writing with bounded spec              |
+| CI fix agent                 | sonnet | Bug diagnosis + code fix                    |
+| Explore (codebase discovery) | haiku  | File search, grep — deterministic           |
+| Pre-flight verification      | haiku  | Check git log, glob — no judgment needed    |
+
+When spawning feature agents, always pass `model: "sonnet"`. When spawning Explore agents for pre-flight checks, pass `model: "haiku"`.
 
 ## Hook Events
 

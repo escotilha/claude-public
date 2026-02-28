@@ -324,6 +324,18 @@ If the user provides reference implementations (open-source repos, blog posts, d
 3. In `plan.md`, note which parts follow the reference and which diverge
 4. Use reference patterns as the basis for proposed code snippets
 
+## Model Tier Strategy
+
+Per `model-tier-strategy.md`, subagents spawned by this skill use tiered models:
+
+| Agent Task               | Model  | Rationale                         |
+| ------------------------ | ------ | --------------------------------- |
+| Orchestrator (this)      | opus   | Deep reasoning, plan synthesis    |
+| Explore (scope finding)  | haiku  | File search, grep — deterministic |
+| General-purpose research | sonnet | Nuanced investigation             |
+
+When spawning Explore agents, always pass `model: "haiku"`. When spawning general-purpose agents for deeper investigation, use `model: "sonnet"`.
+
 ## Rules
 
 - **Never write code before Phase 2 approval** — this is the core principle

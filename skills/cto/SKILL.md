@@ -280,334 +280,108 @@ When performing a comprehensive review, spawn parallel specialist analysts using
 
 #### 3.1: Spawn Specialist Swarm
 
-```
-TeammateTool.spawn({
-  agents: [
-    {
-      name: "architecture-analyst",
-      type: "cto-specialist",
-      task: {
-        focus: "architecture",
-        codebase_context: {
-          tech_stack: detected_stack,
-          structure: directory_structure,
-          agents_md: agents_md_content
-        },
-        checklist: [
-          "Component organization and boundaries",
-          "Dependency graph analysis",
-          "API layer design",
-          "Data flow patterns",
-          "Circular dependency detection",
-          "Separation of concerns",
-          "Scalability readiness",
-          "Microservices vs monolith fit"
-        ]
-      },
-      can_message: ["orchestrator", "security-analyst", "performance-analyst", "quality-analyst"],
-      priority: "medium"
-    },
-    {
-      name: "security-analyst",
-      type: "cto-specialist",
-      task: {
-        focus: "security",
-        codebase_context: {
-          tech_stack: detected_stack,
-          auth_files: auth_related_files,
-          api_files: api_files
-        },
-        checklist: [
-          "OWASP Top 10 vulnerabilities",
-          "Authentication flow security",
-          "Authorization (RBAC/ABAC) implementation",
-          "Input validation coverage",
-          "SQL/NoSQL injection risks",
-          "XSS vulnerability points",
-          "CSRF protection",
-          "Secrets management",
-          "Dependency vulnerabilities (npm audit)",
-          "Security headers"
-        ]
-      },
-      can_message: ["orchestrator", "architecture-analyst", "performance-analyst"],
-      priority: "high"  // Security findings are urgent
-    },
-    {
-      name: "performance-analyst",
-      type: "cto-specialist",
-      task: {
-        focus: "performance",
-        codebase_context: {
-          tech_stack: detected_stack,
-          database_files: db_related_files,
-          api_files: api_files
-        },
-        checklist: [
-          "N+1 query patterns",
-          "Database index coverage",
-          "Caching strategy",
-          "Bundle size analysis",
-          "Memory leak risks",
-          "Async operation handling",
-          "Connection pooling",
-          "Rate limiting",
-          "Pagination implementation",
-          "Heavy computation offloading"
-        ]
-      },
-      can_message: ["orchestrator", "architecture-analyst", "security-analyst"],
-      priority: "medium"
-    },
-    {
-      name: "quality-analyst",
-      type: "cto-specialist",
-      task: {
-        focus: "code_quality",
-        codebase_context: {
-          tech_stack: detected_stack,
-          test_files: test_files,
-          config_files: linter_configs
-        },
-        checklist: [
-          "Test coverage analysis",
-          "Code complexity metrics",
-          "Technical debt indicators",
-          "TODO/FIXME accumulation",
-          "Dead code detection",
-          "Naming conventions",
-          "Documentation coverage",
-          "Error handling patterns",
-          "Logging strategy",
-          "Type safety (if applicable)"
-        ]
-      },
-      can_message: ["orchestrator", "architecture-analyst"],
-      priority: "low"
-    },
-    {
-      name: "stack-analyst",
-      type: "cto-specialist",
-      task: {
-        focus: "tech_stack",
-        codebase_context: {
-          package_files: package_files,
-          lock_files: lock_files,
-          config_files: config_files
-        },
-        checklist: [
-          "Dependency freshness",
-          "Deprecated package usage",
-          "Security advisory check",
-          "License compatibility",
-          "Bundle bloat detection",
-          "Alternative recommendations",
-          "Migration path assessment",
-          "Framework version currency"
-        ]
-      },
-      can_message: ["orchestrator", "security-analyst"],
-      priority: "low"
-    }
-  ],
-  coordination: "async",
-  isolation: "worktree"  // Each analyst works in isolated worktree to prevent file edit conflicts
-})
-```
-
-> **Isolation Note:** When using Task-based spawning for analysts, add `isolation=worktree` to each Task call. This ensures each specialist agent works in its own worktree, preventing parallel agents from clobbering each other's file modifications during concurrent analysis and review phases.
-
-#### 3.2: Inter-Analyst Communication
-
-Analysts share findings in real-time for cross-concern detection.
-
-> **Note:** TeammateTool messages support **rich Markdown rendering**. Use headers, bold, code blocks, and lists in your message payloads for clear, well-formatted communication between agents.
+**Mode selection:**
 
 ```
-// Security analyst finds auth issue
-TeammateTool.message({
-  from: "security-analyst",
-  to: ["orchestrator"],
-  type: "critical_finding",
-  priority: "immediate",
-  message: `## Critical Security Finding
-
-**Severity:** Critical
-**Category:** Security
-**CWE:** CWE-798 (Hardcoded Credentials)
-
-### Location
-- **File:** \`src/api/auth.ts\`
-- **Line:** 45
-
-### Issue
-JWT secret is hardcoded in source code.
-
-### Evidence
-\`\`\`typescript
-const JWT_SECRET = 'mysecretkey'
-\`\`\`
-
-### Recommendation
-Move secret to environment variable:
-\`\`\`typescript
-const JWT_SECRET = process.env.JWT_SECRET
-\`\`\``
-})
-
-// Architecture analyst alerts performance about pattern
-TeammateTool.message({
-  from: "architecture-analyst",
-  to: ["performance-analyst"],
-  type: "pattern_alert",
-  message: `## Pattern Alert: Potential N+1 Query
-
-**File:** \`src/services/orders.ts\`
-
-### Observed Pattern
-Service calls database directly in loop - classic N+1 pattern.
-
-### Action Requested
-Please verify and quantify the performance impact.`
-})
-
-// Performance analyst confirms cross-concern
-TeammateTool.message({
-  from: "performance-analyst",
-  to: ["orchestrator", "architecture-analyst"],
-  type: "cross_concern_confirmed",
-  message: `## Cross-Concern Confirmed: N+1 Query
-
-**Original Alert:** architecture:loop_pattern
-
-### Finding Details
-| Field | Value |
-|-------|-------|
-| **Severity** | High |
-| **File** | \`src/services/orders.ts\` |
-| **Line** | 78 |
-
-### Issue
-N+1 query pattern causing **50 DB calls per request**.
-
-### Recommendation
-Batch fetch with \`WHERE IN\` clause:
-\`\`\`sql
-SELECT * FROM items WHERE order_id IN (?, ?, ...)
-\`\`\``
-})
-
-// Stack analyst warns security about vulnerable dep
-TeammateTool.message({
-  from: "stack-analyst",
-  to: ["security-analyst", "orchestrator"],
-  type: "vulnerability_alert",
-  message: `## Vulnerability Alert: Outdated Dependency
-
-### Package Details
-- **Package:** \`lodash\`
-- **Current Version:** 4.17.15
-- **Vulnerability:** Prototype Pollution
-- **Severity:** High
-
-### Fix
-Upgrade to version **4.17.21+**:
-\`\`\`bash
-npm install lodash@^4.17.21
-\`\`\``
-})
+IF TeamCreate is available AND review scope covers 2+ areas:
+  → Agent Teams mode (preferred — real-time cross-concern detection)
+ELSE:
+  → Task mode (fallback — spawn via Task tool with run_in_background)
 ```
 
-#### 3.3: Live Progress Dashboard
+**Agent Teams mode — spawn 4 teammates:**
 
-```markdown
-## CTO Analysis Progress (Live)
-
-| Analyst              | Status      | Findings | Critical | Duration |
-| -------------------- | ----------- | -------- | -------- | -------- |
-| security-analyst     | ✅ Complete | 5        | 1        | 2m 15s   |
-| architecture-analyst | 🔄 Running  | 3        | 0        | 2m 45s   |
-| performance-analyst  | ✅ Complete | 4        | 0        | 1m 58s   |
-| quality-analyst      | 🔄 Running  | 2        | 0        | 2m 10s   |
-| stack-analyst        | ✅ Complete | 6        | 0        | 1m 30s   |
-
-### Critical Findings (Live)
-
-🚨 [security] JWT secret hardcoded in src/api/auth.ts:45
-└─ Detected 1m 30s ago
-
-### Cross-Concern Alerts
-
-⚠️ architecture → performance: N+1 confirmed in orders service
-⚠️ stack → security: Vulnerable lodash version detected
-
-### Emerging Patterns
-
-📊 3 analysts flagged error handling inconsistency
-📊 2 analysts noted missing input validation
-```
-
-#### 3.4: Swarm Synchronization
-
-Wait for all analysts before final synthesis:
+Pre-compute codebase context before spawning to avoid each analyst re-discovering the same information:
 
 ```
-TeammateTool.sync({
-  name: "analysis-complete",
-  wait_for: [
-    "security-analyst",
-    "architecture-analyst",
-    "performance-analyst",
-    "quality-analyst",
-    "stack-analyst"
-  ],
-  timeout: 300,  // 5 minutes max
-  on_partial_timeout: {
-    // If one analyst is slow, synthesize available findings
-    action: "synthesize_available",
-    mark_incomplete: ["slow_analyst_name"]
-  },
-  on_complete: "generate_executive_report"
-})
+Pre-computed context to include in each spawn prompt:
+- Tech stack: {framework}, {database}, {test runner}, {deployment}
+- Key directories: {src_dirs}, {test_dirs}, {config_files}
+- Known issues from fulltest reports (if any)
 ```
 
-#### 3.5: Swarm Findings Synthesis
+Spawn each analyst with these constraints:
 
-Merge all analyst findings into unified report:
+```
+Teammate "architecture-analyst":
+  Review {src_dirs} for architecture patterns, coupling, scalability.
+  FILE OWNERSHIP: You own analysis of {src_dirs structure}. Do NOT read or analyze
+  files in {auth_dirs} or {test_dirs} — those belong to security and quality analysts.
+  Checklist: component boundaries, dependency graph, API layer design, data flow,
+  circular dependencies, separation of concerns, scalability readiness.
+  Report: severity | file:line | issue | recommendation
+  Message the lead with critical findings immediately.
+  Message security-analyst directly ONLY if you find auth design flaws.
+  Message performance-analyst directly ONLY if you find potential query patterns.
+  Do NOT broadcast. When done, message the lead with your summary.
 
-```json
-{
-  "swarmAnalysis": {
-    "mode": "swarm",
-    "duration": "3m 42s",
-    "analysts": {
-      "security-analyst": { "findings": 5, "critical": 1 },
-      "architecture-analyst": { "findings": 3, "critical": 0 },
-      "performance-analyst": { "findings": 4, "critical": 0 },
-      "quality-analyst": { "findings": 2, "critical": 0 },
-      "stack-analyst": { "findings": 6, "critical": 0 }
-    },
-    "crossConcerns": [
-      {
-        "analysts": ["architecture", "performance"],
-        "issue": "N+1 query in order service",
-        "combinedSeverity": "high"
-      }
-    ],
-    "emergingPatterns": [
-      {
-        "pattern": "Inconsistent error handling",
-        "flaggedBy": ["security", "architecture", "quality"],
-        "recommendation": "Implement centralized error handler"
-      }
-    ],
-    "totalFindings": 20,
-    "criticalCount": 1,
-    "highCount": 4,
-    "mediumCount": 8,
-    "lowCount": 7
-  }
-}
+Teammate "security-analyst":
+  Review {auth_files} and {api_files} for vulnerabilities. Also run `npm audit` / `pip-audit`.
+  FILE OWNERSHIP: You own {auth_dirs}, {api_dirs}, package.json/lock files.
+  Checklist: OWASP Top 10, auth flow, RBAC/ABAC, input validation, injection,
+  XSS, CSRF, secrets management, dependency CVEs, security headers, license compliance.
+  Report: severity | file:line | CWE | issue | recommendation
+  Message the lead with CRITICAL findings immediately (don't wait for completion).
+  Message quality-analyst if you find deprecated/vulnerable dependencies they should flag.
+  Do NOT broadcast. When done, message the lead with your summary.
+
+Teammate "performance-analyst":
+  Review {db_files} and {api_files} for performance bottlenecks.
+  FILE OWNERSHIP: You own {db_dirs}, {service_dirs}, and build/bundle config.
+  Checklist: N+1 queries, index coverage, caching strategy, bundle size,
+  memory leaks, async handling, connection pooling, rate limiting, pagination.
+  Report: severity | file:line | issue | recommendation
+  Message the lead with critical findings immediately.
+  Message architecture-analyst if you find patterns requiring structural changes.
+  Do NOT broadcast. When done, message the lead with your summary.
+
+Teammate "quality-analyst":
+  Review {test_files}, {src_dirs}, and config files for code health.
+  FILE OWNERSHIP: You own {test_dirs}, linter/formatter configs, CI configs.
+  Checklist: test coverage, code complexity, tech debt (TODO/FIXME), dead code,
+  naming conventions, error handling patterns, logging, type safety,
+  framework version currency, deprecated package usage, migration paths.
+  Report: severity | file:line | issue | recommendation
+  Message the lead with critical findings immediately.
+  Message architecture-analyst if you find systemic patterns (e.g., 3+ files with same anti-pattern).
+  Do NOT broadcast. When done, message the lead with your summary.
+```
+
+**File ownership boundaries** prevent analysts from duplicating work or producing conflicting observations about the same file. Each analyst reads only their assigned directories deeply; they may skim other areas for cross-references but must not include them in their own findings.
+
+**Messaging discipline:**
+
+- Direct messages only. Never broadcast.
+- Message another analyst ONLY if your finding directly affects their domain.
+- Message the lead for: critical findings, completion, blockers.
+- Do NOT message for: progress updates (lead gets idle notifications), acknowledgments.
+
+**Lead orchestrator behavior:**
+
+- When an analyst messages completion → update task status → shut them down immediately
+- When an analyst reports a critical finding → log it for the synthesis
+- When all analysts complete → proceed to synthesis (3.2)
+- If an analyst times out (>5 min) → synthesize available findings, mark incomplete
+
+**Task mode (fallback):**
+
+When Agent Teams is unavailable, spawn via Task tool with `run_in_background: true`. Use the same file ownership boundaries and reporting format above, but analysts write findings to `.cto-review/{analyst-name}.md` instead of messaging. The lead polls for file completion.
+
+#### 3.2: Swarm Findings Synthesis
+
+After all analysts complete (or timeout), merge findings:
+
+1. Read all analyst reports (from messages or `.cto-review/*.md` files)
+2. Detect **cross-concerns**: findings flagged by 2+ analysts about the same file/pattern
+3. Detect **emerging patterns**: same issue type appearing across 3+ files
+4. Rank findings by: critical > high > medium > low, with cross-concerns elevated one level
+5. Generate the unified executive report (Step 4 format)
+
+```
+Cross-concern examples:
+- architecture finds loop pattern in orders.ts + performance confirms N+1 → elevate to HIGH
+- security finds vulnerable lodash + quality finds deprecated usage → consolidate into single finding
+- quality finds missing error handling in 5 files + security finds unhandled auth errors → emerging pattern
 ```
 
 ---
@@ -981,9 +755,9 @@ At the end of analysis, return:
 {
   "status": "complete",
   "analysisType": "swarm",
-  "summary": "Completed full codebase review with 5 parallel analysts",
+  "summary": "Completed full codebase review with 4 parallel analysts",
   "swarmMetrics": {
-    "analysts": 5,
+    "analysts": 4,
     "duration": "3m 42s",
     "crossConcerns": 2,
     "emergingPatterns": 3
@@ -996,11 +770,10 @@ At the end of analysis, return:
   },
   "reports": [".testing/reports/cto-full-review-2026-01-30.md"],
   "analystSummaries": {
-    "security": "1 critical, 3 high findings",
+    "security": "1 critical, 3 high findings (incl. dep CVEs)",
     "architecture": "0 critical, 1 high, 3 medium findings",
     "performance": "0 critical, 2 medium findings",
-    "quality": "0 critical, 5 low findings",
-    "stack": "0 critical, 3 medium findings"
+    "quality": "0 critical, 5 low findings (incl. version currency)"
   },
   "userActionRequired": "Review prioritized action items and approve fixes"
 }
@@ -1012,16 +785,16 @@ At the end of analysis, return:
 {
   "status": "partial",
   "analysisType": "swarm",
-  "summary": "3 of 5 analysts completed, 2 timed out",
+  "summary": "3 of 4 analysts completed, 1 timed out",
   "completedAnalysts": ["security", "architecture", "performance"],
-  "incompleteAnalysts": ["quality", "stack"],
+  "incompleteAnalysts": ["quality"],
   "partialFindings": {
     "critical": 1,
     "high": 3,
     "medium": 4,
     "low": 0
   },
-  "reason": "Quality and stack analysts exceeded timeout",
+  "reason": "Quality analyst exceeded timeout",
   "reports": [".testing/reports/cto-partial-review-2026-01-30.md"],
   "userActionRequired": "Review partial findings or re-run incomplete analysts"
 }
@@ -1282,20 +1055,8 @@ Or configure globally:
   "cto": {
     "defaultMode": "swarm",
     "swarmConfig": {
-      "analysts": [
-        "security",
-        "architecture",
-        "performance",
-        "quality",
-        "stack"
-      ],
-      "priorityOrder": [
-        "security",
-        "performance",
-        "architecture",
-        "quality",
-        "stack"
-      ],
+      "analysts": ["security", "architecture", "performance", "quality"],
+      "priorityOrder": ["security", "performance", "architecture", "quality"],
       "timeoutSeconds": 300,
       "crossConcernDetection": true
     }
@@ -1311,7 +1072,7 @@ Or configure globally:
 | Duration          | Sum of all analyses      | Max of all analyses  |
 | Cross-Concerns    | Manual correlation       | Auto-detected        |
 | Critical Findings | Found after all complete | Immediately surfaced |
-| Token Usage       | Lower (single context)   | Higher (5 contexts)  |
+| Token Usage       | Lower (single context)   | Higher (4 contexts)  |
 | Best For          | Focused questions        | Full codebase review |
 
 ### When to Use Each Mode
@@ -1415,7 +1176,7 @@ CTO Advisor (Swarm Mode):
    - architecture-analyst
    - performance-analyst
    - quality-analyst
-   - stack-analyst
+   - quality-analyst
 
 # Real-time output:
 [0:15] security-analyst: 🔍 Scanning auth patterns...
@@ -1425,7 +1186,7 @@ CTO Advisor (Swarm Mode):
 [0:42] architecture-analyst → performance-analyst: "Check service loop pattern"
 [0:55] performance-analyst: ✅ Confirmed N+1 (cross-concern with architecture)
 [1:10] quality-analyst: ℹ️ Test coverage at 45%
-[1:25] stack-analyst: ⚠️ 3 vulnerable dependencies found
+[1:25] security-analyst: ⚠️ 3 vulnerable dependencies found
 
 # Synthesis (live as findings arrive):
 - Critical: 1 (security)
@@ -1457,7 +1218,7 @@ CTO Advisor (Sequential Mode):
 User: "We're launching next week - full CTO review please"
 
 CTO Advisor (Swarm Mode):
-1. Spawns all 5 analysts with "launch_readiness" focus
+1. Spawns all 4 analysts with "launch_readiness" focus
 2. Each analyst prioritizes launch-blocking issues
 3. Cross-concern detection catches:
    - Security + Performance: "Rate limiting missing on public API"
