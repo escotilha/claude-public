@@ -61,6 +61,7 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Task                           | Skill                     |
 | ------------------------------ | ------------------------- |
 | Send/manage email              | `/agentmail`              |
+| Slack messages / channels      | `/slack`                  |
 | Fetch tweet                    | `/tweet`                  |
 | Memory maintenance (Turso/MCP) | `/memory-consolidation`   |
 | Manage auto-memory (built-in)  | `/memory`                 |
