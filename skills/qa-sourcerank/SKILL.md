@@ -221,10 +221,13 @@ Dashboard (authenticated):
 - `/dashboard/agency/revenue` - Agency revenue
 - `/dashboard/agency/margins` - Agency margins
 - `/dashboard/readiness` - GEO Readiness Audit
+- `/dashboard/site-audit` - Site audit issues and crawl results
+- `/dashboard/backlog` - Content/issue backlog management
+- `/dashboard/visibility` - Brand visibility tracking across AI engines
 - `/accept-invitation` - Team invitation acceptance
 
 **API Routes (Fastify at `apps/api/src/routes/`):**
-brands, monitoring, content, intelligence, reports, alerts, billing, competitors, authority, organizations, users, competitive, recommendations, holdings, tokens, cms, agency, white-label, stream, analytics, platform, public, ai
+brands, monitoring, content, intelligence, reports, alerts, billing, competitors, authority, organizations, users, competitive, recommendations, holdings, tokens, cms, agency, white-label, stream, analytics, platform, public, ai, backlog, site-audit, visibility, readiness
 
 ## QA Database Schema
 
@@ -581,6 +584,7 @@ psql "$SRDB" -t -A -c "
 - `/dashboard/stream` - Real-time event stream
 - `/dashboard/settings/ai-models` - AI model configuration
 - `/dashboard/settings/api-keys` - API key management
+- `/dashboard/visibility` - Brand visibility tracking across AI engines
 
 **Test Workflows:**
 
@@ -596,6 +600,7 @@ psql "$SRDB" -t -A -c "
 10. Open Stream → Connect to real-time feed → Verify events appear
 11. Open AI Models → Check provider configuration → Verify model list loads
 12. Open API Keys → Create key → Verify key appears in list
+13. Open Visibility → Check visibility scores per AI engine → Verify data loads
 
 ---
 
@@ -620,6 +625,9 @@ psql "$SRDB" -t -A -c "
 - `/dashboard/integrations` - CMS integrations
 - `/dashboard/analytics` - Analytics trends and attribution
 - `/dashboard/stream` - Real-time event stream monitoring
+- `/dashboard/site-audit` - Site audit issues and crawl results
+- `/dashboard/backlog` - Content/issue backlog management
+- `/dashboard/visibility` - Visibility sprint results and engine breakdown
 
 **Test Workflows:**
 
@@ -633,6 +641,9 @@ psql "$SRDB" -t -A -c "
 8. Open Monitor → Check hallucination alerts tab → Verify prompt library tab → Verify brand facts tab
 9. Open Analytics → Check trends data → Test attribution tab → Review predictions tab
 10. Open Stream → Select channel → Connect → Verify events flow
+11. Open Site Audit → Review crawl results → Check issue list → Verify filtering works
+12. Open Backlog → Review backlog items → Check priority/status filters → Verify sorting
+13. Open Visibility → Check sprint results → Review engine breakdown → Verify charts render
 
 ---
 
@@ -693,6 +704,8 @@ psql "$SRDB" -t -A -c "
 - `/dashboard/quality` - Content quality review
 - `/dashboard/analytics` - Analytics overview and predictions
 - `/dashboard/settings/billing` - Billing plans and invoices
+- `/dashboard/site-audit` - Site audit issues from brand perspective
+- `/dashboard/backlog` - Backlog items for brand
 
 **Test Workflows:**
 
@@ -705,6 +718,8 @@ psql "$SRDB" -t -A -c "
 7. Navigate between features → Verify breadcrumbs and navigation consistency
 8. Open Analytics → Check overview metrics → Review predictions tab
 9. Open Billing → View plan details → Check invoices section
+10. Open Site Audit → Review audit issues for brand → Verify issue details load
+11. Open Backlog → Check backlog items → Verify filtering and priority sorting
 
 ---
 
