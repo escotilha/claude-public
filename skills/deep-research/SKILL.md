@@ -14,6 +14,7 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+  - Agent
   - Task(agent_type=general-purpose)
   - Task(agent_type=Explore)
   - AskUserQuestion

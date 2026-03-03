@@ -15,6 +15,7 @@ allowed-tools:
   - WebFetch
   - mcp__firecrawl__*
   - mcp__context-mode__*
+  - Agent
   - Task(agent_type=general-purpose)
   - Task(agent_type=Explore)
   - Task(agent_type=security-agent)

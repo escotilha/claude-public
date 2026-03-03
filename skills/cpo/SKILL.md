@@ -4,6 +4,7 @@ description: "Chief Product Officer AI that orchestrates entire product lifecycl
 user-invocable: true
 context: fork
 allowed-tools:
+  - Agent
   - Task(agent_type=frontend-agent)
   - Task(agent_type=backend-agent)
   - Task(agent_type=database-agent)

@@ -5,6 +5,7 @@ user-invocable: true
 context: fork
 model: sonnet
 allowed-tools:
+  - Agent
   - Task(agent_type=general-purpose)
   - Task(agent_type=Explore)
   - TaskCreate

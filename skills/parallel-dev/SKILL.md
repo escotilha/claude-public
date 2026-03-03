@@ -11,6 +11,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+  - Agent
   - Task(agent_type=frontend-agent)
   - Task(agent_type=backend-agent)
   - Task(agent_type=database-agent)

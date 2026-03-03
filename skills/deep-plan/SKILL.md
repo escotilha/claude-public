@@ -14,6 +14,7 @@ allowed-tools:
   - Bash
   - WebSearch
   - WebFetch
+  - Agent
   - Task(agent_type=Explore)
   - Task(agent_type=general-purpose)
   - AskUserQuestion
