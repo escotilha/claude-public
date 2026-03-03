@@ -56,6 +56,12 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Anti-bot / Cloudflare scrape | `/scrapling`     | Stealth scraping, TLS impersonation, anti-bot |
 | Headless browser automation  | `/browserless`   | PDFs, screenshots, Lighthouse                 |
 
+### Client & Business
+
+| Task                             | Skill       | When                                                  |
+| -------------------------------- | ----------- | ----------------------------------------------------- |
+| M&A diagnostic/research proposal | `/proposal` | Client proposal from conversations, URLs, notes → PDF |
+
 ### Communication & Utilities
 
 | Task                           | Skill                     |
