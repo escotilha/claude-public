@@ -13,7 +13,7 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
-  - Task
+  - Agent
   - AskUserQuestion
   - TaskCreate
   - TaskUpdate
@@ -58,11 +58,13 @@ ICLOUD_SETUP="$HOME/.claude-setup"
 
 ```
 ~/.claude-setup/
-├── skills/       ← All skills
-├── agents/       ← All agents
-├── commands/     ← All commands
+├── skills/       ← All skills (SKILL.md per directory)
+├── agents/       ← All agents (.md files)
+├── commands/     ← Slash commands (.md files)
+├── rules/        ← Global instruction files (.md)
+├── hooks/        ← Hook scripts (.sh)
 ├── memory/       ← Memory files (core-memory.json, etc.)
-└── settings.json ← Settings
+└── settings.json ← Settings (hooks, MCP servers, env vars)
 ```
 
 **IMPORTANT:** Always read from AND write to the iCloud path directly. Do NOT use symlink paths like `~/.claude/` - use the iCloud path to ensure:
@@ -114,7 +116,6 @@ SETUP="$HOME/.claude-setup"
 echo "=== SKILLS FRONTMATTER ==="
 for f in "$SETUP"/skills/*/SKILL.md; do
   echo "--- $(basename $(dirname "$f")) ---"
-  # Extract YAML frontmatter (between first --- and second ---)
   sed -n '/^---$/,/^---$/p' "$f" 2>/dev/null
   echo ""
 done
@@ -127,11 +128,21 @@ for f in "$SETUP"/agents/*.md "$SETUP"/agents/**/*.md; do
   echo ""
 done
 
-echo "=== CONFIG ==="
-cat "$SETUP/settings.json" 2>/dev/null
-echo ""
 echo "=== COMMANDS ==="
 ls "$SETUP/commands/" 2>/dev/null
+
+echo "=== RULES ==="
+ls "$SETUP/rules/" 2>/dev/null
+
+echo "=== HOOKS ==="
+ls "$SETUP/hooks/" 2>/dev/null
+
+echo "=== CONFIG (settings.json) ==="
+cat "$SETUP/settings.json" 2>/dev/null
+
+echo "=== MCP SERVERS ==="
+# Extract just the MCP server names and descriptions
+cat "$SETUP/settings.json" 2>/dev/null | grep -A1 '"description"' | grep description || true
 ```
 
 This single Bash call replaces 3 Explore subagents and runs in seconds instead of minutes.
@@ -146,22 +157,25 @@ Cross-reference changelog features against your current setup:
 
 1. **New Tools**: Are there new tools you're not using that could benefit your workflows?
 2. **Skill System Updates**: Has the skill format changed? Are there new frontmatter options?
-3. **Agent Improvements**: New agent capabilities or patterns?
-4. **MCP Updates**: New MCP servers or protocol changes?
-5. **Performance Optimizations**: Parallelization, caching, or efficiency improvements?
-6. **Security Features**: New permission patterns or security best practices?
-7. **Configuration Options**: New settings that could improve your experience?
+3. **Agent Improvements**: New agent capabilities, isolation modes (`isolation: worktree`), or team patterns?
+4. **MCP Updates**: New MCP servers, protocol changes, or OAuth improvements?
+5. **Hooks**: New hook events (HTTP hooks, ConfigChange, WorktreeCreate/Remove, TeammateIdle, TaskCompleted)?
+6. **Performance Optimizations**: Parallelization, caching, memory leak fixes, or context efficiency?
+7. **Security Features**: New permission patterns, sandbox changes, or security best practices?
+8. **Configuration Options**: New settings (spinnerTips, statusLine, plugins, plansDirectory)?
 
 **Analysis Checklist:**
 
 For each skill/agent, check:
 
-- [ ] Uses latest skill format (SKILL.md with frontmatter)
+- [ ] Uses latest skill format (SKILL.md with YAML frontmatter)
 - [ ] Takes advantage of parallel tool calls where applicable
-- [ ] Uses appropriate model selection (haiku for fast tasks, etc.)
-- [ ] Has proper error handling patterns
+- [ ] Uses `Agent` tool (not deprecated `Task`) for spawning subagents
+- [ ] Uses appropriate model tier selection (haiku/sonnet/opus per model-tier-strategy)
+- [ ] Has proper tool-annotations in frontmatter (destructiveHint, readOnlyHint, etc.)
 - [ ] Follows current best practices for triggers/descriptions
 - [ ] Uses new tools/features that weren't available before
+- [ ] Leverages relevant hook events (WorktreeCreate, ConfigChange, etc.)
 
 ### Step 3: Generate Recommendations
 
@@ -235,9 +249,9 @@ Would you like me to:
 
 **IMPORTANT: iCloud is the source of truth.** All changes MUST be made directly in the iCloud path to ensure they sync across devices.
 
-**CRITICAL: Use parallel Task agents to implement changes concurrently.** Group approved changes into independent work streams and launch them as parallel agents. This dramatically speeds up implementation.
+**CRITICAL: Use parallel agents to implement changes concurrently.** Group approved changes into independent work streams and launch them as parallel agents. This dramatically speeds up implementation.
 
-#### 6a. Back up affected files first
+#### 5a. Back up affected files first
 
 ```bash
 ICLOUD_SETUP="$HOME/.claude-setup"
@@ -245,7 +259,7 @@ mkdir -p "$ICLOUD_SETUP/backups/$(date +%Y%m%d-%H%M%S)"
 cp <file> "$ICLOUD_SETUP/backups/$(date +%Y%m%d-%H%M%S)/"
 ```
 
-#### 6b. Group changes into independent work streams
+#### 5b. Group changes into independent work streams
 
 Categorize approved changes into groups that can run in parallel without conflicts (no two agents should edit the same file):
 
@@ -258,18 +272,18 @@ If a group touches too many files, split further (e.g., separate M&A skills from
 
 #### 6c. Launch parallel agents
 
-Use the Task tool to launch multiple agents in a **single message** with multiple tool calls. Each agent gets a detailed prompt listing exactly which files to change and what to do.
+Use the Agent tool to launch multiple agents in a **single message** with multiple tool calls. Each agent gets a detailed prompt listing exactly which files to change and what to do. Use `model: "haiku"` for mechanical edits, `model: "sonnet"` for edits requiring judgment.
 
 Example pattern:
 
 ```
-# In a SINGLE message, launch all these Task calls simultaneously:
+# In a SINGLE message, launch all these Agent calls simultaneously:
 
-Task(subagent_type="general-purpose", description="Fix skill frontmatter", prompt="Read and edit these SKILL.md files: [list]. For each: [specific changes]...", run_in_background=true)
+Agent(subagent_type="general-purpose", model="haiku", description="Fix skill frontmatter", prompt="Read and edit these SKILL.md files: [list]. For each: [specific changes]...", run_in_background=true)
 
-Task(subagent_type="general-purpose", description="Update agent files", prompt="Read and edit these agent .md files: [list]. For each: [specific changes]...", run_in_background=true)
+Agent(subagent_type="general-purpose", model="haiku", description="Update agent files", prompt="Read and edit these agent .md files: [list]. For each: [specific changes]...", run_in_background=true)
 
-Task(subagent_type="general-purpose", description="Update config files", prompt="Read and edit settings.json: [specific changes]...", run_in_background=true)
+Agent(subagent_type="general-purpose", model="sonnet", description="Update config files", prompt="Read and edit settings.json: [specific changes]...", run_in_background=true)
 ```
 
 **Rules for parallel agents:**
@@ -293,28 +307,28 @@ A `Stop` hook in this skill's frontmatter automatically commits and pushes all c
 ### Example 1: New Tool Usage
 
 ````markdown
-## [MEDIUM] Add WebSearch to financial-data-extractor skill
+## [MEDIUM] Add Agent tool to deep-research skill
 
-**Affected Items:** financial-data-extractor
+**Affected Items:** deep-research
 
 **Current State:**
-Skill only uses WebFetch for external data
+Skill uses Task tool for spawning parallel research tracks
 
 **Recommended Change:**
-Add WebSearch to allowed-tools to enable broader research capabilities when extracting financial data from unfamiliar sources.
+Replace `Task` with `Agent` in allowed-tools. The `Task` tool was renamed to `Agent` and now supports `model` parameter for per-agent tier selection.
 
 **New Feature Reference:**
-Claude Code v2.x added native WebSearch tool
+Claude Code v2.1.x unified agent spawning under the Agent tool
 
 **Implementation:**
-Add `WebSearch` to allowed-tools in frontmatter:
+Update allowed-tools in frontmatter:
 
 ```yaml
 allowed-tools:
-  - Read
-  - WebFetch
-  - WebSearch # NEW
+  - Agent # was: Task
 ```
+
+And update spawn calls to use `model: "sonnet"` for research tracks.
 ````
 
 **Effort:** Low
@@ -342,29 +356,47 @@ Update the workflow section to specify parallel launch pattern for independent t
 **Effort:** Medium
 ````
 
-### Example 3: Skill Format Migration
+### Example 3: New Hook Event
 
-```markdown
-## [HIGH] Migrate legacy .skill files to SKILL.md format
+````markdown
+## [MEDIUM] Add HTTP hook for deployment notifications
 
-**Affected Items:** financial-data-extractor.skill
+**Affected Items:** settings.json hooks section
 
 **Current State:**
-Using legacy .skill format
+No deployment notification hook configured
 
 **Recommended Change:**
-Migrate to new SKILL.md format with YAML frontmatter for better Claude recognition and metadata support.
+Use the new HTTP hooks feature to POST deployment status to a webhook URL when skills complete. HTTP hooks run a POST request instead of a shell command.
 
 **New Feature Reference:**
-SKILL.md is now the recommended format
+Claude Code v2.1.63 added HTTP hooks support
 
 **Implementation:**
+Add to hooks section in settings.json:
 
-1. Rename file to SKILL.md
-2. Add YAML frontmatter with name, description, allowed-tools
-3. Update content to match new format
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://your-webhook.example.com/deploy",
+            "headers": { "Authorization": "Bearer ${WEBHOOK_TOKEN}" },
+            "allowedEnvVars": ["WEBHOOK_TOKEN"]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+````
 
 **Effort:** Low
+
 ```
 
 ## Triggers
@@ -400,3 +432,4 @@ Never attempt to fetch the full CHANGELOG.md via WebFetch - it's too large.
 - Some recommendations may require manual review
 - Keep track of which changelog versions have been reviewed to avoid duplicate work
 - All paths use `$HOME` variable for cross-machine compatibility
+```
