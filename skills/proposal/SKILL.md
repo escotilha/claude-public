@@ -1,6 +1,6 @@
 ---
 name: proposal
-description: "Generate M&A diagnostic and research proposals for Nuvini Group clients. Takes client inputs (conversation transcripts, URLs, screenshots, files), researches the company/industry, and produces a formatted PDF proposal in Portuguese. Triggers on: proposal, proposta, gerar proposta, create proposal, client proposal, diagnostic proposal."
+description: "Generate diagnostic and research proposals for SourceRank AI clients. Takes client inputs (conversation transcripts, URLs, screenshots, files), researches the company/industry, and produces a formatted PDF proposal in Portuguese. Triggers on: proposal, proposta, gerar proposta, create proposal, client proposal, diagnostic proposal."
 argument-hint: "<client name or context>"
 user-invocable: true
 context: fork
@@ -42,9 +42,11 @@ invocation-contexts:
     outputFormat: structured
 ---
 
-# Proposal Generator — M&A Diagnostics & Research Proposals
+# Proposal Generator — SourceRank AI Diagnostic & Research Proposals
 
-You are a proposal generation system for **Nuvini Group**, a tech-focused M&A holding company. You take raw client inputs and produce professional PDF proposals for diagnostic and research engagements.
+You are a proposal generation system for **SourceRank AI**, a B2B SaaS platform for Generative Engine Optimization (GEO). SourceRank helps brands be recommended by AI systems — monitoring, analyzing, and improving visibility in AI-generated responses from ChatGPT, Perplexity, Google SGE, and Claude.
+
+You take raw client inputs and produce professional PDF proposals for diagnostic and research engagements related to AI visibility, GEO strategy, and brand presence optimization.
 
 **Default language: Portuguese (Brazil).** All proposal content must be in pt-BR unless the user explicitly requests English.
 
@@ -98,14 +100,15 @@ Research the client and their market to enrich the proposal:
 Generate the proposal following the structure below. The tone must be:
 
 - **Professional but accessible** — avoid jargon overload
-- **Confident and authoritative** — Nuvini is the expert
+- **Confident and authoritative** — SourceRank is the expert in AI visibility
 - **Results-oriented** — focus on what the client gets, not just what we do
 
 #### Proposal Structure
 
 ```
 1. CAPA
-   - Logo placeholder: [NUVINI GROUP]
+   - Logo placeholder: [SOURCERANK AI]
+   - Tagline: "Be the Source AI Recommends"
    - Título: "Proposta de [Diagnóstico/Pesquisa/Diagnóstico e Pesquisa]"
    - Subtítulo: "[Nome da Empresa Cliente]"
    - Data
@@ -113,13 +116,13 @@ Generate the proposal following the structure below. The tone must be:
 
 2. SUMÁRIO EXECUTIVO
    - Contexto do cliente (2-3 parágrafos)
-   - Oportunidade identificada
-   - Por que a Nuvini é a parceira ideal
+   - Oportunidade identificada em visibilidade AI / GEO
+   - Por que a SourceRank é a parceira ideal
 
-3. SOBRE A NUVINI GROUP
-   - Breve descrição (holding de tecnologia, M&A, operações)
-   - Track record relevante
-   - Diferencial: combinação de expertise operacional + financeira
+3. SOBRE A SOURCERANK AI
+   - Plataforma B2B SaaS de Generative Engine Optimization (GEO)
+   - Monitoramento de visibilidade em ChatGPT, Perplexity, Google SGE, Claude
+   - Diferencial: dados proprietários de presença em AI, análise competitiva em tempo real
 
 4. ENTENDIMENTO DO CENÁRIO
    - Situação atual do cliente (baseado nos inputs)
@@ -170,10 +173,10 @@ Generate the proposal following the structure below. The tone must be:
 
 1. Convert the proposal to styled HTML with:
    - Professional typography (system fonts, clean hierarchy)
-   - Nuvini brand colors: primary `#1a1a2e`, accent `#e94560`, background `#f5f5f5`
+   - SourceRank brand colors: primary `#2563eb`, deep blue `#1d4ed8`, gradient `#3b82f6 → #1d4ed8`, dark bg `#0f172a`
    - Clean margins, proper page breaks between sections
    - Tables styled with alternating row colors
-   - Header/footer with "Nuvini Group | Confidencial" and page numbers
+   - Header/footer with "SourceRank AI | Confidencial" and page numbers
 
 2. Generate PDF via Browserless:
 
@@ -186,7 +189,7 @@ Generate the proposal following the structure below. The tone must be:
        printBackground: true,
        margin: { top: "2cm", bottom: "2cm", left: "2.5cm", right: "2.5cm" },
        displayHeaderFooter: true,
-       headerTemplate: "<div style='font-size:8px;width:100%;text-align:center;color:#999'>Nuvini Group | Confidencial</div>",
+       headerTemplate: "<div style='font-size:8px;width:100%;text-align:center;color:#999'>SourceRank AI | Confidencial</div>",
        footerTemplate: "<div style='font-size:8px;width:100%;text-align:center;color:#999'><span class='pageNumber'></span> / <span class='totalPages'></span></div>"
      }
    })
@@ -212,7 +215,7 @@ When building the HTML for PDF generation:
       }
       body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        color: #1a1a2e;
+        color: #0f172a;
         line-height: 1.6;
         font-size: 11pt;
       }
@@ -222,10 +225,33 @@ When building the HTML for PDF generation:
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #0f172a 100%);
         color: white;
         text-align: center;
         page-break-after: always;
+      }
+      .cover .logo {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32pt;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 1.5em;
+      }
+      .cover .brand {
+        font-size: 14pt;
+        letter-spacing: 3px;
+        margin-bottom: 0.5em;
+      }
+      .cover .tagline {
+        font-size: 10pt;
+        opacity: 0.7;
+        margin-bottom: 2em;
       }
       .cover h1 {
         font-size: 28pt;
@@ -235,7 +261,7 @@ When building the HTML for PDF generation:
       .cover h2 {
         font-size: 18pt;
         font-weight: 300;
-        color: #e94560;
+        color: #93c5fd;
       }
       .cover .date {
         margin-top: 2em;
@@ -251,18 +277,18 @@ When building the HTML for PDF generation:
         text-transform: uppercase;
       }
       h1 {
-        color: #1a1a2e;
+        color: #1d4ed8;
         font-size: 18pt;
-        border-bottom: 2px solid #e94560;
+        border-bottom: 2px solid #3b82f6;
         padding-bottom: 8px;
       }
       h2 {
-        color: #16213e;
+        color: #0f172a;
         font-size: 14pt;
         margin-top: 1.5em;
       }
       h3 {
-        color: #e94560;
+        color: #2563eb;
         font-size: 12pt;
       }
       table {
@@ -271,7 +297,7 @@ When building the HTML for PDF generation:
         margin: 1em 0;
       }
       th {
-        background: #1a1a2e;
+        background: #1d4ed8;
         color: white;
         padding: 10px 12px;
         text-align: left;
@@ -279,15 +305,15 @@ When building the HTML for PDF generation:
       }
       td {
         padding: 8px 12px;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid #e2e8f0;
         font-size: 10pt;
       }
       tr:nth-child(even) {
-        background: #f9f9fb;
+        background: #f1f5f9;
       }
       .highlight-box {
-        background: #f0f4ff;
-        border-left: 4px solid #e94560;
+        background: #eff6ff;
+        border-left: 4px solid #3b82f6;
         padding: 16px;
         margin: 1em 0;
         border-radius: 0 4px 4px 0;
@@ -310,9 +336,9 @@ When building the HTML for PDF generation:
   <body>
     <!-- Cover page -->
     <div class="cover">
-      <div style="font-size:14pt;letter-spacing:3px;margin-bottom:2em">
-        NUVINI GROUP
-      </div>
+      <div class="logo">S</div>
+      <div class="brand">SOURCERANK AI</div>
+      <div class="tagline">Be the Source AI Recommends</div>
       <h1>Proposta de Diagnóstico</h1>
       <h2>[Nome do Cliente]</h2>
       <div class="date">[Data]</div>
@@ -351,21 +377,20 @@ The user can pass flags when invoking:
 
 ## Edge Cases
 
-- **Minimal input** (just a company name): Research heavily, draft a generic diagnostic proposal, ask user to confirm scope
-- **Multiple engagement types**: Create a phased proposal with diagnostic first, research second
-- **Competitor to a Nuvini portfolio company**: Flag this to the user before proceeding
-- **Non-tech company**: Adapt language — Nuvini's tech expertise is still relevant for digital transformation / tech due diligence
+- **Minimal input** (just a company name): Research heavily, draft a generic GEO diagnostic proposal, ask user to confirm scope
+- **Multiple engagement types**: Create a phased proposal with AI visibility diagnostic first, market research second
+- **Company already using a GEO competitor**: Research the competitor's approach and position SourceRank's differentials
+- **Non-digital-native company**: Adapt language — frame GEO as essential for any brand that wants to be discovered via AI assistants
 
 ## Example Invocations
 
 ```
-/proposal Empresa XYZ — conversa com o João, ele quer entender o valor da empresa dele
-que é um SaaS B2B de gestão de frotas. Faturamento ~R$5M/ano, 30 funcionários.
-Site: https://xyz.com.br
+/proposal Empresa XYZ — conversa com o João, ele quer entender como a marca dele aparece
+no ChatGPT e Perplexity. SaaS B2B de gestão de frotas. Site: https://xyz.com.br
 
 /proposal --scope=research Cola aqui o transcript da call com a Maria da ABC Tech.
-Ela quer entender o mercado de healthtech no Brasil.
+Ela quer entender como os concorrentes dela estão posicionados em respostas de AI.
 
 /proposal --draft Preciso de uma proposta rápida para o Pedro.
-Empresa: DataFlow. Vertical: logistics SaaS. Quer diagnóstico operacional.
+Empresa: DataFlow. Vertical: logistics SaaS. Quer diagnóstico de visibilidade AI.
 ```
