@@ -23,6 +23,7 @@ allowed-tools:
   - Grep
   - WebSearch
   - mcp__chrome-devtools__*
+  - mcp__playwright__*
   - mcp__browserless__*
   - mcp__memory__*
 memory: user

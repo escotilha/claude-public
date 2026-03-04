@@ -13,12 +13,6 @@ allowed-tools:
   - Grep
   - Bash
   - Agent
-  - Task(agent_type=general-purpose)
-  - Task(agent_type=frontend-agent)
-  - Task(agent_type=backend-agent)
-  - Task(agent_type=database-agent)
-  - Task(agent_type=Explore)
-  - Task(agent_type=Plan)
   - TeamCreate
   - TeamDelete
   - SendMessage
@@ -32,6 +26,7 @@ allowed-tools:
   - mcp__sequential-thinking__*
   - mcp__memory__*
   - mcp__chrome-devtools__*
+  - mcp__playwright__*
   - mcp__postgres__*
 memory: user
 slots:

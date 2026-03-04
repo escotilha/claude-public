@@ -6,8 +6,6 @@ context: fork
 model: sonnet
 allowed-tools:
   - Agent
-  - Task(agent_type=general-purpose)
-  - Task(agent_type=Explore)
   - TaskCreate
   - TaskUpdate
   - TaskList
@@ -18,6 +16,7 @@ allowed-tools:
   - Glob
   - Grep
   - mcp__chrome-devtools__*
+  - mcp__playwright__*
   - mcp__browserless__*
   - mcp__memory__*
 memory: user

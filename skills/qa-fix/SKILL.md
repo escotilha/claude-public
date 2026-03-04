@@ -19,6 +19,7 @@ allowed-tools:
   - Glob
   - Grep
   - WebSearch
+  - mcp__playwright__*
   - mcp__memory__*
 memory: user
 tool-annotations:

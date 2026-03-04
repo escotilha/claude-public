@@ -6,8 +6,6 @@ context: fork
 model: opus
 allowed-tools:
   - Agent
-  - Task(agent_type=general-purpose)
-  - Task(agent_type=Explore)
   - TaskCreate
   - TaskUpdate
   - TaskList
@@ -19,7 +17,7 @@ allowed-tools:
   - Glob
   - Grep
   - WebSearch
-  - mcp__claude-in-chrome__*
+  - mcp__chrome-devtools__*
   - mcp__memory__*
 memory: user
 tool-annotations:

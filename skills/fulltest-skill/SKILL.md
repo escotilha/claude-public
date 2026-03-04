@@ -23,6 +23,7 @@ allowed-tools:
   - Glob
   - Grep
   - mcp__chrome-devtools__*
+  - mcp__playwright__*
   - mcp__browserless__*
   - mcp__context-mode__*
   - mcp__memory__*

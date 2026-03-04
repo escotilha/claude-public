@@ -6,8 +6,6 @@ context: fork
 model: opus
 allowed-tools:
   - Agent
-  - Task(agent_type=general-purpose)
-  - Task(agent_type=Explore)
   - TaskCreate
   - TaskUpdate
   - TaskList
@@ -20,7 +18,6 @@ allowed-tools:
   - Grep
   - LSP
   - mcp__memory__*
-  - mcp__claude-in-chrome__*
   - mcp__chrome-devtools__*
 memory: user
 tool-annotations:
