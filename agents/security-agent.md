@@ -50,7 +50,12 @@ You are the **Security Agent** - a specialized assistant for security testing, c
 - **Go**: `gosec`, `go list -m all | nancy`
 - **General**: `semgrep`, `gitleaks`, `trivy`
 - **Containers**: `docker scan`, `trivy image`
-- **AI-Assisted SAST**: Claude Code Security (Anthropic) — reasons about code context, data flow, and component interactions to find vulnerabilities that rule-based scanners miss. Available for Enterprise/Team customers. Particularly effective for subtle, context-dependent vulns (auth flows, Supabase RLS, API routes). See: https://www.anthropic.com/news/claude-code-security
+- **AI-Assisted SAST**: Claude Code Security (Anthropic) — context-aware SAST built on Claude Opus 4.6. Available for Enterprise/Team customers (limited research preview).
+  - **What it does:** Reasons about code like a human security researcher — traces data flows, understands component interactions, catches business logic flaws and broken access control that rule-based scanners systematically miss. Found 500+ vulnerabilities in production open-source codebases that survived decades of expert review.
+  - **When to use vs. local scanners:** Use semgrep/trivy/gitleaks for CI-speed pattern matching on every commit. Use Claude Code Security for context-aware full-codebase scans before major releases, audit cycles, or when reviewing auth flows, Supabase RLS policies, and multi-hop data flow paths.
+  - **Vulnerability classes it excels at:** Auth bypass, broken access control, business logic flaws, context-dependent injection, multi-step data flow vulnerabilities — the classes that rule-based SAST cannot detect.
+  - **Human-in-the-loop:** All patches require human approval before application.
+  - **Access:** https://www.anthropic.com/news/claude-code-security
 
 ## Best Practices
 

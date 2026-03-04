@@ -44,6 +44,7 @@ Pre-commit quality review of staged or unstaged changes.
 - SQL injection risks (string concatenation in queries)
 - XSS vectors (unsanitized user input in HTML)
 - Exposed sensitive data in error messages
+- **Deep scan hint:** If the diff touches auth, authorization, RLS policies, or complex data flow paths, flag that the changes are candidates for deeper analysis via Claude Code Security (AI-assisted SAST that catches business logic flaws and context-dependent vulns that pattern-matching misses)
 
 **Bugs**
 

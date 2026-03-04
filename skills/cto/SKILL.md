@@ -322,6 +322,11 @@ Teammate "security-analyst":
   Checklist: OWASP Top 10, auth flow, RBAC/ABAC, input validation, injection,
   XSS, CSRF, secrets management, dependency CVEs, security headers, license compliance,
   agent chassis security (if AI-integrated: secrets outside model context, deterministic trust boundary, audit logging of agent actions).
+  Routing hint: For auth flows, Supabase RLS policies, and multi-hop data flow issues,
+  note in your findings that these are strong candidates for Claude Code Security
+  (AI-assisted SAST that traces data flows and catches business logic flaws that
+  semgrep/trivy miss — found 500+ vulns in production OSS that survived expert review).
+  This is especially relevant for Contably (Supabase RLS) and SourceRank (GitHub API access control).
   Report: severity | file:line | CWE | issue | recommendation
   Message the lead with CRITICAL findings immediately (don't wait for completion).
   Message quality-analyst if you find deprecated/vulnerable dependencies they should flag.
