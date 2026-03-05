@@ -321,7 +321,8 @@ Teammate "security-analyst":
   FILE OWNERSHIP: You own {auth_dirs}, {api_dirs}, package.json/lock files.
   Checklist: OWASP Top 10, auth flow, RBAC/ABAC, input validation, injection,
   XSS, CSRF, secrets management, dependency CVEs, security headers, license compliance,
-  agent chassis security (if AI-integrated: secrets outside model context, deterministic trust boundary, audit logging of agent actions).
+  agent chassis security (if AI-integrated: secrets outside model context, deterministic trust boundary, audit logging of agent actions),
+  prompt injection defense (if consuming external data from Google Workspace: verify `--sanitize` flag is used on Gmail/Drive/Sheets reads to block Model Armor injection from untrusted content).
   Routing hint: For auth flows, Supabase RLS policies, and multi-hop data flow issues,
   note in your findings that these are strong candidates for Claude Code Security
   (AI-assisted SAST that traces data flows and catches business logic flaws that
