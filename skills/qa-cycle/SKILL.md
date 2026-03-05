@@ -339,7 +339,7 @@ Query DB once for:
 **One message, N parallel Task calls.** Each persona is `model: "haiku"`:
 
 ```
-Task({
+Agent({
   subagent_type: "general-purpose",
   model: "haiku",
   name: "{slug}-tester",
@@ -400,7 +400,7 @@ Output: structured fix plan with groups, priority order, and approach per group.
 For each fix group (by priority), spawn a sub-agent:
 
 ```
-Task({
+Agent({
   subagent_type: "general-purpose",
   model: "sonnet",
   prompt: "Fix these QA issues in {cwd}:
@@ -427,7 +427,7 @@ If a fix is particularly complex (architectural, cross-cutting), opus handles it
 Spawn haiku verification agents to re-test fixed issues via browser:
 
 ```
-Task({
+Agent({
   subagent_type: "general-purpose",
   model: "haiku",
   prompt: "Verify these issues are fixed on {url}:
