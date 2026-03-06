@@ -645,6 +645,24 @@ This block is generated once and reused for all agents. It costs ~200-500 tokens
 
 **When to skip:** If the project has no `package.json` (non-JS project), the orchestrator should adapt the pre-load list to the detected stack (e.g., `Cargo.toml` for Rust, `pyproject.toml` for Python, `go.mod` for Go).
 
+#### Context Degradation Mitigation
+
+Long-running feature agents are susceptible to context degradation patterns. Apply these countermeasures:
+
+**Lost-in-the-middle:** Place the most critical information (task requirements, acceptance criteria) at the START and END of agent prompts. Put reference material (conventions, type definitions) in the middle. Models attend more to edges.
+
+**Context poisoning:** When agents read large files, irrelevant content dilutes focus. Instruct agents to read only the specific functions/sections they need — never full files over 500 lines. Include in every agent prompt: "When reading files, use offset/limit to read only relevant sections. Do NOT read entire large files."
+
+**Context compression for long tasks:** For features with 5+ tasks, instruct the agent to maintain a running summary:
+
+```
+After completing each task, write a 2-line summary to .worktree-progress.md:
+"Task N: [what was done] | Files: [files changed] | Status: [done/blocked]"
+This serves as a compressed context checkpoint if the agent's window fills up.
+```
+
+**Distraction prevention:** Each agent prompt should include explicit scope boundaries: "You are ONLY responsible for {feature}. Do NOT modify files outside {worktree-path}. If you encounter issues in shared code, report them to the lead instead of fixing them."
+
 ### Phase 3: Agent Dispatch
 
 #### Execution Mode Selection

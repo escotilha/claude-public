@@ -95,32 +95,32 @@ A disciplined 7-phase skill that takes a feature from idea to production. Each p
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────────────┐
-│                              /ship ORCHESTRATOR                                      │
-│                                                                                      │
-│  Phase -1       Phase 0       Phase 1        Phase 2        Phase 3                 │
-│  ┌──────────┐   ┌──────────┐  ┌──────────┐   ┌──────────┐   ┌──────────┐           │
-│  │ PROJECT  │──▶│ PROJECT  │─▶│ PRODUCT  │──▶│  TECH    │──▶│  PLAN    │           │
-│  │  INIT    │   │ DETECT   │  │  SPEC    │   │  SPEC    │   │          │           │
-│  │          │   │          │  │          │   │          │   │ Seq.     │           │
-│  │ git init │   │ Auto     │  │ CPO mind │   │ CTO mind │   │ Thinking │           │
-│  │ scaffold │   │          │  └──────────┘   └──────────┘   └─────┬────┘           │
-│  └──────────┘   └──────────┘                                      │                 │
-│  (conditional)                                                    ▼                 │
-│                                 Phase 4         Phase 5                             │
-│                                 ┌──────────┐   ┌─────────┐                          │
-│                                 │ EXECUTE  │──▶│   QA    │                          │
-│                                 │ (Swarm)  │   │  TEST   │                          │
-│                                 │ haiku +  │   │         │                          │
-│                                 │ sonnet   │   └────┬────┘                          │
-│                                 └──────────┘        │                               │
-│                                      ▲              │                               │
-│  Phase 7        Phase 6              │              │                               │
-│  ┌──────────┐   ┌──────────┐         └──────────────┘                               │
-│  │   DOC    │◀──│   FIX    │◀── if issues found                                    │
-│  │          │   │  CYCLE   │                                                        │
-│  └──────────┘   └──────────┘                                                        │
-└─────────────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                              /ship ORCHESTRATOR                                         │
+│                                                                                         │
+│  Phase -1       Phase 0       Phase 1        Phase 2        Phase 3                    │
+│  ┌──────────┐   ┌──────────┐  ┌──────────┐   ┌──────────┐   ┌──────────┐              │
+│  │ PROJECT  │──▶│ PROJECT  │─▶│ PRODUCT  │──▶│  TECH    │──▶│  PLAN    │              │
+│  │  INIT    │   │ DETECT   │  │  SPEC    │   │  SPEC    │   │          │              │
+│  │          │   │          │  │          │   │          │   │ Seq.     │              │
+│  │ git init │   │ Auto     │  │ CPO mind │   │ CTO mind │   │ Thinking │              │
+│  │ scaffold │   │          │  └──────────┘   └──────────┘   └─────┬────┘              │
+│  └──────────┘   └──────────┘                                      │                    │
+│  (conditional)                                                    ▼                    │
+│                        Phase 4       Phase 4.5      Phase 5                            │
+│                        ┌──────────┐  ┌──────────┐   ┌─────────┐                        │
+│                        │ EXECUTE  │─▶│REFLEXION │──▶│   QA    │                        │
+│                        │ (Swarm)  │  │  Self-   │   │  TEST   │                        │
+│                        │ haiku +  │  │ critique │   │         │                        │
+│                        │ sonnet   │  └──────────┘   └────┬────┘                        │
+│                        └──────────┘                      │                              │
+│                             ▲                            │                              │
+│  Phase 7     Phase 6       │                             │                              │
+│  ┌──────────┐ ┌──────────┐ └─────────────────────────────┘                              │
+│  │   DOC    │◀│   FIX    │◀── if issues found                                          │
+│  │          │ │  CYCLE   │                                                              │
+│  └──────────┘ └──────────┘                                                              │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -652,6 +652,38 @@ c. **After each group completes:**
    - Update state.json with exact progress
    - Tell user: "Context getting full. Committed progress. Run `/ship --resume` to continue."
 
+### Phase 4.5: Reflexion (Self-Critique Before QA)
+
+After all execution groups complete and before entering Phase 5, run a reflexion pass. This catches spec-implementation mismatches that would otherwise surface as QA failures.
+
+**Process:**
+
+1. **Re-read the product spec and tech spec** (product-spec.md, tech-spec.md)
+2. **For each completed task,** compare what was specified vs what was implemented:
+   - Read the implemented files
+   - Check: does the implementation satisfy every acceptance criterion from the task?
+   - Check: does it match the API contract from the tech spec (endpoints, params, response shape)?
+   - Check: are there edge cases mentioned in the product spec that aren't handled?
+3. **Generate a reflexion checklist:**
+
+```markdown
+## Reflexion: {Feature Name}
+
+| Task                  | Spec Match | Missing                                  | Action     |
+| --------------------- | ---------- | ---------------------------------------- | ---------- |
+| Task 1: Create schema | FULL       | -                                        | None       |
+| Task 2: API routes    | PARTIAL    | Missing input validation on PUT endpoint | Fix inline |
+| Task 3: UI component  | PARTIAL    | Loading state not implemented per spec   | Fix inline |
+```
+
+4. **Fix inline** any PARTIAL matches — these are cheap fixes now, expensive QA cycles later
+5. **Commit reflexion fixes:** `fix(feature): reflexion pass - spec alignment`
+6. **Update state.json** → reflexion complete, proceed to Phase 5
+
+**Skip condition:** If the feature has fewer than 3 tasks, reflexion overhead exceeds benefit — skip directly to Phase 5.
+
+**Model:** Run reflexion in the main context (opus). It's a judgment task comparing spec to implementation — not delegatable to haiku/sonnet.
+
 ### Agent Prompt Template
 
 ```
@@ -1051,6 +1083,7 @@ After writing ship-log.md, automatically run a retrospective:
 
 ## Version
 
+**v4.1.0** — Added Phase 4.5: Reflexion (self-critique pass between execution and QA). Compares implementation against spec before QA, fixing mismatches inline to reduce QA iterations.
 **v4.0.0** — Added eight-slot plugin architecture for swappable Runtime, Agent, Workspace, Tracker, Notifier, QA, Learnings, and VCS backends. Zero skill rewrites needed when migrating tools.
 **v3.0.0** — Added Phase -1: Project Init. When no existing project is detected, asks for directory, initializes git, and scaffolds the project before proceeding.
 **v2.1.0** — Added two-layer learnings system: project-local learnings.json + cross-project MCP Memory. Each run gets smarter from past runs via model routing corrections, QA failure patterns, fix solutions, and dependency gotchas.

@@ -381,12 +381,38 @@ Teammate "security-analyst":
     trace the code path to determine if the failure mode is permissive; flag CRITICAL if
     an auth guard silently no-ops on exception.
 
+  STATIC ANALYSIS TOOLING (run when available)
+  - Semgrep: `semgrep --config=auto --sarif -o .cto-review/semgrep.sarif {src_dirs} 2>/dev/null`
+    Parse SARIF output for high/critical findings. Semgrep catches injection, XSS, and
+    insecure defaults with low false-positive rate. If semgrep is not installed, skip silently.
+  - npm audit / pip-audit: already included above — parse JSON output for actionable CVEs.
+  - Custom Semgrep rules: if `.semgrep/` or `.semgrep.yml` exists in the project, run
+    `semgrep --config=.semgrep/ --sarif` to pick up project-specific rules.
+
+  DIFFERENTIAL REVIEW (when reviewing changes, not full codebase)
+  - If the review is scoped to a PR or recent changes, run `git diff main...HEAD` first.
+  - Focus security review on changed lines and their surrounding context (callers, callees).
+  - For each changed function: trace data flow from input to output — does the change
+    introduce a new path where untrusted data reaches a sensitive sink?
+  - Apply the "attacker's diff" lens: what would a malicious actor gain from each change?
+  - Cross-reference changed files against the OWASP ASVS category most relevant to
+    the change (e.g., auth changes → V2 Authentication, API changes → V13 API Security).
+
+  INSECURE DEFAULTS DETECTION
+  - Grep for default configuration values that are permissive: `CORS: '*'`, `debug: true`,
+    `secure: false`, `httpOnly: false`, `sameSite: 'none'`, `helmet()` called without options.
+  - Check for missing security middleware: if Express/Fastify, verify helmet, cors with
+    explicit origins, and rate-limiting are configured — not just installed.
+  - Docker/deployment: if Dockerfile exists, check for `USER root` (should be non-root),
+    exposed debug ports, and secrets in build args.
+
   Routing hint: For auth flows, Supabase RLS policies, and multi-hop data flow issues,
   note in your findings that these are strong candidates for Claude Code Security
   (AI-assisted SAST that traces data flows and catches business logic flaws that
   semgrep/trivy miss — found 500+ vulns in production OSS that survived expert review).
   This is especially relevant for Contably (Supabase RLS) and SourceRank (GitHub API access control).
   Report: severity | file:line | CWE | issue | recommendation
+  When SARIF output is available, include the Semgrep rule ID in findings for traceability.
   Message the lead with CRITICAL findings immediately (don't wait for completion).
   Message quality-analyst if you find deprecated/vulnerable dependencies they should flag.
   Do NOT broadcast. When done, message the lead with your summary.
@@ -569,7 +595,22 @@ find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.py" 
 
 #### Security Audit
 
-**Check for common vulnerabilities:**
+**Run static analysis tooling (when available):**
+
+```bash
+# Semgrep (SAST) — low false-positive, catches injection/XSS/insecure-defaults
+semgrep --config=auto --sarif -o .cto-review/semgrep.sarif . 2>/dev/null && echo "Semgrep: $(cat .cto-review/semgrep.sarif | jq '.runs[0].results | length') findings"
+
+# Project-specific Semgrep rules (if configured)
+[ -f .semgrep.yml ] && semgrep --config=.semgrep.yml --sarif -o .cto-review/semgrep-custom.sarif . 2>/dev/null
+
+# If reviewing a PR/branch diff, scope the analysis
+# semgrep --config=auto --sarif --diff-depth=0 --baseline-commit=main . 2>/dev/null
+```
+
+If Semgrep SARIF output is available, parse it for HIGH/CRITICAL findings and include the rule ID in the report for traceability (e.g., `semgrep:javascript.express.security.injection.tainted-sql-string`).
+
+**Check for common vulnerabilities (grep fallback when Semgrep unavailable):**
 
 ```bash
 # Hardcoded secrets
@@ -618,6 +659,39 @@ For each hit, trace the code path: determine whether the condition evaluates to 
 npm audit 2>/dev/null | head -50
 pip-audit 2>/dev/null | head -50
 ```
+
+**Differential review (when reviewing changes, not full codebase):**
+
+If the review is scoped to a PR, branch, or recent changes:
+
+```bash
+# Get the diff to focus on
+git diff main...HEAD --name-only
+git diff main...HEAD --stat
+```
+
+For each changed file:
+
+1. Read the full diff context (not just changed lines)
+2. Trace data flow: does the change introduce a new path where untrusted data reaches a sensitive sink?
+3. Apply the "attacker's diff" lens: what would a malicious actor gain from each change?
+4. Cross-reference against OWASP ASVS: auth changes → V2, API changes → V13, crypto → V6, config → V14
+5. Check for regressions: does the change remove or weaken an existing security control?
+
+**Insecure defaults detection:**
+
+```bash
+# Permissive CORS
+grep -rn "cors\|Access-Control-Allow-Origin" --include="*.ts" --include="*.js" | grep -i "'\*'\|\"\\*\"" | head -10
+
+# Missing security middleware
+grep -rn "helmet\|csrf\|csurf\|rate.limit" --include="*.ts" --include="*.js" | head -10
+
+# Docker security (if applicable)
+[ -f Dockerfile ] && grep -n "USER\|EXPOSE\|ARG\|ENV" Dockerfile | head -10
+```
+
+Check for: `CORS: '*'`, `debug: true` in production, `secure: false` on cookies, `httpOnly: false`, `sameSite: 'none'`, `helmet()` without options, Docker running as root, secrets in build args.
 
 #### Performance Analysis
 
