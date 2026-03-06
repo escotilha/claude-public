@@ -57,6 +57,21 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Anti-bot / Cloudflare scrape | `/scrapling`     | Stealth scraping, TLS impersonation, anti-bot |
 | Headless browser automation  | `/browserless`   | PDFs, screenshots, Lighthouse                 |
 
+### AI Quality & Growth
+
+| Task                        | Skill       | When                                         |
+| --------------------------- | ----------- | -------------------------------------------- |
+| Evaluate LLM output quality | `/llm-eval` | Any AI-powered feature needs quality metrics |
+| Audit eval pipeline         | `/llm-eval` | Check existing evals for gaps                |
+| RAG evaluation              | `/llm-eval` | Retrieval + generation quality               |
+| Landing page CRO            | `/growth`   | Optimize conversion on any page              |
+| Pricing strategy            | `/growth`   | Analyze/optimize SaaS pricing                |
+| Signup/onboarding flow      | `/growth`   | Reduce friction in user acquisition          |
+| SEO / AI SEO (GEO) audit    | `/growth`   | Improve organic + AI search visibility       |
+| Churn prevention            | `/growth`   | Identify and reduce user churn               |
+| Competitor comparison page  | `/growth`   | Build vs-competitor content                  |
+| Email lifecycle sequences   | `/growth`   | Design activation/retention emails           |
+
 ### Client & Business
 
 | Task                                                 | Skill              | When                                                  |

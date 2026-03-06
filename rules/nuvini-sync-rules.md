@@ -77,6 +77,8 @@ Never push content containing:
 - `manual` — build user manual (any project)
 - `demo` — reproducible demo documents (any project)
 - `cpo` — product lifecycle (any project)
+- `llm-eval` — LLM output evaluation pipeline (any AI feature)
+- `growth` — SaaS growth engineering (any SaaS product)
 
 ### Generic Agents
 
