@@ -319,11 +319,68 @@ Teammate "architecture-analyst":
 Teammate "security-analyst":
   Review {auth_files} and {api_files} for vulnerabilities. Also run `npm audit` / `pip-audit`.
   FILE OWNERSHIP: You own {auth_dirs}, {api_dirs}, package.json/lock files.
-  Checklist: OWASP Top 10, auth flow, RBAC/ABAC, input validation, injection,
-  XSS, CSRF, secrets management, dependency CVEs, security headers, license compliance,
-  agent chassis security (if AI-integrated: secrets outside model context, deterministic trust boundary, audit logging of agent actions),
-  prompt injection defense (if consuming external data from Google Workspace: verify `--sanitize` flag is used on Gmail/Drive/Sheets reads to block Model Armor injection from untrusted content),
-  insecure defaults / fail-open (grep for: catch blocks that continue past auth checks; env vars that enable features when missing; default roles of admin/superuser; `.catch(() => true)` on permission checks; boolean flags defaulting to true for allow/skip/bypass/public — for each hit, trace the code path to determine if the failure mode is permissive; flag CRITICAL if an auth guard silently no-ops on exception).
+
+  Checklist — use Trail of Bits–style specificity, not generic OWASP surface scanning:
+
+  AUTH & AUTHORIZATION
+  - Auth flow: trace every code path that grants access. Check for auth bypass via
+    parameter pollution, HTTP verb tampering, or path traversal above auth middleware.
+  - RBAC/ABAC: verify roles are checked server-side on every privileged route, not
+    just derived from JWT claims without re-validation against the DB.
+  - Mass assignment: grep for `req.body` spread into DB update/create calls (e.g.,
+    `Object.assign(record, req.body)`, Prisma `data: req.body`, Mongoose `Model.create(req.body)`).
+    Any unfiltered user input mapped to ORM fields is a candidate for privilege escalation.
+  - Insecure direct object reference (IDOR): check if resource IDs are validated
+    against the authenticated user's ownership/scope before access.
+
+  INJECTION & INPUT HANDLING
+  - SQL injection: grep for raw string interpolation into queries (`query(\`...${var}\``).
+  - Header injection: grep for user-controlled values written directly into HTTP response
+    headers (`res.setHeader`, `res.set`) without sanitization — enables CRLF injection.
+  - Log injection: user input written to logs without stripping newlines enables
+    log forging (`\n`, `\r` in logged request parameters).
+  - Path traversal: `path.join` or `fs.readFile` calls receiving user input without
+    normalization + allowlist validation.
+
+  TIMING & CRYPTOGRAPHY
+  - Timing attacks: grep for direct string equality on secrets, tokens, or password
+    hashes (`===`, `==`, `.equals()`) — must use constant-time comparison
+    (`crypto.timingSafeEqual`, `hmac` comparison). Flag every occurrence.
+  - Constant-time analysis: check HMAC/signature verification code paths for
+    early-exit comparisons that leak secret length via timing.
+  - Weak primitives: `MD5`, `SHA1` for passwords or HMAC; `Math.random()` for
+    token generation; `DES`, `RC4` encryption.
+  - JWT: verify `alg: none` is rejected; RS256 algorithm confusion (accepting HS256
+    with public key as HMAC secret); missing `exp` / `aud` / `iss` validation.
+
+  API SECURITY
+  - Rate limiting: confirm auth endpoints (login, password reset, OTP) have rate
+    limiting applied at the route level, not just globally.
+  - Mass assignment (API layer): OpenAPI/Zod/Joi schemas — verify output schemas
+    strip internal fields (`passwordHash`, `isAdmin`, `stripeCustomerId`) so they
+    are never serialized into API responses.
+  - SSRF: any server-side URL fetch driven by user input (`fetch(req.body.url)`,
+    `axios.get(req.query.webhook)`) — check for allowlist validation and blocked
+    private IP ranges (169.254.x.x, 10.x, 127.x).
+  - HTTP security headers: check for `Strict-Transport-Security`, `X-Content-Type-Options`,
+    `X-Frame-Options` / `frame-ancestors`, `Content-Security-Policy`. Missing headers
+    on auth responses are HIGH severity.
+
+  SECRETS & CONFIGURATION
+  - Secrets management: grep for hardcoded credentials. Verify .env is gitignored.
+  - Agent chassis security (AI-integrated codebases): secrets injected at deterministic
+    runtime layer, not passed through AI context window; trust boundary around model calls;
+    audit logging on all outbound agent actions.
+  - Prompt injection defense (Google Workspace integrations): verify `--sanitize` flag
+    used on Gmail/Drive/Sheets reads to block Model Armor injection.
+
+  FAIL-OPEN PATTERNS
+  - grep for: catch blocks that continue past auth checks; env vars that enable features
+    when missing; default roles of admin/superuser; `.catch(() => true)` on permission
+    checks; boolean flags defaulting to true for allow/skip/bypass/public — for each hit,
+    trace the code path to determine if the failure mode is permissive; flag CRITICAL if
+    an auth guard silently no-ops on exception.
+
   Routing hint: For auth flows, Supabase RLS policies, and multi-hop data flow issues,
   note in your findings that these are strong candidates for Claude Code Security
   (AI-assisted SAST that traces data flows and catches business logic flaws that
@@ -337,8 +394,50 @@ Teammate "security-analyst":
 Teammate "performance-analyst":
   Review {db_files} and {api_files} for performance bottlenecks.
   FILE OWNERSHIP: You own {db_dirs}, {service_dirs}, and build/bundle config.
-  Checklist: N+1 queries, index coverage, caching strategy, bundle size,
-  memory leaks, async handling, connection pooling, rate limiting, pagination.
+
+  Checklist:
+
+  DATABASE
+  - N+1 queries: ORM loops calling DB inside array.map/forEach — must use
+    batch fetch (findMany with `in`, DataLoader, or joined query).
+  - Index coverage: WHERE / ORDER BY / JOIN columns without indexes on high-cardinality tables.
+  - Missing pagination: unbounded queries returning potentially large result sets.
+  - Connection pooling: verify pool is configured (PgBouncer, Prisma connection limit,
+    Supabase `?connection_limit=`). Serverless deployments creating a new connection
+    per request will exhaust the DB.
+
+  NEXT.JS / RSC CACHING (if Next.js App Router is in use)
+  - "use cache" coverage: identify Server Components or data fetching functions that
+    are not-user-specific and tolerate staleness — they should use `"use cache"` + `cacheLife()`.
+    Missing cache on product catalogs, blog posts, and config data is a HIGH opportunity.
+  - Caching anti-pattern — `connection()` overuse: grep for `await connection()` at page
+    level. Using `connection()` makes the entire route dynamic. Replace with Suspense
+    boundaries isolating only the truly dynamic parts.
+  - cacheTag invalidation gaps: Server Actions that mutate data without calling
+    `revalidateTag()` cause stale reads. Cross-reference mutation paths against cacheTag usage.
+  - Dynamic API leakage into cached scope: `cookies()`, `headers()`, `searchParams` called
+    inside a `"use cache"` function — this throws at runtime. Must be extracted outside
+    and passed as arguments.
+  - Route vs data cache confusion: `fetch()` calls without explicit `cache` or `next.revalidate`
+    options — verify intentional caching behavior (Next.js 15 defaults fetch to no-store).
+  - Full Route Cache vs Data Cache invalidation: confirm that `revalidateTag()` is used
+    after mutations (granular) rather than `revalidatePath('/')` (nukes entire route cache).
+  - PPR (Partial Prerendering): if `experimental.ppr` is enabled, check Suspense boundary
+    placement — static shell should be outermost, dynamic content innermost.
+
+  FRONTEND / BUNDLE
+  - Bundle size: identify heavy dependencies imported without tree-shaking (lodash,
+    moment, full icon libraries). Flag `import * as X from` patterns.
+  - Memory leaks: event listeners or intervals not cleared in useEffect cleanup.
+  - Async handling: blocking await chains that could run in parallel — prefer
+    `Promise.all([...])` for independent async operations.
+
+  API / NETWORK
+  - Rate limiting: confirm external API calls are guarded (retries with backoff,
+    not unbounded retry loops).
+  - Streaming: large data responses that could be streamed (SSE, RSC streaming)
+    but are blocking.
+
   Report: severity | file:line | issue | recommendation
   Message the lead with critical findings immediately.
   Message architecture-analyst if you find patterns requiring structural changes.
