@@ -301,6 +301,13 @@ Pre-computed context to include in each spawn prompt:
 - Known issues from fulltest reports (if any)
 ```
 
+**Context engineering for analyst prompts:**
+
+- **Lost-in-the-middle mitigation:** Place the analyst's checklist and file ownership at the START and END of each prompt. Put project context (tech stack, directories) in the middle.
+- **Context compression:** Instruct analysts to read only relevant sections of large files (use offset/limit). Never read full files over 500 lines — read the function/class they need.
+- **Scope boundaries:** Each analyst has FILE OWNERSHIP (below). Do not read or analyze files outside your ownership. This prevents N analysts from reading the same files, wasting N context windows.
+- **Early termination:** If an analyst finds 0 issues in their first 10 files, they should message the lead immediately rather than exhaustively scanning every file. Code with no issues doesn't need a full audit.
+
 Spawn each analyst with these constraints:
 
 ```

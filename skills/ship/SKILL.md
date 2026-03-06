@@ -707,6 +707,11 @@ You are implementing a specific task for the {feature} feature in the {project.n
 - "This task type was previously mis-routed as simple — take extra care"
 (omit this section if no relevant learnings exist)
 
+**Context management:**
+- When reading files, use offset/limit to read only relevant sections. Do NOT read entire files over 500 lines.
+- After completing each task in your group, write a 1-line summary to .task-progress.md in the worktree.
+- You are ONLY responsible for the files listed above. Do NOT modify other files.
+
 **Important:**
 - Do NOT add comments, docstrings, or type annotations beyond what's needed
 - Match the style of existing code exactly
