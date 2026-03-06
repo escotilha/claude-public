@@ -237,11 +237,35 @@ Structured frameworks for optimizing SaaS conversion funnels, pricing, retention
    - Dynamic landing pages from database content
 
 3. **AI/GEO readiness (Generative Engine Optimization):**
-   - Is content structured for LLM consumption? (clear sections, factual claims, data tables)
-   - Does the site have authoritative content that AI assistants would cite?
-   - Schema markup that helps AI understand product capabilities
-   - FAQ sections with clear Q&A format
+
+   AI Overviews appear in ~45% of Google searches and reduce clicks by up to 58%. Optimized content gets cited 3x more.
+
+   **Visibility boost methods (Princeton GEO research):**
+   | Method | Visibility Boost |
+   |--------|-----------------|
+   | Cite sources | +40% |
+   | Add statistics | +37% |
+   | Add quotations | +30% |
+   | Authoritative tone | +25% |
+   | Improve clarity | +20% |
+   | Technical terms | +18% |
+   | Keyword stuffing | **-10%** |
+
+   **Structural checks:**
+   - Key passages 40-60 words (optimal for snippet extraction)
+   - H2/H3 headings matching query phrasing
+   - Definition blocks, step-by-step blocks, comparison tables, pros/cons, FAQ
+   - Schema markup (Product, FAQ, Organization JSON-LD)
    - "vs competitor" pages that AI can reference for comparison queries
+
+   **Bot access check:**
+
+   ```
+   Verify robots.txt allows: GPTBot, ChatGPT-User, PerplexityBot,
+   ClaudeBot, anthropic-ai, Google-Extended, Bingbot
+   ```
+
+   **Most-cited content types:** Comparison articles (~33%), definitive guides (~15%), original research (~12%), best-of lists (~10%)
 
 4. **Generate report:**
 
@@ -290,11 +314,35 @@ Structured frameworks for optimizing SaaS conversion funnels, pricing, retention
 | Billing shock        | Upcoming tier change    | Price change preview email |
 | Missing integration  | No connected services   | Integration setup wizard   |
 
-3. **Design interventions:**
+3. **Health score model (0-100):**
+
+   ```
+   Health = Login frequency (0.30) + Feature usage (0.25) +
+            Support sentiment (0.15) + Billing health (0.15) +
+            Engagement (0.15)
+   ```
+
+   - 80-100: Healthy (upsell opportunity)
+   - 60-79: Needs attention (proactive check-in)
+   - 40-59: At risk (intervention required)
+   - 0-39: Critical (personal outreach)
+
+4. **Cancel flow with dynamic save offers:**
+
+   | Cancel Reason        | Primary Offer                | Fallback                |
+   | -------------------- | ---------------------------- | ----------------------- |
+   | Too expensive        | 20-30% discount 2-3 months   | Downgrade to lower tier |
+   | Not using enough     | 1-3 month pause              | Free onboarding session |
+   | Missing feature      | Roadmap preview + timeline   | Workaround guide        |
+   | Switching competitor | Comparison + discount        | Feedback session        |
+   | Technical issues     | Immediate support escalation | Credit + priority fix   |
+
+   **Target benchmarks:** Cancel flow save rate 25-35%, offer acceptance 15-25%, pause reactivation 60-80%.
+
+5. **Design additional interventions:**
    - Automated email sequences for at-risk users
    - In-app health score/engagement dashboard
-   - Cancel flow with save offers (pause, downgrade, discount)
-   - Win-back sequence for churned users
+   - Win-back sequence for churned users (2 emails over 30 days)
 
 ---
 

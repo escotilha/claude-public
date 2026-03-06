@@ -202,12 +202,32 @@ Do NOT use generic "rate from 1-5" judges. They correlate poorly with human judg
 
 5. **Output:** `.claude/eval/{feature-slug}/judges/` directory with one file per judge.
 
+### Judge Prerequisites (strict ordering)
+
+1. Completed error analysis (Phase 1) identifying the specific failure mode
+2. At least 20 Pass + 20 Fail human-labeled examples
+3. Confirmation that code-based checks cannot address this criterion — **always try code first** (regex, schema validation, format checks) before resorting to LLM judges
+
+### Code-First Checks (before LLM judges)
+
+| Criterion                   | Code Check                         | LLM Judge Needed? |
+| --------------------------- | ---------------------------------- | ----------------- |
+| JSON format valid           | `JSON.parse()` / schema validation | No                |
+| Response length             | Character/token count              | No                |
+| Contains required fields    | Key existence check                | No                |
+| Language detection          | `franc` / regex                    | No                |
+| Tone appropriateness        | --                                 | Yes               |
+| Factual accuracy vs context | --                                 | Yes               |
+| Instruction adherence       | --                                 | Yes               |
+
 ### Anti-patterns to avoid
 
 - "Rate the overall quality from 1-10" — too vague, low inter-rater reliability
 - Single judge for multiple criteria — conflates different failure modes
 - No examples in the judge prompt — judges without examples are 30-40% less accurate
 - Verbose criteria — keep each judge focused on ONE thing
+- ROUGE, BERTScore, cosine similarity as primary metrics — they measure surface overlap, not quality
+- Building judges before fixing obvious problems found in Phase 1
 
 ---
 
@@ -240,15 +260,31 @@ Do NOT use generic "rate from 1-5" judges. They correlate poorly with human judg
    | format-judge        | 97%      | 96%       | 98%    | 0.97 | 0.94          |
    ```
 
-4. **Acceptance threshold:** Cohen's Kappa >= 0.7 (substantial agreement). Below that, the judge needs refinement.
+4. **Acceptance threshold:** TPR > 90% AND TNR > 90%. Minimum acceptable: 80%/80%.
+
+   Use TPR/TNR over precision/recall or raw accuracy — especially important with class imbalance.
 
 5. **If a judge fails calibration:**
-   - Add more examples to the judge prompt
-   - Make criteria more specific
-   - Try a different model (upgrade from haiku to sonnet for that judge)
-   - Re-calibrate
+   - Inspect every disagreement — false passes and false fails have different fixes
+   - False Pass: strengthen failure definitions or add edge cases to prompt
+   - False Fail: clarify pass criteria or adjust examples
+   - Try upgrading the model (haiku → sonnet for that judge)
+   - Decompose criterion into sub-criteria if stalled
+   - Re-calibrate (iterate on dev set only)
 
-6. **Output:** `.claude/eval/{feature-slug}/calibration-report.md`
+6. **Bias correction for production deployment:**
+
+   When deploying judges to score production traffic, apply the Rogan-Gladen formula:
+
+   ```
+   true_rate = (observed_pass_rate + TNR - 1) / (TPR + TNR - 1)
+   ```
+
+   This corrects for systematic judge bias. Bootstrap 95% CI with 2,000 resamples.
+
+7. **Pin exact model versions.** Use `claude-sonnet-4-20250514` not `sonnet`. Judge behavior changes with model updates — re-validate after any model change.
+
+8. **Output:** `.claude/eval/{feature-slug}/calibration-report.md`
 
 ---
 
