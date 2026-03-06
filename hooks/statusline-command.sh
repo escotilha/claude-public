@@ -61,10 +61,16 @@ fi
 ADDED=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
 REMOVED=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
 
-# Git info
+# Git info (use worktree field when available to avoid spawning git subprocess)
+WORKTREE_BRANCH=$(echo "$input" | jq -r '.worktree.branch // ""' 2>/dev/null)
 BRANCH=""
 DIRTY=""
-if git rev-parse --git-dir > /dev/null 2>&1; then
+if [ -n "$WORKTREE_BRANCH" ] && [ "$WORKTREE_BRANCH" != "null" ]; then
+  BRANCH="$WORKTREE_BRANCH"
+  if [ -n "$(git status --porcelain 2>/dev/null | head -1)" ]; then
+    DIRTY="*"
+  fi
+elif git rev-parse --git-dir > /dev/null 2>&1; then
   BRANCH=$(git branch --show-current 2>/dev/null)
   if [ -n "$(git status --porcelain 2>/dev/null | head -1)" ]; then
     DIRTY="*"

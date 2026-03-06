@@ -50,7 +50,7 @@ This skill analyzes codebases to identify unused or unnecessary files, generates
 Run the analysis script to identify unused files:
 
 ```bash
-python ~/.claude/skills/codebase-cleanup/scripts/analyze_codebase.py <project_root>
+python ${CLAUDE_SKILL_DIR}/scripts/analyze_codebase.py <project_root>
 ```
 
 The script will:
@@ -196,7 +196,7 @@ Based on user choice, execute the appropriate deletion strategy:
 mkdir -p ./.cleanup-backup-$(date +%Y%m%d-%H%M%S)
 
 # Move files to backup instead of deleting
-python ~/.claude/skills/codebase-cleanup/scripts/safe_delete.py \
+python ${CLAUDE_SKILL_DIR}/scripts/safe_delete.py \
   --files-list <file_list> \
   --backup-dir <backup_dir> \
   --mode move
@@ -220,7 +220,7 @@ If project uses git:
 git checkout -b cleanup/remove-unused-files
 
 # Delete files
-python ~/.claude/skills/codebase-cleanup/scripts/safe_delete.py \
+python ${CLAUDE_SKILL_DIR}/scripts/safe_delete.py \
   --files-list <file_list> \
   --mode delete
 

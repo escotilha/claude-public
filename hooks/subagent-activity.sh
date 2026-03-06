@@ -15,6 +15,7 @@ INPUT=$(cat)
 
 # Extract agent info
 AGENT_TYPE=$(echo "$INPUT" | jq -r '.agent_type // .subagent_type // "unknown"' 2>/dev/null || echo "unknown")
+AGENT_ID=$(echo "$INPUT" | jq -r '.agent_id // "unknown"' 2>/dev/null || echo "unknown")
 EVENT_TYPE=$(echo "$INPUT" | jq -r '.event // "activity"' 2>/dev/null || echo "activity")
 TASK=$(echo "$INPUT" | jq -r '.task // .prompt // ""' 2>/dev/null | head -c 100 || echo "")
 
@@ -27,6 +28,6 @@ else
 fi
 
 # Log the activity
-echo "[$(date '+%Y-%m-%d %H:%M:%S')] $STATUS: $AGENT_TYPE - ${TASK:0:100}..." >> "$ACTIVITY_LOG"
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] $STATUS: [$AGENT_ID] $AGENT_TYPE - ${TASK:0:100}..." >> "$ACTIVITY_LOG"
 
 exit 0

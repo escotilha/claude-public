@@ -142,6 +142,16 @@
           }
         ]
       }
+    ],
+    "InstructionsLoaded": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Instructions loaded: ${INSTRUCTIONS_FILE}\" >> ~/.claude/logs/instructions.log"
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
