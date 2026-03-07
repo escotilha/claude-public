@@ -20,6 +20,9 @@ allowed-tools:
   - TeamCreate
   - TeamDelete
   - SendMessage
+  - CronCreate
+  - CronList
+  - CronDelete
   - AskUserQuestion
 slots:
   runtime:
@@ -780,39 +783,25 @@ No sleep loops, no marker files. The Agent Teams messaging infrastructure handle
 
 #### Task Mode (Fallback)
 
-Poll background agents and update dashboard:
+Use `CronCreate` to schedule periodic checks instead of a blocking sleep loop. This keeps the orchestrator responsive between checks:
 
-```javascript
-// Monitoring loop
-while (hasActiveFeatures()) {
-  for (const feature of activeFeatures) {
-    // Check agent output file
-    const output = await readAgentOutput(feature.agentId);
-
-    // Check for completion marker
-    const complete = await checkCompletionMarker(feature.worktree);
-
-    if (complete) {
-      feature.status = "completed";
-      await runFeatureTests(feature);
-      if (testsPass) {
-        await mergeToIntegration(feature);
-      }
-    }
-
-    // Update dashboard
-    updateProgressDisplay(features);
-  }
-
-  // Check if new features can start (deps met)
-  const newlyReady = graph.getReadyFeatures();
-  for (const feature of newlyReady) {
-    await spawnFeatureAgent(feature);
-  }
-
-  await sleep(30000); // 30 second polling interval
-}
 ```
+// Schedule a monitoring cron (fires every minute between turns)
+CronCreate(
+  schedule: "*/1 * * * *",
+  prompt: "Read .parallel-dev/active-tasks.json. For each feature:
+    1. Check if its background Task completed (TaskGet)
+    2. If completed: update status, run tests, merge to integration if passing
+    3. If failed: log failure, check retry budget
+    4. Check if newly-unblocked features can be spawned
+    5. Update .parallel-dev/active-tasks.json with current state
+    6. If ALL features are done, delete this cron (CronDelete) and proceed to Phase 5"
+)
+```
+
+The cron fires at low priority between turns — no sleep loops, no blocked session. The orchestrator can respond to user input immediately while monitoring runs in the background.
+
+**When to fall back to inline polling:** If `CronCreate` is unavailable (older environment), use the inline loop with `sleep(30000)` as before.
 
 ### Phase 4.1: Task Registry (External Monitoring)
 
@@ -935,13 +924,13 @@ watch -n 5 'cat .parallel-dev/active-tasks.json | jq ".features[] | {id, status,
 
 > **Context Compression:** When `mcp__context-mode__batch_execute` is available, CI-fix agents should batch typecheck + lint + test into a single `batch_execute` call with intent filtering ("show only errors"). This trims per-agent context in long parallel-dev sessions without changing semantics.
 
-When `slots.ci !== 'none'`, the monitoring loop (Phase 4) also polls GitHub Actions for CI failures on feature branches and routes failure logs back to the responsible agent for autonomous remediation.
+When `slots.ci !== 'none'`, the monitoring cron (Phase 4) also checks GitHub Actions for CI failures on feature branches and routes failure logs back to the responsible agent for autonomous remediation. The CI check runs as part of the same `CronCreate` schedule — no separate polling loop needed.
 
 **Key principle:** Human notifications are reserved only for decisions requiring genuine judgment. CI failures, lint errors, and test regressions are routed back to agents automatically.
 
 ```javascript
+// Called by the Phase 4 CronCreate schedule — no standalone loop needed
 async function ciReactionLoop(features, state) {
-  const CI_POLL_INTERVAL = 45000; // 45 seconds (avoid rate limits)
   const MAX_CI_RETRIES = 2; // Max times to re-route a failure to agent
 
   for (const feature of getActiveFeatures(state)) {
