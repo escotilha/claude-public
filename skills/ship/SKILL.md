@@ -633,12 +633,16 @@ a. **Spawn agents** based on task complexity:
 
 > **Isolation Note:** The `isolation=worktree` parameter prevents parallel agents from clobbering each other's file edits. Each agent works in its own worktree, eliminating conflicts when multiple agents run concurrently.
 
-b. **Each agent gets:**
+b. **Each agent gets a fresh, self-contained context (no conversation history):**
 
 - The specific task from the plan
+- Pre-computed project context (stack, commands, schema — from Phase 0)
 - Relevant file contents (pre-read and included in prompt)
 - Coding conventions from the codebase
 - Clear acceptance criteria
+- Filtered learnings relevant to this task type only
+
+> **Fresh Context Rule:** NEVER pass the orchestrator's conversation history or prior agent outputs to executor agents. Each agent starts with a clean context containing only its task prompt. This prevents context rot — output quality degrades as context fills with irrelevant prior conversation. The orchestrator's job is to distill, not forward.
 
 c. **After each group completes — verify triple:**
 
@@ -688,9 +692,18 @@ After all execution groups complete and before entering Phase 5, run a reflexion
 
 ### Agent Prompt Template
 
+> **Fresh Context Rule:** This template is the ENTIRE context each agent receives. The orchestrator composes it as a self-contained document from plan.md, state.json, and pre-read file contents. No conversation history, no prior agent outputs, no accumulated discussion. Each agent starts clean.
+
 ```
 You are implementing a specific task for the {feature} feature in the {project.name} codebase.
 
+## Project Context
+**Stack:** {project.language} / {project.framework} / {project.packageManager}
+**Commands:** typecheck: `{project.commands.typecheck}` | test: `{project.commands.test}` | build: `{project.commands.build}`
+{dbSchema summary if relevant to this task}
+{relevant type definitions if relevant to this task}
+
+## Your Task
 **Task:** {task description}
 **Files to create/modify:** {file list}
 **Dependencies:** {what other tasks produce that this needs}
@@ -1100,6 +1113,7 @@ After writing ship-log.md, automatically run a retrospective:
 
 ## Version
 
+**v4.2.0** — Fresh context per executor: each spawned agent gets a clean context with only its task prompt, project context, and filtered learnings. No conversation history forwarded. Prevents context rot in long sessions.
 **v4.1.0** — Added Phase 4.5: Reflexion (self-critique pass between execution and QA). Compares implementation against spec before QA, fixing mismatches inline to reduce QA iterations.
 **v4.0.0** — Added eight-slot plugin architecture for swappable Runtime, Agent, Workspace, Tracker, Notifier, QA, Learnings, and VCS backends. Zero skill rewrites needed when migrating tools.
 **v3.0.0** — Added Phase -1: Project Init. When no existing project is detected, asks for directory, initializes git, and scaffolds the project before proceeding.

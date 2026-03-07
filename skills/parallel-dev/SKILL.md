@@ -652,6 +652,15 @@ This block is generated once and reused for all agents. It costs ~200-500 tokens
 
 Long-running feature agents are susceptible to context degradation patterns. Apply these countermeasures:
 
+**Fresh context per executor (CRITICAL):** Each spawned agent gets a clean 200k-token context containing ONLY its task-specific prompt. The orchestrator must NEVER pass conversation history, prior agent outputs, or accumulated discussion to executor agents. Instead, compose a self-contained spawn prompt from:
+
+1. The pre-computed project context (from Phase 2.5)
+2. The specific task/feature requirements
+3. Relevant state from `.parallel-dev/active-tasks.json` (only dependency status, not full logs)
+4. Applicable learnings (filtered, not the full learnings file)
+
+This prevents "context rot" — the degradation in output quality that occurs when an agent's context fills with irrelevant prior conversation. Each agent starts fresh with only what it needs.
+
 **Lost-in-the-middle:** Place the most critical information (task requirements, acceptance criteria) at the START and END of agent prompts. Put reference material (conventions, type definitions) in the middle. Models attend more to edges.
 
 **Context poisoning:** When agents read large files, irrelevant content dilutes focus. Instruct agents to read only the specific functions/sections they need — never full files over 500 lines. Include in every agent prompt: "When reading files, use offset/limit to read only relevant sections. Do NOT read entire large files."
