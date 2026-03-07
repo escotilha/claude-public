@@ -1111,6 +1111,29 @@ After writing ship-log.md, automatically run a retrospective:
 
 ---
 
+## MCP Tool Usage Guide
+
+This skill has access to several MCP servers. Use the right tool for each situation to minimize token cost:
+
+| Need                        | Tool                           | When                                                   | Token Cost |
+| --------------------------- | ------------------------------ | ------------------------------------------------------ | ---------- |
+| Research best practices     | `WebSearch` + `WebFetch`       | Phase 1-2: checking patterns, framework docs           | Low        |
+| Break down complex plan     | `mcp__sequential-thinking__*`  | Phase 3: decomposing tech spec into tasks              | Medium     |
+| Save cross-project learning | `mcp__memory__create_entities` | Phase 7: generalizable patterns (2+ occurrences)       | Low        |
+| Recall past learnings       | `mcp__memory__search_nodes`    | Phase 3: check `ship-learning:*` before planning       | Low        |
+| Browser QA testing          | `mcp__chrome-devtools__*`      | Phase 5: when no Playwright/project QA skill available | Medium     |
+| E2E testing                 | `mcp__playwright__*`           | Phase 5: when playwright.config.ts detected            | Medium     |
+| Database queries            | `mcp__postgres__*`             | Phase 5: verifying data layer works correctly          | Low        |
+
+**Decision rules:**
+
+- **Sequential thinking for planning only.** Don't use it for simple task lists — only for complex decomposition with dependency analysis (Phase 3).
+- **Chrome DevTools vs Playwright:** If `playwright.config.ts` exists, use Playwright MCP. Otherwise fall back to Chrome DevTools. Never use both.
+- **Memory writes: only generalizable patterns.** Project-specific learnings go in `learnings.json`. Cross-project patterns (2+ occurrences) go to MCP Memory as `ship-learning:*` entities.
+- **Bash + CLI first** for typecheck/test/build/lint, git operations, and package manager commands. These are faster and cheaper than any MCP equivalent.
+
+---
+
 ## Version
 
 **v4.2.0** — Fresh context per executor: each spawned agent gets a clean context with only its task prompt, project context, and filtered learnings. No conversation history forwarded. Prevents context rot in long sessions.

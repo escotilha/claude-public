@@ -1504,6 +1504,27 @@ CTO Advisor (Sequential - focused question):
 
 ---
 
+## MCP Tool Usage Guide
+
+This skill has access to several MCP servers and web tools. Use the right one for each situation:
+
+| Need                       | Tool                           | When                                                                | Token Cost |
+| -------------------------- | ------------------------------ | ------------------------------------------------------------------- | ---------- |
+| Quick web lookup           | `WebSearch`                    | Checking best practices, CVE details, framework docs                | Low        |
+| Read a single page         | `WebFetch`                     | Reading a specific URL (blog post, docs page, advisory)             | Low        |
+| Deep site crawl            | `mcp__firecrawl__*`            | Crawling multiple pages, extracting structured data from docs sites | High       |
+| Save cross-project insight | `mcp__memory__create_entities` | Architectural decisions or patterns with relevance >= 5             | Low        |
+| Recall past insights       | `mcp__memory__search_nodes`    | Check if this project/pattern was reviewed before                   | Low        |
+
+**Decision rules:**
+
+- **Default to `WebSearch` + `WebFetch`** for research. Only escalate to Firecrawl when you need to crawl multiple linked pages or extract structured data that WebFetch can't render.
+- **Never use Firecrawl for a single page.** `WebFetch` handles that at ~10x lower token cost.
+- **Memory writes require relevance >= 5.** Auto-memory captures session context already — only save structured architectural decisions and cross-concern insights to MCP Memory.
+- **Bash + CLI first** for git operations (`git log`, `git blame`, `git diff`), dependency checks (`npm audit`, `pnpm outdated`), and system checks. These cost zero MCP overhead.
+
+---
+
 ## Version
 
 **Current Version:** 2.0.0 (Swarm-enabled)
