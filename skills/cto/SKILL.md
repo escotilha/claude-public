@@ -244,6 +244,35 @@ When prompting subagents or analyzing code, use thorough directive language:
 
 > **Context Compression:** When `mcp__context-mode__*` tools are available, use `fetch_and_index` for large files (package-lock.json, directory trees, config dumps) and `search` for targeted queries instead of reading full files into context. Use `batch_execute` to combine typecheck + lint + test runs into a single call with intent filtering ("show only errors").
 
+#### 2.0: QMD Context Pre-Computation (if project is indexed)
+
+Before exploring the codebase manually, check if QMD has the project indexed. If so, use it to pre-compute file lists per analyst domain — this avoids each analyst independently discovering the same directory structure.
+
+```bash
+# Check if the project has a QMD collection
+qmd collection list 2>/dev/null | grep -i "$(basename $(pwd))"
+```
+
+If the project is indexed in QMD, run targeted queries to pre-compute context for the swarm:
+
+```bash
+# Security-relevant files
+qmd search "auth middleware jwt token session password" -c <collection> --files -n 20
+
+# Performance-relevant files
+qmd search "database query ORM prisma cache connection pool" -c <collection> --files -n 20
+
+# Architecture-relevant files
+qmd search "routes API components layout services" -c <collection> --files -n 20
+
+# Quality-relevant files
+qmd search "test spec coverage lint config CI" -c <collection> --files -n 20
+```
+
+Store the results as pre-computed file lists to include in each analyst's spawn prompt. This implements the "Avoid Re-Reading" pattern from AGENT-TEAMS-STRATEGY.md — each analyst gets exact file paths instead of spending tokens on `find` and `grep` during discovery.
+
+**If QMD is not available or project is not indexed**, fall back to the standard discovery below.
+
 **Detect tech stack:**
 
 ```bash

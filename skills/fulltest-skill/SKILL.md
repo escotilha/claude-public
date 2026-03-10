@@ -470,6 +470,46 @@ const items = cart?.items || []
 - **Sequential Mode**: Standard Claude Code
 - **Swarm Mode**: Requires `claude-sneakpeek` or official TeammateTool support
 
+### PinchTab Integration (Token-Efficient Testing)
+
+When PinchTab is available (`pinchtab --version` succeeds), page testers should prefer it over Chrome DevTools MCP for **read-only inspection tasks**:
+
+| Task                     | Without PinchTab                       | With PinchTab                                  | Token Savings |
+| ------------------------ | -------------------------------------- | ---------------------------------------------- | ------------- |
+| Check page loads         | Chrome MCP navigate + snapshot (~56KB) | `pinchtab nav` + `pinchtab text` (~800 tokens) | ~70x          |
+| Get interactive elements | Chrome MCP snapshot (~56KB)            | `pinchtab snap -i -c` (~2,000 tokens)          | ~28x          |
+| Verify content           | Chrome MCP evaluate_script             | `pinchtab text` (~800 tokens)                  | ~70x          |
+| Screenshot on failure    | Chrome MCP take_screenshot             | `pinchtab ss -o file.jpg`                      | Same          |
+
+**When to use PinchTab in fulltest:**
+
+- Page content extraction (`pinchtab text`)
+- Checking for interactive elements (`pinchtab snap -i -c`)
+- Verifying navigation success (`pinchtab nav` + `pinchtab text`)
+- Batch page checks in multi-page testing loops
+
+**When to keep Chrome DevTools MCP:**
+
+- CSS computed style checks (need `evaluate_script`)
+- Complex DOM interaction sequences
+- Console error monitoring (`list_console_messages`)
+- Network request inspection (`list_network_requests`)
+
+**Hybrid pattern for page testers:**
+
+```bash
+# Use PinchTab for initial page load + content check (cheap)
+pinchtab nav "$URL"
+sleep 3
+pinchtab text  # ~800 tokens — check for content
+
+# Use Chrome DevTools only for what PinchTab can't do
+mcp__chrome-devtools__list_console_messages  # console errors
+mcp__chrome-devtools__list_network_requests  # 4xx/5xx checks
+```
+
+This hybrid approach reduces per-page token cost from ~56KB to ~3KB for the inspection phase, allowing more pages to be tested within the same context window.
+
 ---
 
 ## Completion Signals
