@@ -33,6 +33,7 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Parallel codebase migration   | `/batch` (built-in)     | Repetitive changes across many files        |
 | Revert a feature/track        | `/revert-track`         | Undo a feature, phase, or commit range      |
 | Reproducible demo document    | `/demo`                 | Executable narrative with captured output   |
+| Recurring interval task       | `/loop` (built-in)      | Poll status, repeat a command on a schedule |
 
 ### QA & Testing
 

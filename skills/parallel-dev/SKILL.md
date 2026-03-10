@@ -23,6 +23,8 @@ allowed-tools:
   - CronCreate
   - CronList
   - CronDelete
+  - EnterWorktree
+  - ExitWorktree
   - AskUserQuestion
 slots:
   runtime:
@@ -818,6 +820,8 @@ CronCreate(
 The cron fires at low priority between turns — no sleep loops, no blocked session. The orchestrator can respond to user input immediately while monitoring runs in the background.
 
 **When to fall back to inline polling:** If `CronCreate` is unavailable (older environment), use the inline loop with `sleep(30000)` as before.
+
+**Emergency stop:** Set `CLAUDE_CODE_DISABLE_CRON=1` to immediately disable all cron jobs. Use this if a monitoring cron enters a runaway loop or keeps firing after the session should have ended.
 
 ### Phase 4.1: Task Registry (External Monitoring)
 

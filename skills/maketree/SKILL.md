@@ -9,6 +9,8 @@ allowed-tools:
   - Read
   - Write
   - Glob
+  - EnterWorktree
+  - ExitWorktree
   - AskUserQuestion
 tool-annotations:
   Bash: { destructiveHint: false, idempotentHint: false }
