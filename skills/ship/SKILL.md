@@ -457,7 +457,14 @@ If user provides a detailed sprint plan (like the Sprint 1 example), treat it as
    - Read existing patterns (routes, schemas, components, hooks)
    - Understand the tech stack, conventions, and dependencies
 
-2. **Analyze as CTO:**
+2. **Fetch API docs for key dependencies:**
+   - From the deep-read, identify external libraries/SDKs this feature will use
+   - For each, run `chub search "<library>" --json` → `chub get <id> --lang ts`
+   - Include fetched docs in the tech spec context (accurate method signatures, not training-data guesses)
+   - Skip for internal-only features with no external API calls
+   - After implementation, annotate any gotchas: `chub annotate <id> "note"`
+
+3. **Analyze as CTO:**
    - Database schema changes needed
    - API endpoints and contracts
    - Frontend components and state management
@@ -469,7 +476,7 @@ If user provides a detailed sprint plan (like the Sprint 1 example), treat it as
      mutations, and where Suspense boundaries should isolate dynamic content vs cached content
    - Security implications
 
-3. **Write tech-spec.md:**
+4. **Write tech-spec.md:**
 
 ```markdown
 # Tech Spec: {Feature Name}
@@ -537,7 +544,7 @@ If user provides a detailed sprint plan (like the Sprint 1 example), treat it as
 [Numbered sequence respecting dependencies]
 ```
 
-4. **Update state.json** → phase complete
+5. **Update state.json** → phase complete
 
 ---
 
@@ -702,6 +709,7 @@ You are implementing a specific task for the {feature} feature in the {project.n
 **Commands:** typecheck: `{project.commands.typecheck}` | test: `{project.commands.test}` | build: `{project.commands.build}`
 {dbSchema summary if relevant to this task}
 {relevant type definitions if relevant to this task}
+{chub API docs if external libraries are used — pre-fetched in Phase 2, included here so agents don't re-fetch}
 
 ## Your Task
 **Task:** {task description}

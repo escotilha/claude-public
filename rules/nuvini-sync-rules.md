@@ -70,6 +70,7 @@ Never push content containing:
 - `run-local` — start dev server (any project)
 - `research` — analyze URLs/tools (any topic)
 - `firecrawl` — web scraping (any site)
+- `get-api-docs` — fetch current API docs via chub (any library)
 - `scrapling` — stealth scraping (any site)
 - `browserless` — headless browser (any site)
 - `maketree` — git worktree management (any project)

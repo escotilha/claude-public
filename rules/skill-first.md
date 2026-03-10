@@ -34,6 +34,7 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Revert a feature/track        | `/revert-track`         | Undo a feature, phase, or commit range      |
 | Reproducible demo document    | `/demo`                 | Executable narrative with captured output   |
 | Recurring interval task       | `/loop` (built-in)      | Poll status, repeat a command on a schedule |
+| Fetch API docs for a library  | `/get-api-docs`         | Before writing code that uses external APIs |
 
 ### QA & Testing
 
