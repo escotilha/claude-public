@@ -16,6 +16,7 @@ The Nuvinigroup/claude repo is a **public-facing showcase** of reusable Claude C
 - `virtual-user-testing` — Contably-specific persona testing
 - `oci-health` — Contably OCI infrastructure health check
 - `proposal-source` — SourceRank client proposals
+- `chief-geo` — SourceRank GEO officer (daily autonomous)
 
 ### Internal Tooling (personal workflow, not reusable)
 

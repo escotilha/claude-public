@@ -42,6 +42,7 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Full QA cycle (any project) | `/qa-cycle`             | Master orchestrator — auto-detects project                          |
 | Contably QA specifically    | `/qa-conta`             | Contably-specific testing                                           |
 | SourceRank QA specifically  | `/qa-sourcerank`        | SourceRank-specific testing                                         |
+| SourceRank GEO strategy     | `/chief-geo`            | GEO knowledge base, product audit, visibility testing, daily runs   |
 | Fix issues from QA DB       | `/qa-fix`               | Open QA issues need fixing                                          |
 | Verify fixed issues         | `/qa-verify`            | Issues in TESTING status                                            |
 | Full-spectrum site testing  | `/fulltest-skill`       | Sub-skill called by qa-cycle; or direct for standalone site testing |
