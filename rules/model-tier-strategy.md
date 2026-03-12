@@ -46,6 +46,10 @@ Route subagent tasks to the cheapest model that can handle the work. This saves 
 | **qa-fix**         | sonnet       | Investigation + fix                              | sonnet            |
 | **qa-verify**      | sonnet       | Verification testing                             | haiku             |
 | **qa-sourcerank**  | opus         | Persona testers (currently sonnet — downgrade)   | haiku             |
+| **chief-geo**      | opus         | Knowledge researchers (×2)                       | sonnet            |
+| **chief-geo**      | opus         | Knowledge indexer                                | haiku             |
+| **chief-geo**      | opus         | Product audit specialists (×3)                   | sonnet            |
+| **chief-geo**      | opus         | Visibility testers (×4)                          | haiku             |
 
 ## How to Apply
 
