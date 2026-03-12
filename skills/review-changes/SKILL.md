@@ -59,24 +59,68 @@ Assign every changed file a risk tier before reviewing its content:
 
 Flag any removed guard clause as at minimum HIGH severity unless a replacement is visible in the same diff.
 
-### Checks
+### Two-Pass Review
 
-**Security**
+Run Pass 1 first. If any CRITICAL findings exist, report them immediately — these block commits. Then run Pass 2 for informational findings.
+
+#### Pass 1 — CRITICAL (blocks commit)
+
+**Security & Injection**
 
 - Hardcoded secrets, API keys, tokens, passwords
-- SQL injection risks (string concatenation in queries)
-- XSS vectors (unsanitized user input in HTML)
+- SQL injection risks (string interpolation in queries — even if values are `.to_i`/`.to_f`, use parameterized queries)
+- XSS vectors (unsanitized user input in HTML, `.html_safe`/`raw()` on user-controlled data)
 - Exposed sensitive data in error messages
 - **Insecure defaults / fail-open:** Check whether error paths, missing config, or exception handlers default to permissive behavior. Secure code fails closed (denies access on error); insecure code fails open (grants access or skips the check). Flag any pattern where: an exception is caught and execution continues past an auth/permission check; a missing config value causes a feature to be enabled rather than disabled; a null/undefined user or role is treated as a valid state rather than rejected.
 - **Deep scan hint:** If the diff touches auth, authorization, RLS policies, or complex data flow paths, flag that the changes are candidates for deeper analysis via Claude Code Security (AI-assisted SAST that catches business logic flaws and context-dependent vulns that pattern-matching misses)
+
+**Race Conditions & Concurrency**
+
+- TOCTOU: check-then-set patterns that should be atomic (e.g., read-check-write without uniqueness constraint or conflict handling)
+- `findOrCreate` / `upsert` on columns without unique DB index — concurrent calls can create duplicates
+- Status transitions that don't use atomic `WHERE old_status = ? UPDATE SET new_status` — concurrent updates can skip or double-apply
+- N+1 queries: missing `.includes()` / eager loading for associations used in loops
+
+**LLM Output Trust Boundary**
+
+- LLM-generated values (emails, URLs, names) written to DB or passed to external systems without format validation — add lightweight guards (regex, `URL.parse`, `.trim()`) before persisting
+- Structured tool output (arrays, objects) accepted without type/shape checks before database writes
+- Prompt text listing available tools/capabilities that don't match what's actually wired up
+
+#### Pass 2 — INFORMATIONAL (non-blocking)
 
 **Bugs**
 
 - Null/undefined access without checks
 - Off-by-one errors
-- Race conditions
 - Missing error handling
 - Unreachable code
+
+**Conditional Side Effects**
+
+- Code paths that branch on a condition but forget to apply a side effect on one branch (e.g., record promoted but URL only attached on one path)
+- Log messages that claim an action happened but the action was conditionally skipped
+
+**Crypto & Entropy**
+
+- Truncation of data instead of hashing (last N chars vs SHA-256) — less entropy, easier collisions
+- `Math.random()` / non-crypto RNG for security-sensitive values — use `crypto.randomUUID()` / `crypto.getRandomValues()`
+- Non-constant-time comparisons (`===`) on secrets or tokens — vulnerable to timing attacks
+
+**Type Coercion at Boundaries**
+
+- Values crossing server→JSON→client boundaries where type could change (numeric vs string)
+- Hash/digest inputs that don't normalize types before serialization
+
+**Time Window Safety**
+
+- Date-key lookups that assume "today" covers 24h — timezone-dependent
+- Mismatched time windows between related features (one uses hourly, another daily for the same data)
+
+**Test Gaps**
+
+- Negative-path tests that assert type/status but not side effects
+- Security enforcement features without integration tests verifying the enforcement path end-to-end
 
 **Code Quality**
 
@@ -91,6 +135,16 @@ Flag any removed guard clause as at minimum HIGH severity unless a replacement i
 - Files that shouldn't be committed (.env, node_modules, build artifacts)
 - Merge conflict markers
 - Excessively large files
+
+### Suppressions — DO NOT flag these
+
+- Redundancy that aids readability (e.g., `!= null` redundant with optional chaining but clearer)
+- "Add a comment explaining why this threshold/constant was chosen" — thresholds change during tuning, comments rot
+- "This assertion could be tighter" when the assertion already covers the behavior
+- Consistency-only changes (wrapping a value in a conditional to match how another is guarded)
+- Eval threshold changes that are tuned empirically
+- Harmless no-ops (e.g., `.filter()` on an array that never contains the filtered value)
+- Anything already addressed in the diff — read the FULL diff before commenting
 
 4. Report findings
 
@@ -127,13 +181,15 @@ Ready to commit.
 If issues found:
 
 ```
-Review: 2 issues found
+Review: 2 issues (1 critical, 1 informational)
 
-CRITICAL:
-  src/api/auth.ts:45 - Hardcoded API key: const key = "sk-..."
+CRITICAL (blocks commit):
+  [src/api/auth.ts:45] Hardcoded API key: const key = "sk-..."
+  Fix: Move to environment variable
 
-WARNING:
-  src/utils/parse.ts:12 - console.log left in production code
+INFORMATIONAL:
+  [src/utils/parse.ts:12] console.log left in production code
+  Fix: Remove debug statement
 
 Recommendation: Fix critical issues before committing.
 ```
