@@ -146,8 +146,6 @@ Run Pass 1 first. If any CRITICAL findings exist, report them immediately — th
 - Harmless no-ops (e.g., `.filter()` on an array that never contains the filtered value)
 - Anything already addressed in the diff — read the FULL diff before commenting
 
-4. Report findings
-
 ### Rationalizations Table
 
 For any finding where the code change has an apparent justification (a comment, PR description, or surrounding context that explains why a risky pattern was chosen), include a **Rationalizations** column in the output. This prevents false positives while surfacing cases where the rationalization is insufficient.
