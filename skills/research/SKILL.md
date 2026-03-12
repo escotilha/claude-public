@@ -1,6 +1,6 @@
 ---
 name: research
-description: "Analyze any URL or image (article, GitHub repo, tweet, tool, screenshot, diagram) and determine how it can improve existing skills/agents, inspire new skills, or benefit active projects (Contably, SourceRank). Triggers on: research this, analyze this link, learn from this, /research."
+description: "Analyze any URL or image (article, GitHub repo, tweet, tool, screenshot, diagram, YouTube video, podcast) and determine how it can improve existing skills/agents, inspire new skills, or benefit active projects (Contably, SourceRank). Uses summarize CLI for AV content transcription. Triggers on: research this, analyze this link, learn from this, /research."
 argument-hint: "<url or image path>"
 user-invocable: true
 context: fork
@@ -86,6 +86,7 @@ Do everything in a single pass — no separate inventory scan needed.
 #### 1a. Detect Input Type
 
 - **URL**: Starts with `http://`, `https://`, or is a recognizable domain
+- **AV URL**: YouTube, Spotify episode, Apple Podcast, or URL ending in `.mp3`/`.mp4`/`.wav`/`.m4a`/`.webm` — route to `summarize` CLI
 - **Image path**: Ends with `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`, `.svg`, `.bmp`, `.tiff`
 - **Pasted image**: Already visible in conversation
 
@@ -119,9 +120,24 @@ Fallback chain if Firecrawl fails (403, empty, credits exhausted, bot-detected):
 
 If URL is a tweet/social post, replace domain with `api.fxtwitter.com` and use WebFetch. Fall back to WebSearch if that fails.
 
+**YouTube / Podcasts / Audio-Video URLs** — Route through `summarize` CLI for transcription + summary:
+
+```bash
+# Detect AV URLs: youtube.com, youtu.be, spotify.com/episode, podcasts.apple.com,
+# or any URL ending in .mp3, .mp4, .wav, .m4a, .webm
+summarize "<url>" --markdown 2>/dev/null
+```
+
+If `summarize` succeeds, use its markdown output as the content for Phase 1c (classify + score). Skip the Firecrawl chain entirely for AV content — it can't extract transcripts.
+
+If `summarize` fails (not installed, unsupported URL, API error), fall back to:
+
+1. WebSearch for "[video/podcast title] transcript"
+2. Firecrawl on the page itself (may get description/comments but not transcript)
+
 **GitHub repos** — Scrape repo page (description, stars, tech stack from package.json). Only fetch README separately if the repo page lacks sufficient detail.
 
-**Tweets/X posts** — Replace domain with `api.fxtwitter.com`, fetch via WebFetch. Fall back to WebSearch if that fails.
+**Tweets/X posts** — Replace domain with `api.fxtwitter.com`, fetch via WebFetch. Fall back to WebSearch if that fails. For X long-form article posts (Twitter Articles / Notes), also try `summarize "<url>"` as it uses xurl for full article extraction that fxtwitter may miss.
 
 **Images** — Read with `Read` tool (multimodal). Extract visible text, tool names, URLs, code. Use WebSearch for context on identified tools/products.
 
