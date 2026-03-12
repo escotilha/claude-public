@@ -213,6 +213,35 @@ This skill's Firecrawl tools are available to any skill that includes `mcp__fire
 - Prefer `firecrawl_search` over `firecrawl_agent` for simple lookups
 - Use `firecrawl_agent` only for complex multi-source research
 
+## CLI Fallback Mode
+
+When MCP tools are unavailable (e.g., in spawned subagents with limited tool access), use the Firecrawl CLI directly via Bash:
+
+```bash
+# Install and initialize (one-time)
+npx -y firecrawl-cli@latest init --all --browser
+
+# Scrape a single page
+npx firecrawl-cli scrape "https://example.com" --format markdown
+
+# Search the web
+npx firecrawl-cli search "query here" --limit 5
+
+# Crawl a site
+npx firecrawl-cli crawl "https://docs.example.com" --max-depth 3 --limit 50
+```
+
+**When to use CLI vs MCP:**
+
+| Scenario                    | Use                       |
+| --------------------------- | ------------------------- |
+| Normal skill invocation     | MCP tools (default)       |
+| Subagent without MCP access | CLI via Bash              |
+| Browser automation needed   | CLI with `--browser` flag |
+| CI/CD or scripted pipelines | CLI                       |
+
+The CLI requires the same `FIRECRAWL_API_KEY` env var. It also supports browser automation (`--browser`) for tasks that need interactive page control beyond what the MCP scraper handles.
+
 ## Setup
 
 Requires `FIRECRAWL_API_KEY` environment variable. Get a key at https://firecrawl.dev/app/api-keys
