@@ -1,6 +1,18 @@
 ---
 name: mini-remote
 description: Remote autonomous coding relay via SSH to Mac Mini. Use this skill whenever the user types /mini followed by a prompt, or asks to run something remotely on their Mac Mini, queue tasks for the Mini, send work to the Mini, or execute prompts while offline/traveling. Also triggers on "send to mini", "queue for mini", "run on mini", "mini execute", or any reference to running Claude Code tasks on the Mac Mini via Tailscale/SSH. Supports single prompts and multiple queued prompts executed sequentially with Slack notifications on completion.
+user-invocable: true
+context: fork
+model: sonnet
+allowed-tools:
+  - Bash
+  - Read
+  - Write
+  - Glob
+  - Grep
+  - AskUserQuestion
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
 ---
 
 # Mini Remote — Fire & Forget Autonomous Coding Relay
@@ -10,6 +22,7 @@ description: Remote autonomous coding relay via SSH to Mac Mini. Use this skill 
 This skill lets you queue one or more prompts to execute autonomously on your Mac Mini via SSH over Tailscale. Perfect for firing off work before a flight, overnight tasks, or heavy compute jobs.
 
 **Flow:**
+
 1. You code on MacBook Air with Claude Code (auto-saves to GitHub every 3 min)
 2. You type: `/mini "run a full security analysis"`
 3. The skill SSHs into the Mac Mini and:
@@ -23,11 +36,13 @@ This skill lets you queue one or more prompts to execute autonomously on your Ma
 ## Prerequisites
 
 Before first use, run the setup script:
+
 ```bash
 bash /path/to/mini-remote/scripts/setup.sh
 ```
 
 This will verify and configure:
+
 - SSH access to Mac Mini via Tailscale
 - Slack webhook for notifications
 - Claude Code CLI availability on the Mini
@@ -46,11 +61,13 @@ SLACK_WEBHOOK_URL="https://hooks.slack.com/..." # Slack incoming webhook URL
 ## Usage
 
 ### Single prompt:
+
 ```
 /mini "run a full security analysis on the auth module"
 ```
 
 ### Multiple prompts (queued, sequential):
+
 ```
 /mini queue
 1. "run a full security analysis"
@@ -59,6 +76,7 @@ SLACK_WEBHOOK_URL="https://hooks.slack.com/..." # Slack incoming webhook URL
 ```
 
 ### Check status:
+
 ```
 /mini status
 ```
@@ -68,6 +86,7 @@ SLACK_WEBHOOK_URL="https://hooks.slack.com/..." # Slack incoming webhook URL
 When `/mini` is triggered, Claude should:
 
 ### Step 1: Detect Current Context
+
 ```bash
 # Auto-detect current repo and branch
 REPO_URL=$(git remote get-url origin)
@@ -76,7 +95,9 @@ REPO_NAME=$(basename -s .git "$REPO_URL")
 ```
 
 ### Step 2: Execute the Remote Script
+
 Run the dispatcher script which handles everything:
+
 ```bash
 bash /path/to/mini-remote/scripts/dispatch.sh \
   --repo "$REPO_URL" \
@@ -88,7 +109,9 @@ bash /path/to/mini-remote/scripts/dispatch.sh \
 The `|||` delimiter separates multiple queued prompts.
 
 ### Step 3: Confirm to User
+
 After dispatching, confirm:
+
 - Number of prompts queued
 - Repo and branch targeted
 - Estimated that Slack notification will arrive on completion
@@ -123,6 +146,7 @@ Queue: 1/3 complete — next: "add API rate limiting..."
 ```
 
 On full queue completion:
+
 ```
 🏁 Mini Remote — All Tasks Complete
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -135,19 +159,19 @@ On full queue completion:
 ## Architecture Notes
 
 - **No daemon needed** — pure SSH + nohup. The dispatch script starts the job detached so your local terminal returns immediately
-- **GitHub is the state bus** — no file sync needed, git pull/push handles everything  
+- **GitHub is the state bus** — no file sync needed, git pull/push handles everything
 - **Claude Code headless mode** — uses `claude -p` (print mode) or `claude --dangerously-skip-permissions` for fully autonomous execution
 - **Tailscale** — private encrypted tunnel, no port forwarding needed
 - **Sequential execution** — prompts run one after another, not in parallel, to avoid conflicts
 
 ## File Reference
 
-| File | Purpose |
-|------|---------|
-| `SKILL.md` | This file — skill documentation |
-| `scripts/dispatch.sh` | Local script that SSHs into Mini and starts the job |
-| `scripts/executor.sh` | Runs ON the Mini — pulls, executes, commits, pushes |
-| `scripts/safety_check.sh` | Pre-execution safety validation |
-| `scripts/notify.sh` | Sends Slack notifications |
-| `scripts/setup.sh` | First-time setup wizard |
-| `scripts/status.sh` | Check running/queued job status |
+| File                      | Purpose                                             |
+| ------------------------- | --------------------------------------------------- |
+| `SKILL.md`                | This file — skill documentation                     |
+| `scripts/dispatch.sh`     | Local script that SSHs into Mini and starts the job |
+| `scripts/executor.sh`     | Runs ON the Mini — pulls, executes, commits, pushes |
+| `scripts/safety_check.sh` | Pre-execution safety validation                     |
+| `scripts/notify.sh`       | Sends Slack notifications                           |
+| `scripts/setup.sh`        | First-time setup wizard                             |
+| `scripts/status.sh`       | Check running/queued job status                     |
