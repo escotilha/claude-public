@@ -242,6 +242,8 @@ When prompting subagents or analyzing code, use thorough directive language:
 
 ### Step 2: Codebase Discovery
 
+> **Long-Context Option:** For small-to-medium codebases (<500K tokens), a 1M-context model (e.g., Nvidia Nemotron 3 Super 120B via OpenRouter/NIM — 120B params, 12B active MoE, Mamba-2 SSM for linear-time 1M context at 478 tok/s) can load the entire codebase in one shot, eliminating the explore-agent phase entirely. When such a model is available and the project fits, skip discovery and pass full source to analysts directly. This collapses the explore + analyze steps into a single call.
+
 > **Context Compression:** When `mcp__context-mode__*` tools are available, use `fetch_and_index` for large files (package-lock.json, directory trees, config dumps) and `search` for targeted queries instead of reading full files into context. Use `batch_execute` to combine typecheck + lint + test runs into a single call with intent filtering ("show only errors").
 
 #### 2.0: QMD Context Pre-Computation (if project is indexed)

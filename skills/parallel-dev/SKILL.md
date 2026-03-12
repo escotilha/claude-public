@@ -561,6 +561,8 @@ The `claude --worktree` flag is the native CLI mechanism for launching isolated 
 
 ### Phase 2.5: Context Enrichment
 
+> **Long-Context Option:** For small-to-medium codebases (<500K tokens), a 1M-context model (e.g., Nvidia Nemotron 3 Super 120B via OpenRouter/NIM — Mamba-2 SSM backbone for linear-time 1M context) can load the entire project source in one shot. When available, this eliminates the need for context enrichment entirely — each feature agent receives the full codebase instead of pre-computed summaries, improving implementation quality at the cost of per-agent token usage.
+
 Before dispatching agents, the orchestrator pre-loads key project context and embeds it in every agent's spawn prompt. This eliminates N redundant Explore passes where each agent independently reads the same files (e.g., `package.json`, route structure, schema).
 
 **What to pre-load:**
@@ -1404,6 +1406,8 @@ This skill uses Claude Opus 4.6 as the orchestrator. Feature agents use tiered m
 | Pre-flight verification      | haiku  | Check git log, glob — no judgment needed    |
 
 When spawning feature agents, always pass `model: "sonnet"`. When spawning Explore agents for pre-flight checks, pass `model: "haiku"`.
+
+**Long-context alternative:** When a 1M-context model is available (e.g., Nemotron 3 Super via OpenRouter), the Explore agent tier can be eliminated — the orchestrator loads the full codebase once and passes it in spawn prompts. This trades Haiku Explore cost for richer per-agent context.
 
 ## Hook Events
 
