@@ -27,101 +27,222 @@ Ask 5-8 strategic questions with options to quickly qualify the product:
 ## Product Discovery Questions
 
 **1. Target Users & Market**
-   Who is the primary user of this product?
-   A. Individual consumers (B2C)
-   B. Business users/teams (B2B)
-   C. Developers/technical users
-   D. Internal tool for your organization
-   E. Other: [describe]
+Who is the primary user of this product?
+A. Individual consumers (B2C)
+B. Business users/teams (B2B)
+C. Developers/technical users
+D. Internal tool for your organization
+E. Other: [describe]
 
 **2. Core Problem Statement**
-   What's the #1 problem this product solves?
-   [Free text - be specific about the pain point]
+What's the #1 problem this product solves?
+[Free text - be specific about the pain point]
 
 **3. Scope & Complexity**
-   What's your target scope?
-   A. MVP/Prototype - Core functionality only, fastest path to working product
-   B. Feature-complete - All planned features, production quality
-   C. Enterprise-ready - Full features + security, scalability, admin tools
-   D. Let me help define scope based on the idea
+What's your target scope?
+A. MVP/Prototype - Core functionality only, fastest path to working product
+B. Feature-complete - All planned features, production quality
+C. Enterprise-ready - Full features + security, scalability, admin tools
+D. Let me help define scope based on the idea
 
 **4. Technical Constraints**
-   Any required technologies or constraints?
-   A. Web application (specify: React, Vue, Next.js, etc.)
-   B. Mobile app (React Native, Flutter, native)
-   C. API/Backend only
-   D. Full-stack (recommend based on requirements)
-   E. Must integrate with: [list systems]
+Any required technologies or constraints?
+A. Web application (specify: React, Vue, Next.js, etc.)
+B. Mobile app (React Native, Flutter, native)
+C. API/Backend only
+D. Full-stack (recommend based on requirements)
+E. Must integrate with: [list systems]
 
 **5. Data & Persistence**
-   What data needs to be stored?
-   A. Simple data - JSON/file storage is fine
-   B. Relational data - PostgreSQL/MySQL
-   C. Document data - MongoDB/Firebase
-   D. Real-time data - Need live updates
-   E. Help me decide
+What data needs to be stored?
+A. Simple data - JSON/file storage is fine
+B. Relational data - PostgreSQL/MySQL
+C. Document data - MongoDB/Firebase
+D. Real-time data - Need live updates
+E. Help me decide
 
 **6. Authentication Requirements**
-   Who can access the product?
-   A. Public - no login required
-   B. Simple auth - email/password
-   C. Social login (Google, GitHub, etc.)
-   D. Enterprise SSO/SAML
-   E. Multiple user roles with permissions
+Who can access the product?
+A. Public - no login required
+B. Simple auth - email/password
+C. Social login (Google, GitHub, etc.)
+D. Enterprise SSO/SAML
+E. Multiple user roles with permissions
 
 **7. Deployment Target**
-   Where should this run?
-   A. Local development only (for now)
-   B. Cloud hosting (Vercel, Railway, AWS, etc.)
-   C. Self-hosted/on-premise
-   D. Help me choose based on requirements
+Where should this run?
+A. Local development only (for now)
+B. Cloud hosting (Vercel, Railway, AWS, etc.)
+C. Self-hosted/on-premise
+D. Help me choose based on requirements
 
 **8. Success Criteria**
-   How will you know this product is successful?
-   [Free text - define measurable outcomes]
+How will you know this product is successful?
+[Free text - define measurable outcomes]
 
 Reply with your answers like: "1A, 2: [problem], 3B, 4D, 5B, 6B, 7B, 8: [criteria]"
 ```
 
-### Step 1.3: Synthesize Product Definition
+### Step 1.3: Synthesize Product Definition as PRD
 
-After receiving answers, create the product definition:
+After receiving answers, create a structured PRD document (`prd-definition.md`). This follows the 8-section PRD structure (adapted from Huryn/Product Compass):
 
 ```markdown
-## Product Definition: [Product Name]
+# PRD: [Product Name]
 
-### Vision Statement
-[One sentence describing the product's purpose and value]
+**Author:** CPO AI
+**Created:** [Date]
+**Status:** Draft → Approved
 
-### Target User
-[Primary user persona based on Q1]
+---
+
+## 1. Summary
+
+[2-3 sentences: what the product is, who it's for, and the single most important outcome it delivers. Write at a reading level a primary school graduate can understand.]
+
+## 2. Contacts
+
+| Role          | Who                   |
+| ------------- | --------------------- |
+| Product Owner | [User]                |
+| Tech Lead     | CTO Advisor Agent     |
+| Design Lead   | Frontend Design Agent |
+
+## 3. Background
 
 ### Problem Statement
-[Core problem from Q2]
 
-### Scope
-[Scope level from Q3 with implications]
+[Core problem from Q2 — be specific about the pain point, not the solution]
 
-### Technical Stack
-[Recommended or specified stack from Q4-Q5]
+### Market Context
+
+[From research: competitive landscape, market size, trends — 3-5 bullet points]
+
+### Why Now
+
+[What has changed that makes this the right time to build this]
+
+## 4. Objective
+
+### North Star Metric
+
+**Business Game Classification:**
+Classify the product into one of three games to select the right North Star:
+
+| Game             | Signal                 | NSM Pattern                 | Examples                |
+| ---------------- | ---------------------- | --------------------------- | ----------------------- |
+| **Attention**    | Users spend time       | Engagement time, DAU        | Social, media, content  |
+| **Transaction**  | Users buy/sell         | Transaction volume, GMV     | Marketplace, e-commerce |
+| **Productivity** | Users accomplish goals | Tasks completed, time saved | SaaS, tools, utilities  |
+
+**This product plays the:** [Attention / Transaction / Productivity] game.
+
+**North Star Metric:** [Single metric that reflects value customers get]
+
+**Effectiveness check** — the NSM must be:
+
+1. Easy to understand (anyone on the team can explain it)
+2. Customer-centric (reflects value to users, not revenue)
+3. Indicates sustainable value (not vanity — correlates with retention)
+4. Aligned with product vision
+5. Quantitative (measurable number, not a percentage)
+6. Actionable by teams (teams can influence it directly)
+7. Predictive of business success (leading indicator of revenue)
+
+**Input Metrics** (3-5 leading indicators that drive the NSM):
+
+| Input Metric | How It Drives NSM | Owner       |
+| ------------ | ----------------- | ----------- |
+| [Metric 1]   | [Relationship]    | [Team/area] |
+| [Metric 2]   | [Relationship]    | [Team/area] |
+| [Metric 3]   | [Relationship]    | [Team/area] |
+
+### OKRs (if applicable)
+
+**Objective:** [Qualitative, inspiring, time-bound]
+
+- **KR1:** [Quantitative result — target 60-70% confidence]
+- **KR2:** [Quantitative result]
+- **KR3:** [Quantitative result]
+
+## 5. Market Segment(s)
+
+### Primary Segment
+
+- **Who:** [Target user from Q1 — specific persona]
+- **Pain:** [Their #1 unmet need]
+- **Current alternative:** [What they do today without this product]
+
+### Secondary Segment (if applicable)
+
+- **Who:** [Secondary persona]
+- **Pain:** [Their need]
+
+## 6. Value Proposition
+
+**For** [target segment] **who** [situation/need],
+**[Product Name] is a** [category]
+**that** [key benefit].
+**Unlike** [current alternative],
+**we** [primary differentiator].
+
+### Key Differentiators vs Competitors
+
+| Us                 | Competitor A     | Competitor B     |
+| ------------------ | ---------------- | ---------------- |
+| [Differentiator 1] | [Their approach] | [Their approach] |
+| [Differentiator 2] | [Their approach] | [Their approach] |
+
+## 7. Solution
 
 ### Key Features (Prioritized)
-1. [Must-have feature 1]
-2. [Must-have feature 2]
-3. [Should-have feature 1]
-...
+
+| Priority    | Feature     | User Outcome       | NSM Impact         |
+| ----------- | ----------- | ------------------ | ------------------ |
+| P0 (Must)   | [Feature 1] | [What user can do] | [How it moves NSM] |
+| P0 (Must)   | [Feature 2] | [What user can do] | [How it moves NSM] |
+| P1 (Should) | [Feature 3] | [What user can do] | [How it moves NSM] |
+| P2 (Nice)   | [Feature 4] | [What user can do] | [How it moves NSM] |
 
 ### Non-Goals (Explicitly Out of Scope)
-- [Feature/capability NOT included]
-- [Complexity NOT tackled]
 
-### Success Metrics
-[From Q8, made measurable]
+- [Feature/capability NOT included — and WHY]
+- [Complexity NOT tackled — and WHEN it might be]
 
-### Risks & Assumptions
-- **Risk**: [potential issue]
-- **Assumption**: [what we're assuming is true]
+### Assumptions (Flag Unvalidated)
+
+- **Validated:** [Assumption backed by data/research]
+- **Unvalidated:** [Assumption we're betting on — needs validation] ⚠️
+
+## 8. Release
+
+### Scope
+
+[MVP / Feature-complete / Enterprise — from Q3]
+
+### Technical Stack
+
+[Recommended or specified stack from Q4-Q5]
+
+### Success Criteria (from Q8, made SMART)
+
+- [Specific, Measurable, Achievable, Relevant, Time-bound criterion 1]
+- [Criterion 2]
+
+### Risks
+
+| Risk     | Likelihood | Impact  | Mitigation |
+| -------- | ---------- | ------- | ---------- |
+| [Risk 1] | [H/M/L]    | [H/M/L] | [Plan]     |
+| [Risk 2] | [H/M/L]    | [H/M/L] | [Plan]     |
 ```
+
+**Writing standards for the PRD:**
+
+- Use simple language (primary school reading level)
+- Clearly flag unvalidated assumptions with ⚠️
+- Lead with the user benefit, not the technical implementation
+- Every feature must link back to the North Star Metric
 
 ### Step 1.4: Research Phase (Product Research Agent)
 
@@ -160,6 +281,7 @@ Before finalizing the product definition, invoke the research agent:
 ```
 
 **Incorporate Research Findings:**
+
 - Add competitor insights to product definition
 - Include design references for planning phase
 - Adjust scope based on market expectations
@@ -234,6 +356,7 @@ Before epic decomposition, get CTO-level technical guidance:
 ```
 
 **Output Files Generated:**
+
 - `tech-stack-recommendation.md`
 - `architecture-overview.md`
 - `deployment-guide.md`
@@ -246,13 +369,13 @@ Break the product into high-level epics (major feature areas):
 ```markdown
 ## Epic Structure
 
-| Epic | Description | Priority | Dependencies |
-|------|-------------|----------|--------------|
-| E1: Foundation | Project setup, auth, database | P0 | None |
-| E2: Core Features | [Main functionality] | P0 | E1 |
-| E3: User Experience | [UI/UX polish] | P1 | E2 |
-| E4: Integration | [External services] | P1 | E2 |
-| E5: Production | Testing, docs, deployment | P0 | E3, E4 |
+| Epic                | Description                   | Priority | Dependencies |
+| ------------------- | ----------------------------- | -------- | ------------ |
+| E1: Foundation      | Project setup, auth, database | P0       | None         |
+| E2: Core Features   | [Main functionality]          | P0       | E1           |
+| E3: User Experience | [UI/UX polish]                | P1       | E2           |
+| E4: Integration     | [External services]           | P1       | E2           |
+| E5: Production      | Testing, docs, deployment     | P0       | E3, E4       |
 ```
 
 ### Step 2.2: Stage Definition
@@ -302,29 +425,32 @@ Before presenting the plan, calculate and display infrastructure costs:
 ## Resource & Cost Estimate
 
 ### Development Scope
-| Metric | Value |
-|--------|-------|
-| Epics | [N] |
-| Stages | [M] |
-| User Stories | [X] |
-| Complexity | [Low/Medium/High] |
+
+| Metric       | Value             |
+| ------------ | ----------------- |
+| Epics        | [N]               |
+| Stages       | [M]               |
+| User Stories | [X]               |
+| Complexity   | [Low/Medium/High] |
 
 ### Infrastructure Costs (Monthly)
-| Service | Tier | Cost |
-|---------|------|------|
-| [Hosting] | [Tier] | $[X] |
-| [Database] | [Tier] | $[X] |
-| [Auth] | [Tier] | $[X] |
-| **Total** | | **$[X]/month** |
+
+| Service    | Tier   | Cost           |
+| ---------- | ------ | -------------- |
+| [Hosting]  | [Tier] | $[X]           |
+| [Database] | [Tier] | $[X]           |
+| [Auth]     | [Tier] | $[X]           |
+| **Total**  |        | **$[X]/month** |
 
 ### At Scale (10K users)
-| Service | Tier | Cost |
-|---------|------|------|
-| [Hosting] | [Pro] | $[X] |
-| [Database] | [Pro] | $[X] |
-| **Total** | | **$[X]/month** |
 
-*Estimates based on typical usage. See [cost-estimation.md](cost-estimation.md) for details.*
+| Service    | Tier  | Cost           |
+| ---------- | ----- | -------------- |
+| [Hosting]  | [Pro] | $[X]           |
+| [Database] | [Pro] | $[X]           |
+| **Total**  |       | **$[X]/month** |
+
+_Estimates based on typical usage. See [cost-estimation.md](cost-estimation.md) for details._
 ```
 
 ### Step 2.7: Present Plan for Approval
@@ -351,6 +477,7 @@ Before presenting the plan, calculate and display infrastructure costs:
 ### Quality Gates
 
 Each stage will be:
+
 1. Implemented via autonomous-dev (with backend-api-agent/frontend-design-agent delegation)
 2. Tested via fulltest-skill
 3. Committed only when tests pass
@@ -359,6 +486,7 @@ Each stage will be:
 Ready to begin implementation?
 
 Reply with:
+
 - "start" - Begin Stage 1
 - "adjust [stage]" - Modify stage plan
 - "reorder [stages]" - Change execution order
@@ -393,6 +521,7 @@ Find the next stage: first with `status: "pending"` ordered by dependencies.
 **Stories:** [N] user stories
 
 **Objectives:**
+
 - [Objective 1]
 - [Objective 2]
 
@@ -403,14 +532,14 @@ Delegating to specialized agents for implementation...
 
 **Stage Type Detection → Agent Selection:**
 
-| Stage Type | Primary Agent | Secondary |
-|------------|---------------|-----------|
-| Foundation (Stage 1) | database-setup-agent | autonomous-dev |
-| UI/Frontend | frontend-design-agent | autonomous-dev |
-| API/Backend | backend-api-agent | autonomous-dev |
-| Full-Stack | frontend + backend agents | autonomous-dev |
-| Testing/Validation | fulltest-skill | - |
-| Deployment | deployment-agent | - |
+| Stage Type           | Primary Agent             | Secondary      |
+| -------------------- | ------------------------- | -------------- |
+| Foundation (Stage 1) | database-setup-agent      | autonomous-dev |
+| UI/Frontend          | frontend-design-agent     | autonomous-dev |
+| API/Backend          | backend-api-agent         | autonomous-dev |
+| Full-Stack           | frontend + backend agents | autonomous-dev |
+| Testing/Validation   | fulltest-skill            | -              |
+| Deployment           | deployment-agent          | -              |
 
 ---
 
@@ -551,12 +680,12 @@ const stagePrd = {
   description: stage.description,
   createdAt: new Date().toISOString(),
   verification: masterProject.verification,
-  userStories: stage.stories.map(story => ({
+  userStories: stage.stories.map((story) => ({
     ...story,
     passes: false,
     attempts: 0,
-    notes: ""
-  }))
+    notes: "",
+  })),
 };
 ```
 
@@ -601,17 +730,21 @@ Begin implementation. Report progress and any blockers.
 ### Step 3.4: Monitor Stage Progress
 
 Track autonomous-dev progress:
+
 - Stories completed
 - Issues encountered
 - Learnings captured
 
 Update `master-project.json`:
+
 ```json
 {
-  "stages": [{
-    "status": "in_progress",
-    "startedAt": "[timestamp]"
-  }]
+  "stages": [
+    {
+      "status": "in_progress",
+      "startedAt": "[timestamp]"
+    }
+  ]
 }
 ```
 
@@ -620,17 +753,21 @@ Update `master-project.json`:
 When autonomous-dev completes the stage:
 
 1. **Verify all stories pass:**
+
    ```bash
    cat prd.json | jq '.userStories | map(select(.passes == true)) | length'
    ```
 
 2. **Update master project:**
+
    ```json
    {
-     "stages": [{
-       "status": "implemented",
-       "completedAt": "[timestamp]"
-     }]
+     "stages": [
+       {
+         "status": "implemented",
+         "completedAt": "[timestamp]"
+       }
+     ]
    }
    ```
 
@@ -674,16 +811,20 @@ If using fulltest-skill with a web UI, test at the configured URL.
 #### If all tests pass:
 
 1. Update master project:
+
    ```json
    {
-     "stages": [{
-       "status": "tested",
-       "testedAt": "[timestamp]"
-     }]
+     "stages": [
+       {
+         "status": "tested",
+         "testedAt": "[timestamp]"
+       }
+     ]
    }
    ```
 
 2. Commit the stage:
+
    ```bash
    git add -A
    git commit -m "feat(stage-[N]): [Stage Name]
@@ -696,11 +837,13 @@ If using fulltest-skill with a web UI, test at the configured URL.
    ```
 
 3. Push to repository:
+
    ```bash
    git push origin feature/stage-[N]-[name]
    ```
 
 4. Update progress log:
+
    ```markdown
    ## [Timestamp] - Stage [N]: [Name] COMPLETE
 
@@ -709,9 +852,11 @@ If using fulltest-skill with a web UI, test at the configured URL.
    **Commit:** [hash]
 
    **Key Implementations:**
+
    - [What was built]
 
    **Learnings:**
+
    - [Patterns discovered]
    ```
 
@@ -749,10 +894,12 @@ Focus on Stage [N] functionality but include regression tests for previous stage
 The stage has been implemented and all tests pass.
 
 **Please review the app:**
+
 - [URL or local instructions to view the app]
 - [Key features to test in this stage]
 
 **Your feedback:**
+
 - Reply "done" to approve and continue to the next stage
 - Reply with feedback to request changes (I'll implement and re-test)
 ```
@@ -764,12 +911,14 @@ The stage has been implemented and all tests pass.
 - Update master-project.json:
   ```json
   {
-    "stages": [{
-      "feedbackLoop": {
-        "status": "user_approved",
-        "approvedAt": "[timestamp]"
+    "stages": [
+      {
+        "feedbackLoop": {
+          "status": "user_approved",
+          "approvedAt": "[timestamp]"
+        }
       }
-    }]
+    ]
   }
   ```
 - Proceed to Step 3.8 (Stage Completion Check)
@@ -792,6 +941,7 @@ The stage has been implemented and all tests pass.
   }
   ```
 - Invoke autonomous-dev with user feedback:
+
   ```
   Implement the following user feedback for Stage [N]:
 
@@ -799,6 +949,7 @@ The stage has been implemented and all tests pass.
 
   Make the requested changes and ensure existing tests still pass.
   ```
+
 - Commit changes: `fix(stage-[N]): incorporate user feedback - [summary]`
 - Loop back to step 1 (run fulltesting-agent again)
 
@@ -807,15 +958,17 @@ The stage has been implemented and all tests pass.
 #### If tests fail:
 
 1. Analyze failures:
+
    ```markdown
    ### Test Failures for Stage [N]
 
-   | Test | Error | Root Cause | Fix Required |
-   |------|-------|------------|--------------|
-   | [test] | [error] | [cause] | [fix] |
+   | Test   | Error   | Root Cause | Fix Required |
+   | ------ | ------- | ---------- | ------------ |
+   | [test] | [error] | [cause]    | [fix]        |
    ```
 
 2. Re-invoke autonomous-dev with fixes:
+
    ```xml
    <Task subagent_type="general-purpose" prompt="
    ## Fix Stage [N] Test Failures
@@ -836,10 +989,12 @@ The stage has been implemented and all tests pass.
 3. Re-test (max 3 iterations)
 
 4. If still failing after 3 iterations:
+
    ```markdown
    Stage [N] has persistent test failures.
 
    Options:
+
    1. Review failures manually
    2. Simplify stage scope
    3. Get user input on blockers
@@ -853,7 +1008,7 @@ The stage has been implemented and all tests pass.
 After each stage:
 
 ```javascript
-const remainingStages = stages.filter(s => s.status !== 'tested');
+const remainingStages = stages.filter((s) => s.status !== "tested");
 if (remainingStages.length === 0) {
   // All stages complete - proceed to Phase 4
   output("ALL STAGES COMPLETE - Beginning full project validation");
@@ -883,7 +1038,7 @@ done
 
 ### Step 4.2: Full Integration Testing
 
-```xml
+````xml
 <Task subagent_type="general-purpose" prompt="
 ## Full Project Validation: [Product Name]
 
@@ -899,14 +1054,16 @@ All stages have been implemented. Run comprehensive integration testing.
 1. **Unit Tests**
    ```bash
    [test command]
-   ```
+````
 
 2. **Integration Tests**
+
    ```bash
    [integration test command]
    ```
 
 3. **E2E Tests** (if applicable)
+
    ```bash
    [e2e test command]
    ```
@@ -925,12 +1082,14 @@ All stages have been implemented. Run comprehensive integration testing.
 3. [Journey 3: e.g., Error handling scenarios]
 
 Report comprehensive results including:
+
 - Overall test pass rate
 - Any failures with root causes
 - Performance observations
 - Security considerations
-"/>
-```
+  "/>
+
+````
 
 ### Step 4.3: Fix Any Integration Issues
 
@@ -981,7 +1140,7 @@ git commit -m "docs: Add user guide and technical documentation
 - User guide with getting started, features, troubleshooting
 - Technical documentation with architecture, setup, deployment
 - Project README updates"
-```
+````
 
 ### Step 5.4: Push to GitHub
 
@@ -1038,6 +1197,7 @@ Execute deployment and report results.
 ```
 
 **Deployment Output:**
+
 ```markdown
 ## Deployment Complete
 
@@ -1046,12 +1206,14 @@ Execute deployment and report results.
 **Deployed At:** [timestamp]
 
 ### Verification Results
+
 - Health Check: ✓ 200 OK (145ms)
 - Homepage Load: ✓ 200 OK (890ms)
 - API Health: ✓ 200 OK (120ms)
 - SSL Certificate: ✓ Valid
 
 ### Environment
+
 - Node.js: 20.x
 - Region: [auto-detected]
 - Database: Connected
