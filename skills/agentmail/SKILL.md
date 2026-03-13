@@ -297,6 +297,75 @@ $PYTHON "/Volumes/AI/Code/agentmail/agentmail_helper.py" org_info
 | Pro      | 100     | 100,000      | $100/mo |
 | Business | 300     | 300,000      | $500/mo |
 
+## Resend CLI — Transactional Send Channel
+
+For **one-way transactional emails from verified business domains** (nuvini.ai, contably.ai), use the Resend CLI instead of AgentMail. AgentMail is for agent inboxes (receive, reply, thread); Resend is for professional outbound sends.
+
+### When to Use Resend vs AgentMail
+
+| Need                                               | Use            |
+| -------------------------------------------------- | -------------- |
+| Agent needs its own inbox (receive, reply, thread) | AgentMail      |
+| Send from `@agentmail.to` address                  | AgentMail      |
+| One-way transactional send from verified domain    | **Resend CLI** |
+| Deploy notification, user-facing email             | **Resend CLI** |
+| CI/CD pipeline email                               | **Resend CLI** |
+
+### Prerequisites
+
+```bash
+# Install (once)
+pnpm add -g resend
+
+# Set API key
+export RESEND_API_KEY="re_..."
+# Or add to ~/.zshrc for persistence
+```
+
+### Send Commands
+
+```bash
+# Basic send
+resend emails send \
+  --from "onboarding@nuvini.ai" \
+  --to "client@example.com" \
+  --subject "Welcome" \
+  --text "Plain text body"
+
+# HTML send
+resend emails send \
+  --from "Pierre <pierre@nuvini.ai>" \
+  --to "client@example.com" \
+  --subject "Report Ready" \
+  --html "<h1>Your report</h1><p>Details...</p>"
+
+# With CC/BCC
+resend emails send \
+  --from "notifications@contably.ai" \
+  --to "user@example.com" \
+  --cc "team@nuvini.ai" \
+  --subject "Invoice processed"
+```
+
+### Non-TTY / Agent Mode
+
+The Resend CLI auto-detects non-TTY environments and outputs JSON — perfect for agent subprocess calls:
+
+```bash
+# Returns JSON: { "id": "msg_..." }
+resend emails send --from "bot@nuvini.ai" --to "user@example.com" --subject "Alert" --text "Body" 2>/dev/null
+```
+
+### Routing Logic
+
+When this skill is invoked:
+
+1. **If the task involves receiving, replying, threading, or an `@agentmail.to` address** → use AgentMail (above)
+2. **If the task is a one-way send from a verified domain AND `resend` CLI is available** → use Resend CLI
+3. **Fallback**: if `resend` is not installed, send via AgentMail from the appropriate inbox
+
+Check availability: `which resend && echo "resend available" || echo "use agentmail"`
+
 ## Workflow Tips
 
 1. **First use**: Run `/agentmail setup` to verify dependencies and API key
