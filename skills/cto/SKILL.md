@@ -414,6 +414,30 @@ Teammate "security-analyst":
   - Prompt injection defense (Google Workspace integrations): verify `--sanitize` flag
     used on Gmail/Drive/Sheets reads to block Model Armor injection.
 
+  AI PLATFORM ATTACK SURFACE (for codebases with LLM/AI features)
+  - Unauthenticated API endpoints: grep for API routes that serve AI/chat/assistant
+    functionality without auth middleware. Check `/api/chat`, `/api/assistant`,
+    `/api/completion`, `/api/prompt` and similar. Any unauthenticated endpoint that
+    touches LLM infrastructure is CRITICAL.
+  - SQL injection on JSON keys: standard parameterization protects VALUES but not
+    column names or JSON key paths. Grep for dynamic key construction in queries
+    (e.g., `jsonb_extract_path`, `->`, `->>` operators with user input as the key;
+    `ORDER BY ${userInput}`; dynamic column selection). This bypasses prepared
+    statements entirely — flag as HIGH.
+  - System prompt access controls: verify system prompts are not exposed via any API
+    response, debug endpoint, or error message. Check that system prompts cannot be
+    read OR written by any user-facing endpoint. Write access to system prompts =
+    CRITICAL (enables poisoned advice, guardrail removal, data exfiltration via
+    prompt manipulation). Grep for: prompt storage tables, prompt config files,
+    admin endpoints that modify assistant behavior.
+  - RAG document chunk exposure: if the codebase uses RAG (vector search, embeddings,
+    document retrieval), verify that retrieved chunks are access-controlled — users
+    should only see chunks from documents they have permission to access. Grep for
+    vector similarity queries that lack a WHERE clause on ownership/permissions.
+  - AI assistant write permissions: check if any API allows modifying AI assistant
+    configuration (model, temperature, tools, system prompt) without admin auth.
+    Any user-writable assistant config is HIGH severity.
+
   FAIL-OPEN PATTERNS
   - grep for: catch blocks that continue past auth checks; env vars that enable features
     when missing; default roles of admin/superuser; `.catch(() => true)` on permission

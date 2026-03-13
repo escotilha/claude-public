@@ -170,7 +170,18 @@ For each page, run these checks:
 - Network failures (4xx/5xx)
 - Broken links
 
-#### 2b. Visual Verification (NEW)
+#### 2b. AI Prompt Integrity (for AI-integrated sites)
+
+If the site has chat/assistant/AI features (detected in Phase 1 via presence of chat widgets, `/api/chat` endpoints, or AI-related routes):
+
+- Probe for unauthenticated AI API endpoints: try `fetch('/api/chat')`, `/api/assistant`, `/api/completion`, `/api/prompt` without auth headers — any 200 response is CRITICAL
+- Check if system prompts leak in API responses: send a basic chat request and inspect response for system prompt fragments, internal instructions, or config metadata
+- Test for system prompt write access: attempt PUT/PATCH to prompt or assistant config endpoints without admin auth — any success is CRITICAL
+- Check error responses from AI endpoints for verbose mode leaking internal config
+
+Report any finding as severity P0 with category `ai-prompt-integrity`.
+
+#### 2c. Visual Verification (NEW)
 
 Execute this JavaScript via `mcp__chrome-devtools__evaluate_script`:
 

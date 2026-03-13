@@ -367,6 +367,11 @@ As personas report back, opus watches for:
 - **Performance bottlenecks** — multiple personas report slow loads
 - **Data inconsistencies** — different roles see different data for same entity
 - **Regressions** — previously CLOSED issues reappearing → P0
+- **AI prompt integrity** (for AI-integrated projects) — if the app has chat/assistant/AI features:
+  - Test whether any API endpoint returns system prompt content without auth (try `/api/chat`, `/api/assistant`, `/api/prompt`, debug/admin endpoints)
+  - Test whether any endpoint accepts writes to system prompt or AI config without admin auth
+  - Check if AI responses leak system prompt fragments in error messages or verbose mode
+  - Any system prompt exposure = P0; any unauthenticated write to AI config = P0
 
 ---
 
