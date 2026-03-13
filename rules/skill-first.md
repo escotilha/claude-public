@@ -109,12 +109,31 @@ Only skip skills when:
 
 ## Remote Monitoring (Remote Control)
 
-Long-running skills like `/parallel-dev`, `/cto` (swarm), `/qa-cycle`, and `/fulltest-skill` can be monitored from any browser or mobile device using Claude Code Remote Control (Pro/Max, research preview).
+Long-running skills like `/parallel-dev`, `/cto` (swarm), `/qa-cycle`, and `/fulltest-skill` can be monitored from any browser or mobile device using Claude Code Remote Control (Pro/Max/Team, v2.1.51+).
 
-- **From within a session:** type `/remote-control` or `/rc`
-- **From CLI:** `claude remote-control` (supports `--verbose`, `--sandbox`, `--no-sandbox`)
-- Uses outbound HTTPS polling only — no inbound ports needed
+- **From within a session:** type `/remote-control` or `/rc` — attaches to current conversation with full history
+- **From CLI:** `claude remote-control` — starts server mode (persistent, multi-session)
+- **Interactive + remote:** `claude --remote-control` — normal interactive session with remote access enabled
+
+### Server Mode Flags
+
+| Flag                         | Description                                                                                                                                                                                                       |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--spawn worktree`           | Each concurrent remote session gets its own git worktree. **Recommended for `/parallel-dev` and `/qa-cycle`** — matches their existing worktree isolation model. Default: `same-dir`. Toggle at runtime with `w`. |
+| `--capacity <N>`             | Max concurrent sessions (default: 32). Useful for `/fulltest-skill` with many parallel testers.                                                                                                                   |
+| `--name "My Project"`        | Custom session title in the session list.                                                                                                                                                                         |
+| `--verbose`                  | Detailed connection/session logs.                                                                                                                                                                                 |
+| `--sandbox` / `--no-sandbox` | Filesystem/network isolation (off by default).                                                                                                                                                                    |
+
+### Security Model
+
+- Traffic routes through Anthropic API over TLS with short-lived scoped credentials
+- No inbound ports opened — outbound HTTPS only
 - Sessions reconnect automatically after network drops
+
+### Access
+
+Connect from another device via the session URL displayed in terminal, the QR code (press spacebar in server mode), or by finding the session in the claude.ai/code session list.
 
 Useful for fire-and-forget workflows: launch the skill locally, then monitor/approve from phone.
 
