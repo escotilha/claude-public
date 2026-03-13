@@ -1424,6 +1424,12 @@ This skill leverages:
 4. **Test early** - Catch issues before merge
 5. **Regular status checks** - Monitor progress, catch problems early
 
+## Troubleshooting
+
+### Stopping Scheduled Cron Jobs Mid-Session
+
+Set `CLAUDE_CODE_DISABLE_CRON=1` in your environment to immediately stop all scheduled cron jobs in the current session.
+
 ## Example Session
 
 ```bash

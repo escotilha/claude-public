@@ -10,30 +10,31 @@ When you identify a matching skill, tell the user which skill you're invoking an
 
 ### Development Workflow
 
-| Task                          | Skill                   | When                                        |
-| ----------------------------- | ----------------------- | ------------------------------------------- |
-| Build a feature end-to-end    | `/ship`                 | Feature requires spec → implement → test    |
-| Plan complex implementation   | `/deep-plan`            | Need research → plan → implement phases     |
-| Quick architecture advice     | `/cto`                  | Technical decision, swarm analysis          |
-| Break down hard problem       | `/first-principles`     | Ambiguous or complex problem                |
-| Run project tests + typecheck | `/verify`               | After making changes, before committing     |
-| Fix failing tests             | `/test-and-fix`         | Tests are broken, need auto-fix loop        |
-| Review code before commit     | `/review-changes`       | Uncommitted changes need review             |
-| Commit + push + PR            | `/cpr`                  | Ready to ship to remote                     |
-| Start local dev server        | `/run-local`            | Need to run project locally                 |
-| Parallel feature branches     | `/parallel-dev`         | Multiple independent features               |
-| Clean unused files            | `/codebase-cleanup`     | Project has cruft                           |
-| Design website/landing page   | `/website-design`       | Any web UI design task                      |
-| Full project lifecycle        | `/project-orchestrator` | New project from zero to production         |
-| End-of-session reflection     | `/meditate`             | After /ship, /cto, /parallel-dev, long work |
-| Full product from idea        | `/cpo`                  | Product lifecycle: discovery → spec → build |
-| Git worktree management       | `/maketree`             | Create/manage isolated worktrees            |
-| Refactor for clarity          | `/simplify` (built-in)  | Clean up code after long session or PR      |
-| Parallel codebase migration   | `/batch` (built-in)     | Repetitive changes across many files        |
-| Revert a feature/track        | `/revert-track`         | Undo a feature, phase, or commit range      |
-| Reproducible demo document    | `/demo`                 | Executable narrative with captured output   |
-| Recurring interval task       | `/loop` (built-in)      | Poll status, repeat a command on a schedule |
-| Fetch API docs for a library  | `/get-api-docs`         | Before writing code that uses external APIs |
+| Task                          | Skill                   | When                                                     |
+| ----------------------------- | ----------------------- | -------------------------------------------------------- |
+| Build a feature end-to-end    | `/ship`                 | Feature requires spec → implement → test                 |
+| Plan complex implementation   | `/deep-plan`            | Need research → plan → implement phases                  |
+| Quick architecture advice     | `/cto`                  | Technical decision, swarm analysis                       |
+| Break down hard problem       | `/first-principles`     | Ambiguous or complex problem                             |
+| Run project tests + typecheck | `/verify`               | After making changes, before committing                  |
+| Fix failing tests             | `/test-and-fix`         | Tests are broken, need auto-fix loop                     |
+| Review code before commit     | `/review-changes`       | Uncommitted changes need review                          |
+| Commit + push + PR            | `/cpr`                  | Ready to ship to remote                                  |
+| Start local dev server        | `/run-local`            | Need to run project locally                              |
+| Parallel feature branches     | `/parallel-dev`         | Multiple independent features                            |
+| Clean unused files            | `/codebase-cleanup`     | Project has cruft                                        |
+| Design website/landing page   | `/website-design`       | Any web UI design task                                   |
+| Full project lifecycle        | `/project-orchestrator` | New project from zero to production                      |
+| End-of-session reflection     | `/meditate`             | After /ship, /cto, /parallel-dev, long work              |
+| Full product from idea        | `/cpo`                  | Product lifecycle: discovery → spec → build              |
+| Git worktree management       | `/maketree`             | Create/manage isolated worktrees                         |
+| Refactor for clarity          | `/simplify` (built-in)  | Clean up code after long session or PR                   |
+| Parallel codebase migration   | `/batch` (built-in)     | Repetitive changes across many files                     |
+| Revert a feature/track        | `/revert-track`         | Undo a feature, phase, or commit range                   |
+| Reproducible demo document    | `/demo`                 | Executable narrative with captured output                |
+| Recurring interval task       | `/loop` (built-in)      | Poll status, repeat a command on a schedule              |
+| Fetch API docs for a library  | `/get-api-docs`         | Before writing code that uses external APIs              |
+| Build with Claude API/SDK     | `/claude-api`           | Code imports anthropic SDK or user asks about Claude API |
 
 ### QA & Testing
 
