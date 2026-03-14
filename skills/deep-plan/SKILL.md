@@ -205,14 +205,27 @@ Write the plan to `plan.md` in the project root:
 
 ## Implementation Steps
 
+Use **2-5 minute task granularity**: each step must be completable in 2-5 minutes. This means:
+
+- **Exact file paths** for every file to create/modify
+- **Complete code** in the proposed snippet (function signatures, types, component structure — not pseudocode)
+- **One concern per step** (one schema, one route, one component)
+- **Self-contained verification** (typecheck passes after this step alone)
+
+If a step touches 3+ files across layers, split it. If you can't describe the output in <10 lines of spec, it's too big.
+
 ### Step 1: [Description]
 
 **File:** `path/to/file.ts`
 **What:** [specific change]
 **Why:** [rationale]
+**Expected output:**
 
 ```typescript
-// Proposed code or pseudocode
+// Complete code — not pseudocode
+export function createFoo(input: CreateFooInput): Promise<Foo> {
+  // exact implementation or at minimum exact signatures + types
+}
 ```
 ````
 
@@ -266,7 +279,18 @@ When the user says they've annotated the plan:
 4. Write the updated plan back to `plan.md`
 5. Tell the user: "Plan updated — review changes and approve when ready"
 
-Repeat until the user approves. **Do not proceed to Phase 3 without explicit approval.**
+Repeat until the user approves.
+
+### 2.3 HARD-GATE: Plan Approval Required
+
+**Do NOT proceed to Phase 3 until the user explicitly approves the plan.** This is a hard gate:
+
+- No implicit approval (silence is not consent)
+- No auto-proceed after a timeout
+- No "I'll start implementing while you review" — wait for the word
+- Use AskUserQuestion if the user hasn't responded: "Plan is ready in `plan.md`. I need your explicit approval before implementing. [Approve / Request changes]"
+- If the user requests changes → update plan → re-present for approval
+- Only proceed when the user says "approve", "go", "looks good", "ship it", or equivalent
 
 ## Phase 3: Implement
 

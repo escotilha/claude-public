@@ -544,7 +544,14 @@ If user provides a detailed sprint plan (like the Sprint 1 example), treat it as
 [Numbered sequence respecting dependencies]
 ```
 
-5. **Update state.json** → phase complete
+5. **Present to user for approval (HARD-GATE):**
+   - Display the tech spec summary (architecture decision, key files, implementation order)
+   - Use AskUserQuestion: "Tech spec written to `tech-spec.md`. Review it and approve before I plan implementation. [Approve / Request changes]"
+   - **Do NOT proceed to Phase 3 until the user explicitly approves.** This is a hard gate — no implicit approval, no timeout, no auto-proceed.
+   - If user requests changes → update tech-spec.md → re-present for approval
+   - If user approves → update state.json → proceed to Phase 3
+
+6. **Update state.json** → phase complete
 
 ---
 
@@ -581,9 +588,18 @@ For each item in the tech spec:
 
 **Override from learnings:** If `learnings.json` records that a task type was mis-routed in a past run (e.g. "hooks" classified as simple but failed, needed sonnet), bump its complexity up.
 
-4. **Write plan.md** with the ordered task list:
+4. **Write plan.md** with the ordered task list using **2-5 minute task granularity:**
 
-```markdown
+Each task must be small enough that an agent can complete it in 2-5 minutes. This means:
+
+- **Exact file paths** — every task specifies the precise files to create/modify (no "update relevant files")
+- **Complete code in acceptance criteria** — include the expected function signatures, type definitions, or component structure so the agent doesn't have to guess
+- **One concern per task** — a task should do ONE thing (create a schema, add a route, build a component). If a task touches 3+ files across different layers, split it.
+- **Self-contained verification** — each task can be verified independently (typecheck passes after this task alone)
+
+**Granularity rule of thumb:** If you can't describe the task's output in <10 lines of spec, it's too big. Split it.
+
+````markdown
 # Implementation Plan: {Feature Name}
 
 ## Task List
@@ -595,6 +611,16 @@ For each item in the tech spec:
 - **Files:** packages/database/src/schema/foo.ts
 - **Depends on:** none
 - **Parallel group:** A
+- **Expected output:**
+  ```typescript
+  // packages/database/src/schema/foo.ts
+  export const fooTable = pgTable("foo", {
+    id: serial("id").primaryKey(),
+    name: text("name").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+  });
+  ```
+````
 
 ### Task 2: {Description}
 
@@ -603,6 +629,12 @@ For each item in the tech spec:
 - **Files:** apps/api/src/services/foo/bar.ts
 - **Depends on:** Task 1
 - **Parallel group:** B
+- **Expected output:**
+  ```typescript
+  // apps/api/src/services/foo/bar.ts
+  export async function createFoo(input: CreateFooInput): Promise<Foo> { ... }
+  export async function getFooById(id: number): Promise<Foo | null> { ... }
+  ```
 
 ## Execution Groups
 
@@ -614,7 +646,8 @@ Group C (sequential): Task 6 (depends on Group B)
 
 - Commit after each group completes
 - Typecheck after each task
-```
+
+````
 
 5. **Create TaskList** from the plan for tracking
 6. **Update state.json** → phase complete
@@ -665,37 +698,81 @@ c. **After each group completes — verify triple:**
    - Update state.json with exact progress
    - Tell user: "Context getting full. Committed progress. Run `/ship --resume` to continue."
 
-### Phase 4.5: Reflexion (Self-Critique Before QA)
+### Phase 4.5: Two-Stage Review Loop
 
-After all execution groups complete and before entering Phase 5, run a reflexion pass. This catches spec-implementation mismatches that would otherwise surface as QA failures.
+After all execution groups complete and before entering Phase 5, run a **two-stage subagent review**. Two independent reviewers catch different failure modes — spec drift and code quality — before QA burns cycles on preventable issues.
 
-**Process:**
+#### Stage 1: Spec Compliance Review (sonnet)
 
-1. **Re-read the product spec and tech spec** (product-spec.md, tech-spec.md)
-2. **For each completed task,** compare what was specified vs what was implemented:
-   - Read the implemented files
-   - Check: does the implementation satisfy every acceptance criterion from the task?
-   - Check: does it match the API contract from the tech spec (endpoints, params, response shape)?
-   - Check: are there edge cases mentioned in the product spec that aren't handled?
-3. **Generate a reflexion checklist:**
+Spawn a review subagent that checks implementation against the design specs:
 
-```markdown
-## Reflexion: {Feature Name}
+```
+Agent(model="sonnet", subagent_type="general-purpose", prompt="
+  You are a spec compliance reviewer. Compare the implementation against the design specs.
 
-| Task                  | Spec Match | Missing                                  | Action     |
-| --------------------- | ---------- | ---------------------------------------- | ---------- |
-| Task 1: Create schema | FULL       | -                                        | None       |
-| Task 2: API routes    | PARTIAL    | Missing input validation on PUT endpoint | Fix inline |
-| Task 3: UI component  | PARTIAL    | Loading state not implemented per spec   | Fix inline |
+  ## Specs
+  {contents of product-spec.md}
+  {contents of tech-spec.md}
+
+  ## Implemented Files
+  {list of all files created/modified in Phase 4, with their contents}
+
+  ## Review Checklist
+  For each task in the plan:
+  1. Does the implementation satisfy EVERY acceptance criterion?
+  2. Does it match the API contract (endpoints, params, response shape)?
+  3. Are edge cases from the product spec handled?
+  4. Are all files listed in the tech spec actually created?
+  5. Do database schemas match the spec exactly (column names, types, indices)?
+
+  ## Output Format
+  | Task | Spec Match | Gap | Severity | Fix Description |
+  Mark as FULL, PARTIAL, or MISSING.
+  Only flag genuine gaps — do NOT flag stylistic differences or improvements over spec.
+")
 ```
 
-4. **Fix inline** any PARTIAL matches — these are cheap fixes now, expensive QA cycles later
-5. **Commit reflexion fixes:** `fix(feature): reflexion pass - spec alignment`
-6. **Update state.json** → reflexion complete, proceed to Phase 5
+#### Stage 2: Code Quality Review (sonnet)
 
-**Skip condition:** If the feature has fewer than 3 tasks, reflexion overhead exceeds benefit — skip directly to Phase 5.
+Spawn a second review subagent **in parallel** with Stage 1:
 
-**Model:** Run reflexion in the main context (opus). It's a judgment task comparing spec to implementation — not delegatable to haiku/sonnet.
+```
+Agent(model="sonnet", subagent_type="code-review-agent", prompt="
+  You are a code quality reviewer. Review these files for correctness and quality.
+
+  ## Files to Review
+  {list of all files created/modified in Phase 4, with their contents}
+
+  ## Project Conventions
+  {conventions from Phase 0 detection}
+
+  ## Review Focus
+  1. Security: injection, auth bypass, secrets exposure, XSS
+  2. Correctness: null handling, error paths, race conditions, off-by-one
+  3. Conventions: does new code match existing patterns?
+  4. Performance: N+1 queries, missing indices, unbounded loops, missing pagination
+  5. Missing error handling at system boundaries (API inputs, DB responses, external calls)
+
+  ## Output Format
+  | File:Line | Category | Severity (P0/P1/P2) | Issue | Suggested Fix |
+  Do NOT flag: style preferences, missing comments, type annotations, hypothetical edge cases.
+")
+```
+
+#### Merge & Fix
+
+1. **Collect both reviews** — wait for both subagents to complete
+2. **Merge findings** into `review-report.md`:
+   - P0 issues (security, data loss, crashes) → fix immediately
+   - P1 issues (spec gaps, correctness bugs) → fix before QA
+   - P2 issues (minor quality, conventions) → fix if quick (<2 min), else log for later
+3. **Fix inline** all P0 and P1 issues
+4. **Commit review fixes:** `fix(feature): two-stage review - spec + quality fixes`
+5. **Update state.json** → review complete, proceed to Phase 5
+
+**Skip condition:** If the feature has fewer than 3 tasks, skip the two-stage review — overhead exceeds benefit. Proceed directly to Phase 5.
+
+**Cost:** Both reviewers run as sonnet subagents (~$0.50-1.00 combined). The orchestrator (opus) merges findings and decides which fixes to apply.
 
 ### Agent Prompt Template
 
@@ -1144,9 +1221,11 @@ This skill has access to several MCP servers. Use the right tool for each situat
 
 ## Version
 
+**v5.0.0** — Three Superpowers patterns: (1) Phase 4.5 replaced with two-stage subagent review loop (spec compliance + code quality, both sonnet, run in parallel). (2) HARD-GATE on Phase 2→3 transition — tech spec requires explicit user approval before planning begins. (3) 2-5 minute task granularity in Phase 3 — every task must specify exact file paths and expected code output.
 **v4.2.0** — Fresh context per executor: each spawned agent gets a clean context with only its task prompt, project context, and filtered learnings. No conversation history forwarded. Prevents context rot in long sessions.
 **v4.1.0** — Added Phase 4.5: Reflexion (self-critique pass between execution and QA). Compares implementation against spec before QA, fixing mismatches inline to reduce QA iterations.
 **v4.0.0** — Added eight-slot plugin architecture for swappable Runtime, Agent, Workspace, Tracker, Notifier, QA, Learnings, and VCS backends. Zero skill rewrites needed when migrating tools.
 **v3.0.0** — Added Phase -1: Project Init. When no existing project is detected, asks for directory, initializes git, and scaffolds the project before proceeding.
 **v2.1.0** — Added two-layer learnings system: project-local learnings.json + cross-project MCP Memory. Each run gets smarter from past runs via model routing corrections, QA failure patterns, fix solutions, and dependency gotchas.
 **v2.0.0** — Project-agnostic: auto-detects project type, package manager, commands, and QA skill via Phase 0
+````
