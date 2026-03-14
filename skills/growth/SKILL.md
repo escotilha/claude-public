@@ -18,8 +18,6 @@ allowed-tools:
   - mcp__firecrawl__*
   - mcp__chrome-devtools__*
   - mcp__playwright__*
-tool-annotations:
-  Bash: { destructiveHint: false, idempotentHint: true }  # browse CLI runs via Bash
   - AskUserQuestion
   - mcp__memory__*
 memory: user
@@ -43,6 +41,8 @@ invocation-contexts:
 
 Structured frameworks for optimizing SaaS conversion funnels, pricing, retention, and acquisition. Each mode produces an actionable report with specific code/copy changes.
 
+> **Browser tool:** `browse` CLI (`~/.local/bin/browse`) is the primary tool for all page analysis — zero MCP overhead, ~100ms per call. Chrome DevTools MCP (`mcp__chrome-devtools__*`) is the fallback when `browse` is unavailable.
+
 ## Mode Selection
 
 | Input                     | Mode             | What it does                                        |
@@ -65,7 +65,18 @@ Structured frameworks for optimizing SaaS conversion funnels, pricing, retention
 
 ### Process
 
-1. **Fetch the page** via Firecrawl or Chrome DevTools
+1. **Fetch and analyze the page** using `browse` (primary) or Firecrawl (fallback for content extraction):
+
+   ```bash
+   browse goto <url>
+   browse snapshot -a -o /tmp/cro-analysis.png   # annotated screenshot with element labels
+   browse snapshot -i                              # interactive elements + CTA refs
+   browse perf                                    # LCP, CLS, FCP metrics
+   browse responsive                              # mobile/tablet/desktop check
+   ```
+
+   Use `browse text` or Firecrawl for full content extraction when needed.
+
 2. **Score against CRO framework:**
 
 | Element            | Check                                                       | Weight |
@@ -163,7 +174,15 @@ Structured frameworks for optimizing SaaS conversion funnels, pricing, retention
 
 ### Process
 
-1. **Map the current flow:**
+1. **Map the current flow** using `browse`:
+
+   ```bash
+   browse goto <signup-url>
+   browse forms              # enumerate all form fields and step count
+   browse snapshot -i        # identify interactive elements, step indicators
+   browse snapshot -a -o /tmp/signup-flow.png  # annotated visual of the flow
+   ```
+
    - How many steps from landing to first value?
    - What information is required at each step?
    - Where are the drop-off points?
@@ -224,14 +243,22 @@ Structured frameworks for optimizing SaaS conversion funnels, pricing, retention
 
 ### Process
 
-1. **Technical SEO:**
+1. **Technical SEO** using `browse`:
 
+   ```bash
+   browse goto <url>
+   browse links              # internal linking structure
+   browse js "document.title + ' | ' + document.querySelector('meta[name=description]')?.content"  # title + meta
+   browse js "JSON.stringify([...document.querySelectorAll('h1,h2,h3')].map(h=>({tag:h.tagName,text:h.innerText.trim()})))"  # heading hierarchy
+   browse js "[...document.querySelectorAll('script[type=\"application/ld+json\"]')].map(s=>s.textContent)"  # structured data
+   browse perf               # Core Web Vitals: LCP, CLS, FCP
+   browse responsive         # mobile-friendliness check
    ```
+
    Check: sitemap.xml, robots.txt, canonical tags, meta titles/descriptions,
    Open Graph tags, structured data (JSON-LD), H1-H6 hierarchy, internal linking,
-   image alt text, Core Web Vitals (via Lighthouse), mobile-friendliness,
+   image alt text, Core Web Vitals, mobile-friendliness,
    HTTPS redirects, 404 handling, hreflang (if multi-language)
-   ```
 
 2. **Programmatic SEO opportunities:**
    - Identify data that could generate pages (e.g., "best {tool} for {industry}")

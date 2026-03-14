@@ -282,6 +282,79 @@ curl -X POST localhost:9867/tab/unlock -d '{"tabId":"abc","owner":"agent-1"}'
 | Multi-site crawling to markdown   | **Firecrawl** `firecrawl_crawl`            |
 | Full Playwright automation        | **Playwright** MCP                         |
 
+## browse CLI Alternative
+
+`browse` is a compiled headless Chromium CLI at `~/.local/bin/browse`. Zero MCP token overhead, ~100ms per call after cold start. Shares the same conceptual model as PinchTab (accessibility tree snapshots with element refs, navigate → snapshot → act → re-snapshot loop) but adds capabilities not available in PinchTab.
+
+### Command Mapping
+
+| PinchTab                   | browse equivalent                   | Notes                                         |
+| -------------------------- | ----------------------------------- | --------------------------------------------- |
+| `pinchtab nav <url>`       | `browse goto <url>`                 | Same                                          |
+| `pinchtab snap -i -c`      | `browse snapshot -i`                | browse uses compact by default                |
+| `pinchtab snap -c`         | `browse snapshot`                   | Full page                                     |
+| `pinchtab text`            | `browse text`                       | Same                                          |
+| `pinchtab ss -o file.jpg`  | `browse screenshot file.jpg`        | Same                                          |
+| `pinchtab click e5`        | `browse click @e5`                  | browse uses @e prefix                         |
+| `pinchtab fill e12 "val"`  | `browse fill @e12 "val"`            | browse uses @e prefix                         |
+| `pinchtab press e12 Enter` | `browse press Enter`                | browse press is global                        |
+| `pinchtab eval "js"`       | `browse js "js"`                    | Same                                          |
+| `pinchtab pdf -o file.pdf` | `browse pdf file.pdf`               | Same                                          |
+| `pinchtab tabs`            | `browse tabs`                       | Same                                          |
+| N/A                        | `browse snapshot -D`                | **Diff vs previous — unique to browse**       |
+| N/A                        | `browse snapshot -a -o path`        | **Annotated screenshot — unique to browse**   |
+| N/A                        | `browse snapshot -C`                | **Non-ARIA clickables — unique to browse**    |
+| N/A                        | `browse console` / `browse network` | **Ring buffer capture — unique to browse**    |
+| N/A                        | `browse cookie-import-browser`      | **Import browser cookies — unique to browse** |
+
+### browse-Exclusive Features
+
+- **`snapshot -D`** — unified diff vs previous snapshot; ideal for verifying that an action changed the expected elements
+- **`snapshot -a -o path.png`** — annotated screenshot with ref labels overlaid on the image; useful for visual debugging
+- **`snapshot -C`** — cursor-interactive mode; finds non-ARIA clickables (divs with onclick handlers, elements with `cursor:pointer`) that standard a11y tree traversal misses
+- **`console` / `network`** — ring buffer captures (50K capacity) for console messages and network requests; essential for debugging JS errors and API calls
+- **`cookie-import-browser`** — import cookies from Chrome/Arc/Brave/Edge via macOS Keychain decryption; enables authenticated sessions without manual login
+- **Multi-workspace isolation** — set `BROWSE_STATE_FILE` to a different path per agent for fully isolated sessions
+
+### When to Use Which
+
+**Use browse when:**
+
+- You need console/network monitoring (`browse console`, `browse network`)
+- You need snapshot diffing to verify page changes (`browse snapshot -D`)
+- You need annotated screenshots for visual debugging (`browse snapshot -a`)
+- You need to find non-ARIA clickables (`browse snapshot -C`)
+- You need to import browser cookies without manual login (`browse cookie-import-browser`)
+- You need multi-workspace isolation via `BROWSE_STATE_FILE`
+- MCP token overhead matters (high call-count sessions — browse has zero MCP overhead)
+
+**Use PinchTab when:**
+
+- You need profile management with persistent sessions across runs
+- You need tab locking for multi-agent safety (`/tab/lock`)
+- You need stealth mode (`BRIDGE_STEALTH`)
+- You need the HTTP API for programmatic access from non-Bash contexts
+
+### Detection Logic
+
+```bash
+# Prefer browse if available
+if command -v browse >/dev/null 2>&1; then
+  # Use browse commands
+  browse goto "https://example.com"
+  browse snapshot -i
+  browse click @e5
+elif command -v pinchtab >/dev/null 2>&1; then
+  # Use pinchtab commands
+  pinchtab nav "https://example.com"
+  pinchtab snap -i -c
+  pinchtab click e5
+else
+  # Fall back to Chrome DevTools MCP
+  # Use mcp__chrome-devtools__* tools
+fi
+```
+
 ## Common Patterns
 
 ### Form Submission

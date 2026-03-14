@@ -47,7 +47,7 @@ invocation-contexts:
     outputFormat: structured
 ---
 
-# QA SourceRank Skill (v4.0 - Self-Healing Autonomous)
+# QA SourceRank Skill (v4.1 - browse CLI Primary + Self-Healing Autonomous)
 
 Full QA lifecycle for SourceRank AI with **self-healing autonomous operation**. Runs end-to-end without stopping — discovers bugs, fixes them, deploys, verifies, and loops until **100% coverage**. Learns from every repair via MCP memory so repeated issues get fixed faster. The orchestrator (opus) **NEVER aborts** — even if 100% of features are broken, it proceeds to fix them.
 
@@ -66,6 +66,52 @@ When you run `/qa-sourcerank`, it orchestrates a **continuous loop** that only s
 9. **REGRESSION CHECK** - Compare with previous sessions, detect regressions
 10. **DEPLOY + CONTINUE** - Deploy decision based on coverage %. Loop until 100% approved
 11. **LEARN** - Save successful repair patterns to MCP memory for future sessions
+
+## Browser Tool: browse CLI
+
+**Primary browser tool:** `~/.local/bin/browse` — compiled headless Chromium CLI, ~100ms per call, zero MCP token overhead.
+
+**Detection:**
+
+```bash
+test -x ~/.local/bin/browse && echo "browse available" || echo "fallback to Chrome DevTools MCP"
+```
+
+**Command reference:**
+
+| Command                                  | Purpose                           |
+| ---------------------------------------- | --------------------------------- |
+| `browse goto <url>`                      | Navigate to URL                   |
+| `browse snapshot -i`                     | Interactive elements with @e refs |
+| `browse snapshot -i -C`                  | + non-ARIA clickable @c refs      |
+| `browse snapshot -D`                     | Diff vs previous snapshot         |
+| `browse snapshot -a -o path.png`         | Annotated screenshot              |
+| `browse screenshot [path]`               | Plain screenshot                  |
+| `browse text`                            | Page text content                 |
+| `browse click @e3`                       | Click element by ref              |
+| `browse fill @e4 "value"`                | Fill input by ref                 |
+| `browse console`                         | Console ring buffer               |
+| `browse network`                         | Network ring buffer               |
+| `browse links`                           | Extract all links                 |
+| `browse forms`                           | Extract all forms                 |
+| `browse js "expr"`                       | Evaluate JS                       |
+| `browse cookies`                         | Get cookies                       |
+| `browse cookie-import-browser [browser]` | Import from Chrome/Arc/Brave      |
+| `browse perf`                            | Performance metrics               |
+
+**Fallback:** If `browse` is not available, fall back to `mcp__chrome-devtools__*` tools.
+
+**Per-persona isolation:** Each persona agent MUST set a unique `BROWSE_STATE_FILE` env var so each gets its own Chromium instance, preventing session conflicts between the 4 concurrent testers:
+
+```bash
+# In each persona agent's spawn prompt, set before any browse command:
+export BROWSE_STATE_FILE="/tmp/browse-state-{persona_slug}.json"
+# e.g.:
+export BROWSE_STATE_FILE="/tmp/browse-state-sarah.json"
+export BROWSE_STATE_FILE="/tmp/browse-state-marcus.json"
+export BROWSE_STATE_FILE="/tmp/browse-state-diana.json"
+export BROWSE_STATE_FILE="/tmp/browse-state-alex.json"
+```
 
 ## Architecture
 
@@ -764,7 +810,7 @@ Both accounts share the same password. Sarah/Diana use the admin account, Marcus
 1. **If ALL features are blocked by the same systemic issue** — this is actually the BEST case. One fix will unblock everything. Proceed to triage → fix → deploy → verify.
 2. **If personas report empty pages, timeouts, or rendering failures** — these are bugs to fix, NOT reasons to abort. Log them, proceed to Phase 5-6.
 3. **If the same issue was found in previous sessions** — check repair memory for the fix pattern. Apply it immediately.
-4. **The ONLY valid reason to stop** is if Chrome DevTools MCP is completely unavailable (can't test at all). Even then, try curl-based API testing first.
+4. **The ONLY valid reason to stop** is if both `browse` CLI and Chrome DevTools MCP are completely unavailable (can't test at all). Even then, try curl-based API testing first.
 
 **NEVER:**
 
@@ -901,7 +947,12 @@ psql "$SRDB" -t -A -c "
    - If `--url` flag provided, use that
    - Else check for running local dev: `http://localhost:3000`
    - Else use production: `https://sourcerank-web.onrender.com`
-2. Verify the site is accessible via `mcp__chrome-devtools__navigate_page`
+2. Verify the site is accessible:
+   ```bash
+   # Primary: browse CLI (zero MCP overhead)
+   browse goto {url} && browse text | head -20
+   # Fallback if browse unavailable: mcp__chrome-devtools__navigate_page
+   ```
 3. Check API health: `curl -s https://sourcerank-api.onrender.com/health`
 
 **Default: Test against production** (https://sourcerank-web.onrender.com).
@@ -1016,6 +1067,30 @@ VERIFICATION QUEUE (re-test these fixed bugs):
 
 == INSTRUCTIONS ==
 
+STEP 0: Set up browser isolation (REQUIRED — prevents session conflicts with other personas):
+export BROWSE_STATE_FILE="/tmp/browse-state-{slug}.json"
+export SRDB="postgresql://postgres.swpznmoctbtnmspmyrfu:Lmk48ZJTjRzCp4xh@aws-1-us-east-1.pooler.supabase.com:5432/postgres"
+
+BROWSER TOOL PRIORITY:
+1. PRIMARY: browse CLI (`~/.local/bin/browse`) — fast, zero MCP overhead
+   - Navigation:   browse goto <url>
+   - Page content: browse snapshot -i   (interactive elements with @e refs)
+   - Page text:    browse text
+   - Console:      browse console
+   - Network:      browse network
+   - Screenshot:   browse screenshot /tmp/{slug}-{page}.png
+   - Click:        browse click @e<N>
+   - Fill form:    browse fill @e<N> "value"
+2. FALLBACK: mcp__chrome-devtools__* (only if browse is unavailable)
+
+Login sequence using browse:
+  browse goto {url}/sign-in
+  browse snapshot -i   # find email/password fields by @e ref
+  browse fill @e<email_ref> "{email}"
+  browse fill @e<password_ref> "{password}"
+  browse click @e<submit_ref>
+  browse snapshot -i   # verify redirect to dashboard
+
 STEP 1: Start your persona session:
 psql "$SRDB" -t -A -c "INSERT INTO qa_persona_sessions (session_id, persona) VALUES ('{session_id}', '{slug}') RETURNING id"
 SAVE the returned persona_session_id.
@@ -1028,14 +1103,21 @@ YOUR FEATURE ASSIGNMENTS (you MUST test every one):
 For EACH feature in your assignment list:
 a) Mark it as in_progress:
    psql "$SRDB" -t -A -c "UPDATE qa_feature_coverage SET status = 'in_progress', tested_at = NOW() WHERE session_id = '{session_id}' AND feature_key = '{feature_key}' AND persona = '{slug}'"
-b) Navigate to the feature's route using mcp__chrome-devtools
+b) Navigate to the feature's route:
+   browse goto {url}{route}
+   browse snapshot -i   # inspect interactive elements
+   browse text          # read page content
 c) Test ALL workflows for that feature. For each page/action, evaluate:
    1. FUNCTIONALITY - Does it work? Any errors? Console errors?
+      Check: browse console
    2. UX/USABILITY - Is it intuitive? Confusing? Too many clicks?
    3. PERFORMANCE - Is it fast? Any loading delays > 3s?
+      Check: browse perf
    4. DATA ACCURACY - Do numbers/dates/statuses look correct?
    5. VISUAL - Do charts render? Are layouts broken? CSS loaded?
+      Check: browse screenshot /tmp/{slug}-{feature_key}.png
    6. PERMISSIONS - Can you access only what your role allows?
+      Check: browse network   (look for 401/403 responses)
 d) After testing all workflows for that feature:
    - If ALL workflows pass (no bugs): Mark APPROVED:
      psql "$SRDB" -t -A -c "UPDATE qa_feature_coverage SET status = 'approved', approved_at = NOW(), workflows_passed = {passed}, workflows_failed = 0, notes = '{observations}' WHERE session_id = '{session_id}' AND feature_key = '{feature_key}' AND persona = '{slug}'"
@@ -1079,8 +1161,8 @@ SendMessage({
 Write feedback AS THE PERSONA - first person, with their frustrations and satisfaction level.
 
 RESILIENCE RULES:
-- If a page shows empty content or takes >15s to load: wait 5 seconds, then retry ONCE. If still empty, mark as blocked.
-- If Chrome DevTools times out on navigation: try the page URL with curl to check if the server responds. If curl works but browser doesn't, note "client-side rendering failure" in the bug.
+- If a page shows empty content or takes >15s to load: wait 5 seconds, then retry ONCE (`browse goto <url>`). If still empty, mark as blocked.
+- If `browse goto` fails or times out: try `curl -s -o /dev/null -w '%{http_code}' <url>` to check server response. If curl returns 200 but browse fails, note "client-side rendering failure" in the bug. Then try fallback: mcp__chrome-devtools__navigate_page.
 - If you hit a crash or unrecoverable error on one feature: log it, mark it blocked, and CONTINUE to the next feature. NEVER stop early.
 - You MUST complete ALL features and send your final report even if most features are blocked. Partial results are valuable.
 - If you receive a broadcast about a known broken page, you can skip browser testing for that page but MUST still mark it as blocked with the referenced issue ID.
@@ -1466,7 +1548,11 @@ Task({
   name: "verifier-batch-1",
   prompt: "Verify these QA issues are fixed on {url}:
     {issues_batch_1}
-    For each: navigate to affected_page, follow reproduction_steps, record result via psql."
+
+    BROWSER TOOL: Use browse CLI as primary (export BROWSE_STATE_FILE=/tmp/browse-state-verifier-1.json).
+    For each issue: browse goto {url}{affected_page}, follow reproduction_steps, check browse console for errors.
+    Fallback to mcp__chrome-devtools__* if browse unavailable.
+    Record result via psql."
 })
 
 Task({
@@ -1475,7 +1561,11 @@ Task({
   name: "verifier-batch-2",
   prompt: "Verify these QA issues are fixed on {url}:
     {issues_batch_2}
-    ..."
+
+    BROWSER TOOL: Use browse CLI as primary (export BROWSE_STATE_FILE=/tmp/browse-state-verifier-2.json).
+    For each issue: browse goto {url}{affected_page}, follow reproduction_steps, check browse console for errors.
+    Fallback to mcp__chrome-devtools__* if browse unavailable.
+    Record result via psql."
 })
 ```
 
@@ -1907,11 +1997,19 @@ SendMessage({
 
 ## Version
 
-**Current Version:** 4.0.0
-**Last Updated:** February 2026
+**Current Version:** 4.1.0
+**Last Updated:** March 2026
 
 ### Changelog
 
+- **4.1.0**: browse CLI as primary browser automation tool
+  - Added "Browser Tool: browse CLI" section with full command reference
+  - Persona agent prompts updated to use `browse goto`, `browse snapshot -i`, `browse text`, `browse console`, `browse network`, `browse screenshot`, `browse click`, `browse fill`
+  - Per-persona isolation via `BROWSE_STATE_FILE` env var — each of the 4 concurrent testers gets its own Chromium instance
+  - Phase 1 (environment discovery) uses `browse goto` + `browse text` for site accessibility check
+  - Phase 7 (verification agents) use `browse goto` + `browse console` for re-testing
+  - Chrome DevTools MCP retained as fallback in allowed-tools and in all prompts
+  - Resilience rules updated: browse failure → curl check → MCP fallback (instead of MCP as only option)
 - **4.0.0**: Self-healing autonomous operation + repair memory
   - Opus orchestrator (upgraded from sonnet) — better reasoning, never aborts
   - Sonnet persona agents (upgraded from haiku) — more reliable browser testing
@@ -1953,7 +2051,9 @@ SendMessage({
 
 ### Requirements
 
-- Chrome DevTools MCP (for local browser) or Browserless MCP (for cloud browser sessions — parallel personas without local Chrome)
+- **browse CLI** at `~/.local/bin/browse` (primary browser automation — compiled headless Chromium, ~100ms/call)
+- Chrome DevTools MCP (fallback when browse is unavailable)
+- Browserless MCP (optional, for cloud browser sessions when local Chrome not available)
 - Memory MCP (for pattern learning)
 - psql CLI (for SourceRank Supabase DB access)
 - Access to SourceRank production or local dev environment

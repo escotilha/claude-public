@@ -469,11 +469,19 @@ const items = cart?.items || []
 
 ## Version
 
-**Current Version:** 4.0.0 (Swarm-enabled)
-**Last Updated:** January 2026
+**Current Version:** 5.0.0 (browse-primary)
+**Last Updated:** March 2026
 
 ### Changelog
 
+- **5.0.0**: `browse` CLI as primary browser tool
+  - Replaced PinchTab with `browse` (~/.local/bin/browse) as primary browser automation
+  - Zero MCP token overhead: ~100ms per call after cold start vs 2–5s + 1,500–2,000 tokens per MCP call
+  - Added `browse snapshot -D` diff pattern for action verification
+  - Added `browse snapshot -a` annotated screenshots for visual debugging
+  - Added `browse snapshot -i -C` cursor-interactive refs for non-ARIA clickables
+  - Added `BROWSE_STATE_FILE` per-tester isolation for swarm mode
+  - Chrome DevTools MCP and Browserless MCP retained as fallbacks
 - **4.0.0**: Added swarm mode
   - True parallel testers via TeammateTool
   - Real-time failure sharing between testers
@@ -486,49 +494,92 @@ const items = cart?.items || []
 
 ### Requirements
 
-- **Both Modes**: Chrome DevTools MCP or Browserless MCP (cloud), Memory MCP
+- **Primary browser tool**: `browse` CLI at `~/.local/bin/browse` (zero MCP overhead)
+- **Fallback**: Chrome DevTools MCP or Browserless MCP (cloud) when `browse` is unavailable
+- **Both Modes**: Memory MCP
 - **Sequential Mode**: Standard Claude Code
 - **Swarm Mode**: Requires `claude-sneakpeek` or official TeammateTool support
 
-### PinchTab Integration (Token-Efficient Testing)
+### `browse` Integration (Primary Browser Tool)
 
-When PinchTab is available (`pinchtab --version` succeeds), page testers should prefer it over Chrome DevTools MCP for **read-only inspection tasks**:
+`browse` is a compiled headless Chromium CLI binary backed by a persistent Playwright daemon. It is the **primary browser tool** for all page testers. Chrome DevTools MCP is the fallback only when `browse` is unavailable.
 
-| Task                     | Without PinchTab                       | With PinchTab                                  | Token Savings |
-| ------------------------ | -------------------------------------- | ---------------------------------------------- | ------------- |
-| Check page loads         | Chrome MCP navigate + snapshot (~56KB) | `pinchtab nav` + `pinchtab text` (~800 tokens) | ~70x          |
-| Get interactive elements | Chrome MCP snapshot (~56KB)            | `pinchtab snap -i -c` (~2,000 tokens)          | ~28x          |
-| Verify content           | Chrome MCP evaluate_script             | `pinchtab text` (~800 tokens)                  | ~70x          |
-| Screenshot on failure    | Chrome MCP take_screenshot             | `pinchtab ss -o file.jpg`                      | Same          |
-
-**When to use PinchTab in fulltest:**
-
-- Page content extraction (`pinchtab text`)
-- Checking for interactive elements (`pinchtab snap -i -c`)
-- Verifying navigation success (`pinchtab nav` + `pinchtab text`)
-- Batch page checks in multi-page testing loops
-
-**When to keep Chrome DevTools MCP:**
-
-- CSS computed style checks (need `evaluate_script`)
-- Complex DOM interaction sequences
-- Console error monitoring (`list_console_messages`)
-- Network request inspection (`list_network_requests`)
-
-**Hybrid pattern for page testers:**
+**Check availability before testing:**
 
 ```bash
-# Use PinchTab for initial page load + content check (cheap)
-pinchtab nav "$URL"
-sleep 3
-pinchtab text  # ~800 tokens — check for content
-
-# Use Chrome DevTools only for what PinchTab can't do
-mcp__chrome-devtools__list_console_messages  # console errors
-mcp__chrome-devtools__list_network_requests  # 4xx/5xx checks
+~/.local/bin/browse status 2>/dev/null && echo "browse available" || echo "use Chrome DevTools MCP fallback"
 ```
 
-This hybrid approach reduces per-page token cost from ~56KB to ~3KB for the inspection phase, allowing more pages to be tested within the same context window.
+#### Token and Speed Comparison
+
+| Task                  | `browse` (primary)               | Chrome DevTools MCP (fallback) | MCP Token Overhead |
+| --------------------- | -------------------------------- | ------------------------------ | ------------------ |
+| Navigate to page      | `browse goto <url>` ~100ms       | `navigate_page` 2–5s           | ~1,500–2,000/call  |
+| Interactive snapshot  | `browse snapshot -i` ~100ms      | `take_snapshot` ~56KB output   | ~1,500–2,000/call  |
+| Console errors        | `browse console`                 | `list_console_messages`        | ~1,500–2,000/call  |
+| Network requests      | `browse network`                 | `list_network_requests`        | ~1,500–2,000/call  |
+| Screenshot on failure | `browse screenshot path.png`     | `take_screenshot`              | ~1,500–2,000/call  |
+| Annotated screenshot  | `browse snapshot -a -o path.png` | N/A                            | —                  |
+| Fill form input       | `browse fill @e4 "value"`        | `fill`                         | ~1,500–2,000/call  |
+| Click element         | `browse click @e3`               | `click`                        | ~1,500–2,000/call  |
+
+**Over 20 commands, MCP burns 30–40K tokens in protocol overhead. `browse` burns 0.**
+
+Cold start is ~3s (first call per session). All subsequent calls are ~100ms.
+
+#### Key `browse` Features for Testing
+
+- **`browse snapshot -i`** — Interactive ARIA tree with `@e1`, `@e2`... element refs for clicking/filling
+- **`browse snapshot -i -C`** — Adds `@c1`, `@c2`... cursor-interactive refs for clickable elements NOT in the ARIA tree (catches non-semantic buttons, custom widgets)
+- **`browse snapshot -D`** — Diff vs previous snapshot: shows exactly what changed after an action (verification pattern)
+- **`browse snapshot -a -o path.png`** — Annotated screenshot with element ref overlays (visual debugging)
+- **`browse console`** — Console messages from ring buffer (CSS 404s, JS errors, warnings)
+- **`browse network`** — Network requests from ring buffer (4xx/5xx, asset failures)
+
+#### Hybrid Pattern for Page Testers
+
+```bash
+# Primary: use browse for all browser operations (zero MCP overhead)
+browse goto "$URL"
+browse snapshot -i          # interactive elements, check for styled content
+browse console              # console errors (CSS 404s, JS errors)
+browse network              # network requests (4xx/5xx on assets)
+
+# On failure: capture evidence
+browse screenshot /tmp/fulltest-failure-$(date +%s).png
+# Or annotated (shows element refs overlaid):
+browse snapshot -a -o /tmp/fulltest-annotated-$(date +%s).png
+
+# Verification pattern (snapshot -D diff):
+browse snapshot              # baseline before action
+browse click @e5             # perform action
+browse snapshot -D           # shows only what changed — fast verification
+```
+
+**Fallback when `browse` is unavailable** (binary not at `~/.local/bin/browse`):
+
+```
+# Fall back to Chrome DevTools MCP
+mcp__chrome-devtools__navigate_page
+mcp__chrome-devtools__list_console_messages
+mcp__chrome-devtools__list_network_requests
+mcp__chrome-devtools__take_screenshot
+```
+
+#### Multi-Workspace Isolation (Swarm Mode)
+
+Each parallel tester can set `BROWSE_STATE_FILE` to get its own isolated Chromium instance, preventing port conflicts between concurrent page testers:
+
+```bash
+# In each parallel tester's environment:
+export BROWSE_STATE_FILE="/tmp/browse-tester-${TESTER_ID}.json"
+browse goto "$URL"
+# This tester now has its own browser state, isolated from other testers
+```
+
+This is especially important in swarm mode where multiple testers run concurrently — without state isolation, testers would share browser state and interfere with each other's sessions.
+
+This approach reduces per-page token cost from ~56KB (Chrome DevTools MCP snapshot) to near zero for the inspection phase, allowing more pages to be tested within the same context window.
 
 ---
 
@@ -656,7 +707,7 @@ At the end of testing, return:
   "blockers": [
     "Website not accessible at http://localhost:3000",
     "Connection refused - is dev server running?",
-    "Chrome DevTools cannot connect"
+    "browse CLI and Chrome DevTools MCP both unavailable"
   ],
   "testedSoFar": 0,
   "userInputRequired": "Please start development server and ensure it's running on port 3000"
@@ -690,7 +741,8 @@ Claude will analyze the current session and help identify configuration issues, 
   "partialResults": ".testing/reports/partial-results.json",
   "recoverySuggestions": [
     "Retry with sequential mode instead of swarm",
-    "Check Chrome DevTools MCP connection",
+    "Check browse CLI: ~/.local/bin/browse status",
+    "If browse unavailable, ensure Chrome DevTools MCP is connected",
     "Reduce number of parallel testers",
     "Clear .testing/ directory and restart"
   ]

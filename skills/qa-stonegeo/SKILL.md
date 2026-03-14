@@ -151,23 +151,63 @@ Spawn 3 explore agents to cover different aspects:
 - CSRF protection via tRPC batch endpoint
 - Environment variables not exposed to client (only `NEXT_PUBLIC_*`)
 
-### Phase 3: Browser Testing (if Chrome DevTools MCP available)
+### Phase 3: Browser Testing
+
+**Tool selection:** Use `browse` CLI (primary) or Chrome DevTools MCP (fallback).
+
+```bash
+# Detect browse
+test -x ~/.local/bin/browse && echo "browse available" || echo "fallback to Chrome MCP"
+```
 
 Start dev server:
 
 ```bash
 pnpm --filter @stonegeo/web dev &
 # Wait for "Ready in" message, note port (usually 3000 or 3001)
+BASE=http://localhost:3000
 ```
 
-Test each page:
+Test each of the 6 dashboard routes using `browse`:
 
-1. Navigate to each route
-2. Check for console errors
-3. Verify loading states render
-4. Verify empty states render correctly
-5. Check responsive layout (sidebar collapse at < lg breakpoint)
-6. Verify Clerk auth components render
+**Navigate and inspect each route:**
+
+```bash
+# Navigate
+browse goto $BASE/overview
+
+# Check console errors
+browse console --errors
+
+# Verify loading states + interactive elements (look for skeleton refs)
+browse snapshot -i
+
+# Verify empty state text
+browse text
+
+# Check responsive layout (sidebar collapse at <lg)
+browse responsive
+
+# Diff after interaction to verify state transitions
+browse snapshot -D
+```
+
+**Repeat for all routes:** `/overview`, `/visibility`, `/audit`, `/sources`, `/backlog`, `/settings`
+
+**Clerk auth verification** (on each route):
+
+```bash
+# Look for Clerk component refs (@e refs for SignIn, UserButton, OrganizationSwitcher)
+browse snapshot -i | grep -i "clerk\|sign-in\|org-switch\|user-button"
+```
+
+**Screenshot on failure:**
+
+```bash
+browse screenshot /tmp/stonegeo-<route>-failure.png
+```
+
+If `browse` is unavailable, fall back to `mcp__chrome-devtools__*` tools for navigation, console inspection, and screenshots.
 
 ### Phase 4: Fix Issues
 
@@ -284,10 +324,18 @@ Track issues across sessions. Update this list after each QA run.
 
 ## Version
 
-**Current Version:** 1.0.0
-**Last Updated:** 2026-02-27
+**Current Version:** 1.1.0
+**Last Updated:** 2026-03-14
 
 ### Changelog
+
+- **1.1.0**: Phase 3 browser testing migrated to `browse` CLI (primary)
+  - `browse` at `~/.local/bin/browse` is now the primary tool for all browser testing
+  - Per-route commands: `goto`, `console --errors`, `snapshot -i`, `text`, `responsive`, `snapshot -D`
+  - Clerk component detection via `browse snapshot -i | grep -i "clerk|..."`
+  - Screenshot on failure via `browse screenshot`
+  - Chrome DevTools MCP (`mcp__chrome-devtools__*`) retained as fallback
+  - Detection: `test -x ~/.local/bin/browse`
 
 - **1.0.0**: Initial skill generated from /qa-cycle
   - Full project discovery: 6 dashboard pages, 7 tRPC routers, Clerk auth

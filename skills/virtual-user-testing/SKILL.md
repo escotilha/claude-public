@@ -46,9 +46,52 @@ invocation-contexts:
     outputFormat: structured
 ---
 
-# Virtual User Testing Skill (v2.0 - DB-Backed QA Cycle)
+# Virtual User Testing Skill (v2.1 - browse CLI + DB-Backed QA Cycle)
 
 Spawns parallel virtual user personas that simulate real Contably users navigating the app, testing workflows, reporting bugs to the QA database, and verifying previously fixed issues.
+
+## Browser Automation: Primary vs Fallback
+
+**Primary tool: `browse` CLI** (`~/.local/bin/browse`) — compiled headless Chromium, zero MCP token overhead, ~100ms per call.
+
+**Fallback: Chrome DevTools MCP** (`mcp__chrome-devtools__*`) — used only when `browse` is not available.
+
+### Detection
+
+At the start of the session, check for `browse`:
+
+```bash
+test -x ~/.local/bin/browse && echo "browse available" || echo "fallback to MCP"
+```
+
+### browse Command Reference
+
+| Task                                | Command                                             |
+| ----------------------------------- | --------------------------------------------------- |
+| Navigate                            | `browse goto <url>`                                 |
+| Interactive elements (with @e refs) | `browse snapshot -i`                                |
+| Diff vs previous snapshot           | `browse snapshot -D`                                |
+| Annotated screenshot                | `browse snapshot -a -o path.png`                    |
+| Plain screenshot                    | `browse screenshot [path]`                          |
+| Page text                           | `browse text`                                       |
+| Click element                       | `browse click @e3`                                  |
+| Fill input                          | `browse fill @e4 "value"`                           |
+| Console logs                        | `browse console`                                    |
+| Network requests                    | `browse network`                                    |
+| Evaluate JS                         | `browse js "expr"`                                  |
+| Get cookies                         | `browse cookies`                                    |
+| Import browser cookies              | `browse cookie-import-browser [chrome\|arc\|brave]` |
+
+### Per-Persona Isolation
+
+Each persona agent runs an **isolated Chromium instance** via a unique `BROWSE_STATE_FILE`. Set this at the top of each persona agent's prompt:
+
+```bash
+export BROWSE_STATE_FILE="/tmp/browse-state-{persona-slug}.json"
+# Example: /tmp/browse-state-maria.json, /tmp/browse-state-carlos.json, etc.
+```
+
+All `browse` commands in the same agent process will use that state file, keeping sessions fully isolated across parallel persona agents.
 
 ## What It Does
 
@@ -296,13 +339,24 @@ python apps/api/scripts/qa_manager.py session start \
 
 ### Phase 1: Environment Discovery
 
-```
-1. Detect running services:
-   - Admin app URL (default: http://localhost:5173)
-   - Client portal URL (default: http://localhost:3000)
-   - API URL (default: http://localhost:8000)
-2. Verify services are accessible via chrome-devtools
-3. Check for test credentials or create virtual users via API
+```bash
+# Detect browse availability
+test -x ~/.local/bin/browse && BROWSE_AVAILABLE=true || BROWSE_AVAILABLE=false
+
+# Detect running services
+# Admin app URL (default: http://localhost:5173)
+# Client portal URL (default: http://localhost:3000)
+# API URL (default: http://localhost:8000)
+
+# Verify services are accessible (using browse if available, MCP fallback)
+if [ "$BROWSE_AVAILABLE" = true ]; then
+  browse goto http://localhost:5173 && browse text | head -20   # admin app
+  browse goto http://localhost:3000 && browse text | head -20   # client portal
+else
+  # Fallback: mcp__chrome-devtools__navigate_page
+fi
+
+# Check for test credentials or create virtual users via API
 ```
 
 ### Phase 2: Spawn Persona Swarm
@@ -340,7 +394,31 @@ For each persona:
     name: "{persona-name}-tester",
     prompt: "You are {persona name}, a {role description}. {full persona context}.
 
-             SESSION CONTEXT:
+             ## Browser Automation Setup
+
+             FIRST: Detect browse availability and set your isolated state file:
+
+               export BROWSE_STATE_FILE=/tmp/browse-state-{slug}.json
+               test -x ~/.local/bin/browse && echo 'browse available' || echo 'fallback to MCP'
+
+             Use `browse` (primary) for all browser interactions. Fall back to
+             mcp__chrome-devtools__* only if browse is not available.
+
+             browse commands to use:
+               browse goto <url>            — navigate
+               browse snapshot -i           — list interactive elements with @e refs
+               browse snapshot -D           — diff vs previous state
+               browse snapshot -a -o f.png  — annotated screenshot
+               browse screenshot [path]     — plain screenshot
+               browse text                  — page text
+               browse click @e3             — click element
+               browse fill @e4 'value'      — fill input
+               browse console               — console logs (check for JS errors)
+               browse network               — network requests (check for API errors)
+               browse js 'expr'             — evaluate JS
+
+             ## Session Context
+
              - Session ID: {session_id}
              - QA Manager script: python apps/api/scripts/qa_manager.py
 
@@ -353,21 +431,41 @@ For each persona:
              VERIFICATION QUEUE (re-test these fixed bugs):
              {regression_check_output}
 
-             STEP 1: Start your persona session:
+             ## STEP 1: Start your persona session
+
              python apps/api/scripts/qa_manager.py persona-session start \
                --session-id {session_id} --persona {slug}
              SAVE the returned persona_session_id.
 
-             STEP 2: Navigate to {app URL} and test these workflows: {workflow list}.
-             For each page/action, evaluate:
-             1. FUNCTIONALITY - Does it work? Any errors? Console errors?
-             2. UX/USABILITY - Is it intuitive? Confusing? Too many clicks?
-             3. PERFORMANCE - Is it fast? Any loading delays?
-             4. PERMISSIONS - Can you access only what your role allows?
-             5. DATA ACCURACY - Do numbers/dates/statuses look correct?
-             6. MOBILE/RESPONSIVE - Does it work on smaller screens?
+             ## STEP 2: Navigate and test workflows
 
-             STEP 3: For each bug found:
+             Navigate to {app URL} and test these workflows: {workflow list}.
+
+             Login workflow (using browse):
+               browse goto {app_url}/login
+               browse snapshot -i
+               browse fill @e{email_field} '{email}'
+               browse fill @e{pass_field} '{password}'
+               browse click @e{submit_button}
+               browse snapshot -D       # verify redirect to dashboard
+               browse console           # check for JS errors
+               browse network           # check for failed API calls
+
+             For each page/action, evaluate:
+             1. FUNCTIONALITY — Does it work? Any errors? Console errors?
+                (browse console after every interaction)
+             2. UX/USABILITY — Is it intuitive? Confusing? Too many clicks?
+                (count clicks for core tasks)
+             3. PERFORMANCE — Is it fast? Any loading delays?
+                (note slow network calls from browse network)
+             4. PERMISSIONS — Can you access only what your role allows?
+             5. DATA ACCURACY — Do numbers/dates/statuses look correct?
+                (browse text to extract displayed values)
+             6. MOBILE/RESPONSIVE — Does it work on smaller screens?
+
+             ## STEP 3: Report bugs
+
+             For each bug found:
              a) Check for duplicates FIRST:
                 python apps/api/scripts/qa_manager.py query duplicate-check \
                   --endpoint '{endpoint}' --http-status {status}
@@ -393,10 +491,12 @@ For each persona:
                   --comment 'Still reproducing as of {date}' \
                   --type note
 
-             STEP 4: Verify fixed bugs from your queue:
+             ## STEP 4: Verify fixed bugs from your queue
+
              For each issue in the verification queue:
-             a) Follow the reproduction steps from the issue
-             b) Record the result:
+             a) Follow the reproduction steps using browse
+             b) Run: browse console and browse network to capture evidence
+             c) Record the result:
                 python apps/api/scripts/qa_manager.py issue verify \
                   --id {issue_id} \
                   --persona {slug} \
@@ -404,14 +504,15 @@ For each persona:
                   --session-id {session_id} \
                   --notes 'Description of verification result'
 
-             STEP 5: Complete your persona session:
+             ## STEP 5: Complete your persona session
+
              python apps/api/scripts/qa_manager.py persona-session complete \
                --id {persona_session_id} \
                --satisfaction {1-10 score} \
                --pages '[\"page1\",\"page2\"]' \
                --workflows '[\"workflow1\",\"workflow2\"]'
 
-             Write your feedback AS THE PERSONA - in first person, with their
+             Write your feedback AS THE PERSONA — in first person, with their
              level of technical sophistication and their specific frustrations.
 
              IMPORTANT: ALL bugs go to the database via qa_manager.py.
@@ -723,11 +824,17 @@ Create `virtual-user-testing.config.md` in project root to customize:
 
 ## Version
 
-**Current Version:** 2.0.0
-**Last Updated:** February 2026
+**Current Version:** 2.1.0
+**Last Updated:** March 2026
 
 ### Changelog
 
+- **2.1.0**: browse CLI integration as primary browser tool
+  - Added Browser Automation section (primary/fallback detection, command reference, per-persona isolation)
+  - Per-persona `BROWSE_STATE_FILE` isolation for parallel Chromium instances
+  - Persona spawn prompts updated to use browse for navigation, snapshots, clicks, fill, console, network
+  - Phase 1 environment discovery updated to use browse with MCP fallback
+  - Requirements updated to list browse as primary dependency
 - **2.0.0**: DB-backed QA cycle integration
   - Session initialization via qa_manager.py
   - Persona history loading from DB
@@ -741,7 +848,8 @@ Create `virtual-user-testing.config.md` in project root to customize:
 
 ### Requirements
 
-- Chrome DevTools MCP (for local browser) or Browserless MCP (for cloud browser sessions — enables true parallel persona testing)
+- **`browse` CLI** at `~/.local/bin/browse` (primary browser tool — zero MCP overhead, per-persona isolation via `BROWSE_STATE_FILE`)
+- Chrome DevTools MCP (`mcp__chrome-devtools__*`) as fallback when `browse` is unavailable
 - Running Contably environment (admin + client portal + API)
 - QA database schema (migration 029_qa_schema)
 - qa_manager.py CLI script (apps/api/scripts/qa_manager.py)

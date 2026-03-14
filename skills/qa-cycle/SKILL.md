@@ -457,9 +457,20 @@ As personas report back, opus watches for:
 - **Data inconsistencies** — different roles see different data for same entity
 - **Regressions** — previously CLOSED issues reappearing → P0
 - **AI prompt integrity** (for AI-integrated projects) — if the app has chat/assistant/AI features:
-  - Test whether any API endpoint returns system prompt content without auth (try `/api/chat`, `/api/assistant`, `/api/prompt`, debug/admin endpoints)
-  - Test whether any endpoint accepts writes to system prompt or AI config without admin auth
-  - Check if AI responses leak system prompt fragments in error messages or verbose mode
+  - Test whether any API endpoint returns system prompt content without auth:
+    ```bash
+    browse goto {base_url}/api/chat && browse text    # check for prompt leaks in response
+    browse goto {base_url}/api/assistant && browse text
+    browse js "fetch('/api/prompt').then(r=>r.text()).then(t=>t.substring(0,500))"
+    ```
+  - Test unauthenticated write access to AI config:
+    ```bash
+    browse js "fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'INJECTED'})}).then(r=>r.status)"
+    ```
+  - Check if AI responses leak system prompt fragments in error messages or verbose mode:
+    ```bash
+    browse goto {base_url}/api/chat?debug=true && browse text
+    ```
   - Any system prompt exposure = P0; any unauthenticated write to AI config = P0
 
 ---
@@ -518,7 +529,7 @@ If a fix is particularly complex (architectural, cross-cutting), opus handles it
 
 ## Phase 7: Verify
 
-Spawn haiku verification agents to re-test fixed issues via browser:
+Spawn haiku verification agents to re-test fixed issues via browse CLI:
 
 ```
 Agent({
@@ -526,7 +537,19 @@ Agent({
   model: "haiku",
   prompt: "Verify these issues are fixed on {url}:
     {issues_in_testing_status}
-    For each: navigate, follow reproduction steps, record pass/fail in DB"
+
+    Browser tool: use browse CLI (~/.local/bin/browse).
+    Set: export BROWSE_STATE_FILE='/tmp/browse-verify-{issue_id}.json'
+
+    For each issue:
+      1. browse goto <reproduction_url>
+      2. browse snapshot -i   (get element refs)
+      3. Follow reproduction steps using browse click/fill/js
+      4. browse screenshot /tmp/verify-{issue_id}.png  (evidence)
+      5. browse console   (check for JS errors)
+      6. Record pass/fail in DB
+
+    If browse not found, fall back to mcp__chrome-devtools__* equivalents."
 })
 ```
 

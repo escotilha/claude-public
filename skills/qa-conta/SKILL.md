@@ -485,9 +485,18 @@ curl -s https://api.contably.ai/health
 | ---- | ------------- | ------ | --------------- | -------- |
 | 43.1 | List feedback | GET    | /slack-feedback | 200      |
 
-### 44. BROWSER TESTS (Chrome MCP)
+### 44. BROWSER TESTS
 
-After API tests pass, verify the frontend apps render correctly:
+After API tests pass, verify the frontend apps render correctly.
+
+**Primary tool:** `browse` CLI (`~/.local/bin/browse`) — zero MCP overhead, ~100ms per call.
+**Fallback:** Chrome DevTools MCP (`mcp__chrome-devtools__*`) if `browse` is unavailable.
+
+Detection:
+
+```bash
+test -x ~/.local/bin/browse && echo "browse available" || echo "use Chrome MCP"
+```
 
 | #    | Test                     | URL                              | Check                             |
 | ---- | ------------------------ | -------------------------------- | --------------------------------- |
@@ -495,6 +504,38 @@ After API tests pass, verify the frontend apps render correctly:
 | 44.2 | Admin login works        | https://contably.ai/login        | Dashboard loads after login       |
 | 44.3 | Dashboard renders charts | https://contably.ai/             | Sidebar, charts, company selector |
 | 44.4 | Portal login page        | https://portal.contably.ai/login | Login form visible                |
+
+**Implementation using `browse` (primary):**
+
+```bash
+# 44.1 — Admin login page loads, login form visible
+browse goto https://contably.ai/login
+browse snapshot -i   # check for email/password input refs
+
+# 44.2 — Admin login works
+browse fill @e<email-ref> "master@contably.com"
+browse fill @e<password-ref> "1@Masterpass"
+browse click @e<submit-ref>
+browse snapshot -D   # diff should show dashboard content, not login form
+
+# 44.3 — Dashboard renders charts
+browse goto https://contably.ai/
+browse screenshot /tmp/contably-dashboard.png
+browse text          # verify sidebar text, chart labels, company selector
+
+# 44.4 — Portal login page loads
+browse goto https://portal.contably.ai/login
+browse snapshot -i   # check for login form elements
+```
+
+**Fallback using Chrome MCP (if browse unavailable):**
+
+```
+mcp__chrome-devtools__navigate_page → url
+mcp__chrome-devtools__take_screenshot → verify visually
+mcp__chrome-devtools__fill → login form
+mcp__chrome-devtools__click → submit
+```
 
 ---
 

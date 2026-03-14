@@ -15,7 +15,6 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
-  - Bash
   - mcp__chrome-devtools__*
   - mcp__playwright__*
   - mcp__browserless__*
@@ -39,7 +38,41 @@ invocation-contexts:
 
 # QA Verify Skill (v1.0)
 
-Loads issues in TESTING status from the QA database and verifies fixes by running the reproduction steps via Chrome DevTools MCP browser testing. Records results in DB and updates issue status.
+Loads issues in TESTING status from the QA database and verifies fixes by running the reproduction steps via the `browse` CLI (primary). Records results in DB and updates issue status.
+
+## Browser Automation: `browse` CLI (Primary)
+
+**`browse`** is a compiled headless Chromium CLI at `~/.local/bin/browse`. Zero MCP token overhead, ~100ms per call.
+
+```bash
+browse goto <url>           # Navigate to page
+browse snapshot -i          # Interactive elements with @e refs (for clicking/filling)
+browse snapshot -D          # Diff vs previous snapshot (see exactly what changed)
+browse screenshot [path]    # Screenshot for evidence capture
+browse text                 # Get page text content
+browse click @e3            # Click element by ref
+browse fill @e4 "value"     # Fill input by ref
+browse console              # Check console errors
+browse network              # List network requests
+browse js "expr"            # Evaluate JavaScript expression
+browse perf                 # Performance metrics
+```
+
+**Chrome DevTools MCP** (`mcp__chrome-devtools__*`) remains available as a fallback when `browse` cannot handle a specific interaction.
+
+### The snapshot -D Verification Pattern
+
+This pattern is ideal for verifying that an action produced the expected change:
+
+```bash
+browse goto <page>
+browse snapshot -i          # baseline — capture initial state
+browse fill @e5 "credentials"
+browse click @e10           # submit action
+browse snapshot -D          # shows exactly what changed — did login succeed?
+```
+
+Use `snapshot -D` after any action that should change the UI — form submissions, button clicks, state transitions. It shows only the diff, making pass/fail determination fast and unambiguous.
 
 ## What It Does
 
@@ -49,7 +82,7 @@ When you run `/qa-verify`, it will:
 2. **Create a verification session** in the DB
 3. For each issue:
    - Read the reproduction steps from the DB
-   - **Navigate the app via Chrome DevTools** following each step
+   - **Navigate the app via `browse`** following each step
    - **Verify the expected behavior** matches actual behavior
    - **Record the result** in the DB (pass/fail with notes)
    - Move issue to VERIFIED (if passed) or back to IN_PROGRESS (if failed)
@@ -110,15 +143,18 @@ Each issue has structured `reproduction_steps` stored as JSON:
 ]
 ```
 
-#### 3b: Execute Steps via Chrome DevTools
+#### 3b: Execute Steps via browse CLI
 
 For each step in the reproduction:
 
-1. **Navigate** to the page: `mcp__chrome-devtools__navigate_page`
-2. **Fill forms** if needed: `mcp__chrome-devtools__fill`
-3. **Click buttons** if needed: `mcp__chrome-devtools__click`
-4. **Check results**: `mcp__chrome-devtools__evaluate_script` to verify expected state
-5. **Capture evidence**: `mcp__chrome-devtools__take_screenshot` on failure
+1. **Navigate** to the page: `browse goto <url>`
+2. **Discover interactive elements**: `browse snapshot -i` (returns @e refs for inputs, buttons)
+3. **Fill forms** if needed: `browse fill @e<N> "value"`
+4. **Click buttons** if needed: `browse click @e<N>`
+5. **Check results**: `browse snapshot -D` to see what changed, or `browse js "expr"` to query DOM state
+6. **Capture evidence**: `browse screenshot /tmp/issue-{id}-evidence.png` on failure or for confirmation
+
+Fallback: if `browse` cannot handle an interaction, use `mcp__chrome-devtools__*` equivalents.
 
 #### 3c: Determine Persona Credentials
 
@@ -168,31 +204,36 @@ python apps/api/scripts/qa_manager.py session complete \
 
 ### API Bug Verification
 
-1. Navigate to the page that triggers the API call
-2. Check network requests via `mcp__chrome-devtools__list_network_requests`
-3. Verify HTTP status codes are now correct
-4. Check response body for expected data
+1. Navigate to the page that triggers the API call: `browse goto <url>`
+2. Check network requests: `browse network`
+3. Verify HTTP status codes are now correct and response body contains expected data
+
+Fallback: `mcp__chrome-devtools__list_network_requests` if more detail is needed.
 
 ### UI Bug Verification
 
-1. Navigate to the affected page
-2. Use `mcp__chrome-devtools__evaluate_script` to check DOM state
-3. Verify elements exist, are visible, and have correct content
-4. Take screenshot for visual confirmation
+1. Navigate to the affected page: `browse goto <url>`
+2. Take a baseline snapshot: `browse snapshot -i`
+3. Perform the triggering action (fill, click)
+4. Check what changed: `browse snapshot -D`
+5. Confirm specific DOM state: `browse js "document.querySelector('.selector')?.textContent"`
+6. Take screenshot for visual confirmation: `browse screenshot /tmp/issue-{id}.png`
 
 ### Permission Bug Verification
 
-1. Login as the affected persona
-2. Navigate to the restricted resource
-3. Verify correct access (granted or denied based on role)
+1. Login as the affected persona using the `snapshot -D` pattern to confirm login success
+2. Navigate to the restricted resource: `browse goto <url>`
+3. Verify correct access (granted or denied based on role) via `browse snapshot -i` or `browse text`
 4. Check for proper error messages on denied access
 
 ### Performance Bug Verification
 
-1. Navigate to the slow page
-2. Use `mcp__chrome-devtools__performance_start_trace` and `performance_stop_trace`
+1. Navigate to the slow page: `browse goto <url>`
+2. Capture performance metrics: `browse perf`
 3. Check load time against acceptable threshold
 4. Verify the specific bottleneck is resolved
+
+Fallback: `mcp__chrome-devtools__performance_start_trace` / `performance_stop_trace` for detailed traces.
 
 ## Completion Signal
 
@@ -250,7 +291,8 @@ This skill runs fully autonomously without user interaction:
 
 ### Requirements
 
-- Chrome DevTools MCP (for local browser navigation) or Browserless MCP (for cloud browser sessions)
+- `browse` CLI at `~/.local/bin/browse` (primary browser automation — headless Chromium, zero MCP overhead)
+- Chrome DevTools MCP (fallback for interactions browse cannot handle)
 - Running Contably environment (admin + client portal + API)
 - QA database schema (migration 029_qa_schema)
 - qa_manager.py CLI script (apps/api/scripts/qa_manager.py)

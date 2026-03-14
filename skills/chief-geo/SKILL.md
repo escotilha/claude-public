@@ -38,6 +38,8 @@ tool-annotations:
   mcp__memory__delete_entities: { destructiveHint: true, idempotentHint: true }
   mcp__memory__create_entities: { readOnlyHint: false, idempotentHint: false }
   mcp__postgres__query: { destructiveHint: false, idempotentHint: true }
+# Browser tool priority: browse CLI (~/.local/bin/browse) is PRIMARY — zero MCP overhead, ~100ms/call.
+# Chrome DevTools MCP (mcp__chrome-devtools__*) is FALLBACK when browse is unavailable.
 invocation-contexts:
   user-direct:
     verbosity: high
@@ -156,7 +158,7 @@ Before any pillar runs:
    mcp__memory__search_nodes({ query: "geo sourcerank visibility" })
    ```
 
-5. **Check SourceRank production** — verify https://sourcerank-web.onrender.com is up (quick fetch, don't block if slow — Render cold starts take 30-60s)
+5. **Check SourceRank production** — verify https://sourcerank-web.onrender.com is up using `browse goto https://sourcerank-web.onrender.com && browse text` (lighter than WebFetch; don't block if slow — Render cold starts take 30-60s)
 
 ---
 
@@ -413,7 +415,7 @@ Audit SourceRank's technical implementation against GEO best practices:
 Audit SourceRank's content strategy for GEO authority:
 
 1. **Website Content Analysis:**
-   - Fetch and analyze sourcerank-web.onrender.com pages via Firecrawl
+   - Use `browse` as primary: `browse goto <url>` + `browse text` for content extraction, `browse links` for link structure. Firecrawl as fallback if `browse` is unavailable or returns incomplete content.
    - Check: value proposition clarity, authority signals, data citations
    - Are pages structured for LLM extraction? (40-60 word key passages, definition blocks, comparison tables)
 
@@ -655,19 +657,34 @@ Maintain a standard set of 20-30 test queries in `.claude/geo/test-queries.md`:
 
 ### Visibility Testing Process
 
-**Important:** This pillar uses **web search simulation**, not direct API calls to AI platforms. Each haiku agent:
+**Primary tool: `browse` CLI** (`~/.local/bin/browse`) — zero MCP overhead, ~100ms per call. Each haiku tester sets a unique `BROWSE_STATE_FILE` env var for isolated Chromium instances (prevents session collisions when running in parallel):
 
-1. **WebSearch for AI-generated answers:** Search for "{query} site:perplexity.ai" or "{query} ChatGPT recommendation" to find cached/indexed AI responses
-2. **Check SourceRank's monitoring data** via PostgreSQL — query existing mention data for these test queries
-3. **Analyze SourceRank's own content** — does our website have content that would answer these queries?
+```bash
+BROWSE_STATE_FILE=/tmp/geo-tester-A.json browse goto "https://www.perplexity.ai"
+```
 
-Spawn 4 parallel haiku agents, each handling 5-7 queries from a specific category:
+**Per-agent workflow (haiku):**
+
+1. **Live AI platform testing via browse:**
+   - `browse goto "https://www.perplexity.ai"` → `browse snapshot -i` to get interactive element refs → fill the search box → submit → `browse text` to extract the response
+   - `browse cookie-import-browser arc` (or `chrome`/`brave`) to import the user's browser cookies for authenticated AI platform sessions (useful for ChatGPT, Perplexity Pro, Gemini Advanced)
+   - Repeat for each assigned query; record SourceRank mentions and competitor citations
+
+2. **WebSearch fallback:** If `browse` cannot reach a platform or returns a CAPTCHA, fall back to WebSearch for "{query} site:perplexity.ai" or "{query} ChatGPT recommendation" to find cached/indexed AI responses
+
+3. **Check SourceRank's monitoring data** via PostgreSQL — query existing mention data for these test queries
+
+4. **Analyze SourceRank's own content** — does our website have content that would answer these queries?
+
+**Note:** Chrome DevTools MCP (`mcp__chrome-devtools__*`) is available as a secondary fallback if `browse` is unavailable.
+
+Spawn 4 parallel haiku agents, each with a unique `BROWSE_STATE_FILE`, handling 5-7 queries from a specific category:
 
 ```
-Agent A (haiku): Direct product queries + comparison queries
-Agent B (haiku): Problem-aware queries
-Agent C (haiku): Industry/education queries
-Agent D (haiku): SourceRank-specific queries + cross-check monitoring DB
+Agent A (haiku, BROWSE_STATE_FILE=/tmp/geo-A.json): Direct product queries + comparison queries
+Agent B (haiku, BROWSE_STATE_FILE=/tmp/geo-B.json): Problem-aware queries
+Agent C (haiku, BROWSE_STATE_FILE=/tmp/geo-C.json): Industry/education queries
+Agent D (haiku, BROWSE_STATE_FILE=/tmp/geo-D.json): SourceRank-specific queries + cross-check monitoring DB
 ```
 
 Each agent reports back:
@@ -872,7 +889,8 @@ Observations follow the standard format:
 ## Error Handling
 
 - **WebSearch fails:** Skip that research track, note in report as "incomplete — search unavailable"
-- **Firecrawl timeout:** Fall back to WebFetch for page content
+- **browse unavailable:** Fall back to Chrome DevTools MCP (`mcp__chrome-devtools__*`) for browser automation; if that also fails, fall back to WebSearch for cached AI responses
+- **Firecrawl timeout:** Fall back to `browse goto <url>` + `browse text` for page content; then WebFetch as last resort
 - **MCP Memory unavailable:** Write findings to local files only, skip memory persistence
 - **PostgreSQL unavailable:** Skip monitoring data cross-reference, note in visibility report
 - **Production site down:** Log alert in report, still run knowledge base and doc updates
