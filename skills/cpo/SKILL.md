@@ -333,6 +333,7 @@ ls -la master-project.json cpo-progress.md docs/user-guide.md 2>/dev/null
 6. Initialize `cpo-progress.md` for tracking
 7. Calculate cost estimates for MVP and scale
 8. Present plan for user approval
+9. **HARD-GATE:** Do NOT proceed to Phase 3 until user explicitly approves. No implicit approval, no auto-proceed, no timeout.
 
 **Output:** Complete project plan with epics, stages, INVEST-validated stories, and cost estimates
 

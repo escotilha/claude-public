@@ -507,6 +507,17 @@ Reply with:
 - "questions" - Discuss the approach
 ```
 
+### HARD-GATE: Plan Approval Required
+
+**Do NOT proceed to Phase 3 until the user explicitly approves the plan.** This is a hard gate:
+
+- No implicit approval (silence is not consent)
+- No auto-proceed after a timeout
+- No "I'll start implementing while you review"
+- Wait for "start", "go", "approved", "looks good", or equivalent
+- If the user requests changes → update master-project.json and re-present
+- Only after explicit approval → update `master-project.json` with `"planApprovedAt": "[timestamp]"` → proceed to Phase 3
+
 ---
 
 ## Phase 3: Stage-by-Stage Implementation

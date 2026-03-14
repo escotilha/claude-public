@@ -1092,10 +1092,28 @@ ${ciContext.log}
 
 ---
 
+### Phase 4.6: Two-Stage Review Loop (Per Feature)
+
+Before merging each completed feature, run a **two-stage subagent review**. This catches issues in isolation before they pollute the integration branch. Skip for features with fewer than 3 tasks.
+
+**Stage 1: Spec Compliance (sonnet)** — spawn a subagent that reads the feature's task list and compares against implemented code in the worktree. Reports FULL/PARTIAL/MISSING per task.
+
+**Stage 2: Code Quality (sonnet)** — spawn in parallel a subagent that reviews all files changed in the worktree for security, correctness, conventions, and performance. Reports P0/P1/P2 findings.
+
+**Merge & Fix:**
+
+1. Collect both reviews
+2. Fix all P0 and P1 issues in the worktree
+3. Re-run verify triple after fixes
+4. Commit fixes: `fix({feature-id}): two-stage review fixes`
+5. Only then proceed to merge
+
+**Cost:** ~$0.50-1.00 per feature (both reviewers are sonnet). Worth it — catching a bug pre-merge is 10x cheaper than debugging it post-integration.
+
 ### Phase 5: Progressive Merge
 
 ```bash
-# When feature verify triple passes in worktree:
+# When feature verify triple passes in worktree AND review loop passes:
 cd {worktree-path}
 # Run verify triple before allowing merge
 {project.commands.typecheck}   # must pass

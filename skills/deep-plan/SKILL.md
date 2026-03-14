@@ -323,16 +323,30 @@ For each step in the plan:
 ````
 5. Move to the next step
 
-### 3.3 Post-Implementation
+### 3.3 Two-Stage Review Loop
 
-After all steps are complete, run the final verify triple:
+After all steps are complete but before marking done, run a **two-stage subagent review** (skip if fewer than 3 steps):
+
+**Stage 1: Spec Compliance (sonnet)** — spawn a subagent that re-reads `plan.md` and compares each step's expected output against the actual implementation. Reports FULL/PARTIAL/MISSING per step with specific gaps.
+
+**Stage 2: Code Quality (sonnet)** — spawn in parallel a subagent that reviews all changed files for security, correctness, convention compliance, and performance issues. Reports P0/P1/P2 findings.
+
+**Merge & Fix:**
+1. Collect both reviews
+2. Fix all P0 (security, data loss) and P1 (spec gaps, correctness) issues inline
+3. P2 issues: fix if quick (<2 min), else log
+4. Commit fixes: `fix: two-stage review - spec + quality fixes`
+
+### 3.4 Post-Implementation
+
+After review fixes (or directly after steps if <3 steps), run the final verify triple:
 
 1. Run typecheck (skip if unavailable) — must pass
 2. Run tests (skip if unavailable) — must pass
 3. Run build (skip if unavailable) — must pass
 4. Fix any failures before marking complete
 5. Update `.deep-plan-state.json`: set `implement.status = "complete"`, `currentPhase = "complete"`
-4. Update `plan.md` with final status:
+6. Update `plan.md` with final status:
 ```markdown
 ## Status: ✅ Complete
 
