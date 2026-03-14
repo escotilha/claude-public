@@ -88,18 +88,20 @@ Within the current Claude API ecosystem, this is already partially implemented v
 | Sonnet subagent formats its own report            | Sonnet produces findings, Haiku formats the report           |
 | Each subagent explores the codebase independently | Orchestrator pre-computes context, passes it in spawn prompt |
 
-### Future: Local Model Tier (Tier 0)
+### Local Model Tier (Tier 0)
 
-When local model infrastructure matures (Ollama, LM Studio MLX), a **Tier 0** becomes viable:
+With [OpenClaw-RL](https://github.com/Gen-Verse/OpenClaw-RL) (Princeton, 2026), Tier 0 is now concrete. OpenClaw-RL is a fully async RL framework that turns conversations into training signals — no manual labeling. Every reply, tool output, and environment state change becomes a reward signal. A personal agent improved from score 0.17 → 0.81 after 36 conversations.
 
-| Tier       | Model                       | Cost   | Use For                                              |
-| ---------- | --------------------------- | ------ | ---------------------------------------------------- |
-| **Tier 0** | Local (Qwen 3.5-9B, Ollama) | Free   | Pure text generation, template expansion, formatting |
-| **Tier 1** | Haiku                       | Low    | Deterministic execution with tool use                |
-| **Tier 2** | Sonnet                      | Medium | Nuanced judgment, code review, implementation        |
-| **Tier 3** | Opus                        | High   | Architecture, security, complex reasoning            |
+**Architecture:** Four async loops — agent serving, rollout collection, PRM/judge evaluation, policy training (PPO/GRPO). Models deploy as OpenAI-compatible APIs. Supports local GPU (Qwen 3.5-4B/8B via LoRA) and serverless cloud (Tinker).
 
-**Not actionable yet** — requires Ollama integration in Claude Code subagent spawning. Documented here for when the infrastructure supports it. Candidate models: Qwen 3.5-4B (edge), Qwen 3.5-9B (quality), both multimodal and MLX-optimized for Apple Silicon.
+| Tier       | Model                            | Cost   | Use For                                                                              |
+| ---------- | -------------------------------- | ------ | ------------------------------------------------------------------------------------ |
+| **Tier 0** | Local (Qwen 3.5-8B, OpenClaw-RL) | Free   | Pure text generation, template expansion, formatting — continuously improving via RL |
+| **Tier 1** | Haiku                            | Low    | Deterministic execution with tool use                                                |
+| **Tier 2** | Sonnet                           | Medium | Nuanced judgment, code review, implementation                                        |
+| **Tier 3** | Opus                             | High   | Architecture, security, complex reasoning                                            |
+
+**Deployment path:** Qwen 3.5-4B (edge) or Qwen 3.5-8B (quality) + OpenClaw-RL for continuous improvement + Ollama/LM Studio for local serving. Still requires Ollama integration in Claude Code subagent spawning for full automation. MLX-optimized variants available for Apple Silicon.
 
 ### Practical Takeaway
 

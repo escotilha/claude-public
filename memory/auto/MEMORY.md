@@ -6,3 +6,4 @@
 - [reference_resend_cli.md](reference_resend_cli.md) — Resend CLI added as transactional send channel in /agentmail; use for one-way sends from verified domains (nuvini.ai, contably.ai)
 - [tech_ai_platform_attack_surface.md](tech_ai_platform_attack_surface.md) — AI platform attack chain: unauthenticated endpoints + JSON-key SQLi + system prompt write access (McKinsey Lilli breach pattern)
 - [tech_browse_cli.md](tech_browse_cli.md) — gstack browse CLI at ~/.local/bin/browse — zero-MCP-overhead headless Chromium, integrated into 10 skills as primary browser tool
+- [tech_openclaw_rl.md](tech_openclaw_rl.md) — OpenClaw-RL: Princeton async RL framework for training local agents from conversations; unlocks Tier 0 self-improvement with Qwen 3.5-4B/8B
