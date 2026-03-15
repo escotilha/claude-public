@@ -2,6 +2,7 @@
 
 ## Feedback
 
+- [feedback_blackbox_vs_code_review.md](feedback_blackbox_vs_code_review.md) — Always run code-level review (/cto) alongside black-box testing (/fulltest-skill) — they catch fundamentally different issue classes
 - [feedback_memory_boost_weights.md](feedback_memory_boost_weights.md) — Boost weights for memory search ranking — feedback 3x, user 2x, reference 1.5x, project 1x, with 1.5x recency for last 7 days
 
 ## References
