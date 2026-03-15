@@ -37,6 +37,21 @@ type: reference
 - "Cloudflare Agent (auto-generated)" — Account.Access, Account.Acce... — All accounts
 - "Edit zone DNS" — Account.Cloudflare Pages, Account.W... — All accounts (broader)
 
+## Clerk (contably.ai)
+
+- **Instance:** clerk.contably.ai (production), kind-mammal-39.clerk.accounts.dev (staging)
+- **Publishable key:** `pk_live_Y2xlcmsuY29udGFibHkuYWkk`
+- **Secret key:** stored in:
+  - macOS Keychain (local): `security find-generic-password -s "clerk-secret-key" -w`
+  - Local/Mini/VPS: `~/.config/cloudflare/.env` (as CLERK_SECRET_KEY)
+  - GitHub secret: `Contably/contably` → `CLERK_SECRET_KEY`
+- **DNS records (5 CNAMEs on contably.ai):**
+  - `clerk` → `frontend-api.clerk.services`
+  - `accounts` → `accounts.clerk.services`
+  - `clkmail` → `mail.26946z3qph7i.clerk.services`
+  - `clk._domainkey` → `dkim1.26946z3qph7i.clerk.services`
+  - `clk2._domainkey` → `dkim2.26946z3qph7i.clerk.services`
+
 ## Zone IDs
 
 | Domain      | Zone ID                          |
