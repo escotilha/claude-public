@@ -15,6 +15,7 @@
 - [tech_ai_platform_attack_surface.md](tech_ai_platform_attack_surface.md) — Attack chain from McKinsey Lilli breach — unauthenticated endpoints + JSON-key SQLi + system prompt write access = full AI platform compromise
 - [tech_browse_cli.md](tech_browse_cli.md) — gstack browse CLI binary installed at ~/.local/bin/browse — zero-MCP-overhead headless Chromium for browser automation across 10 skills
 - [tech_openclaw_rl.md](tech_openclaw_rl.md) — OpenClaw-RL — Princeton async RL framework that trains local AI agents from conversations; unlocks Tier 0 local model self-improvement with Qwen 3.5-4B/8B
+- [tech_hyperskill_skill_tree.md](tech_hyperskill_skill_tree.md) — HyperSkill by Hyperbrowser: auto-generates SKILL.md from live docs + /skill-tree command splits deep-knowledge into navigable hierarchies to avoid context bloat
 
 # currentDate
 
