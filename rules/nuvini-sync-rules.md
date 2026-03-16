@@ -68,6 +68,7 @@ Never push content containing:
 - `review-changes` — code review (any project)
 - `test-and-fix` — auto-fix tests (any project)
 - `verify` — typecheck + tests + build (any project)
+- `skill-tree` — split large docs into navigable hierarchies (any project)
 - `run-local` — start dev server (any project)
 - `research` — analyze URLs/tools (any topic)
 - `firecrawl` — web scraping (any site)

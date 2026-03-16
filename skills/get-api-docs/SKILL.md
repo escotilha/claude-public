@@ -44,10 +44,19 @@ Omit `--lang` if the doc has only one language variant — it will be auto-selec
 
 Default to `--lang ts` for this user's projects (TypeScript stack).
 
-## Step 3 — Use the docs
+## Step 3 — Use the docs (or split if large)
 
 Read the fetched content and use it to write accurate code or answer the question.
 Do not rely on memorized API shapes — use what the docs say.
+
+**If the doc is larger than ~200 lines**, suggest splitting it for efficient subagent use:
+
+```
+This doc is large (N lines). Run `/skill-tree <id>` to split it into a
+navigable index + sub-files so agents read only the sections they need.
+```
+
+If a skill tree already exists for this doc at `.skill-trees/<author>-<name>/`, read `_index.md` first and follow only the relevant branches instead of loading the full doc.
 
 ## Step 4 — Annotate what you learned
 

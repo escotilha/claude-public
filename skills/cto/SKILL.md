@@ -292,6 +292,25 @@ Store the results as pre-computed file lists to include in each analyst's spawn 
 
 **If QMD is not available or project is not indexed**, fall back to the standard discovery below.
 
+#### 2.0b: Skill Tree Pre-Split (for large codebases)
+
+If the project has >100 source files across multiple domains, consider pre-splitting the codebase into a skill tree before spawning analysts. This gives each analyst a focused file list instead of exploring the full tree:
+
+```bash
+# Check if a skill tree already exists for this project
+ls .skill-trees/codebase/_index.md 2>/dev/null
+```
+
+If no tree exists and the codebase is large, the orchestrator can invoke `/skill-tree` to create one. Then include in each analyst's spawn prompt:
+
+```
+Read .skill-trees/codebase/_index.md for project overview.
+Your domain files: {files from the relevant section}
+Skip all other sections — other analysts cover those.
+```
+
+This implements the "Avoid Re-Reading" pattern more aggressively — each analyst gets pre-routed to their exact slice of the codebase, spending zero tokens on discovery.
+
 **Detect tech stack:**
 
 ```bash

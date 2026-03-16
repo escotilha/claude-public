@@ -159,6 +159,19 @@ Each agent should use WebSearch and WebFetch/Firecrawl extensively. Instruct the
 - Contradictions or surprising results
 - Data points with citations
 
+### Phase 2.5: Skill Tree for Large Research Output (Optional)
+
+If Phase 2 produces combined track findings exceeding ~300 lines, split them into a skill tree before synthesis. This lets the synthesizer read the index and pull only the tracks relevant to each section of the final report, rather than loading all raw findings at once:
+
+```bash
+# Write combined findings to a temp file
+# Then split into navigable sections per sub-question
+```
+
+Invoke `/skill-tree` on the combined findings file. Output goes to `.skill-trees/research-<topic>/`. The synthesizer in Phase 3 reads `_index.md` first and follows only the branches it needs for each section of the report.
+
+**Skip this step if:** total findings are under 300 lines — the overhead of creating the tree exceeds the context savings.
+
 ### Phase 3: Synthesis & Validation (Integration)
 
 After all tracks return:
