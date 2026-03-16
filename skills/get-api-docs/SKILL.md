@@ -1,6 +1,6 @@
 ---
 name: get-api-docs
-description: "Fetch current API documentation for any library/SDK using chub CLI instead of relying on training data. Covers 70+ services including Supabase, Anthropic SDK, Clerk, Prisma, Stripe, Resend, Playwright. Local annotations persist across sessions."
+description: "Fetch current API documentation for any library/SDK using chub CLI instead of relying on training data. Covers 1,000+ API documents including Supabase, Anthropic SDK, Clerk, Prisma, Stripe, Resend, Playwright. Local annotations persist across sessions."
 argument-hint: "<library name or chub doc ID>"
 user-invocable: true
 context: fork
@@ -78,22 +78,36 @@ Available labels: `outdated`, `inaccurate`, `incomplete`, `wrong-examples`,
 
 ## Quick reference
 
-| Goal              | Command                                       |
-| ----------------- | --------------------------------------------- |
-| List everything   | `chub search`                                 |
-| Find a doc        | `chub search "stripe"`                        |
-| Exact id detail   | `chub search stripe/api`                      |
-| Fetch TS docs     | `chub get stripe/api --lang ts`               |
-| Fetch Python docs | `chub get stripe/api --lang py`               |
-| Save to file      | `chub get anthropic/sdk --lang ts -o docs.md` |
-| Fetch multiple    | `chub get openai/chat stripe/api --lang ts`   |
-| Save a note       | `chub annotate stripe/api "needs raw body"`   |
-| List notes        | `chub annotate --list`                        |
-| Rate a doc        | `chub feedback stripe/api up`                 |
+| Goal                       | Command                                       |
+| -------------------------- | --------------------------------------------- |
+| List everything            | `chub search`                                 |
+| Find a doc                 | `chub search "stripe"`                        |
+| Exact id detail            | `chub search stripe/api`                      |
+| Fetch TS docs              | `chub get stripe/api --lang ts`               |
+| Fetch Python docs          | `chub get stripe/api --lang py`               |
+| Fetch specific version     | `chub get stripe/api --version 12.0.0`        |
+| Fetch specific file        | `chub get stripe/api --file webhooks.md`      |
+| Fetch all files (offline)  | `chub get stripe/api --full`                  |
+| Structured JSON output     | `chub get stripe/api --json`                  |
+| Save to file               | `chub get anthropic/sdk --lang ts -o docs.md` |
+| Fetch multiple             | `chub get openai/chat stripe/api --lang ts`   |
+| Save a note                | `chub annotate stripe/api "needs raw body"`   |
+| List notes                 | `chub annotate --list`                        |
+| Rate a doc                 | `chub feedback stripe/api up`                 |
+| Refresh doc registry cache | `chub update`                                 |
+| Force re-download          | `chub update --force`                         |
+| Download for offline use   | `chub update --full`                          |
+| Check cache status         | `chub cache status`                           |
+| Clear cache                | `chub cache clear`                            |
 
 ## Notes
 
-- `chub search` with no query lists everything available
+- `chub search` with no query lists everything available (1,000+ API documents as of 2026-03)
 - IDs are `<author>/<name>` — confirm the ID from search before fetching
 - If multiple languages exist and you don't pass `--lang`, chub will tell you which are available
 - Prefer `--lang ts` for this user's TypeScript projects
+- Use `--version` when a project pins a specific library version to avoid drift
+- Use `--file` to fetch only a sub-section (e.g., webhooks, auth) — cheaper in subagent contexts
+- Use `--full` to pre-download everything for offline or multi-agent sessions
+- Use `--json` for programmatic/agent integration (returns structured output with `additionalFiles` array)
+- Disable telemetry/feedback sharing: set `telemetry: false` in `~/.chub/config.yaml` or `CHUB_TELEMETRY=0`
