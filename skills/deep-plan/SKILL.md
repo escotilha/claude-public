@@ -17,6 +17,7 @@ allowed-tools:
   - Agent
   - AskUserQuestion
   - mcp__firecrawl__*
+  - mcp__exa__*
   - mcp__memory__*
 memory: user
 tool-annotations:

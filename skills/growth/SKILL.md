@@ -16,6 +16,7 @@ allowed-tools:
   - WebSearch
   - WebFetch
   - mcp__firecrawl__*
+  - mcp__exa__*
   - mcp__chrome-devtools__*
   - mcp__playwright__*
   - AskUserQuestion

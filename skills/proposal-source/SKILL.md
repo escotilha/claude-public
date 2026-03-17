@@ -19,6 +19,7 @@ allowed-tools:
   - mcp__firecrawl__*
   - mcp__browserless__*
   - mcp__brave-search__*
+  - mcp__exa__*
   - mcp__memory__*
 memory: user
 tool-annotations:

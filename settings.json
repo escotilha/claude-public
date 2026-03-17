@@ -3,7 +3,9 @@
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "ENABLE_CLAUDEAI_MCP_SERVERS": "false",
     "CLAUDE_BASH_NO_LOGIN": "1",
-    "RESEND_API_KEY": "re_SBHeSKNj_AM1wzDrF5eJZ2LKmuyDyNvE2"
+    "RESEND_API_KEY": "re_SBHeSKNj_AM1wzDrF5eJZ2LKmuyDyNvE2",
+    "BRAVE_API_KEY": "BSAYdiKG6QoqYPSm9rCGdPlwM_fnzNu",
+    "EXA_API_KEY": "81538a60-ff60-46e3-9fd4-78e954bc85d0"
   },
   "hooks": {
     "SessionStart": [
@@ -246,7 +248,15 @@
         "env": {
           "BRAVE_API_KEY": "${BRAVE_API_KEY}"
         },
-        "description": "Web search via Brave"
+        "description": "Web search via Brave LLM Context API — use count param to control token budget"
+      },
+      "exa": {
+        "command": "npx",
+        "args": ["-y", "exa-mcp-server"],
+        "env": {
+          "EXA_API_KEY": "${EXA_API_KEY}"
+        },
+        "description": "Neural search with highlights mode — returns only query-relevant passages for minimal token usage"
       },
       "postgres": {
         "command": "npx",

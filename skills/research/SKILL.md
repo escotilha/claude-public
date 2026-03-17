@@ -19,6 +19,7 @@ allowed-tools:
   - mcp__ScraplingServer__*
   - mcp__browserless__*
   - mcp__brave-search__*
+  - mcp__exa__*
   - mcp__memory__*
 memory: user
 tool-annotations:
@@ -109,13 +110,16 @@ Fallback chain if Firecrawl fails (403, empty, credits exhausted, bot-detected):
 ```
 1. Firecrawl (cloud, fast, structured extraction)
    ↓ if fails
-2. Scrapling Fetcher (local HTTP, TLS fingerprint impersonation, free)
+2. Exa highlights (neural search, query-relevant excerpts only — use when researching a topic, not a specific URL)
+   mcp__exa__get_contents({ ids: ["<url>"], highlights: true, maxCharacters: 2000 })
+   ↓ if not applicable (specific URL, not topic)
+3. Scrapling Fetcher (local HTTP, TLS fingerprint impersonation, free)
    mcp__ScraplingServer__fetch({ url: "<url>", headless: true })
    ↓ if blocked (403, captcha, empty)
-3. Scrapling StealthyFetcher (Playwright stealth, Cloudflare bypass)
+4. Scrapling StealthyFetcher (Playwright stealth, Cloudflare bypass)
    mcp__ScraplingServer__stealthy_fetch({ url: "<url>", headless: true, block_webrtc: true })
    ↓ if still fails
-4. WebFetch (last resort)
+5. WebFetch (last resort)
 ```
 
 If URL is a tweet/social post, replace domain with `api.fxtwitter.com` and use WebFetch. Fall back to WebSearch if that fails.
@@ -250,6 +254,14 @@ After writing any new or updated memory, reindex:
 ```bash
 ~/.claude-setup/tools/mem-search --reindex
 ```
+
+## Token Efficiency Notes
+
+When researching a topic (not a specific URL):
+
+- **Prefer Exa highlights** (`mcp__exa__search`) over Firecrawl search — returns only query-relevant passages (500-1,500 tokens vs 2,000-5,000)
+- **Use Brave LLM Context** (`mcp__brave-search__brave_web_search`) for quick factual lookups with `count=5`
+- **Avoid fetching full pages** unless the specific content is needed — highlights mode covers 80% of research needs
 
 ## Edge Cases
 

@@ -14,6 +14,7 @@ allowed-tools:
   - WebSearch
   - WebFetch
   - mcp__firecrawl__*
+  - mcp__exa__*
   - mcp__context-mode__*
   - mcp__qmd__*
   - Agent

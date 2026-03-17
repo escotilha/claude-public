@@ -16,6 +16,8 @@
 - [tech_browse_cli.md](tech_browse_cli.md) — gstack browse CLI binary installed at ~/.local/bin/browse — zero-MCP-overhead headless Chromium for browser automation across 10 skills
 - [tech_openclaw_rl.md](tech_openclaw_rl.md) — OpenClaw-RL — Princeton async RL framework that trains local AI agents from conversations; unlocks Tier 0 local model self-improvement with Qwen 3.5-4B/8B
 - [tech_hyperskill_skill_tree.md](tech_hyperskill_skill_tree.md) — HyperSkill by Hyperbrowser: auto-generates SKILL.md from live docs + /skill-tree command splits deep-knowledge into navigable hierarchies to avoid context bloat
+- [reference_search_api_keys.md](reference_search_api_keys.md) — Brave Search + Exa.ai API keys stored in macOS Keychain (cross-device) and settings.json
+- [tech_token_efficient_search.md](tech_token_efficient_search.md) — Web search token efficiency findings: Brave LLM Context (token-budgeted), Exa highlights (50-75% fewer tokens), pre-search orchestrator pattern, SearXNG+Crawl4AI on VPS
 
 # currentDate
 

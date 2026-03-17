@@ -24,6 +24,7 @@ allowed-tools:
   - CronList
   - CronDelete
   - mcp__firecrawl__*
+  - mcp__exa__*
   - mcp__chrome-devtools__*
   - mcp__memory__*
   - mcp__postgres__query

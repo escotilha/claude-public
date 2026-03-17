@@ -19,6 +19,8 @@ allowed-tools:
   - mcp__firecrawl__*
   - mcp__browserless__*
   - mcp__brave-search__*
+  - mcp__exa__*
+  - mcp__searxng-crawl4ai__*
   - mcp__memory__*
   - mcp__qmd__*
 memory: user
@@ -50,6 +52,36 @@ You are a research orchestration system that manages complex investigations acro
 ## Auto-Memory Note
 
 Auto-memory (v2.1.59) captures session context automatically. When saving research findings to Memory MCP, focus on **high-value conclusions and validated insights** — not raw search results or intermediate findings that auto-memory already handles. Only create Memory MCP entities for insights with relevance score >= 5 (per memory-consolidation skill).
+
+## Web Search Tool Selection
+
+Choose the most token-efficient search tool for each query type:
+
+| Query Type                  | Best Tool                                                 | Token Budget                            | When                                    |
+| --------------------------- | --------------------------------------------------------- | --------------------------------------- | --------------------------------------- |
+| Quick factual lookup        | Brave LLM Context (`mcp__brave-search__brave_web_search`) | Set `count=5`                           | Single-answer questions                 |
+| Deep content research       | Exa highlights (`mcp__exa__search`)                       | `maxCharacters=1500`, `highlights=true` | Need actual page content, not just URLs |
+| Discovery (what exists?)    | WebSearch (built-in)                                      | N/A (titles+URLs only)                  | Broad topic exploration                 |
+| Full page extraction        | Firecrawl scrape                                          | `onlyMainContent=true`                  | Known URL, need full content            |
+| High-volume subagent search | SearXNG (`mcp__searxng-crawl4ai__search`)                 | Free, unlimited                         | Subagent parallel searches              |
+| Anti-bot / blocked URLs     | Scrapling → browse CLI                                    | N/A                                     | Cloudflare, captchas                    |
+
+### Token Budget Rules
+
+1. **Always set explicit limits** when the tool supports it:
+   - Brave: `count=5` for discovery, `count=10` for deep research
+   - Exa: `maxCharacters=1500` for highlights, `maxCharacters=3000` for deep content
+   - Firecrawl: `onlyMainContent=true` always; use `extract` with `max_tokens` when possible
+2. **Prefer highlights over full text** — Exa highlights return 500-1,500 tokens vs 5,000-15,000 for full pages
+3. **Search once, fetch selectively** — use metadata-only search (WebSearch/Brave) to find URLs, then fetch only the 2-3 most relevant
+
+### Tool Availability Fallback
+
+Not all MCP tools may be available in every session. Use this fallback chain:
+
+1. **Search:** Brave LLM Context → Exa → WebSearch → SearXNG (if VPS available)
+2. **Content:** Exa highlights → Firecrawl scrape → WebFetch → Scrapling → browse CLI
+3. **Always works:** WebSearch + WebFetch (built-in, always available)
 
 ## Research Protocol
 
@@ -142,6 +174,30 @@ For each sub-question, launch parallel investigation tracks using Task agents:
 - What are the failure cases?
 - What assumptions could be wrong?
 
+#### Pre-Search Optimization (Orchestrator Context Sharing)
+
+Before spawning subagents, the orchestrator performs ONE broad search to build a shared URL pool:
+
+1. Run 2-3 broad searches using Brave LLM Context API or Exa:
+
+   ```
+   mcp__brave-search__brave_web_search({ query: "<core question>", count: 10 })
+   mcp__exa__search({ query: "<core question>", numResults: 10, type: "auto", highlights: true, maxCharacters: 500 })
+   ```
+
+2. Compile a **Shared URL Pool** from the results — titles, URLs, and 1-line relevance notes
+
+3. Pass this pool to EACH subagent in their spawn prompt:
+   ```
+   "Shared research context (pre-searched by orchestrator — do NOT re-search these broad topics):
+   - [URL 1]: [title] — relevant to [sub-question X]
+   - [URL 2]: [title] — relevant to [sub-question Y]
+   ...
+   Your job: fetch and analyze the URLs relevant to YOUR sub-questions. Only search for NEW, specific sub-topics not covered by the shared pool."
+   ```
+
+This eliminates 60-70% of redundant searches across subagents. Each subagent should only search for specific sub-topics NOT covered by the shared pool.
+
 **Implementation:** Spawn parallel research agents for independent sub-questions:
 
 ```
@@ -152,7 +208,15 @@ Agent(subagent_type="general-purpose", model="sonnet") → Sub-question 5 + 6 (r
 Agent(subagent_type="general-purpose", model="sonnet") → Contrarian analysis across all sub-questions
 ```
 
-Each agent should use WebSearch and WebFetch/Firecrawl extensively. Instruct them to return:
+Each agent should:
+
+- First check the Shared URL Pool for relevant URLs before searching
+- Use Exa highlights (`maxCharacters=1500`) when they need page content
+- Use Brave LLM Context when they need search + content in one call
+- Only use WebSearch + WebFetch as fallback
+- Return findings as concise summaries (200-500 tokens), NOT raw search results
+
+Instruct them to return:
 
 - Key findings with source URLs
 - Confidence level (high/medium/low) per finding
