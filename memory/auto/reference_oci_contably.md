@@ -14,7 +14,8 @@ Credentials and OCIDs stored in `/Volumes/AI/Code/contably/.local/oci-credential
 - **Prod cluster OCID**: `ocid1.cluster.oc1.sa-saopaulo-1.aaaaaaaak6kfvaibonj2axticenu2qhhv7ztvk7rhfo3v2yklc3xnftms6ua`
 - **OCIR username**: `gr5ovmlswwos/Default/p@nuvini.com.br`
 - **OCIR auth token**: macOS Keychain → `security find-internet-password -s 'sa-saopaulo-1.ocir.io' -w`
-- **GitHub PAT**: `GITHUB_TOKEN= gh auth token` (OAuth token with repo scope)
+- **GitHub PAT (OAuth, gh CLI)**: `GITHUB_TOKEN= gh auth token` — works for GitHub API, NOT for OCI DevOps
+- **GitHub Classic PAT (OCI DevOps)**: `security find-generic-password -s 'github-classic-pat' -w` — required for OCI DevOps git clone
 - **Vault secret update command**: `oci vault secret update-base64` (NOT `update-secret-content`)
 - **OCI CLI flag**: Use `--environment-id` (NOT `--deploy-environment-id`)
 
