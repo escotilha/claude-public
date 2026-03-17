@@ -11188,3 +11188,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-03-17T18:30:37Z",
+  "date": "2026-03-17",
+  "skill": "cto",
+  "args": "URGENT: Contably production is down (503 on all services). We need a recovery plan NOW.\n\nContext:\n- OKE Enhanced Cluster on OCI (sa-saopaulo-1), 2 nodes, contably namespace\n- Both nodes were soft-rebooted to force image pull — both are RUNNING now but all pods return 503\n- We cannot access kubectl (OCI user has IAM admin but no K8s RBAC binding — instance agent doesn't work on OKE managed nodes)\n- The API Docker image build is failing due to pip resolver backtracking on unbounded version constraints in requirements.txt\n- Admin and Portal images are pushed to OCIR with latest tag (working)\n- There IS an older API image in OCIR (from March 10) tagged as latest that should still work\n- The 503 across ALL services (including admin which is just nginx) suggests the issue is NOT the API image — it's likely ingress-nginx or a missing K8s Secret (contably-secrets)\n- We just deleted GHA workflows and added ESO manifests but ESO is NOT installed yet — so if the static secrets got wiped during kustomize apply, pods can't start\n- GHA billing is blocked so we can't use GitHub Actions\n\nKey questions:\n1. How do we get kubectl access NOW? (OKE Enhanced Cluster, user ocid1.user.oc1..aaaaaaaaqfokrxa532iror5bq3vnb2dr56tzzrjthklrqqugmtafr4muy6ea is in Administrators group but K8s API rejects the token)\n2. What's causing the 503 on ALL services including static nginx admin?\n3. How do we get back online in the next 30 minutes?\n4. How do we fix the API image pip resolver issue?\n\nFiles to check: infrastructure/kubernetes/overlays/oci/kustomization.yaml, infrastructure/kubernetes/overlays/oci/secrets-patch.yaml, apps/api/requirements.txt, apps/api/Dockerfile, apps/api/Dockerfile.slim",
+  "sessionId": "1212e42b-50aa-4e2c-b3c0-d7c6b9a10d9a",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably/{\"additionalContext\": \"Worktree setup: env files copied, dependencies installing in background\"}",
+  "hadError": false
+}
