@@ -1,0 +1,32 @@
+---
+name: reference:oci-contably
+description: OCI infrastructure credentials, OCIDs, and kubectl auth workaround for Contably OKE clusters
+type: reference
+---
+
+## OCI Contably Infrastructure
+
+Credentials and OCIDs stored in `/Volumes/AI/Code/contably/.local/oci-credentials.md` (gitignored).
+
+### Key Facts
+
+- **Two OKE clusters**: `contably-oke-prod` (use this) and `contably-oke-staging`
+- **Prod cluster OCID**: `ocid1.cluster.oc1.sa-saopaulo-1.aaaaaaaak6kfvaibonj2axticenu2qhhv7ztvk7rhfo3v2yklc3xnftms6ua`
+- **OCIR username**: `gr5ovmlswwos/Default/p@nuvini.com.br`
+- **OCIR auth token**: macOS Keychain → `security find-internet-password -s 'sa-saopaulo-1.ocir.io' -w`
+- **GitHub PAT**: `GITHUB_TOKEN= gh auth token` (OAuth token with repo scope)
+- **Vault secret update command**: `oci vault secret update-base64` (NOT `update-secret-content`)
+- **OCI CLI flag**: Use `--environment-id` (NOT `--deploy-environment-id`)
+
+### kubectl Auth Issue
+
+Local kubectl fails with 401 on OKE Enhanced Clusters (API key auth). OCI Cloud Shell works (session auth).
+Workaround: Run kubectl commands via OCI Cloud Shell, or use `oci session authenticate` + `--auth security_token`.
+Cloud Shell setup script at: `/Volumes/AI/Code/contably/.local/cloud-shell-setup.sh`
+
+### Script Fixes Applied (complete-oci-setup.sh)
+
+- Changed cluster query to filter by name `contably-oke-prod` (was picking staging as first result)
+- Changed DevOps project query to use `data.items[0].id` (project has no display-name)
+- Changed `--deploy-environment-id` → `--environment-id` (OCI CLI version difference)
+- Changed `oci vault secret update-secret-content` → `oci vault secret update-base64`
