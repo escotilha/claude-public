@@ -30,3 +30,11 @@ Cloud Shell setup script at: `/Volumes/AI/Code/contably/.local/cloud-shell-setup
 - Changed DevOps project query to use `data.items[0].id` (project has no display-name)
 - Changed `--deploy-environment-id` → `--environment-id` (OCI CLI version difference)
 - Changed `oci vault secret update-secret-content` → `oci vault secret update-base64`
+
+### ESO (External Secrets Operator) Learnings
+
+- Use `external-secrets.io/v1` API version (NOT `v1beta1`)
+- Oracle provider needs `principalType: UserPrincipal` for API key auth
+- Private key must be **PKCS#8** (`BEGIN PRIVATE KEY`), not PKCS#1 — convert with `openssl pkcs8 -topk8 -nocrypt`
+- `~/.oci/contably_api_key.pem` has trailing `OCI_API_KEY` junk — strip before using
+- Cloud Shell setup gist: https://gist.github.com/escotilha/0746df720cf0eeafba1c287fd30a70a8
