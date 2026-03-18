@@ -1,18 +1,20 @@
 ---
 name: reference:paperclip-vps-setup
-description: Paperclip AI orchestration running on VPS with 3 companies (Nuvini, Contably, SourceRank) — hybrid claude_local + openclaw_gateway adapters
+description: Paperclip AI orchestration running on VPS with 3 companies (Nuvini, Contably, SourceRank) — hybrid claude_local + openclaw_gateway adapters, Nemotron 3 Super via Ollama for CEOs
 type: reference
 ---
 
 ## Paperclip on VPS
 
 - **Host:** vmi3065960 (Contabo), Tailscale IP 100.77.51.51
-- **Service:** `paperclip.service` (systemd), port 3100, bind 127.0.0.1
+- **Service:** `paperclip.service` (systemd, User=paperclip), port 3100, bind 0.0.0.0
 - **Database:** PostgreSQL 16 on port 5432, db=paperclip, user=paperclip
-- **Config:** `/root/.paperclip/instances/default/config.json`
-- **Mode:** `local_trusted` / private
+- **Config:** `/home/paperclip/.paperclip/instances/default/config.json`
+- **Mode:** `authenticated` / `private` (HTTP cookies, no Secure flag)
+- **Public URL:** `http://100.77.51.51:3100` (Tailscale only)
 - **Version:** 0.3.1 (npm: paperclipai)
-- **Claude Auth:** Max subscription (oauth login, no API key needed)
+- **Login:** p@xurman.com / Paperclip2026!
+- **Claude Auth:** Max subscription (oauth login on paperclip user, no API key needed)
 
 ## Companies
 
@@ -24,27 +26,35 @@ type: reference
 
 ## Agents
 
-| Agent               | Company    | Role    | Adapter          | Model             |
-| ------------------- | ---------- | ------- | ---------------- | ----------------- |
-| Nuvini CEO          | Nuvini     | ceo     | openclaw_gateway | (via OpenClaw)    |
-| Nuvini Orchestrator | Nuvini     | general | claude_local     | claude-sonnet-4-6 |
-| Contably CEO        | Contably   | ceo     | openclaw_gateway | (via OpenClaw)    |
-| Contably Operator   | Contably   | general | claude_local     | claude-sonnet-4-6 |
-| SourceRank CEO      | SourceRank | ceo     | openclaw_gateway | (via OpenClaw)    |
-| SourceRank Operator | SourceRank | general | claude_local     | claude-sonnet-4-6 |
+| Agent               | Company    | Role    | Adapter          | Model                     |
+| ------------------- | ---------- | ------- | ---------------- | ------------------------- |
+| Nuvini CEO          | Nuvini     | ceo     | openclaw_gateway | nemotron-3-super (Ollama) |
+| Nuvini Orchestrator | Nuvini     | general | claude_local     | claude-sonnet-4-6 (Max)   |
+| Contably CEO        | Contably   | ceo     | openclaw_gateway | nemotron-3-super (Ollama) |
+| Contably Operator   | Contably   | general | claude_local     | claude-sonnet-4-6 (Max)   |
+| SourceRank CEO      | SourceRank | ceo     | openclaw_gateway | nemotron-3-super (Ollama) |
+| SourceRank Operator | SourceRank | general | claude_local     | claude-sonnet-4-6 (Max)   |
 
 ## Architecture
 
-- **CEOs** → OpenClaw gateway (ws://127.0.0.1:3001) → Mac Mini node (MLX compute, multi-model)
-- **Operators** → claude_local adapter → Claude Code CLI directly on VPS (Max subscription, sonnet-4-6)
+- **CEOs** → OpenClaw gateway (ws://127.0.0.1:3001) → Ollama (nemotron-3-super primary, qwen3:8b backup, anthropic emergency)
+- **Operators** → claude_local adapter → Claude Code CLI on VPS as `paperclip` user (Max subscription, sonnet-4-6)
 - Personal agents (Claudia, Marco, Arnold, etc.) remain OpenClaw-only — not managed by Paperclip
-- Paperclip skill installed at `/root/.openclaw/skills/paperclip/SKILL.md`
+- Gateway API key file: `/root/.openclaw/workspace/paperclip-claimed-api-key.json`
 
-**Why:** CEOs do strategic/multi-modal work through OpenClaw's model routing. Operators do hands-on code execution directly via Claude Code on the VPS — faster, no gateway hop, direct filesystem access.
-**How to apply:** Use Paperclip CLI or API for business task assignment; use OpenClaw directly for personal agent interactions.
+## Ollama Models on VPS
+
+| Model            | Size   | Role                 |
+| ---------------- | ------ | -------------------- |
+| nemotron-3-super | 86 GB  | CEO primary (Tier 0) |
+| qwen3:8b         | 5.2 GB | CEO backup           |
+| qwen2.5:14b      | 9.0 GB | Legacy               |
 
 ## Key Config Notes
 
-- PG port was fixed from 5433→5432 on 2026-03-18 (upstream default changed)
-- Claude Code on VPS: v2.1.31, logged in via oauth (Max 20x rate limit)
-- Operator agents: `dangerouslySkipPermissions: true`, `maxTurnsPerRun: 50`, `timeoutSec: 1800`
+- Service runs as `paperclip` user (non-root, required for dangerouslySkipPermissions)
+- PG port fixed from 5433→5432 on 2026-03-18
+- PAPERCLIP_PUBLIC_URL=http://100.77.51.51:3100 (disables Secure cookie flag for HTTP)
+- CEO gateway: password = OPENCLAW_GATEWAY_TOKEN, waitTimeoutMs = 300000 (5min)
+- Operator agents: dangerouslySkipPermissions: true, maxTurnsPerRun: 50, timeoutSec: 1800
+- Both adapters smoke-tested successfully (NUV-1 via claude_local, NUV-3 via openclaw_gateway/Nemotron)
