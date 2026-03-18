@@ -386,12 +386,26 @@ Example pattern:
 ```
 # In a SINGLE message, launch all these Agent calls simultaneously:
 
-Agent(subagent_type="general-purpose", model="haiku", description="Fix skill frontmatter", prompt="Read and edit these SKILL.md files: [list]. For each: [specific changes]...", run_in_background=true)
+Agent(subagent_type="general-purpose", model="haiku", name="skill-fixer", description="Fix skill frontmatter", prompt="Read and edit these SKILL.md files: [list]. For each: [specific changes]...", run_in_background=true)
 
-Agent(subagent_type="general-purpose", model="haiku", description="Update agent files", prompt="Read and edit these agent .md files: [list]. For each: [specific changes]...", run_in_background=true)
+Agent(subagent_type="general-purpose", model="haiku", name="agent-fixer", description="Update agent files", prompt="Read and edit these agent .md files: [list]. For each: [specific changes]...", run_in_background=true)
 
-Agent(subagent_type="general-purpose", model="sonnet", description="Update config files", prompt="Read and edit settings.json: [specific changes]...", run_in_background=true)
+Agent(subagent_type="general-purpose", model="sonnet", name="config-fixer", description="Update config files", prompt="Read and edit settings.json: [specific changes]...", run_in_background=true)
 ```
+
+**Resuming agents (v2.1.77+):**
+
+The Agent tool does NOT accept a `resume` parameter. To continue a previously spawned agent, use `SendMessage`:
+
+```
+# Give the agent a name when spawning:
+Agent(name="skill-fixer", ...)
+
+# Later, send follow-up instructions:
+SendMessage(to="skill-fixer", message="Also update the verify skill frontmatter...")
+```
+
+The agent resumes with its full context preserved. Each new `Agent()` call starts fresh — use `SendMessage` to continue existing agents instead.
 
 **Rules for parallel agents:**
 
@@ -400,7 +414,7 @@ Agent(subagent_type="general-purpose", model="sonnet", description="Update confi
 - Use `run_in_background=true` to launch them concurrently
 - Wait for all agents to complete, then verify results
 - If a change depends on another change, put them in the same agent or run sequentially
-- **Breaking change (v2.1.77):** The Agent tool no longer accepts a `resume` parameter. To continue a previously spawned agent, use `SendMessage({to: agentId})` instead. Update any skill instructions that reference `Agent(..., resume=...)`
+- Always set `name` on background agents so they can be addressed via `SendMessage` if needed
 
 #### 5d. Verify all changes
 
