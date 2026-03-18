@@ -11318,3 +11318,13 @@
   "cwd": "/Users/ps/code",
   "hadError": false
 }
+{
+  "timestamp": "2026-03-18T11:39:32Z",
+  "date": "2026-03-18",
+  "skill": "cto",
+  "args": "URGENT BUG: Login returns \"Internal server error\" (HTTP 500) on contably.ai after DNS migration to OKE cluster.\n\nRoot cause identified: The DATABASE_URL vault secret in OCI Vault contains \"placeholder-update-after-db-provisioning\" instead of a real PostgreSQL connection string. The API health endpoint works (/health returns healthy) but any DB-dependent operation (login, etc.) fails with 500.\n\nContext:\n- DNS was just switched from old server (137.131.156.136) to OKE LB (137.131.234.85)\n- The old server was running Contably with a working database\n- OCI has no provisioned PostgreSQL DB system (was skipped due to replacement risk)\n- ESO ExternalSecret syncs DATABASE_URL from OCI Vault secret \"contably-db-url\"\n- All other vault secrets may also be placeholders\n\nYour task:\n1. Check ALL vault secrets to see which ones are placeholders\n2. Find the real database connection string (check old server, terraform state, .env files, any source)\n3. Update the vault secrets with real values\n4. Verify login works after the fix\n\nYou have full autonomy. OCI CLI is configured. Vault secret IDs can be found with: oci vault secret list --compartment-id \"ocid1.compartment.oc1..aaaaaaaagmp3gkydqsks74mmpi2jw7y4fwtflgas4zzfu6gp6iftmtbqqi4a\" --all\n\nIMPORTANT: Do NOT ask for permission. Fix the secrets and get login working.",
+  "sessionId": "d9aa91b6-14ea-4f03-88a6-7213cb0e3da2",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably/infrastructure/terraform/oci",
+  "hadError": false
+}
