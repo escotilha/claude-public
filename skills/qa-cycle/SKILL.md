@@ -4,6 +4,7 @@ description: "Master QA orchestrator: project-agnostic opus-powered autonomous a
 user-invocable: true
 context: fork
 model: opus
+maxTurns: 200
 allowed-tools:
   - Agent
   - Skill

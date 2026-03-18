@@ -5,6 +5,7 @@ argument-hint: ""
 user-invocable: true
 context: fork
 model: haiku
+effort: low
 allowed-tools:
   - Read
   - Glob

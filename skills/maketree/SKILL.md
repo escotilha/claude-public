@@ -4,6 +4,7 @@ description: Create and manage git worktrees via native Claude CLI flag or confi
 user-invocable: true
 context: fork
 model: haiku
+effort: low
 allowed-tools:
   - Bash
   - Read

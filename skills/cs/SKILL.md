@@ -4,6 +4,7 @@ description: Check and sync Claude setup with remote repository
 user-invocable: true
 context: fork
 model: haiku
+effort: low
 allowed-tools:
   - Bash
 tool-annotations:

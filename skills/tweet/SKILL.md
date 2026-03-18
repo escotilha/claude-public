@@ -5,6 +5,7 @@ argument-hint: "<tweet URL>"
 user-invocable: true
 context: fork
 model: haiku
+effort: low
 allowed-tools:
   - WebFetch
   - WebSearch

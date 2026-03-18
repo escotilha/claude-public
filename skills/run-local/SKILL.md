@@ -4,6 +4,7 @@ description: Start local development environment with automatic dependency insta
 user-invocable: true
 context: fork
 model: haiku
+effort: low
 allowed-tools:
   - Bash
   - Read
