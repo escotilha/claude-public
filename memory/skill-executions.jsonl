@@ -11458,3 +11458,13 @@
   "cwd": "/Users/ps/code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-03-21T17:16:46Z",
+  "date": "2026-03-21",
+  "skill": "cto",
+  "args": "Review the OCR pipeline architecture on the Contably project at /Users/ps/code/contably. Focus on the new document processing structure that was just deployed: document_router.py, ocr_service.py (PaddleOCR), image_preprocessor.py, schema_extractor.py + schemas/, vision_providers/ (Gemini/Claude), confidence_calculator.py, confidence_tracker.py, and how they're wired into extraction_service.py and pdf_image_workflow.py. Check for: architectural concerns, coupling issues, error handling gaps, performance bottlenecks, and whether the graceful degradation fallbacks work.",
+  "sessionId": "99e64d0a-a935-4685-ade9-37ed302324af",
+  "project": "Contably",
+  "cwd": "/Users/ps/code/contably",
+  "hadError": false
+}
