@@ -445,7 +445,23 @@ Runs automatically on first invocation. Detects project type and stores config i
 | ---- | ------ | ---------- |
 ```
 
-5. **Update state.json** → phase complete
+5. **Section-by-section approval (HARD-GATE):**
+
+   Present each major section of the product spec to the user for approval before writing the next. This prevents wasted work on a misaligned spec.
+
+   **Approval sequence:**
+   1. Present **Problem Statement + Target Users** → wait for approval or corrections
+   2. Present **Scope (In/Out)** → wait for approval or corrections
+   3. Present **User Stories + Success Metrics** → wait for approval or corrections
+   4. After all sections approved → write the complete `product-spec.md`
+
+   **Rules:**
+   - Use AskUserQuestion after each section: "Section approved? [Yes / Needs changes]"
+   - If user requests changes → revise that section → re-present → wait again
+   - Do NOT draft later sections until earlier ones are approved — they build on each other
+   - Shortcut: if user says "approve all" or "looks good, keep going" after section 1, treat as blanket approval and write remaining sections without pausing
+
+6. **Update state.json** → phase complete
 
 ### Skip Condition
 
@@ -553,11 +569,23 @@ If user provides a detailed sprint plan (like the Sprint 1 example), treat it as
 [Numbered sequence respecting dependencies]
 ```
 
-5. **Present to user for approval (HARD-GATE):**
-   - Display the tech spec summary (architecture decision, key files, implementation order)
-   - Use AskUserQuestion: "Tech spec written to `tech-spec.md`. Review it and approve before I plan implementation. [Approve / Request changes]"
-   - **Do NOT proceed to Phase 3 until the user explicitly approves.** This is a hard gate — no implicit approval, no timeout, no auto-proceed.
-   - If user requests changes → update tech-spec.md → re-present for approval
+5. **Section-by-section approval (HARD-GATE):**
+
+   Present each major section of the tech spec incrementally for approval:
+
+   **Approval sequence:**
+   1. Present **Architecture Decision + Database Changes** → wait for approval
+   2. Present **API Design + Service Layer** → wait for approval
+   3. Present **Frontend Changes + Dependencies** → wait for approval
+   4. Present **Implementation Order** → wait for approval
+   5. After all sections approved → finalize `tech-spec.md`
+
+   **Rules:**
+   - Use AskUserQuestion after each section: "Section approved? [Yes / Needs changes]"
+   - If user requests changes → revise that section → re-present → wait again
+   - Do NOT proceed to Phase 3 until ALL sections are explicitly approved
+   - No implicit approval, no timeout, no auto-proceed
+   - Shortcut: if user says "approve all" or "looks good, keep going" after section 1, treat as blanket approval and finalize remaining sections without pausing
    - If user approves → update state.json → proceed to Phase 3
 
 6. **Update state.json** → phase complete
@@ -693,16 +721,33 @@ b. **Each agent gets a fresh, self-contained context (no conversation history):*
 
 > **Fresh Context Rule:** NEVER pass the orchestrator's conversation history or prior agent outputs to executor agents. Each agent starts with a clean context containing only its task prompt. This prevents context rot — output quality degrades as context fills with irrelevant prior conversation. The orchestrator's job is to distill, not forward.
 
-c. **After each group completes — verify triple:**
+c. **After each group completes — verify triple + mini spec check:**
 
 - Run `{project.commands.typecheck}` (skip if not available) — fix inline before proceeding
 - Run `{project.commands.test}` (skip if not available) — fix any regressions
 - Run `{project.commands.build}` (skip if not available) — catch SSR/import/bundler issues
 - All three must pass before committing the group
+- **Mini spec check (haiku):** Spawn a lightweight haiku subagent that compares this group's tasks against the implemented code. Reports FULL/PARTIAL/MISSING per task. Fix any MISSING items before committing. This catches spec drift early — cheaper to fix per-group than to discover at Phase 4.5.
 - Commit the group: `git add <specific files> && git commit -m "feat(feature): implement group X"`
 - Update state.json with completed tasks
 
-3. **Context checkpoint:** If context usage approaches 80%:
+3. **Handle agent status responses:**
+
+   After each agent completes, parse the STATUS line from its response:
+
+   | Status                | Action                                                                                            |
+   | --------------------- | ------------------------------------------------------------------------------------------------- |
+   | `DONE`                | Mark task complete, proceed to next                                                               |
+   | `DONE_WITH_CONCERNS`  | Mark complete, log concerns in state.json for Phase 4.5 review to evaluate                        |
+   | `NEEDS_CONTEXT`       | Re-spawn agent with additional context, or ask user if context is unavailable                     |
+   | `BLOCKED`             | Stop the group. If 3+ failed fixes: flag as architectural issue, ask user before continuing       |
+
+   **Architectural escalation:** When an agent reports BLOCKED after 3 fix attempts, do NOT re-spawn or retry. Instead:
+   - Log the error chain in state.json
+   - Present to user: "Task {N} blocked after 3 fix attempts. This likely indicates an architectural issue, not a bug. Error: {details}. [Redesign approach / Skip task / Manual fix]"
+   - Wait for user decision before continuing
+
+4. **Context checkpoint:** If context usage approaches 80%:
    - Commit all current work
    - Update state.json with exact progress
    - Tell user: "Context getting full. Committed progress. Run `/ship --resume` to continue."
@@ -825,6 +870,15 @@ Do NOT mark your task as complete until all three pass.
 - When reading files, use offset/limit to read only relevant sections. Do NOT read entire files over 500 lines.
 - After completing each task in your group, write a 1-line summary to .task-progress.md in the worktree.
 - You are ONLY responsible for the files listed above. Do NOT modify other files.
+
+**Completion status (MANDATORY):**
+Your final message MUST start with exactly one of these status lines:
+- `STATUS: DONE` — task fully complete, all checks pass
+- `STATUS: DONE_WITH_CONCERNS` — task complete but you noticed issues (list them)
+- `STATUS: NEEDS_CONTEXT` — you need information not in this prompt to proceed (specify what)
+- `STATUS: BLOCKED` — you cannot complete this task (explain why)
+
+**3-strikes rule:** If you fail to fix a typecheck/test/build error after 3 attempts, STOP. Report `STATUS: BLOCKED` with the error details. Three failed fixes likely means an architectural problem, not an implementation bug — the orchestrator needs to re-evaluate.
 
 **Important:**
 - Do NOT add comments, docstrings, or type annotations beyond what's needed
@@ -1230,6 +1284,7 @@ This skill has access to several MCP servers. Use the right tool for each situat
 
 ## Version
 
+**v5.1.0** — Extended Superpowers patterns: (1) Section-by-section hard-gate approval on product spec (Phase 1) and tech spec (Phase 2) — each section approved independently before the next is written, with "approve all" shortcut. (2) Implementer status protocol (DONE/DONE_WITH_CONCERNS/NEEDS_CONTEXT/BLOCKED) with 3-strikes architectural escalation rule — stops blind retries, surfaces design issues to user. (3) Per-group mini spec check (haiku) in Phase 4 for early spec-drift detection before full Phase 4.5 review.
 **v5.0.0** — Three Superpowers patterns: (1) Phase 4.5 replaced with two-stage subagent review loop (spec compliance + code quality, both sonnet, run in parallel). (2) HARD-GATE on Phase 2→3 transition — tech spec requires explicit user approval before planning begins. (3) 2-5 minute task granularity in Phase 3 — every task must specify exact file paths and expected code output.
 **v4.2.0** — Fresh context per executor: each spawned agent gets a clean context with only its task prompt, project context, and filtered learnings. No conversation history forwarded. Prevents context rot in long sessions.
 **v4.1.0** — Added Phase 4.5: Reflexion (self-critique pass between execution and QA). Compares implementation against spec before QA, fixing mismatches inline to reduce QA iterations.

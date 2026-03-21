@@ -289,6 +289,22 @@ export function createFoo(input: CreateFooInput): Promise<Foo> {
 
 ```
 
+### 2.1.1 Section-by-Section Approval (HARD-GATE)
+
+Present each major section of the plan incrementally for approval before writing the next:
+
+**Approval sequence:**
+1. Present **Approach + Trade-offs** → wait for approval
+2. Present **Implementation Steps 1–N** (grouped by concern area) → wait for approval
+3. Present **Testing Strategy + Rollback Plan** → wait for approval
+4. After all sections approved → finalize `plan.md`
+
+**Rules:**
+- Use AskUserQuestion after each section: "Section approved? [Yes / Needs changes]"
+- If user requests changes → revise that section → re-present → wait again
+- Do NOT write later sections until earlier ones are approved — they build on each other
+- Shortcut: if user says "approve all" or "looks good, keep going" after section 1, treat as blanket approval and write remaining sections without pausing
+
 Tell the user: "Plan written to `plan.md` — review it, add inline annotations (comments, questions, corrections), and I'll iterate."
 
 ### 2.2 Annotation Cycle
@@ -303,9 +319,9 @@ When the user says they've annotated the plan:
 
 Repeat until the user approves.
 
-### 2.3 HARD-GATE: Plan Approval Required
+### 2.3 HARD-GATE: Final Plan Approval Required
 
-**Do NOT proceed to Phase 3 until the user explicitly approves the plan.** This is a hard gate:
+**Do NOT proceed to Phase 3 until the user explicitly approves the complete plan.** This is a hard gate:
 
 - No implicit approval (silence is not consent)
 - No auto-proceed after a timeout

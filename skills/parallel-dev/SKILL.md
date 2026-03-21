@@ -744,8 +744,14 @@ Teammate "{feature-id}":
      c. Build: `{project.commands.build}` (skip if unavailable)
      Do NOT mark complete until all three pass.
   5. Commit with message: feat({feature-id}): {description}
-  6. Message the lead: "Complete. Verify: types OK, tests OK, build OK. {summary}"
-  7. If you need an API/interface from another feature,
+  6. **Report status using EXACTLY one of these lines as your first message line to the lead:**
+     - `STATUS: DONE` — feature fully complete, all checks pass
+     - `STATUS: DONE_WITH_CONCERNS` — complete but noticed issues (list them)
+     - `STATUS: NEEDS_CONTEXT` — need information not in this prompt (specify what)
+     - `STATUS: BLOCKED` — cannot complete (explain why)
+  7. **3-strikes rule:** If you fail to fix a typecheck/test/build error after 3 attempts,
+     STOP and report `STATUS: BLOCKED`. Three failed fixes = architectural problem.
+  8. If you need an API/interface from another feature,
      message that teammate directly to coordinate.
 
   Do NOT modify files outside {worktree-path}.
@@ -753,9 +759,16 @@ Teammate "{feature-id}":
 
 **Lead orchestrator instructions:**
 
-- When a teammate messages completion, update feature status and shut them down immediately
-- Check if newly-unblocked features can be spawned
-- When a teammate reports a blocker, try to resolve or notify user
+- Parse the STATUS line from each teammate's message:
+
+  | Status               | Action                                                                              |
+  | -------------------- | ----------------------------------------------------------------------------------- |
+  | `DONE`               | Update feature status, shut down teammate, check for unblocked features             |
+  | `DONE_WITH_CONCERNS` | Log concerns, update status, shut down — review concerns before merge in Phase 4.6  |
+  | `NEEDS_CONTEXT`      | Provide context via direct message, or escalate to user if unavailable              |
+  | `BLOCKED`            | If 3+ fix attempts: flag as architectural issue, ask user. Do NOT re-spawn blindly. |
+
+- **Architectural escalation (3-strikes):** When a teammate reports BLOCKED after 3 fix attempts, present to user: "Feature {name} blocked after 3 fix attempts. This likely indicates an architectural issue. Error: {details}. [Redesign / Skip / Manual fix]"
 - When all features complete, begin Phase 5 (merge)
 
 **Messaging discipline:** Teammates should use direct messages only. Never broadcast for progress updates or individual findings. Only broadcast for blocking discoveries that change everyone's approach.
@@ -786,6 +799,17 @@ When Agent Teams is unavailable, use the Task tool with `run_in_background: true
        c. Build (skip if unavailable)
     4. Commit your changes with descriptive messages
     5. Signal completion by creating .feature-complete marker file
+
+    ### Completion Status (MANDATORY):
+    Your final output MUST start with exactly one of:
+    - `STATUS: DONE` — feature fully complete, all checks pass
+    - `STATUS: DONE_WITH_CONCERNS` — complete but noticed issues (list them)
+    - `STATUS: NEEDS_CONTEXT` — need information not in this prompt (specify what)
+    - `STATUS: BLOCKED` — cannot complete (explain why)
+
+    ### 3-Strikes Rule:
+    If you fail to fix a typecheck/test/build error after 3 attempts, STOP.
+    Report STATUS: BLOCKED. Three failed fixes = architectural problem.
 
     ### Constraints:
     - Stay within this worktree directory
