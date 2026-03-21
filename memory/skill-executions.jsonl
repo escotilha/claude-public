@@ -11468,3 +11468,13 @@
   "cwd": "/Users/ps/code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-03-21T17:24:09Z",
+  "date": "2026-03-21",
+  "skill": "manual",
+  "args": "Build/update the project manual for Contably at /Users/ps/code/contably. Focus on documenting the document processing pipeline: how documents flow from upload through format routing, OCR (PaddleOCR), image preprocessing, field extraction (Instructor+Pydantic schemas), vision providers (Gemini/Claude), confidence scoring, feedback loop, and canonization. Include configuration settings (GEMINI_API_KEY, EVTIT_ENABLED) and architecture diagrams.",
+  "sessionId": "99e64d0a-a935-4685-ade9-37ed302324af",
+  "project": "Contably",
+  "cwd": "/Users/ps/code/contably",
+  "hadError": false
+}
