@@ -5,6 +5,7 @@ argument-hint: [format: html|word|screenshots [url]]
 user-invocable: true
 context: fork
 model: sonnet
+effort: low
 allowed-tools:
   - Bash
   - Read

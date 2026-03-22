@@ -13,6 +13,7 @@ description: |
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools:
   - Bash
   - Read

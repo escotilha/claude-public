@@ -4,6 +4,7 @@ description: "Full QA cycle for SourceRank AI with swarm-parallel persona testin
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools:
   - Agent
   - TaskCreate

@@ -5,6 +5,7 @@ argument-hint: "<feature or task description>"
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools:
   - Read
   - Write

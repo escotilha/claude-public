@@ -5,6 +5,7 @@ argument-hint: "<setup | add-channel <telegram|gmail|discord|slack> | sandbox | 
 user-invocable: true
 context: fork
 model: sonnet
+effort: low
 allowed-tools:
   - Read
   - Write

@@ -4,6 +4,7 @@ description: "Headless browser automation via self-hosted Browserless. Generate 
 user-invocable: true
 context: fork
 model: sonnet
+effort: medium
 allowed-tools:
   - Read
   - Write

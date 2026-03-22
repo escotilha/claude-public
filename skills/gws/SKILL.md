@@ -5,6 +5,7 @@ argument-hint: "<task description>"
 user-invocable: true
 context: fork
 model: sonnet
+effort: low
 allowed-tools:
   - Bash
   - Read

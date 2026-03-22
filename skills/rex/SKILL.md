@@ -5,6 +5,7 @@ argument-hint: "[target: all|mac|mini|vps] [--fix]"
 user-invocable: true
 context: fork
 model: sonnet
+effort: medium
 allowed-tools:
   - Bash
   - Read

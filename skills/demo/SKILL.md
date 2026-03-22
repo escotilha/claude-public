@@ -5,6 +5,7 @@ argument-hint: "<what to demo — feature, tool, workflow, or script>"
 user-invocable: true
 context: fork
 model: sonnet
+effort: low
 allowed-tools:
   - Read
   - Write

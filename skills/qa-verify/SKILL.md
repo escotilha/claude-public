@@ -4,6 +4,7 @@ description: "Loads issues in TESTING status from the QA database and verifies f
 user-invocable: true
 context: fork
 model: sonnet
+effort: medium
 allowed-tools:
   - Agent
   - TaskCreate

@@ -4,6 +4,7 @@ description: "Pre-deploy guardian for SourceRank AI. Runs a comprehensive multi-
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools:
   - Read
   - Write

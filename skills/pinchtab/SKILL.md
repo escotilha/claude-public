@@ -4,6 +4,7 @@ description: "Local browser automation via PinchTab. Navigate pages, extract acc
 user-invocable: true
 context: fork
 model: sonnet
+effort: low
 allowed-tools:
   - Read
   - Write

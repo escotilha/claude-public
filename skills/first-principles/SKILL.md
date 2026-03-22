@@ -5,6 +5,7 @@ argument-hint: "<problem description>"
 user-invocable: true
 context: fork
 model: opus
+effort: high
 permissionMode: plan
 allowed-tools:
   - Read

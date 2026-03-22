@@ -5,6 +5,7 @@ argument-hint: "[environment: staging|production|all] [--skip-guardian] [--skip-
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools:
   - Read
   - Write

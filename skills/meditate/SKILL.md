@@ -4,6 +4,7 @@ description: "End-of-session judgment extraction. Structured capture of learning
 user-invocable: true
 context: fork
 model: haiku
+effort: low
 allowed-tools:
   - Read
   - Glob

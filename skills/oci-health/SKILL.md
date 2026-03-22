@@ -5,6 +5,7 @@ argument-hint: "[environment: staging|production|both]"
 user-invocable: true
 context: fork
 model: haiku
+effort: low
 allowed-tools:
   - Bash
   - Read

@@ -5,6 +5,7 @@ argument-hint: "<url or page to optimize, or mode: cro|pricing|seo|onboarding|ch
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools:
   - Read
   - Write

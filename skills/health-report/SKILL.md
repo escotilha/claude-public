@@ -5,6 +5,7 @@ argument-hint: "[--skip-qa] [--skip-lighthouse] [--pdf-only] [--url URL]"
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools:
   - Agent
   - TaskCreate

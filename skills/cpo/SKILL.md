@@ -15,6 +15,7 @@ allowed-tools:
   - TaskGet
   - mcp__memory__*
 model: opus
+effort: high
 disable-model-invocation: true
 memory: user
 tool-annotations:

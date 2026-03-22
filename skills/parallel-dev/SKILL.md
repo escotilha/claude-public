@@ -4,6 +4,7 @@ description: "Parallel feature development using git worktrees and specialized a
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools:
   - Read
   - Write

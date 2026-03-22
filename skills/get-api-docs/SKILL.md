@@ -5,6 +5,7 @@ argument-hint: "<library name or chub doc ID>"
 user-invocable: true
 context: fork
 model: haiku
+effort: low
 allowed-tools:
   - Bash
   - Read

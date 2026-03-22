@@ -5,6 +5,7 @@ argument-hint: "<feature description, sprint plan, or --resume>"
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools:
   - Read
   - Write

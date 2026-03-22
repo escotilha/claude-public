@@ -5,6 +5,7 @@ user-invocable: true
 context: fork
 agent: Explore
 model: sonnet
+effort: low
 allowed-tools:
   - Read
   - Glob

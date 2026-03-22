@@ -4,6 +4,7 @@ description: "Review uncommitted changes for bugs, security issues, and code qua
 user-invocable: true
 context: fork
 model: sonnet
+effort: medium
 allowed-tools:
   - Bash
   - Read

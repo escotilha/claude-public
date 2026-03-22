@@ -5,6 +5,7 @@ argument-hint: "<feature-id | 'last' | commit-range>"
 user-invocable: true
 context: fork
 model: sonnet
+effort: medium
 allowed-tools:
   - Read
   - Glob

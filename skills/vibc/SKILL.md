@@ -5,6 +5,7 @@ argument-hint: "<decision or problem> [--mode full|quick] [--type binary|strateg
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools:
   - Read
   - Write

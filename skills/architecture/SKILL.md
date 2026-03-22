@@ -5,6 +5,7 @@ argument-hint: "[format: md|pdf|docx] [--force]"
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools:
   - Read
   - Write

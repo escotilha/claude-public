@@ -4,6 +4,7 @@ description: Remote autonomous coding relay via SSH to Mac Mini. Use this skill 
 user-invocable: true
 context: fork
 model: sonnet
+effort: low
 allowed-tools:
   - Bash
   - Read

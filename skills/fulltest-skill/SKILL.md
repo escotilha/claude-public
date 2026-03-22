@@ -4,6 +4,7 @@ description: "Swarm-enabled full-spectrum testing for websites and applications.
 user-invocable: true
 context: fork
 model: sonnet # Orchestration-focused; spawns haiku agents for parallel page testing
+effort: medium
 maxTurns: 150
 allowed-tools:
   - Agent

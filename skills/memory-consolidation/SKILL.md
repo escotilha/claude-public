@@ -4,6 +4,7 @@ description: "Human-like memory maintenance for AI agents. Consolidates learning
 user-invocable: true
 context: fork
 model: sonnet
+effort: low
 allowed-tools:
   - Read
   - Write

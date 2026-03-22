@@ -5,6 +5,7 @@ argument-hint: [project-path]
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools: "*"
 tool-annotations:
   Bash: { destructiveHint: true, idempotentHint: false }

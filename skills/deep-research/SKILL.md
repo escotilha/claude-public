@@ -5,6 +5,7 @@ argument-hint: "<research question>"
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools:
   - WebFetch
   - WebSearch

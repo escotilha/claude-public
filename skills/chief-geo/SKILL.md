@@ -5,6 +5,7 @@ argument-hint: "<mode: full|knowledge|audit|manual|visibility|daily> [--brand NA
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools:
   - Read
   - Write

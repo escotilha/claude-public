@@ -4,6 +4,7 @@ description: "Pre-deploy guardian for Contably. Runs a comprehensive multi-layer
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools:
   - Read
   - Write

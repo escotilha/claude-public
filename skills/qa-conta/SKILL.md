@@ -4,6 +4,7 @@ description: "Autonomous Opus orchestrator for Contably QA. Runs API-level tests
 user-invocable: true
 context: fork
 model: opus
+effort: high
 maxTurns: 200
 allowed-tools:
   - Agent

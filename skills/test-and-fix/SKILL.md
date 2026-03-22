@@ -4,6 +4,7 @@ description: "Run tests and auto-fix failures in a loop. Use when tests are fail
 user-invocable: true
 context: fork
 model: sonnet
+effort: medium
 allowed-tools:
   - Bash
   - Read

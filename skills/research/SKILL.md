@@ -5,6 +5,7 @@ argument-hint: "<url or image path>"
 user-invocable: true
 context: fork
 model: sonnet
+effort: medium
 allowed-tools:
   - WebFetch
   - WebSearch

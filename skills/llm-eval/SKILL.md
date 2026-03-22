@@ -5,6 +5,7 @@ argument-hint: "<feature/endpoint to evaluate, or 'audit' to review existing eva
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools:
   - Read
   - Write

@@ -5,6 +5,7 @@ argument-hint: "<client name or context>"
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools:
   - Read
   - Write

@@ -4,6 +4,7 @@ description: "Full QA cycle for StoneGEO platform with code analysis + browser t
 user-invocable: true
 context: fork
 model: opus
+effort: high
 allowed-tools:
   - Agent
   - TaskCreate

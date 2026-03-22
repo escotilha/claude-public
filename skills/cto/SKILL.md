@@ -4,6 +4,7 @@ description: "Swarm-enabled AI CTO advisor for any project. Uses TeammateTool fo
 user-invocable: true
 context: fork
 model: opus # Complex technical decisions require deep reasoning
+effort: high
 allowed-tools:
   - Read
   - Write
