@@ -13108,3 +13108,13 @@
   "cwd": "/Users/ps/code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-03-22T12:55:11Z",
+  "date": "2026-03-22",
+  "skill": "deep-plan",
+  "args": "Implement a Beta Tester Feature Flag System for Contably (Option C - Hybrid approach).\n\n## What to build:\n1. **DB migration**: Add `is_beta: bool = False` column to `users` and `client_users` tables\n2. **JWT claims**: Include `is_beta` in the token payload so frontend can read it without extra API calls\n3. **Backend decorator**: `@beta_required` decorator for beta-only API endpoints\n4. **Frontend hook**: `useBetaFeature(\"feature_name\")` that checks the JWT claim\n5. **Admin toggle**: Simple switch in the admin dashboard user management to enable/disable beta per user\n6. **Feature registry**: A config dict mapping feature names → whether they require beta access\n\n## Context:\n- Monorepo with apps/api (FastAPI + SQLAlchemy), apps/admin (React + Vite + Zustand), apps/client-portal (Next.js)\n- Auth is HS256 JWT with claims: sub, email, company_id, role, is_superuser, jti, type\n- User model is in /apps/api/src/models/companies.py with existing `preferences` JSON field and `user_type` string field\n- Staging/production are separate K8s namespaces on OCI\n- Frontend uses Zustand for auth state\n- The system already has `system_settings.feature_flags` JSON field for global toggles\n\n## Key decisions needed:\n- Where to store the feature registry (code config vs DB)\n- How frontend components conditionally render beta features\n- Whether client_users (portal) also get beta access\n- How to handle beta feature deprecation/graduation to GA",
+  "sessionId": "2951c38a-fb7e-4c1e-8520-8010dd38c95e",
+  "project": "Contably",
+  "cwd": "/Users/ps/code/contably",
+  "hadError": false
+}
