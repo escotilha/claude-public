@@ -13088,3 +13088,13 @@
   "cwd": "/Users/ps/code/claude-setup",
   "hadError": false
 }
+{
+  "timestamp": "2026-03-22T12:04:17Z",
+  "date": "2026-03-22",
+  "skill": "website-design",
+  "args": "Review and improve the UX/UI design of the \"Criar Nova Empresa\" (Create New Company) dialog in the Contably admin panel at /Users/ps/code/contably/apps/admin/src/pages/companies/CompaniesPage.tsx. \n\nThe dialog now has:\n1. CNPJ input + \"Buscar Dados\" button\n2. Razão Social (company name) input\n3. Nome Fantasia (trade name) input\n4. A \"Filial\" toggle with a parent company selector (Select dropdown)\n\nFocus on:\n- Making the subsidiary section feel polished and intuitive (the bordered card with Switch + conditional Select)\n- Smooth visual transition when the subsidiary toggle is enabled (showing/hiding the parent company selector)\n- Good spacing, typography, and visual hierarchy\n- The toast notification when a subsidiary is auto-detected should feel natural\n- The overall dialog should look professional and not feel cramped with the new fields\n- Use existing @contably/ui components (shadcn-based) and Tailwind classes only\n\nThe tech stack is React + Tailwind + shadcn/ui components from @contably/ui package. Do NOT add new dependencies.",
+  "sessionId": "116bb5be-14ff-4121-a9a2-76a4707d7720",
+  "project": "Contably",
+  "cwd": "/Users/ps/code/contably",
+  "hadError": false
+}
