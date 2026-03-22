@@ -50,13 +50,14 @@ Full credentials stored in `/Volumes/AI/Code/contably/.local/oci-credentials.md`
 
 ### Redis
 
-| Field | Value                                                                  |
-| ----- | ---------------------------------------------------------------------- |
-| Host  | `10.0.2.150`                                                           |
-| Port  | `6379`                                                                 |
-| VCN   | Prod VCN (reachable from prod cluster only — NOT from staging cluster) |
+Two clusters, both ACTIVE, each in its own VCN matching its OKE cluster:
 
-**Note:** Redis is in the prod VCN. The staging cluster may not be able to reach it. The API gracefully degrades without Redis (login lockout skipped, session cache skipped).
+| Cluster                  | IP           | Nodes | Memory | VCN     |
+| ------------------------ | ------------ | ----- | ------ | ------- |
+| `contably-redis-staging` | `10.0.2.202` | 1     | 2 GB   | Staging |
+| `contably-redis-prod`    | `10.0.2.150` | 2     | 6 GB   | Prod    |
+
+Both are reachable from their respective OKE clusters (same VCN, db-subnet).
 
 ### Credential Sources (macOS Keychain)
 

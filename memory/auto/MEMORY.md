@@ -25,6 +25,7 @@
 - [reference_paperclip_vps.md](reference_paperclip_vps.md) — Paperclip AI orchestration on VPS with 3 companies (Nuvini, Contably, SourceRank) connected to OpenClaw gateway — ports, company IDs, agent roster, architecture
 - [reference_oci_contably.md](reference_oci_contably.md) — OCI infrastructure credentials, OCIDs, kubectl auth workaround, and OCIR details for Contably OKE clusters
 - [tech_lightpanda_browser.md](tech_lightpanda_browser.md) — Lightpanda headless browser (Zig, CDP) — not ready as Chrome replacement, revisit Q3 2026
+- [tech_asmr_memory_retrieval.md](tech_asmr_memory_retrieval.md) — ASMR by Supermemory — 3-agent parallel retrieval (facts/context/temporal) replacing vector DB, ~99% LongMemEval_s. Open-source ~April 2026. Applied to /consolidate, /meditate, /cto.
 
 # currentDate
 

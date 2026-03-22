@@ -603,22 +603,60 @@ Teammate "quality-analyst":
 
 When Agent Teams is unavailable, spawn via Task tool with `run_in_background: true`. Use the same file ownership boundaries and reporting format above, but analysts write findings to `.cto-review/{analyst-name}.md` instead of messaging. The lead polls for file completion.
 
-#### 3.2: Swarm Findings Synthesis
+#### 3.2: Parallel Swarm Findings Synthesis
 
-After all analysts complete (or timeout), merge findings:
+> **ASMR Synthesis Pattern:** Instead of a single orchestrator doing severity ranking, cross-concern detection, and effort estimation sequentially, spawn 3-4 specialist synthesis agents in parallel. Each agent analyzes the raw analyst findings from a different perspective, then results are merged into the final report. Based on Supermemory's ASMR answering architecture (parallel specialist prompt variants). This catches cross-domain interactions that single-pass synthesis misses.
 
-1. Read all analyst reports (from messages or `.cto-review/*.md` files)
-2. Detect **cross-concerns**: findings flagged by 2+ analysts about the same file/pattern
-3. Detect **emerging patterns**: same issue type appearing across 3+ files
-4. Rank findings by: critical > high > medium > low, with cross-concerns elevated one level
-5. Generate the unified executive report (Step 4 format)
+After all analysts complete (or timeout), collect all raw findings, then spawn 3 parallel synthesis agents (model: haiku) via Task tool with `run_in_background: true`:
 
 ```
-Cross-concern examples:
-- architecture finds loop pattern in orders.ts + performance confirms N+1 → elevate to HIGH
-- security finds vulnerable lodash + quality finds deprecated usage → consolidate into single finding
-- quality finds missing error handling in 5 files + security finds unhandled auth errors → emerging pattern
+Synthesis Agent "severity-ranker" (haiku):
+  Input: {all raw analyst findings as JSON}
+  Task: Rank every finding by severity using these rules:
+  - CRITICAL: production outage risk, data loss, security breach, auth bypass
+  - HIGH: significant performance degradation, major security flaw, data integrity risk
+  - MEDIUM: code quality issues affecting maintainability, moderate performance impact
+  - LOW: style issues, minor tech debt, nice-to-have improvements
+  For findings at boundary between levels, err toward the higher severity.
+  Output: JSON array of {finding_id, severity, justification}
+
+Synthesis Agent "cross-concern-detector" (haiku):
+  Input: {all raw analyst findings as JSON, grouped by analyst}
+  Task: Find cross-concern patterns:
+  1. SAME FILE flagged by 2+ analysts → elevate one severity level
+  2. SAME ISSUE TYPE across 3+ files → flag as emerging pattern
+  3. CONTRADICTIONS between analysts (one says "good", another says "bad") → flag for lead review
+  4. REINFORCEMENTS where multiple analysts confirm the same root cause
+  Examples:
+  - architecture finds loop in orders.ts + performance confirms N+1 → elevate to HIGH
+  - security finds vulnerable lodash + quality finds deprecated usage → consolidate
+  - quality finds missing error handling in 5 files + security finds unhandled auth → emerging pattern
+  Output: JSON with {elevations[], emergingPatterns[], contradictions[], consolidations[]}
+
+Synthesis Agent "effort-estimator" (haiku):
+  Input: {all raw analyst findings as JSON}
+  Task: For each finding, estimate implementation effort:
+  - QUICK WIN: <1 hour, single file change, low risk
+  - MODERATE: 1-4 hours, multiple files, some testing needed
+  - SIGNIFICANT: 1-2 days, architectural change, thorough testing
+  - MAJOR: 3+ days, cross-cutting refactor, migration planning
+  Also identify the optimal fix ORDER (dependencies between fixes,
+  quick wins that unblock larger changes).
+  Output: JSON array of {finding_id, effort, dependencies[], quickWin: boolean}
 ```
+
+**Merge synthesis results:**
+
+After all 3 synthesis agents complete, the lead orchestrator merges:
+
+1. Apply severity rankings from severity-ranker
+2. Apply elevations from cross-concern-detector (override severity where cross-concerns found)
+3. Consolidate duplicate findings flagged by cross-concern-detector
+4. Annotate each finding with effort estimate
+5. Sort: critical quick-wins first, then critical significant, then high quick-wins, etc.
+6. Generate the unified executive report (Step 4 format)
+
+**Fallback:** If Task tool is unavailable or findings are <10, do single-pass synthesis (the lead merges findings directly using the rules above).
 
 ---
 

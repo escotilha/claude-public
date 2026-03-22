@@ -121,29 +121,78 @@ ls $HOME/.claude-setup/memory/archive/ 2>/dev/null | wc -l
 
 ## Phase 1: Analyze Memory Health
 
-### Step 1.1: Load All Memories
+### Step 1.1: Load All Memories via ASMR Retrieval
+
+> **ASMR Pattern (Agentic Search and Memory Retrieval):** Instead of a single BM25 query that misses temporal reasoning and implicit connections, spawn 3 parallel retrieval agents. Each agent searches the memory graph from a different angle, then results are merged. This eliminates the semantic similarity trap on temporal changes and contradictory facts. Based on Supermemory's ASMR pipeline (~99% on LongMemEval_s).
+
+**Step 1: Parallel Retrieval Agents**
+
+Spawn 3 subagents (model: haiku) in parallel via Task tool with `run_in_background: true`:
+
+```
+Agent "facts-retriever" (haiku):
+  Search Memory MCP and auto-memory for DIRECT FACTS.
+  Query all memory types: pattern:, mistake:, tech-insight:, preference:,
+  research:, competitor:, design:, stack:, architecture:
+  Also scan ~/.claude-setup/memory/auto/*.md for auto-memory entries.
+  For each memory, extract: name, type, observation count, key facts.
+  Return: JSON array of {name, type, factSummary, observationCount}
+  Focus: What do we KNOW? Explicit stored facts and observations.
+
+Agent "context-retriever" (haiku):
+  Search Memory MCP for IMPLICATIONS and CONTEXT.
+  For each memory type, look for:
+  - Relations between memories (derived_from, supersedes, related_to, prevents)
+  - Memories that CONTRADICT each other (same topic, different conclusions)
+  - Memories that REINFORCE each other (multiple sources confirming same insight)
+  - Orphaned memories with no relations
+  Return: JSON with {contradictions[], reinforcements[], orphans[], relationGraph[]}
+  Focus: What CONNECTIONS exist? What conflicts need resolution?
+
+Agent "temporal-retriever" (haiku):
+  Search Memory MCP and auto-memory for TEMPORAL PATTERNS.
+  For each memory, extract timeline data:
+  - Discovered date, last used date, age in days
+  - Usage trajectory (increasing, stable, declining, unused)
+  - Temporal clusters (memories created around the same time = same project/session)
+  - Memories that UPDATE previous memories (supersedes relations with dates)
+  Return: JSON with {timeline[], clusters[], trajectories[], staleMemories[]}
+  Focus: WHEN did things change? What's the temporal story?
+```
+
+**Step 2: Merge Retrieval Results**
+
+After all 3 agents complete, the orchestrator merges their outputs into a unified memory state:
 
 ```javascript
-// Query all memories from Memory MCP
-const allMemories = await mcp__memory__search_nodes({ query: "" });
+// Merge the three retrieval perspectives
+const memoryState = {
+  // From facts-retriever
+  allMemories: factsResult.memories,
+  byType: groupByType(factsResult.memories),
 
-// Also query by specific types
-const patterns = await mcp__memory__search_nodes({ query: "pattern:" });
-const mistakes = await mcp__memory__search_nodes({ query: "mistake:" });
-const techInsights = await mcp__memory__search_nodes({
-  query: "tech-insight:",
-});
-const preferences = await mcp__memory__search_nodes({ query: "preference:" });
-const research = await mcp__memory__search_nodes({ query: "research:" });
-const competitors = await mcp__memory__search_nodes({ query: "competitor:" });
-const designs = await mcp__memory__search_nodes({ query: "design:" });
-const stacks = await mcp__memory__search_nodes({ query: "stack:" });
+  // From context-retriever
+  contradictions: contextResult.contradictions, // Pairs needing resolution
+  reinforcements: contextResult.reinforcements, // Candidates for merging
+  orphans: contextResult.orphans, // Need relations or pruning
+  relationGraph: contextResult.relationGraph,
 
-// Also scan auto-memory for consolidation candidates
-const autoMemoryDir = `${HOME}/.claude/memory`;
-const autoMemoryFiles = await glob(`${autoMemoryDir}/*.md`);
-// Auto-memory entries are evaluated in Step 1.3 for promotion/pruning
+  // From temporal-retriever
+  timeline: temporalResult.timeline,
+  clusters: temporalResult.clusters, // Session-grouped memories
+  staleMemories: temporalResult.staleMemories, // Candidates for forgetting
+  trajectories: temporalResult.trajectories, // Usage trends
+
+  // Also scan auto-memory for consolidation candidates
+  autoMemoryFiles: await glob(`${HOME}/.claude-setup/memory/auto/*.md`),
+};
 ```
+
+This replaces the single-pass retrieval with a multi-perspective view that catches:
+
+- **Contradictions** the single query misses (e.g., old "use X" vs newer "stop using X")
+- **Temporal decay** that BM25 ranking ignores (memory scored high but unused for 6 months)
+- **Implicit relations** between memories that were never explicitly linked
 
 ### Step 1.2: Calculate Memory Statistics
 
