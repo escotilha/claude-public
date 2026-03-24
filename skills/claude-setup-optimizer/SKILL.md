@@ -35,9 +35,12 @@ Automatically analyzes the Claude Code changelog and recommends improvements to 
 
 1. **Gets Latest Changelog** - Uses the built-in `/release-notes` command or conversation context
 2. **Analyzes Your Setup** - Reviews all your agents, skills, plugins, rules, and configuration
-3. **Identifies Opportunities** - Finds ways your setup could benefit from new Claude features
-4. **Recommends Improvements** - Provides specific, actionable recommendations
-5. **Implements Changes** - Optionally applies improvements automatically
+3. **Diffs Against Baseline** - Compares current state to `~/.claude-setup/SETUP-BASELINE.md` to detect drift
+4. **Role-Based Gap Analysis** - Evaluates coverage for both Developer and M&A Analyst roles
+5. **Identifies Opportunities** - Finds ways your setup could benefit from new Claude features
+6. **Generates Health Report** - Structured report with health score, updates, gaps, action items
+7. **Recommends Improvements** - Provides specific, actionable recommendations
+8. **Implements Changes** - Optionally applies improvements automatically
 
 ## Paths
 
@@ -370,42 +373,107 @@ Specific steps or code changes needed
 **Effort:** Low/Medium/High
 ```
 
-### Step 4: Present and Confirm
+### Step 3b: Baseline Diff
 
-Present findings to the user:
+Read `~/.claude-setup/SETUP-BASELINE.md` and diff against current state:
 
-```
-# Claude Setup Optimization Report
+1. **Component drift** — new skills/agents/MCP servers added since last baseline? Any removed?
+2. **Count changes** — skill count, agent count, MCP server count vs baseline numbers
+3. **Role coverage changes** — has Developer or M&A Analyst coverage improved since last review?
+4. **Gap closure** — have any previously identified gaps been addressed?
 
-## Changelog Summary
-- Version X.Y.Z released on DATE
-- Key new features: [list]
+Update the baseline file's `Last verified` date and any changed counts/components after the review.
 
-## Your Setup Analysis
-- X skills analyzed
-- Y agents analyzed
-- Z plugins installed
-- W rules loaded
+### Step 3c: Role-Based Gap Analysis
 
-## Recommendations Found: N
+Evaluate setup coverage for each of the user's roles:
 
-### High Priority (M items)
-1. [Brief description]
-2. ...
+**Developer Role (Primary)**
 
-### Medium Priority (N items)
+- CI/CD pipeline completeness (verify → review → commit → push → PR → deploy)
+- Testing coverage (unit, E2E, QA cycle, persona testing)
+- Architecture/security review capabilities
+- Research and planning tools
+- Browser/scraping automation options
+- Score: HIGH / MEDIUM / LOW
+
+**M&A Analyst Role (Secondary)**
+
+- Due diligence research capabilities
+- Financial modeling / spreadsheet automation
+- Deal pipeline / CRM tracking
+- Market data and comparable analysis
+- Board/investor reporting
+- Document generation (proposals, memos)
+- Score: HIGH / MEDIUM / LOW
+
+For each gap, assess:
+
+- **Impact**: How much does this gap slow the user down? (1-5)
+- **Feasibility**: Can Claude Code address this with a new skill/MCP? (1-5)
+- **Priority**: Impact × Feasibility
+
+Only recommend filling gaps with Impact × Feasibility ≥ 12.
+
+### Step 4: Present Structured Health Report
+
+Present findings using this template:
+
+```markdown
+# Setup Optimization Report — {date}
+
+## Health Score: {1-10}/10
+
+{One-line justification}
+
+## Executive Summary
+
+- **Components:** {N} skills, {N} agents, {N} MCP servers, {N} rules
+- **Changes since last review:** {summary of drift from baseline}
+- **Top 3 recommendations:** {brief list}
+
+## Updates Available
+
+| Component | Current State | Recommended Change | Priority |
+| --------- | ------------- | ------------------ | -------- |
+
+## Role Coverage
+
+| Role        | Coverage       | Change  | Key Gaps |
+| ----------- | -------------- | ------- | -------- |
+| Developer   | {HIGH/MED/LOW} | {↑/→/↓} | {gaps}   |
+| M&A Analyst | {HIGH/MED/LOW} | {↑/→/↓} | {gaps}   |
+
+## Recommendations
+
+### HIGH Priority
+
 1. ...
 
-### Low Priority (P items)
+### MEDIUM Priority
+
 1. ...
 
-Would you like me to:
-1. Show detailed recommendations for all items
-2. Show only HIGH priority recommendations
-3. Auto-implement all HIGH priority changes
-4. Auto-implement specific recommendations
-5. Skip implementation (just review)
+### LOW Priority
+
+1. ...
+
+## Action Items
+
+- [ ] Prioritized list
+
+## Next Review
+
+- {next scheduled date}
 ```
+
+Then ask:
+
+1. Auto-implement all HIGH priority changes
+2. Show details for specific recommendations
+3. Skip implementation (just review)
+
+````
 
 ### Step 5: Implement Improvements with Parallel Agents
 
@@ -420,7 +488,7 @@ SETUP="$HOME/.claude-setup"
 BACKUP="$SETUP/backups/$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$BACKUP"
 cp <file> "$BACKUP/"
-```
+````
 
 #### 5b. Group changes into independent work streams
 
