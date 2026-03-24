@@ -61,6 +61,15 @@ fi
 ADDED=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
 REMOVED=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
 
+# Rate limits (v2.1.80) — show warning when 5-hour usage >= 70%
+RATE_5H_PCT=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // 0' 2>/dev/null | cut -d. -f1)
+RATE_FMT=""
+if [ "${RATE_5H_PCT:-0}" -ge 70 ] 2>/dev/null; then
+  RATE_5H_RESET=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // ""' 2>/dev/null | sed 's/T/ /' | cut -c12-16)
+  RATE_FMT=" ${CLR}⚡${RATE_5H_PCT}%${RST}"
+  [ -n "$RATE_5H_RESET" ] && RATE_FMT="${RATE_FMT}${DIM}@${RATE_5H_RESET}${RST}"
+fi
+
 # Git info (use worktree field when available to avoid spawning git subprocess)
 WORKTREE_BRANCH=$(echo "$input" | jq -r '.worktree.branch // ""' 2>/dev/null)
 BRANCH=""
@@ -89,4 +98,4 @@ if [ -n "$ADDED_DIRS" ]; then
 fi
 
 # Build output
-echo -e "${DIM}${ACCOUNT}${RST} ${DIM}|${RST} ${BOLD}${CYAN}${MODEL}${RST} ${DIM}|${RST} ${CLR}${BAR}${RST} ${PCT}% ${DIM}|${RST} ${MAGENTA}${COST_FMT}${RST} ${DIM}|${RST} ${DIM}${TOK_FMT}tok${RST} ${DIM}|${RST} ${DUR_FMT} ${DIM}|${RST} ${BLUE}${BRANCH}${DIRTY}${RST} ${DIM}|${RST} ${DIR}${ADDED_DIRS_FMT} ${DIM}|${RST} ${DIM}+${ADDED} -${REMOVED}${RST}"
+echo -e "${DIM}${ACCOUNT}${RST} ${DIM}|${RST} ${BOLD}${CYAN}${MODEL}${RST} ${DIM}|${RST} ${CLR}${BAR}${RST} ${PCT}% ${DIM}|${RST} ${MAGENTA}${COST_FMT}${RST} ${DIM}|${RST} ${DIM}${TOK_FMT}tok${RST} ${DIM}|${RST} ${DUR_FMT} ${DIM}|${RST} ${BLUE}${BRANCH}${DIRTY}${RST} ${DIM}|${RST} ${DIR}${ADDED_DIRS_FMT} ${DIM}|${RST} ${DIM}+${ADDED} -${REMOVED}${RST}${RATE_FMT}"
