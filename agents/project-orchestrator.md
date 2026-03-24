@@ -6,6 +6,7 @@ background: true
 allowed-tools: "*"
 color: magenta
 model: opus
+effort: high
 memory: project
 skills:
   - run-local

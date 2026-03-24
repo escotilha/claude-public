@@ -11,6 +11,7 @@ allowed-tools:
   - LSP
 color: #60A5FA
 model: sonnet
+effort: high
 memory: project
 isolation: worktree
 skills: [verify, test-and-fix]
