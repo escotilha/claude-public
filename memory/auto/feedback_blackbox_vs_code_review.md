@@ -13,3 +13,5 @@ Black-box testing (fulltest-skill) and code-level review (cto, review-changes) a
 1. Run /fulltest-skill (or /qa-conta) for runtime/black-box issues
 2. Run /cto or /review-changes for code-level architectural, security, and logic issues
 3. Never assume one covers the other — they find fundamentally different bug classes
+
+**Related:** See `feedback_run_guardian_before_deploy.md` for the Contably-specific rule (guardian = code review for Contably deploys).

@@ -84,7 +84,7 @@ log "Removed $DUPES duplicates"
   echo ""
 
   # Group by type — known types first, then uncategorized
-  for memory_type in user feedback project reference; do
+  for memory_type in user feedback project tech reference; do
     type_files=()
     for f in "$MEMORY_DIR"/*.md; do
       [[ "$(basename "$f")" == "MEMORY.md" ]] && continue
@@ -99,6 +99,8 @@ log "Removed $DUPES duplicates"
       # Capitalize the type name for the section header
       if [[ "$memory_type" == "feedback" ]]; then
         section_name="Feedback"
+      elif [[ "$memory_type" == "tech" ]]; then
+        section_name="Tech Insights"
       else
         section_name="$(echo "${memory_type:0:1}" | tr '[:lower:]' '[:upper:]')${memory_type:1}s"
       fi
@@ -119,7 +121,7 @@ log "Removed $DUPES duplicates"
     [[ "$(basename "$f")" == "MEMORY.md" ]] && continue
     [[ ! -f "$f" ]] && continue
     file_type=$(grep "^type:" "$f" 2>/dev/null | head -1 | sed 's/^type: *//')
-    if [[ -z "$file_type" || ! "$file_type" =~ ^(user|feedback|project|reference)$ ]]; then
+    if [[ -z "$file_type" || ! "$file_type" =~ ^(user|feedback|project|tech|reference)$ ]]; then
       uncat_files+=("$f")
     fi
   done
