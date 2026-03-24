@@ -11,12 +11,15 @@ MEM_SEARCH="$HOME/.claude-setup/tools/mem-search"
 [ ${#PROMPT} -lt 10 ] && exit 0
 [ -x "$MEM_SEARCH" ] || exit 0
 
-# Extract search terms: take first 80 chars, strip special chars, drop common words
+# Extract search terms: strip stopwords, keep top 3 longest words (most distinctive)
 QUERY=$(echo "$PROMPT" | head -c 80 \
   | sed 's/[^a-zA-Z0-9 _-]/ /g' \
   | tr ' ' '\n' \
-  | grep -viE '^(the|a|an|is|it|to|in|on|of|for|and|or|but|not|with|this|that|can|do|how|what|why|when|where|my|i|me|we|you|fix|check|run|make|get|set|use|hi|hey|please|help|want|need|should|would|could)$' \
-  | head -5 \
+  | grep -viE '^(the|a|an|is|it|to|in|on|of|for|and|or|but|not|with|this|that|can|do|how|what|why|when|where|my|i|me|we|you|fix|check|run|make|get|set|use|hi|hey|please|help|want|need|should|would|could|issue|issues|problem|error|look|find|show|tell|about)$' \
+  | awk '{print length, $0}' \
+  | sort -rn \
+  | head -3 \
+  | awk '{print $2}' \
   | tr '\n' ' ' \
   | xargs)
 [ -z "$QUERY" ] && exit 0
