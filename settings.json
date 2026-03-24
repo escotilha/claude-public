@@ -91,6 +91,17 @@
         ]
       }
     ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude-setup/hooks/memory-whisper.sh\"",
+            "timeout": 4000
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
@@ -240,7 +251,7 @@
   "enabledPlugins": {
     "swift-lsp@claude-plugins-official": true,
     "discord@claude-plugins-official": true,
-    "claude-subconscious@letta-ai-claude-subconscious": true
+    "claude-subconscious@letta-ai-claude-subconscious": false
   },
   "spinnerVerbs": {
     "mode": "append",
