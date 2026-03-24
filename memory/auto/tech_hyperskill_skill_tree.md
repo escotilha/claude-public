@@ -1,3 +1,9 @@
+---
+name: tech-insight:hyperskill-skill-tree
+description: HyperSkill auto-generates SKILL.md files from live docs; skill-tree command splits deep docs into navigable index + sub-files to avoid context bloat
+type: reference
+---
+
 # HyperSkill & Skill Tree Pattern
 
 **Entity:** `tech-insight:hyperskill-skill-tree`
