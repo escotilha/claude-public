@@ -13,8 +13,10 @@ allowed-tools:
   - Grep
   - Glob
   - AskUserQuestion
+  - mcp__google-workspace__*
 tool-annotations:
   Bash: { destructiveHint: true, idempotentHint: false }
+  mcp__google-workspace__*: { openWorldHint: true }
 invocation-contexts:
   user-direct:
     verbosity: high

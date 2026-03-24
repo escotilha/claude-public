@@ -221,6 +221,16 @@
           }
         ]
       }
+    ],
+    "ElicitationResult": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] MCP elicitation result: ${ELICITATION_SERVER:-unknown} request_id=${ELICITATION_ID:-unknown} accepted=${ELICITATION_ACCEPTED:-unknown}\" >> ~/.claude/logs/elicitations.log"
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
