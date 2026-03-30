@@ -18,7 +18,6 @@ allowed-tools:
   - TaskUpdate
   - TaskList
   - TaskGet
-  - TaskOutput
   - AskUserQuestion
   - mcp__postgres__query
   - mcp__sequential-thinking__sequentialthinking

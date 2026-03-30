@@ -1,6 +1,6 @@
 # Setup Baseline Inventory
 
-**Last verified:** 2026-03-23
+**Last verified:** 2026-03-30
 **Next review:** Biweekly (Wednesday + Sunday, 6am)
 
 ---
@@ -29,15 +29,15 @@
 | 18  | plugin:discord      | Discord bot                     | Active |
 | 19  | plugin:swift-lsp    | Swift LSP                       | Active |
 
-## Skills (64)
+## Skills (69)
 
-### Developer Workflow (18)
+### Developer Workflow (21)
 
-ship, deep-plan, cto, first-principles, verify, test-and-fix, review-changes, cpr, cs, run-local, parallel-dev, codebase-cleanup, website-design, project-orchestrator, maketree, revert-track, simplify, get-api-docs
+ship, deep-plan, cto, first-principles, verify, test-and-fix, review-changes, cpr, sc, cs, run-local, parallel-dev, codebase-cleanup, website-design, project-orchestrator, maketree, revert-track, simplify, get-api-docs, architecture, mini-remote
 
-### QA & Testing (8)
+### QA & Testing (9)
 
-qa-cycle, qa-conta, qa-sourcerank, qa-stonegeo, qa-fix, qa-verify, fulltest-skill, virtual-user-testing
+qa-cycle, qa-conta, qa-sourcerank, qa-stonegeo, qa-fix, qa-verify, fulltest-skill, virtual-user-testing, health-report
 
 ### Deploy & Ops (5)
 
