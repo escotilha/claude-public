@@ -50,6 +50,34 @@ type: reference
 | qwen3:8b         | 5.2 GB | CEO backup           |
 | qwen2.5:14b      | 9.0 GB | Legacy               |
 
+## Mac Mini MLX Inference (Alternative Tier 0 Host)
+
+- **Host:** Mac Mini M4 Pro, 48 GB RAM, Tailscale IP 100.66.244.112, SSH alias `mini`
+- **Python:** 3.14 via Homebrew, venv at `~/mlx-env` (activate: `source ~/mlx-env/bin/activate`)
+- **MLX:** v0.31.0 (system), mlx-lm v0.31.1 (venv)
+- **KV cache quantization:** `--kv-bits 4` supported (TurboQuant-style, built into mlx-lm)
+
+### Cached Models
+
+| Model                      | Size   | Speed       | Peak Memory | Notes                                  |
+| -------------------------- | ------ | ----------- | ----------- | -------------------------------------- |
+| Qwen3.5-35B-A3B-4bit (MoE) | ~19 GB | 103 tok/s   | 19.6 GB     | Best quality, 3B active params         |
+| Qwen3.5-9B-4bit            | ~5 GB  | 46-52 tok/s | 5.2 GB      | Fast, lightweight                      |
+| Qwen3.5-9B-MLX-4bit        | ~5 GB  | —           | —           | Hybrid Mamba arch, mlx-lm incompatible |
+| nanoLLaVA-1.5-8bit         | —      | —           | —           | Vision model                           |
+
+### Usage
+
+```bash
+ssh mini "source ~/mlx-env/bin/activate && python3 -m mlx_lm generate --model mlx-community/Qwen3.5-35B-A3B-4bit --kv-bits 4 --prompt 'your prompt' --max-tokens 200"
+```
+
+### Potential as Paperclip Inference Host
+
+- M4 Pro + 48 GB >> Contabo VPS CPU for inference throughput
+- Could serve CEOs via mlx_lm.server over Tailscale (OpenAI-compatible API)
+- Limitation: Mini sleeps/goes offline — not always reachable (confirmed 2026-03-30)
+
 ## Key Config Notes
 
 - Service runs as `paperclip` user (non-root, required for dangerouslySkipPermissions)
