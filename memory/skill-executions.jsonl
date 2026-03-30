@@ -13388,3 +13388,13 @@
   "cwd": "/Volumes/AI/Code/openclaw-vps",
   "hadError": false
 }
+{
+  "timestamp": "2026-03-30T22:18:34Z",
+  "date": "2026-03-30",
+  "skill": "run-local",
+  "args": "Start the Contably admin dashboard at /Volumes/AI/Code/contably/apps/admin on port 3000",
+  "sessionId": "b367863a-5043-487d-99cd-1ddba2b6ce8f",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
