@@ -10,6 +10,7 @@
 
 ## Projects
 
+- [project_claudia_router.md](project_claudia_router.md) — Claudia router replacing OpenClaw on VPS — Claude Code Agent SDK sessions with 3-tier fallback
 - [project_esocial_plan.md](project_esocial_plan.md) — Contably eSocial module activation via TecnoSpeed middleware — decisions, phases, and partner strategy
 
 ## Tech Insights
@@ -33,4 +34,5 @@
 - [tech_anthropic_harness_design.md](tech_anthropic_harness_design.md) — Planner/generator/evaluator three-agent pattern and structured handoff (no compaction) for long-running agent sessions — from Anthropic engineering post on frontend design
 
 # currentDate
+
 Today's date is 2026-03-29.
