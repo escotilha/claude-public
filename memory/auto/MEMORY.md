@@ -27,7 +27,8 @@
 
 ## References
 
-- [reference_cloudflare.md](reference_cloudflare.md) — Cloudflare API token with Zone.DNS edit for all zones, account details, zone IDs, and where credentials are stored
+- [reference_cloudflare.md](reference_cloudflare.md) — Cloudflare API token (p@nove.co) with Zone.DNS edit for all zones except nuvini.ai
+- [reference_cloudflare_nuvini.md](reference_cloudflare_nuvini.md) — Cloudflare API token for nuvini.ai (P@nuvini.co account) — separate account, zone ID, Resend DNS records
 - [reference_oci_contably.md](reference_oci_contably.md) — OCI infrastructure credentials, OCIDs, cluster topology, kubectl auth, and CI/CD pipeline details for Contably
 - [reference_paperclip_vps.md](reference_paperclip_vps.md) — Paperclip AI orchestration running on VPS with 3 companies (Nuvini, Contably, SourceRank) — hybrid claude_local + openclaw_gateway adapters, Nemotron 3 Super via Ollama for CEOs
 - [reference_resend_cli.md](reference_resend_cli.md) — Resend CLI (v1.4.1) configured as transactional send channel in /agentmail skill — use for one-way sends from verified domains (contably.ai, xurman.com, agentwave.io)
