@@ -108,14 +108,17 @@ Tier 0 is production-viable today thanks to two converging breakthroughs:
 
 **Reference model: Nvidia Nemotron 3 Super** — 120B MoE (12B active params), 1M native context, DeepSeek-R1-style chain-of-thought, native tool-call support, 85.6% on PinchBench. With TurboQuant, its ~35 GB KV cache drops to ~6 GB — comfortably fits on a single RTX 4090 or Mac Studio.
 
-| Tier       | Model                                 | Cost   | Use For                                                                                              |
-| ---------- | ------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
-| **Tier 0** | Local (Nemotron 3 Super, OpenClaw-RL) | Free   | Text generation, template expansion, formatting, light agentic tasks — continuously improving via RL |
-| **Tier 1** | Haiku                                 | Low    | Deterministic execution with tool use                                                                |
-| **Tier 2** | Sonnet                                | Medium | Nuanced judgment, code review, implementation                                                        |
-| **Tier 3** | Opus                                  | High   | Architecture, security, complex reasoning                                                            |
+| Tier        | Model                                 | Cost   | Use For                                                                                              |
+| ----------- | ------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
+| **Tier 0a** | Cloud (Qwen 3.6 Plus via OpenRouter)  | Free\* | 1M context, cloud-hosted — no setup, use while preview pricing lasts                                 |
+| **Tier 0b** | Local (Nemotron 3 Super, OpenClaw-RL) | Free   | Text generation, template expansion, formatting, light agentic tasks — continuously improving via RL |
+| **Tier 1**  | Haiku                                 | Low    | Deterministic execution with tool use                                                                |
+| **Tier 2**  | Sonnet                                | Medium | Nuanced judgment, code review, implementation                                                        |
+| **Tier 3**  | Opus                                  | High   | Architecture, security, complex reasoning                                                            |
 
-**Deployment path:** Nemotron 3 Super via Ollama + TurboQuant (primary) + OpenClaw-RL for continuous improvement. Fallback: Qwen 3.5-4B (edge) or Qwen 3.5-8B (quality) via Ollama/LM Studio. MLX-optimized variants available for Apple Silicon. TurboQuant MLX implementation available for all models.
+\* Qwen 3.6 Plus Preview is free on OpenRouter as of March 2026 ($0/$0 per 1M tokens, 1M context). Previous gen (Qwen 3.5) went to $0.1/$0.3 after preview ended — expect similar. Any integration should fall back to Tier 0b or Tier 1 when pricing changes.
+
+**Deployment path:** Qwen 3.6 Plus via OpenRouter (cloud, free while preview lasts) for tasks that don't require local isolation. Nemotron 3 Super via Ollama + TurboQuant (local, always free) + OpenClaw-RL for continuous improvement. Fallback: Qwen 3.5-4B (edge) or Qwen 3.5-8B (quality) via Ollama/LM Studio. MLX-optimized variants available for Apple Silicon. TurboQuant MLX implementation available for all models.
 
 ### Practical Takeaway
 
@@ -138,4 +141,4 @@ As of v2.1.75, Opus 4.6 defaults to **1M context** for Max/Team/Enterprise. This
 **If the subagent only reads files and reports results → haiku.**
 **If the subagent writes code or makes judgment calls → sonnet.**
 **If the subagent makes architectural or security decisions → opus.**
-**If the task is pure text generation or light agentic work with tool calls → Tier 0 (Nemotron 3 Super via Ollama).**
+**If the task is pure text generation or light agentic work with tool calls → Tier 0a (Qwen 3.6 Plus via OpenRouter) or Tier 0b (Nemotron 3 Super via Ollama).**
