@@ -7,6 +7,8 @@
 - [feedback_memory_boost_weights.md](feedback_memory_boost_weights.md) — Boost weights for memory search ranking — feedback 3x, user 2x, reference 1.5x, project 1x, with 1.5x recency for last 7 days
 - [feedback_parallel_first.md](feedback_parallel_first.md) — User wants Claude to always prefer parallel processing and swarm execution over sequential — maximize concurrent agents, tool calls, and background tasks
 - [feedback_run_guardian_before_deploy.md](feedback_run_guardian_before_deploy.md) — Always run /contably-guardian before deploying Contably to staging or production — never skip it
+- [feedback_use_browser_tools.md](feedback_use_browser_tools.md) — Use browser/fetch tools to diagnose visual bugs proactively — don't ask user for screenshots
+- [feedback_nuvini_ir_css_classes.md](feedback_nuvini_ir_css_classes.md) — nuvini-ir uses section-label/title/description for styled headers — content-\* variants are unstyled
 
 ## Projects
 
