@@ -79,6 +79,7 @@ Never push content containing:
 - `maketree` — git worktree management (any project)
 - `revert-track` — revert features (any project)
 - `manual` — build user manual (any project)
+- `officecli` — create/edit Office documents via CLI (any project)
 - `demo` — reproducible demo documents (any project)
 - `cpo` — product lifecycle (any project)
 - `llm-eval` — LLM output evaluation pipeline (any AI feature)

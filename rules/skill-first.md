@@ -39,6 +39,7 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Context recovery              | `/primer`               | After compaction, new session, or "where was I?"         |
 | Search memory                 | `mem-search "<query>"`  | Find past decisions, patterns, learnings (CLI tool)      |
 | Advisory board deliberation   | `/vibc`                 | Complex decision needing diverse perspectives            |
+| Office docs (.docx/xlsx/pptx) | `/officecli`            | Create, edit, inspect Word/Excel/PowerPoint documents    |
 
 ### QA & Testing
 
