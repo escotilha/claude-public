@@ -1,12 +1,15 @@
 ---
 name: cs
-description: Check and sync Claude setup with remote repository
+description: Sync Claude setup to all remotes — origin (private), nuvini (public filtered)
 user-invocable: true
 context: fork
 model: haiku
 effort: low
 allowed-tools:
   - Bash
+  - Read
+  - Glob
+  - Grep
 tool-annotations:
   Bash: { destructiveHint: false, idempotentHint: false }
 invocation-contexts:
@@ -16,83 +19,69 @@ invocation-contexts:
     verbosity: minimal
 ---
 
-## Argument Syntax
+# Claude Setup Sync — All Remotes
 
-- `$0` - First argument
-- `$1` - Second argument
-- `$ARGUMENTS` - Full argument string
-- `$ARGUMENTS[0]` - Indexed access
+Syncs the local Claude setup repo (`~/.claude-setup`) to all configured remotes:
 
-# Claude Setup Sync Check
-
-Check if your local Claude setup is in sync with the remote repository. Automatically commits and pushes local changes when ahead.
+| Remote     | Repo                        | Branch | Type                                     |
+| ---------- | --------------------------- | ------ | ---------------------------------------- |
+| **origin** | escotilha/claude (private)  | master | Full push (all content)                  |
+| **nuvini** | Nuvinigroup/claude (public) | master | Filtered push (excluded content removed) |
 
 ## Process
 
-1. Fetch latest from remote without merging
-2. Compare local HEAD with remote HEAD
-3. Check for uncommitted local changes
-4. If local has changes or is ahead: commit and push automatically
-5. If behind: report and recommend pull
-6. Report final sync status
+### Phase 1: Commit local changes (on master)
 
-## Usage
+1. Check for uncommitted changes on master
+2. If changes exist: `git add -A && git commit -m "auto: sync claude-setup"`
+3. Fetch from origin to check sync status
+
+### Phase 2: Push to origin (private — full content)
+
+1. Compare local HEAD with `origin/master`
+2. If ahead: `git push origin master`
+3. If behind: report only (manual pull recommended)
+4. If diverged: report only
+
+### Phase 3: Push to nuvini (public — filtered)
+
+1. Delete and recreate `nuvini-public` branch from current master HEAD
+2. On `nuvini-public`, remove all excluded content per sync rules:
+
+**Excluded skills** (project-specific or internal):
 
 ```
-/cs
+qa-conta qa-sourcerank qa-stonegeo virtual-user-testing
+oci-health proposal-source chief-geo health-report
+cs cpr sc slack agentmail tweet gws
+claude-setup-optimizer memory-consolidation meditate test-memory
+deploy-conta-staging deploy-conta-production deploy-sourcerank
+contably-guardian sourcerank-guardian
+pr-impact rex mini-remote nanoclaw computer-use
+office-hours primer vibc paperclip paperclip-create-agent
+discord loop schedule
 ```
 
-## Behavior
+**Excluded directories**: `memory/ tools/ hooks/ rules/ backups/ config/ launchd/ plans/ guides/ bin/ commands/ mcp-servers/`
 
-- **UP TO DATE**: No action needed
-- **LOCAL CHANGES**: Auto-commit with message "chore: sync claude setup" and push
-- **AHEAD**: Auto-push to remote
-- **BEHIND**: Report only (manual pull recommended to avoid conflicts)
-- **DIVERGED**: Report only (manual reconciliation needed)
+**Excluded files**: `settings.json .deep-plan-state.json .gstack/ settings.json.backup* plan.md research.md memory/core-memory.json`
 
-## Implementation
+3. Commit removals: `chore: sync nuvini-public with master`
+4. Force-push: `git push nuvini nuvini-public:master --force`
+5. Switch back to master
 
-Run the following on the Claude setup repository at `$HOME/.claude-setup`:
+### Phase 4: Report
 
-```bash
-# Fetch latest from remote
-git -C $HOME/.claude-setup fetch origin master --quiet
+Present results:
 
-# Check for uncommitted changes first
-CHANGES=$(git -C $HOME/.claude-setup status --short)
+- origin status (pushed N commits / up to date / behind)
+- nuvini status (force-pushed / up to date)
+- Any errors or warnings
 
-# If there are local changes, commit them
-if [ -n "$CHANGES" ]; then
-    git -C $HOME/.claude-setup add -A
-    git -C $HOME/.claude-setup commit -m "chore: sync claude setup"
-fi
+## Important Notes
 
-# Get commit hashes after potential commit
-LOCAL=$(git -C $HOME/.claude-setup rev-parse HEAD)
-REMOTE=$(git -C $HOME/.claude-setup rev-parse origin/master)
-BASE=$(git -C $HOME/.claude-setup merge-base HEAD origin/master)
-
-# Determine sync status and take action
-if [ "$LOCAL" = "$REMOTE" ]; then
-    echo "UP TO DATE"
-elif [ "$LOCAL" = "$BASE" ]; then
-    echo "BEHIND - manual pull recommended"
-    git -C $HOME/.claude-setup log --oneline HEAD..origin/master
-elif [ "$REMOTE" = "$BASE" ]; then
-    echo "AHEAD - pushing to remote..."
-    git -C $HOME/.claude-setup push origin master
-    echo "PUSHED SUCCESSFULLY"
-else
-    echo "DIVERGED - manual reconciliation needed"
-    echo "Local commits not on remote:"
-    git -C $HOME/.claude-setup log --oneline origin/master..HEAD
-    echo "Remote commits not on local:"
-    git -C $HOME/.claude-setup log --oneline HEAD..origin/master
-fi
-```
-
-Present results clearly with:
-
-- Current sync status
-- Actions taken (committed X files, pushed Y commits)
-- Summary of any remaining differences
+- Always switch back to `master` at the end, even if an error occurs
+- The nuvini-public branch is ephemeral — recreated fresh each sync
+- Never push rules/, memory/, hooks/, tools/, settings.json, or project-specific skills to nuvini
+- Use `git rm -rf --ignore-unmatch` to handle files that may not exist
+- Check the exclude list in `rules/nuvini-sync-rules.md` for the authoritative list if available
