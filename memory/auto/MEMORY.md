@@ -19,6 +19,7 @@
 - [project_esocial_plan.md](project_esocial_plan.md) — Contably eSocial module activation via TecnoSpeed middleware — decisions, phases, and partner strategy
 - [project_nuvini_ir_deploy.md](project_nuvini_ir_deploy.md) — nuvini-ir deploys via Cloudflare Pages (wrangler) — build with eleventy, deploy \_site folder, not auto-deployed from git
 - [project_woodpecker_ci.md](project_woodpecker_ci.md) — Woodpecker CI running on OKE cluster at ci.contably.ai — replaces OCI DevOps for Contably CI/CD
+- [project_benchmark_loop_scaleup.md](project_benchmark_loop_scaleup.md) — Benchmark loop deployed 2026-04-04 for claudia only — check ledger ~2026-04-20 and expand to buzz/marco/north if gates pass
 
 ## Tech Insights
 
