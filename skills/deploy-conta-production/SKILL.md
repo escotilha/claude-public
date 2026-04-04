@@ -46,6 +46,7 @@ This skill DOES NOT push code or run CI. It only promotes what's already on stag
 ## Arguments
 
 - `--skip-staging-check` — skip the staging health verification (use when you've already manually verified)
+- `--auto-approve` — skip the confirmation prompt and auto-approve the OCI DevOps production gate (used by `/deploy-conta-full` after staging is verified green)
 
 ## Infrastructure Context
 

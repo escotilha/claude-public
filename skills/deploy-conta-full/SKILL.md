@@ -58,14 +58,13 @@ Runs the complete deployment pipeline: staging deploy followed by automatic prod
    - If staging deploy succeeded and health checks pass → proceed to Phase 2
    - If staging deploy failed or health checks failed → **STOP**. Report the failure. Do not touch production.
 
-### Phase 2: Promote to Production
+### Phase 2: Promote to Production (Auto-Approve)
 
-1. Invoke the `deploy-conta-production` skill via the Skill tool with `--skip-staging-check` (staging was just verified in Phase 1 — no need to re-check).
+1. Invoke the `deploy-conta-production` skill via the Skill tool with `--skip-staging-check --auto-approve` (staging was just verified in Phase 1 — no need to re-check or ask for confirmation).
 
 2. The production skill will:
    - Find the pending production deployment in OCI DevOps
-   - Present deployment details and ask for confirmation
-   - Approve the OCI DevOps manual gate on confirmation
+   - **Auto-approve the OCI DevOps manual gate without asking** (staging is verified green)
    - Monitor the production rollout
    - Run production health checks
 
@@ -116,6 +115,7 @@ Production is live at:
 3. **Never auto-fix production** — the production skill handles this (always asks the user)
 4. **Forward arguments** — `--skip-guardian` and `--skip-verify` are passed to staging only
 5. **Report combined timing** — show both staging and production phases in the final summary
+6. **Auto-approve production** — the whole point of this skill is hands-off staging→production. No confirmation prompt for the production gate.
 
 ## Subagent Model Tiers
 
