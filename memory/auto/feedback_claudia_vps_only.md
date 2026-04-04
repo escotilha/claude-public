@@ -1,11 +1,11 @@
 ---
 name: Claudia lives on VPS only
-description: When discussing Claudia's running state, always check the VPS (/opt/claudia) via SSH — local repo is just source code
+description: Any mention of Claudia means VPS — always SSH to /opt/claudia, never check local repo for state
 type: feedback
 ---
 
-When talking about Claudia's live state (agents, crons, config, running tasks), always look at the VPS at /opt/claudia, not the local repo at ~/code/claudia. The local repo is source code only — it doesn't have agent directories, runtime data, or the actual .env.
+Every time the user mentions Claudia, assume VPS context. Always SSH to the VPS (/opt/claudia) — never check the local repo at ~/code/claudia for running state, agents, crons, config, or runtime data. The local repo is source code only.
 
-**Why:** User corrected me for checking local paths when discussing what Claudia actually does. The agents/ directory, runtime state, and config live on the VPS.
+**Why:** User has repeatedly corrected this. The agents/ directory, runtime state, cron data, and .env all live on the VPS. Checking locally wastes time and gives wrong answers.
 
-**How to apply:** SSH into the VPS via Tailscale when checking Claudia's running behavior. Use local repo only for code changes.
+**How to apply:** Default to `ssh vps` for ANY Claudia question — status, tasks, logs, config, agents, crons. Only use local repo when explicitly doing code changes or git operations.
