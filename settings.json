@@ -269,11 +269,13 @@
     "command": "$HOME/.claude-setup/hooks/statusline-command.sh"
   },
   "enabledPlugins": {
-    "swift-lsp@claude-plugins-official": true,
     "discord@claude-plugins-official": true,
-    "claude-subconscious@letta-ai-claude-subconscious": false,
     "codex@openai-codex": true,
-    "frontend-design@claude-plugins-official": true
+    "frontend-design@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "hookify@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "openai-codex": {
