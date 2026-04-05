@@ -266,9 +266,100 @@ await mcp__memory__add_observations({
 });
 ```
 
+### Cross-Link Related Memories (Karpathy Wiki Pattern)
+
+After saving each new entity, find 3-5 **existing** memories that the new information touches and update them with back-references. This is the highest-value step — it turns isolated memories into a connected knowledge graph at ingest time, not just during periodic consolidation.
+
+**For each newly created entity:**
+
+1. **Search broadly** — use 2-3 keyword queries against Memory MCP to find related memories across different entity types:
+
+```javascript
+// Search by topic keywords (not just the entity name)
+const topicResults = await mcp__memory__search_nodes({
+  query: "{2-3 key topic words from the new entity}",
+});
+
+// Search by technology/project if applicable
+const techResults = await mcp__memory__search_nodes({
+  query: "{technology or project name from the entity}",
+});
+```
+
+2. **Select 3-5 most relevant** — skip the new entity itself and any that are only superficially related. Prioritize:
+   - Memories the new entity **contradicts** (update both with contradiction note)
+   - Memories the new entity **extends** (add "See also" observation)
+   - Memories the new entity **validates** (add "Confirmed by" observation)
+   - Memories in a different type that share the same root cause or domain
+
+3. **Update each related memory** with a back-reference observation:
+
+```javascript
+// For each related existing memory, add a cross-reference
+await mcp__memory__add_observations({
+  observations: [
+    {
+      entityName: "{existing-memory-name}",
+      contents: [
+        "Cross-ref: {new-entity-name} — {one-line why they're related} ({today's date})",
+      ],
+    },
+  ],
+});
+```
+
+4. **Create bidirectional relations** in the graph:
+
+```javascript
+await mcp__memory__create_relations({
+  relations: [
+    // Forward: new → existing
+    {
+      from: "{new-entity-name}",
+      relationType: "{relation}",
+      to: "{existing-memory-name}",
+    },
+    // Reverse where meaningful (e.g., pattern prevents mistake)
+    {
+      from: "{existing-memory-name}",
+      relationType: "{reverse-relation}",
+      to: "{new-entity-name}",
+    },
+  ],
+});
+```
+
+5. **Mark the new entity as cross-linked** so `/consolidate` Phase 3.4 skips it:
+
+```javascript
+await mcp__memory__add_observations({
+  observations: [
+    {
+      entityName: "{new-entity-name}",
+      contents: [`Cross-linked: ${today's date} — ${N} related memories updated`],
+    },
+  ],
+});
+```
+
+**Relation type selection guide:**
+
+| New entity type | Related entity type | Likely relation                               |
+| --------------- | ------------------- | --------------------------------------------- |
+| mistake:        | pattern:            | `prevents` (pattern prevents mistake)         |
+| pattern:        | mistake:            | `derived_from` (pattern derived from mistake) |
+| tech-insight:   | tech-insight:       | `related_to` or `contradicts`                 |
+| pattern:        | pattern:            | `generalizes` or `competes_with`              |
+| architecture:   | tech-insight:       | `applies_to`                                  |
+| any             | any (same topic)    | `co_occurs`                                   |
+
+**Budget:** Max 5 related memories per new entity. Max 2 MCP search calls per entity. This keeps cross-linking fast (~5-10 seconds per entity) while still touching the most relevant neighbors.
+
+**Nudge mode:** In nudge mode (Phase 0), limit to 2 related memories per entity to stay under the 30-second budget.
+
 ### Reindex search index
 
-After all memory writes (creates, updates, new observations) are complete, rebuild the FTS5 index so subsequent searches reflect the new entries:
+After all memory writes (creates, updates, new observations, cross-links) are complete, rebuild the FTS5 index so subsequent searches reflect the new entries:
 
 ```bash
 ~/.claude-setup/tools/mem-search --reindex
@@ -298,6 +389,13 @@ Output a concise summary:
 | Entity                    | Update                         |
 | ------------------------- | ------------------------------ |
 | tech-insight:supabase-rls | Applied in: Contably - HELPFUL |
+
+### Cross-Linked ({N} existing memories updated)
+
+| New Entity  | Related Memory Updated   | Relation   | Back-Ref Added |
+| ----------- | ------------------------ | ---------- | -------------- |
+| pattern:xyz | mistake:abc              | prevents   | yes            |
+| pattern:xyz | tech-insight:related-lib | related_to | yes            |
 
 ### Skipped ({N} below threshold)
 
