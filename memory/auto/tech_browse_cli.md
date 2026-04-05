@@ -25,3 +25,5 @@ Built from source with Bun + Playwright. Architecture: thin CLI client → persi
 **Dependencies:** bun (homebrew), Playwright Chromium (bundled). `~/.local/bin` added to PATH in `~/.zshrc`.
 
 **Build from source:** `cd /tmp && git clone --depth 1 https://github.com/garrytan/gstack.git && cd gstack && bun install && bun run build`
+
+**Headed mode (launched 2026-04-04):** `/open-gstack-browser` (after `/gstack-upgrade`) opens a real steerable Chromium with a sidebar running an interactive Claude Code session. Connected to both the sidebar AND the origin Claude Code instance. Use for live CSS debugging and visual inspection when headless screenshots aren't enough to diagnose failures.
