@@ -22,6 +22,7 @@
 - [project_heartbeat_followup.md](project_heartbeat_followup.md) — Follow-up review of Claudia's HEARTBEAT.md system — check if it's useful after 2 weeks, decide whether to split tasks.md out
 - [project_nuvini_ir_deploy.md](project_nuvini_ir_deploy.md) — nuvini-ir deploys via Cloudflare Pages (wrangler) — build with eleventy, deploy \_site folder, not auto-deployed from git
 - [project_woodpecker_ci.md](project_woodpecker_ci.md) — Woodpecker CI running on OKE cluster at ci.contably.ai — replaces OCI DevOps for Contably CI/CD
+- [project_agentwave_deploy.md](project_agentwave_deploy.md) — AgentWave deploys to Contabo VPS via SSH, not Railway/Vercel
 
 ## Tech Insights
 
