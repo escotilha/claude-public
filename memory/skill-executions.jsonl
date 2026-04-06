@@ -14298,3 +14298,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-06T22:38:12Z",
+  "date": "2026-04-06",
+  "skill": "parallel-dev",
+  "args": "Implement CompanyGroup (holding company) support for Contably based on the plan in plan.md. Split into 2 parallel features:\n\nFeature 1 - \"backend-company-groups\": Backend implementation in apps/api/\n- Step 1: Alembic migration (033) — company_groups table, company_group_users table, company_group_id FK on companies\n- Step 2: SQLAlchemy models — CompanyGroup, CompanyGroupUser in multi_tenant.py; company_group_id FK + relationship on Company (companies.py); company_group_access relationship on User (companies.py); register in __init__.py\n- Step 3: Pydantic schemas — CompanyGroupBase, Create, Update, Response, DetailResponse, CompanyGroupUserCreate, CompanyGroupUserResponse\n- Step 4: Access control — extend UNION ALL in user_context.py (new source between af_admin and analyst for group_admin/group_viewer); extend company_access.py; add CompanyGroupAccess dataclass and helpers (is_group_admin, can_manage_group) to CurrentUser; cache invalidation on group mutations\n- Step 5: API routes — admin/company_groups.py with full CRUD (groups, users, company assignment); group_dashboard.py with per-company iteration respecting RLS; register in admin/__init__.py\n- Step 6: Tests — access control (group_admin implicit access, priority chain, dedup), API routes, RLS isolation\nDependencies: none\n\nFeature 2 - \"frontend-company-groups\": Frontend implementation in apps/admin/\n- Step 1: Types — add group fields to auth.types.ts (company_group_id, company_group_name, company_group_role, company_group_access); add CompanyGroupAccess interface\n- Step 2: Auth store — add group context hooks to stores/auth.ts (useCompanyGroupAccess, useIsGroupAdmin, useActiveGroup)\n- Step 3: API client — add company group API functions (CRUD, dashboard)\n- Step 4: Pages — CompanyGroupsPage.tsx (list), CompanyGroupDetailPage.tsx (detail with companies + users + stats)\n- Step 5: Dashboard widget — GroupDashboardWidget.tsx showing consolidated group stats\n- Step 6: Layout — add \"Grupo\" section to DashboardLayout.tsx sidebar when user has group access; add routes to App.tsx\nDependencies: none (can use mocked types until backend merges)",
+  "sessionId": "c6f092c8-e430-4e5a-a874-fb5e6f5dd141",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
