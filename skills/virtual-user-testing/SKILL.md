@@ -85,11 +85,21 @@ test -x ~/.local/bin/browse && echo "browse available" || echo "fallback to MCP"
 Each persona agent runs an **isolated Chromium instance** via a unique `BROWSE_STATE_FILE`. Set this at the top of each persona agent's prompt:
 
 ```bash
-export BROWSE_STATE_FILE="/tmp/browse-state-{persona-slug}.json"
-# Example: /tmp/browse-state-maria.json, /tmp/browse-state-carlos.json, etc.
+# Prefix EVERY browse call with the env var (it does not persist across Bash tool calls):
+BROWSE_STATE_FILE="/tmp/browse-state-{persona-slug}.json" browse goto http://localhost:5173
+BROWSE_STATE_FILE="/tmp/browse-state-{persona-slug}.json" browse snapshot -i
+# etc.
 ```
 
-All `browse` commands in the same agent process will use that state file, keeping sessions fully isolated across parallel persona agents.
+**IMPORTANT:** Each `Bash` tool invocation runs in a new shell process — `export` does not persist between calls. You MUST prefix every `browse` call with `BROWSE_STATE_FILE=...` inline, or create a wrapper script at session start:
+
+```bash
+echo '#!/bin/bash
+BROWSE_STATE_FILE="/tmp/browse-state-{persona-slug}.json" exec ~/.local/bin/browse "$@"' > /tmp/browse-{persona-slug}.sh && chmod +x /tmp/browse-{persona-slug}.sh
+# Then use: /tmp/browse-{persona-slug}.sh goto http://localhost:5173
+```
+
+This keeps sessions fully isolated across parallel persona agents.
 
 ### Headed Mode Escalation
 
@@ -119,7 +129,7 @@ When you run `/virtual-user-testing`, it will:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│              VIRTUAL USER TESTING ORCHESTRATOR (sonnet)               │
+│              VIRTUAL USER TESTING ORCHESTRATOR (opus)                 │
 │                                                                      │
 │  Phase 0: Session Initialization (qa_manager.py session start)       │
 │         │                                                            │
@@ -136,16 +146,18 @@ When you run `/virtual-user-testing`, it will:
 │  │  │ (master) │  │(company) │  │  Admin   │  │ Viewer   │      │   │
 │  │  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘      │   │
 │  │       │              │              │              │            │   │
-│  │  ┌────┴──────────────┴──────────────┴──────────────┘            │   │
-│  │  │  PEDRO (Company Admin)                                       │   │
-│  │  └──────────────────────────────────────────────────────────┐   │   │
-│  │                          │                                   │   │   │
-│  │             ┌────────────┴────────────┐                      │   │   │
-│  │             │   DB-BACKED BUG REPORTS  │                      │   │   │
-│  │             │ • qa_manager.py issue    │                      │   │   │
-│  │             │ • Duplicate detection    │                      │   │   │
-│  │             │ • Verification results   │                      │   │   │
-│  │             └─────────────────────────┘                      │   │   │
+│  │       │         ┌────┴──────────────┴──────────────┘            │   │
+│  │       │         │  PEDRO (Company Admin)                        │   │
+│  │       │         └──────────────────────┘                        │   │
+│  │       │              │                                          │   │
+│  │       └──────────────┤                                          │   │
+│  │                      ▼                                          │   │
+│  │         ┌─────────────────────────┐                             │   │
+│  │         │   DB-BACKED BUG REPORTS  │                             │   │
+│  │         │ • qa_manager.py issue    │                             │   │
+│  │         │ • Duplicate detection    │                             │   │
+│  │         │ • Verification results   │                             │   │
+│  │         └─────────────────────────┘                             │   │
 │  └───────────────────────────────────────────────────────────────┘   │
 │         │                                                            │
 │         ▼                                                            │
@@ -352,8 +364,8 @@ test -x ~/.local/bin/browse && BROWSE_AVAILABLE=true || BROWSE_AVAILABLE=false
 
 # Verify services are accessible (using browse if available, MCP fallback)
 if [ "$BROWSE_AVAILABLE" = true ]; then
-  browse goto http://localhost:5173 && browse text | head -20   # admin app
-  browse goto http://localhost:3000 && browse text | head -20   # client portal
+  browse goto http://localhost:5173 && browse text | head -n 20 || true   # admin app
+  browse goto http://localhost:3000 && browse text | head -n 20 || true   # client portal
 else
   # Fallback: mcp__chrome-devtools__navigate_page
 fi
@@ -363,61 +375,70 @@ fi
 
 ### Phase 2: Spawn Persona Swarm
 
-Spawn one agent per persona using Task tool with `model: "haiku"`.
+Spawn one agent per persona using the `Agent` tool with `model: "haiku"`.
 
 **CRITICAL MODEL RULES:**
 
 - **Persona testers MUST use `model: "haiku"`** - they do navigation, bug reporting, and verification. Haiku is fast, cheap, and sufficient for this.
-- **Orchestrator runs on sonnet** (set in YAML header above) - it handles coordination, report synthesis, and cross-persona analysis.
+- **Orchestrator runs on opus** (set in YAML header above) - it handles coordination, report synthesis, and cross-persona analysis.
 - **NEVER spawn persona testers with sonnet or opus** - this wastes budget with no benefit.
 
-**CRITICAL: Before spawning, load context for each persona from the DB.**
+**Flag handling:**
 
-For each persona, first gather their context:
+- `admin-only` → spawn only: maria, carlos, pedro (admin app personas)
+- `client-only` → spawn only: renata, joao (client portal personas)
+- `persona:{name}` → spawn only the named persona (e.g., `persona:maria`)
+- `--verify-only` → skip discovery (STEP 2), only run STEP 4 (verification queue), then complete session
+
+**CRITICAL: Before spawning, pre-compute shared context ONCE in the orchestrator.**
+
+The orchestrator loads open issues once and passes them to all personas (avoids 5 redundant DB queries):
 
 ```bash
-# Load persona history (past sessions, bugs found, satisfaction trend)
+# PRE-COMPUTE: Load open issues ONCE (shared across all personas)
+OPEN_ISSUES=$(python apps/api/scripts/qa_manager.py query open-issues)
+
+# PER-PERSONA: Load persona-specific context
+# (run these in parallel for all personas being spawned)
 python apps/api/scripts/qa_manager.py query persona-history --persona {slug} --limit 5
-
-# Load currently open issues (to avoid duplicates)
-python apps/api/scripts/qa_manager.py query open-issues
-
-# Load verification queue (recently fixed bugs this persona should re-test)
 python apps/api/scripts/qa_manager.py query regression-check --persona {slug}
 ```
 
-Then spawn the persona agent with all this context:
+Then spawn each persona agent with all context pre-loaded:
 
 ```
-For each persona:
-  Task({
-    subagent_type: "general-purpose",
-    model: "haiku",
-    name: "{persona-name}-tester",
-    prompt: "You are {persona name}, a {role description}. {full persona context}.
+For each persona (spawn all in parallel via Agent tool):
+  Agent(
+    subagent_type="general-purpose",
+    model="haiku",
+    description="{persona-name} persona tester",
+    prompt="You are {persona name}, a {role description}. {full persona context}.
 
              ## Browser Automation Setup
 
-             FIRST: Detect browse availability and set your isolated state file:
+             FIRST: Create your browse wrapper for session isolation:
 
-               export BROWSE_STATE_FILE=/tmp/browse-state-{slug}.json
+               echo '#!/bin/bash
+               BROWSE_STATE_FILE=/tmp/browse-state-{slug}.json exec ~/.local/bin/browse \"$@\"' > /tmp/browse-{slug}.sh && chmod +x /tmp/browse-{slug}.sh
+
+             Then check availability:
                test -x ~/.local/bin/browse && echo 'browse available' || echo 'fallback to MCP'
 
-             Use `browse` (primary) for all browser interactions. Fall back to
-             mcp__chrome-devtools__* only if browse is not available.
+             Use `/tmp/browse-{slug}.sh` (primary) for all browser interactions.
+             Fall back to mcp__chrome-devtools__* only if browse is not available.
 
-             browse commands to use:
-               browse goto <url>            — navigate
-               browse snapshot -i           — list interactive elements with @e refs
-               browse snapshot -D           — diff vs previous state
-               browse snapshot -a -o f.png  — annotated screenshot
-               browse screenshot [path]     — plain screenshot
-               browse text                  — page text
-               browse click @e3             — click element
-               browse fill @e4 'value'      — fill input
-               browse console               — console logs (check for JS errors)
-               browse network               — network requests (check for API errors)
-               browse js 'expr'             — evaluate JS
+             browse commands (via your wrapper):
+               /tmp/browse-{slug}.sh goto <url>            — navigate
+               /tmp/browse-{slug}.sh snapshot -i           — list interactive elements with @e refs
+               /tmp/browse-{slug}.sh snapshot -D           — diff vs previous state
+               /tmp/browse-{slug}.sh snapshot -a -o f.png  — annotated screenshot
+               /tmp/browse-{slug}.sh screenshot [path]     — plain screenshot
+               /tmp/browse-{slug}.sh text                  — page text
+               /tmp/browse-{slug}.sh click @e3             — click element
+               /tmp/browse-{slug}.sh fill @e4 'value'      — fill input
+               /tmp/browse-{slug}.sh console               — console logs (check for JS errors)
+               /tmp/browse-{slug}.sh network               — network requests (check for API errors)
+               /tmp/browse-{slug}.sh js 'expr'             — evaluate JS
 
              ## Session Context
 
@@ -443,15 +464,15 @@ For each persona:
 
              Navigate to {app URL} and test these workflows: {workflow list}.
 
-             Login workflow (using browse):
-               browse goto {app_url}/login
-               browse snapshot -i
-               browse fill @e{email_field} '{email}'
-               browse fill @e{pass_field} '{password}'
-               browse click @e{submit_button}
-               browse snapshot -D       # verify redirect to dashboard
-               browse console           # check for JS errors
-               browse network           # check for failed API calls
+             Login workflow (using your browse wrapper):
+               /tmp/browse-{slug}.sh goto {app_url}/login
+               /tmp/browse-{slug}.sh snapshot -i
+               /tmp/browse-{slug}.sh fill @e{email_field} '{email}'
+               /tmp/browse-{slug}.sh fill @e{pass_field} '{password}'
+               /tmp/browse-{slug}.sh click @e{submit_button}
+               /tmp/browse-{slug}.sh snapshot -D       # verify redirect to dashboard
+               /tmp/browse-{slug}.sh console            # check for JS errors
+               /tmp/browse-{slug}.sh network            # check for failed API calls
 
              For each page/action, evaluate:
              1. FUNCTIONALITY — Does it work? Any errors? Console errors?
@@ -508,9 +529,16 @@ For each persona:
 
              ## STEP 5: Complete your persona session
 
+             Satisfaction score guide:
+               1-3: Core workflows broken or impossible
+               4-5: Works but significant friction / confusion
+               6-7: Mostly smooth, minor issues
+               8-9: Polished, intuitive
+               10: No issues found
+
              python apps/api/scripts/qa_manager.py persona-session complete \
                --id {persona_session_id} \
-               --satisfaction {1-10 score} \
+               --satisfaction {1-10 score per rubric above} \
                --pages '[\"page1\",\"page2\"]' \
                --workflows '[\"workflow1\",\"workflow2\"]'
 
@@ -519,16 +547,27 @@ For each persona:
 
              IMPORTANT: ALL bugs go to the database via qa_manager.py.
              Do NOT write bugs to markdown files or MCP memory."
-  })
+  )
 ```
 
 **CRITICAL: All persona testers MUST use `model: "haiku"` to minimize cost.**
 
-The orchestrator (sonnet) manages coordination, synthesis, and report generation.
+**Timeout:** If any persona agent does not complete within 10 minutes, the orchestrator should proceed to report generation and mark that persona as `status: timed-out` in the completion signal.
 
-### Phase 3: Real-Time Cross-Persona Detection
+The orchestrator (opus) manages coordination, synthesis, and report generation.
 
-As persona testers report back, the orchestrator watches for:
+### Phase 3: Cross-Persona Pattern Detection
+
+**Note:** Verification of fixed bugs happens inside each persona's Phase 2 (STEP 4), not as a separate sequential phase. Phase 3 runs after all persona agents complete.
+
+After all persona agents finish (or time out), the orchestrator queries the DB to detect cross-persona patterns:
+
+```bash
+# Query all issues from this session, grouped by endpoint/page
+python apps/api/scripts/qa_manager.py query cross-persona --session-id {session_id}
+```
+
+The orchestrator analyzes the results for these patterns:
 
 | Pattern                      | Detection                                          | Action                    |
 | ---------------------------- | -------------------------------------------------- | ------------------------- |
