@@ -14518,3 +14518,13 @@
   "cwd": "/Volumes/AI/Code/claudia",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-07T17:55:29Z",
+  "date": "2026-04-07",
+  "skill": "ship",
+  "args": "Add workspace_id scoping to all agent, skill, and channel binding queries to enforce multi-tenant data isolation. Any authenticated user should only see/modify resources belonging to their workspace. Self-hosted mode (no workspace) continues to return all data.",
+  "sessionId": "44a6026a-d6df-4662-af75-a5004dcfc5d8",
+  "project": "Unknown",
+  "cwd": "/Volumes/AI/Code/agentwave",
+  "hadError": false
+}

@@ -161,7 +161,7 @@ When you run `/virtual-user-testing`, it will:
 │  └───────────────────────────────────────────────────────────────┘   │
 │         │                                                            │
 │         ▼                                                            │
-│  Phase 3: Verification (personas re-test fixed bugs)                 │
+│  Phase 3: Cross-Persona Pattern Detection (from DB query)            │
 │         │                                                            │
 │         ▼                                                            │
 │  Phase 4: Report Generation (from DB via qa_manager.py report)       │
@@ -613,8 +613,14 @@ python apps/api/scripts/qa_manager.py session complete \
 /virtual-user-testing client-only              # Test client portal personas only
 /virtual-user-testing persona:maria            # Test single persona
 /virtual-user-testing --url http://localhost:5173 --api http://localhost:8000
-/virtual-user-testing --verify-only            # Only verify fixed bugs, skip discovery
+/virtual-user-testing --verify-only            # Only verify fixed bugs, skip discovery (see also /qa-verify)
 ```
+
+**Flag behavior:**
+- `admin-only` → spawns only maria, carlos, pedro (admin app personas)
+- `client-only` → spawns only renata, joao (client portal personas)
+- `persona:{name}` → spawns only the named persona
+- `--verify-only` → skips Phase 0 session creation and Phase 2 discovery; loads only the verification queue per persona, runs STEP 4 (verify fixed bugs), then completes. For pure verification runs, prefer `/qa-verify` which is purpose-built for this.
 
 ## Test Credentials
 
@@ -865,11 +871,25 @@ Create `virtual-user-testing.config.md` in project root to customize:
 
 ## Version
 
-**Current Version:** 2.1.0
-**Last Updated:** March 2026
+**Current Version:** 2.2.0
+**Last Updated:** April 2026
 
 ### Changelog
 
+- **2.2.0**: Fixes from comprehensive review
+  - Orchestrator model upgraded from sonnet to opus (matches model-tier-strategy)
+  - Spawn syntax changed from `Task({...})` pseudocode to `Agent(...)` invocation form
+  - `BROWSE_STATE_FILE` env var fix: wrapper script pattern replaces broken `export`
+  - Pre-compute open-issues once in orchestrator, pass to all personas (saves 4 redundant DB queries)
+  - Added flag implementation: `admin-only`, `client-only`, `persona:{name}`, `--verify-only`
+  - Added satisfaction score calibration rubric (1-10 guide) in persona spawn prompt
+  - Added 10-minute timeout for stuck persona agents
+  - Phase 3 clarified: cross-persona detection runs post-swarm via DB query, not in real-time
+  - Verification happens inside Phase 2 (STEP 4), not as separate phase
+  - Fixed Phase 1 pipe SIGPIPE issue (`head -n 20 || true`)
+  - Fixed ASCII architecture diagram broken box
+  - Removed unused `mcp__playwright__*`, `mcp__browserless__*`, `mcp__memory__*` from allowed-tools
+  - `browse` CLI is now clearly primary in Requirements; Chrome DevTools MCP is subordinate fallback
 - **2.1.0**: browse CLI integration as primary browser tool
   - Added Browser Automation section (primary/fallback detection, command reference, per-persona isolation)
   - Per-persona `BROWSE_STATE_FILE` isolation for parallel Chromium instances
@@ -889,8 +909,8 @@ Create `virtual-user-testing.config.md` in project root to customize:
 
 ### Requirements
 
-- **`browse` CLI** at `~/.local/bin/browse` (primary browser tool — zero MCP overhead, per-persona isolation via `BROWSE_STATE_FILE`)
-- Chrome DevTools MCP (`mcp__chrome-devtools__*`) as fallback when `browse` is unavailable
+- **`browse` CLI** at `~/.local/bin/browse` — **PRIMARY** browser tool (zero MCP overhead, per-persona isolation via `BROWSE_STATE_FILE` wrapper)
+  - Fallback: Chrome DevTools MCP (`mcp__chrome-devtools__*`) — used only when `browse` is not installed
 - Running Contably environment (admin + client portal + API)
 - QA database schema (migration 029_qa_schema)
 - qa_manager.py CLI script (apps/api/scripts/qa_manager.py)
