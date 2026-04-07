@@ -14458,3 +14458,23 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-07T16:29:26Z",
+  "date": "2026-04-07",
+  "skill": "qa-cycle",
+  "args": "",
+  "sessionId": "44a6026a-d6df-4662-af75-a5004dcfc5d8",
+  "project": "Unknown",
+  "cwd": "/Volumes/AI/Code/agentwave",
+  "hadError": false
+}
+{
+  "timestamp": "2026-04-07T16:30:23Z",
+  "date": "2026-04-07",
+  "skill": "manual",
+  "args": "Build a user manual for the Claudia project at /Volumes/AI/Code/claudia. Focus on: what Claudia is, the 10 agents and their roles, all communication channels, the dashboard, scheduled tasks, webhook system, memory system, skills system, and the deploy workflow. Target audience: someone using Claudia for the first time who needs a quick reference. Keep it practical — how to use, not how it's built.",
+  "sessionId": "b20aab22-a55d-4fe3-ac61-5ae4dbd76c82",
+  "project": "Unknown",
+  "cwd": "/Volumes/AI/Code/claudia",
+  "hadError": false
+}
