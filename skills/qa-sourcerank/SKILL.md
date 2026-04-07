@@ -5,6 +5,7 @@ user-invocable: true
 context: fork
 model: opus
 effort: high
+skills: [qa-fix, qa-verify]
 allowed-tools:
   - Agent
   - TaskCreate

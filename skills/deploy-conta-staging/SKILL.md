@@ -6,6 +6,7 @@ user-invocable: true
 context: fork
 model: opus
 effort: high
+skills: [verify, contably-guardian, oci-health]
 allowed-tools:
   - Read
   - Write

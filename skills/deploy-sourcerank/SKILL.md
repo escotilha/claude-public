@@ -6,6 +6,7 @@ user-invocable: true
 context: fork
 model: opus
 effort: high
+skills: [verify, sourcerank-guardian]
 allowed-tools:
   - Read
   - Write

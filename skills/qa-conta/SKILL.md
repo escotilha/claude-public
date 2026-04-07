@@ -6,6 +6,7 @@ context: fork
 model: opus
 effort: high
 maxTurns: 200
+skills: [qa-fix, qa-verify]
 allowed-tools:
   - Agent
   - Skill

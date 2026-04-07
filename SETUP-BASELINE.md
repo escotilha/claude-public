@@ -1,6 +1,6 @@
 # Setup Baseline Inventory
 
-**Last verified:** 2026-03-30
+**Last verified:** 2026-04-07
 **Next review:** Biweekly (Wednesday + Sunday, 6am)
 
 ---
@@ -29,7 +29,7 @@
 | 18  | plugin:discord      | Discord bot                     | Active |
 | 19  | plugin:swift-lsp    | Swift LSP                       | Active |
 
-## Skills (69)
+## Skills (130+)
 
 ### Developer Workflow (21)
 
@@ -79,6 +79,10 @@ rex
 
 vibc
 
+### Finance & M&A (12+)
+
+finance-dcf, finance-comps, finance-lbo, finance-model, finance-memo, finance-pitch, finance-cim, finance-dataroom, finance-ic, finance-nda, finance-loi, finance-spa, mna-pipeline, mna-diligence, mna-synergies, mna-integration, ir-deck, ir-earnings, ir-model, compliance-kyc, compliance-aml, compliance-reporting, legal-review, legal-redline, analyze-deal, committee-presenter, aimpact, generate-deck, portfolio-monitor, portfolio-report, portfolio-valuation, financial-model
+
 ## Agents (8)
 
 backend-agent, database-agent, devops-agent, frontend-agent, oncall-guide, performance-agent, project-orchestrator, review/ (multi-perspective)
@@ -115,24 +119,20 @@ AGENT-TEAMS-STRATEGY.md, memory-strategy.md, model-tier-strategy.md, nuvini-sync
 - Browser automation (3 options)
 - Web scraping (3 options)
 
-### M&A Analyst (Secondary) — Coverage: LOW
+### M&A Analyst (Secondary) — Coverage: HIGH
 
-- Deep research for due diligence
+- Deep research for due diligence (deep-research, mna-diligence)
+- Financial modeling: DCF, LBO, comps, valuation (finance-dcf, finance-lbo, finance-comps, financial-model)
+- Deal pipeline and memo generation (mna-pipeline, finance-memo, finance-cim)
+- IC and board presentation (committee-presenter, generate-deck, ir-deck)
+- Legal document review and redlining (legal-review, legal-redline, finance-nda, finance-loi, finance-spa)
+- Portfolio monitoring and reporting (portfolio-monitor, portfolio-report, portfolio-valuation)
+- Compliance: KYC, AML, regulatory reporting (compliance-kyc, compliance-aml, compliance-reporting)
+- AI impact analysis (aimpact)
+- IR materials: earnings decks, investor model (ir-earnings, ir-model)
 - Google Workspace for docs/sheets
-- No dedicated financial modeling tools
-- No deal pipeline tracking
-- No valuation templates
-- No comparable analysis automation
 
 ### Gaps Identified
-
-#### M&A Analyst Gaps
-
-- Financial modeling / DCF templates
-- Deal pipeline tracking (CRM-like)
-- Comparable company analysis automation
-- Market data feeds (financial APIs)
-- Board reporting templates
 
 #### Developer Gaps (Minor)
 
