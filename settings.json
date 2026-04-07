@@ -262,36 +262,6 @@
           }
         ]
       }
-    ],
-    "PermissionRequest": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] PERMISSION_REQUEST: $(cat)\" >> ~/.claude/logs/permission-audit.log"
-          }
-        ]
-      }
-    ],
-    "PermissionDenied": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] PERMISSION_DENIED: $(cat)\" >> ~/.claude/logs/permission-audit.log"
-          }
-        ]
-      }
-    ],
-    "FileChanged": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "mkdir -p ~/.claude/logs && FILE=$(cat | python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get('file_path', d.get('path', '')))\" 2>/dev/null); case \"$FILE\" in *.env|*.env.*|*package.json|*package-lock.json|*pnpm-lock.yaml|*yarn.lock|*/prisma/schema.prisma|*docker-compose.yml|*docker-compose.yaml|*Dockerfile|*.dockerfile|*/.github/workflows/*.yml|*/.github/workflows/*.yaml|*/terraform/*.tf|*secrets.*|*credentials.*) echo \"[$(date)] WARNING: State file modified: $FILE\" >> ~/.claude/logs/file-changes.log ;; esac"
-          }
-        ]
-      }
     ]
   },
   "statusLine": {
@@ -338,9 +308,7 @@
     ]
   },
   "alwaysThinkingEnabled": false,
-  "showThinkingSummaries": false,
   "effortLevel": "high",
-  "attribution": true,
   "plansDirectory": "~/.claude/plans",
   "autoMemoryDirectory": "~/.claude-setup/memory/auto",
   "skipDangerousModePermissionPrompt": true,
@@ -519,5 +487,6 @@
         "mcp"
       ]
     }
-  }
+  },
+  "model": "sonnet[1m]"
 }
