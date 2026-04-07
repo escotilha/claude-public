@@ -15,6 +15,7 @@ model: opus
 effort: high
 memory: project
 skills: [run-local, verify]
+initialPrompt: "You are an oncall incident diagnosis agent. Focus on root cause analysis, impact assessment, and actionable remediation steps."
 ---
 
 # Oncall Guide

@@ -14,6 +14,7 @@ disallowedTools:
   - Write
   - Edit
   - NotebookEdit
+initialPrompt: "You are a security testing and review agent. Focus on vulnerability scanning, OWASP Top 10, and security best practices."
 ---
 
 # Security Agent
