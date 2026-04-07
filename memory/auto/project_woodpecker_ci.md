@@ -38,9 +38,12 @@ type: project
 ### Key Decisions
 
 - Replaced OCI DevOps Build Pipelines (3+ min provisioning, Docker-in-Docker failures)
-- GitHub Actions workflows also created (.github/workflows/) but blocked by billing
+- GitHub Actions workflows exist (.github/workflows/) but are NOT the active pipeline — DO NOT add CI/CD logic there
 - OCI DevOps CI pipeline still works as fallback (fixed in same session)
+- Deploy step now runs `alembic upgrade head` before image update (added 2026-04-07)
+
+**CRITICAL: Contably CI/CD runs on Woodpecker (ci.contably.ai), NOT GitHub Actions. Always edit `.woodpecker/` files for CI/CD changes.**
 
 **Why:** OCI DevOps was unreliable (Docker-in-Docker fails, 3-min cold start, no build logs via CLI). Woodpecker runs on-cluster at $0/month with instant webhook triggers.
 
-**How to apply:** For future CI/CD changes, edit `.woodpecker/` files. Monitor at ci.contably.ai.
+**How to apply:** For CI/CD changes, edit `.woodpecker/` files ONLY. Monitor at ci.contably.ai. Never add deploy logic to .github/workflows/.

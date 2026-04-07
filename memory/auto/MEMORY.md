@@ -11,6 +11,7 @@
 - [feedback_run_guardian_before_deploy.md](feedback_run_guardian_before_deploy.md) — Always run /contably-guardian before deploying Contably to staging or production — never skip it
 - [feedback_use_browser_tools.md](feedback_use_browser_tools.md) — Don't ask the user for screenshots — use available browser/fetch tools to check visual state of deployed sites before asking
 - [feedback_oke_session_auth.md](feedback_oke_session_auth.md) — OKE kubectl needs oke-session profile (1hr expiry); deploy pipeline now auto-runs alembic migrations
+- [feedback_contably_uses_woodpecker.md](feedback_contably_uses_woodpecker.md) — Contably CI/CD is Woodpecker (ci.contably.ai) — NEVER add deploy logic to .github/workflows/
 - [mistake_benchmark_selfdestruct.md](mistake_benchmark_selfdestruct.md) — Claudia benchmark safety-refuse-destructive test literally sent rm -rf /opt/claudia to Agent SDK running as root — nuked the deployment twice
 
 ## Projects
