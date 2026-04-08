@@ -17,17 +17,40 @@ The Nuvinigroup/claude repo is a **public-facing showcase** of reusable Claude C
 - `oci-health` — Contably OCI infrastructure health check
 - `proposal-source` — SourceRank client proposals
 - `chief-geo` — SourceRank GEO officer (daily autonomous)
+- `health-report` — SourceRank-specific health report
+
+### Deployment Skills (project-specific pipelines)
+
+- `deploy-conta-staging` — Contably OCI staging deployment
+- `deploy-conta-production` — Contably OCI production promotion
+- `deploy-conta-full` — Contably staging → production pipeline
+- `deploy-sourcerank` — SourceRank Render deployment
+- `deploy-claudia` — Claudia VPS deployment
+- `contably-guardian` — Contably pre-deploy checks
+- `sourcerank-guardian` — SourceRank pre-deploy checks
 
 ### Internal Tooling (personal workflow, not reusable)
 
 - `cs` — syncs escotilha/claude personal repo
 - `cpr` — personal commit+push+PR shortcut
+- `sc` — personal ship commit shortcut
 - `paperclip` — Paperclip control plane (internal orchestration)
 - `paperclip-create-agent` — Paperclip agent creation
 - `slack` — personal Slack automation
 - `agentmail` — personal email automation
 - `tweet` — personal tweet fetching
 - `gws` — personal Google Workspace automation
+- `mini-remote` — SSH relay to Mac Mini
+- `computer-use` — macOS/iOS desktop automation
+- `nanoclaw` — personal agent runtime setup
+
+### Personal Decision/Context Tools
+
+- `pr-impact` — Nuvini (NVNI) press release optimizer
+- `rex` — infrastructure security audit across personal machines
+- `office-hours` — product office hours (internal brainstorming)
+- `primer` — personal session context recovery
+- `vibc` — advisory board deliberation simulator
 
 ### Infrastructure References (sensitive)
 

@@ -23,12 +23,12 @@ invocation-contexts:
 
 Syncs the local Claude setup repo (`~/.claude-setup`) to all configured remotes and the VPS:
 
-| Target     | Destination                      | Method | Type                                     |
-| ---------- | -------------------------------- | ------ | ---------------------------------------- |
-| **origin** | escotilha/claude (private)       | git    | Full push (all content)                  |
-| **public** | escotilha/claude-public (public) | git    | Filtered push (excluded content removed) |
-| **nuvini** | Nuvinigroup/claude (public)      | git    | Filtered push (excluded content removed) |
-| **VPS**    | root@vmi3065960:~/.claude-setup/ | git    | `git pull` (symlinked into ~/.claude/)   |
+| Target     | Destination                              | Method | Type                                     |
+| ---------- | ---------------------------------------- | ------ | ---------------------------------------- |
+| **origin** | escotilha/claude (private)               | git    | Full push (all content)                  |
+| **public** | escotilha/claude-public (public)         | git    | Filtered push (excluded content removed) |
+| **nuvini** | Nuvinigroup/claude (public)              | git    | Filtered push (excluded content removed) |
+| **VPS**    | VPS ~/.claude-setup/ (via Tailscale SSH) | git    | `git pull` (symlinked into ~/.claude/)   |
 
 ## Process
 
@@ -78,15 +78,17 @@ discord loop schedule
 
 The VPS has a clone of `escotilha/claude` at `~/.claude-setup/`. The synced directories (`skills/`, `agents/`, `rules/`, `tools/`, `hooks/`, `memory/auto/`) are symlinked from `~/.claude/` into this git checkout.
 
-**Connection**: `ssh root@100.77.51.51` (Tailscale IP)
+**Connection**: SSH to VPS via Tailscale (see `reference_vps_connection` memory for current IP/hostname)
 
 **Pre-flight**: Check VPS is reachable with a quick SSH test. If unreachable, skip this phase and report "VPS offline".
 
 **Sync command**:
 
 ```bash
-ssh root@100.77.51.51 "cd ~/.claude-setup && git pull origin master"
+ssh <VPS_TAILSCALE_IP> "cd ~/.claude-setup && git pull origin master"
 ```
+
+> Note: Resolve the actual VPS Tailscale IP from the `reference_vps_connection` memory at runtime. Never hardcode IPs in this file.
 
 That's it. The symlinks mean the pulled content is immediately live in `~/.claude/`.
 
