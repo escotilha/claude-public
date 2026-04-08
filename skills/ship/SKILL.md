@@ -1,6 +1,6 @@
 ---
 name: ship
-description: "End-to-end feature shipping: CPO product spec → CTO tech spec → sequential thinking implementation plan → swarm execution (haiku for simple, sonnet for complex) → QA testing → fix cycles → documentation. Resumable across context clears. Triggers on: ship, ship feature, build and ship, full cycle, end to end, /ship."
+description: "End-to-end feature shipping: spec → plan → swarm implement → QA → fix → docs. Resumable. Triggers on: ship, ship feature, build and ship, full cycle, end to end, /ship."
 argument-hint: "<feature description, sprint plan, or --resume>"
 user-invocable: true
 context: fork

@@ -1,6 +1,6 @@
 ---
 name: deploy-conta-production
-description: "Promote Contably from staging to production on OCI. Verifies staging is healthy, approves the OCI DevOps production gate, monitors the production deploy, and validates the live environment. Triggers on: deploy conta production, promote to production, push to production, production deploy, go live."
+description: "Promote Contably staging to production on OCI. Verifies, approves gate, monitors, validates. Triggers on: deploy conta production, promote to production, push to production, production deploy, go live."
 argument-hint: "[--skip-staging-check]"
 user-invocable: true
 context: fork

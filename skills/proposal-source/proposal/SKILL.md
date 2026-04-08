@@ -1,6 +1,6 @@
 ---
 name: proposal
-description: "Generate M&A diagnostic and research proposals for Nuvini Group clients. Takes client inputs (conversation transcripts, URLs, screenshots, files), researches the company/industry, and produces a formatted PDF proposal in Portuguese. Triggers on: proposal, proposta, gerar proposta, create proposal, client proposal, diagnostic proposal."
+description: "Generate M&A diagnostic/research proposals for Nuvini Group clients. PDF output in Portuguese. Triggers on: proposal, proposta, gerar proposta, create proposal, client proposal, diagnostic proposal."
 argument-hint: "<client name or context>"
 user-invocable: true
 context: fork

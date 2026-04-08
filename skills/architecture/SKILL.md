@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: "Generate and maintain a comprehensive software architecture document with Mermaid diagrams, versioned backups, and PDF/DOCX export. Auto-detects changes via git log on subsequent runs. Triggers on: architecture, architecture doc, software architecture, generate architecture, update architecture."
+description: "Generate/maintain architecture docs with Mermaid diagrams, backups, PDF/DOCX export. Auto-detects changes. Triggers on: architecture, architecture doc, software architecture, generate architecture, update architecture."
 argument-hint: "[format: md|pdf|docx] [--force]"
 user-invocable: true
 context: fork

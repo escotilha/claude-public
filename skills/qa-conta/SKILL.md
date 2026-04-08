@@ -1,6 +1,6 @@
 ---
 name: qa-conta
-description: "Autonomous Opus orchestrator for Contably QA. Runs API-level tests locally via curl against staging (api.contably.ai) + browser tests via browse CLI / Chrome MCP. Maps all 395+ endpoints across 50+ route modules. Supports partial runs via flags. Triggers on: qa conta, contably qa, qa runner, ship qa."
+description: "Contably QA orchestrator: API tests (curl) + browser tests. Maps 395+ endpoints across 50+ route modules. Triggers on: qa conta, contably qa, qa runner, ship qa."
 user-invocable: true
 context: fork
 model: opus

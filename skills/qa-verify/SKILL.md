@@ -1,6 +1,6 @@
 ---
 name: qa-verify
-description: "Loads issues in TESTING status from the QA database and verifies fixes using the browse CLI (primary) or Chrome DevTools MCP (fallback) for browser automation. Records verification results in DB, moves issues to VERIFIED or back to IN_PROGRESS. Triggers on: qa verify, verify fixes, verify qa issues, verify bugs, test fixes."
+description: "Verify QA fixes via browse CLI or Chrome MCP. Updates issue status in DB (VERIFIED or back to IN_PROGRESS). Triggers on: qa verify, verify fixes, verify qa issues, verify bugs, test fixes."
 user-invocable: true
 context: fork
 model: sonnet

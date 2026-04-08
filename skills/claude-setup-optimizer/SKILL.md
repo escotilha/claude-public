@@ -1,6 +1,6 @@
 ---
 name: claude-setup-optimizer
-description: Analyzes Claude Code changelog, reviews your current agents/skills/plugins setup, and recommends improvements based on new features. Use when asked to "optimize claude setup", "check for claude updates", "improve my agents", "sync with claude changelog", or "/optimize-setup".
+description: "Analyze Claude Code changelog and recommend setup improvements. Triggers on: optimize claude setup, check for claude updates, improve my agents, sync with claude changelog, /optimize-setup."
 user-invocable: true
 model: sonnet
 effort: medium

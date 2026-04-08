@@ -1,6 +1,6 @@
 ---
 name: oci-health
-description: "Check if Contably on OCI is up. Tests API, admin dashboard, client portal, K8s pods, OCI DevOps pipelines, and services. If anything is down, generates a diagnostic report with root cause and fix steps. Triggers on: oci health, is contably up, check staging, check production, contably status, oci status."
+description: "Check Contably OCI health: API, dashboards, K8s pods, pipelines. Generates diagnostic report if down. Triggers on: oci health, is contably up, check staging, check production, contably status, oci status."
 argument-hint: "[environment: staging|production|both]"
 user-invocable: true
 context: fork

@@ -1,6 +1,6 @@
 ---
 name: fulltest-skill
-description: "Swarm-enabled full-spectrum testing for websites and applications. Uses TeammateTool for true parallel page testers that share failure patterns in real-time. Maps sites, spawns concurrent testers, detects cross-page patterns, auto-fixes with parallel fixers, generates comprehensive reports."
+description: "Swarm-enabled full-spectrum site testing via TeammateTool. Parallel page testers, cross-page pattern detection, auto-fix, reports. Triggers on: fulltest, full test, site test, test all pages."
 user-invocable: true
 context: fork
 model: sonnet # Orchestration-focused; spawns haiku agents for parallel page testing

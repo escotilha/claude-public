@@ -1,6 +1,6 @@
 ---
 name: deep-plan
-description: "Three-phase research→plan→implement workflow with persistent markdown artifacts and annotation cycles. Deep-reads codebase, writes research.md, generates plan.md with code snippets and trade-offs, iterates on user annotations, then implements. Triggers on: deep plan, plan feature, research and plan, plan this."
+description: "Three-phase research→plan→implement workflow with persistent markdown artifacts. Deep-reads codebase, iterates on annotations. Triggers on: deep plan, plan feature, research and plan, plan this."
 argument-hint: "<feature or task description>"
 user-invocable: true
 context: fork

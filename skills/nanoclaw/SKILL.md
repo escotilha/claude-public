@@ -1,6 +1,6 @@
 ---
 name: nanoclaw
-description: "Install and configure NanoClaw — a lightweight Claude-native agent runtime with Docker Sandbox isolation, persistent memory, scheduled tasks, and multi-channel messaging (WhatsApp, Telegram, Slack, Discord, Gmail). Triggers on: nanoclaw, nanoclaw setup, agent runtime, docker sandbox agent, nanoclaw configure."
+description: "Lightweight Claude-native agent runtime with Docker Sandbox, memory, scheduling, multi-channel messaging. Triggers on: nanoclaw, nanoclaw setup, agent runtime, docker sandbox agent, nanoclaw configure."
 argument-hint: "<setup | add-channel <telegram|gmail|discord|slack> | sandbox | schedule <task> | swarm | status | --help>"
 user-invocable: true
 context: fork

@@ -1,6 +1,6 @@
 ---
 name: qa-fix
-description: "Reads open QA issues from the database, prioritizes by severity, investigates the codebase, and creates fixes. Uses CTO/autonomous-dev patterns for investigation and implementation. Updates issue status in DB throughout the fix lifecycle. Triggers on: qa fix, fix bugs, fix qa issues, fix open issues."
+description: "Fix open QA issues: reads from DB, prioritizes by severity, investigates codebase, implements fixes. Triggers on: qa fix, fix bugs, fix qa issues, fix open issues."
 user-invocable: true
 context: fork
 model: sonnet

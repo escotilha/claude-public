@@ -1,6 +1,6 @@
 ---
 name: skill-tree
-description: "Split large documentation or knowledge domains into a navigable index + linked sub-files. Agents read the index first, follow only relevant branches, skip the rest. Reduces context bloat for deep-knowledge skills. Use on API docs, large SKILL.md files, or any monolithic reference."
+description: "Split large docs into navigable index + linked sub-files to reduce context bloat. Triggers on: skill tree, split docs, navigable index, reduce context bloat."
 argument-hint: "<source file or URL or topic>"
 user-invocable: true
 context: fork

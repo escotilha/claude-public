@@ -1,6 +1,6 @@
 ---
 name: memory-consolidation
-description: "Human-like memory maintenance for AI agents. Consolidates learnings, prunes unused memories, applies relevance filtering, and promotes patterns to core memory. Run weekly or after project milestones. Triggers on: consolidate memory, memory maintenance, clean up memories, /consolidate, memory health."
+description: "Memory maintenance: consolidate learnings, prune unused, filter relevance, promote patterns. Triggers on: consolidate memory, memory maintenance, clean up memories, /consolidate, memory health."
 user-invocable: true
 context: fork
 model: sonnet

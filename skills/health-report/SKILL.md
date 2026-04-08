@@ -1,6 +1,6 @@
 ---
 name: health-report
-description: "Generate a comprehensive health report proving SourceRank AI is fully functional. Chains API testing, E2E browser verification, unit tests, and Lighthouse audits into a single HTML/PDF deliverable with evidence. Triggers on: health report, site health, functional report, prove it works, health-report."
+description: "Health report for SourceRank AI: API tests, E2E, unit tests, Lighthouse in one HTML/PDF. Triggers on: health report, site health, functional report, prove it works, health-report."
 argument-hint: "[--skip-qa] [--skip-lighthouse] [--pdf-only] [--url URL]"
 user-invocable: true
 context: fork

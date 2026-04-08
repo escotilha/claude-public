@@ -1,6 +1,6 @@
 ---
 name: slack
-description: "Automate Slack via browser using agent-browser CLI. Send messages, read channels, search conversations, manage threads, and extract data from Slack workspaces. Use for: send slack message, read slack channel, search slack, post to slack, slack automation. Triggers on: slack, send to slack, post slack, read slack, slack message, slack channel."
+description: "Automate Slack via browser. Send messages, read channels, search, manage threads. Triggers on: slack, send to slack, post slack, read slack, slack message, slack channel."
 argument-hint: "<action> [target] [message]"
 user-invocable: true
 context: fork

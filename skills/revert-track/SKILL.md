@@ -1,6 +1,6 @@
 ---
 name: revert-track
-description: "Revert a logical unit of work (feature, phase, deep-plan track) by identifying all related commits and generating a single clean revert. Reads state files from /parallel-dev, /deep-plan, /ship, or accepts manual commit ranges. Always confirms with user before executing. Triggers on: revert track, revert feature, undo feature, revert phase, undo last deep-plan."
+description: "Revert a logical unit of work (feature, phase, track) via related commits. Reads state from /parallel-dev, /deep-plan, /ship. Triggers on: revert track, revert feature, undo feature, revert phase, undo last deep-plan."
 argument-hint: "<feature-id | 'last' | commit-range>"
 user-invocable: true
 context: fork

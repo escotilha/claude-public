@@ -1,6 +1,6 @@
 ---
 name: vibc
-description: "Variety Independent Board Council — 12-seat advisory board of maximally diverse archetypes for structured decision deliberation. Simulates blind input, collision mapping, adversarial steelman debates, scored option generation, and retrospective tracking. Triggers on: vibc, board council, advisory board, decision council, variety board."
+description: "12-seat advisory board of diverse archetypes for structured decision deliberation. Blind input, debates, scored options. Triggers on: vibc, board council, advisory board, decision council, variety board."
 argument-hint: "<decision or problem> [--mode full|quick] [--type binary|strategy|ethical|crisis|resource-allocation] [retro <decision-id>]"
 user-invocable: true
 context: fork
