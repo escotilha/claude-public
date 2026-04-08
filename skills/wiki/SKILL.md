@@ -1,6 +1,6 @@
 ---
 name: wiki
-description: "LLM Wiki — persistent, compounding knowledge base. Ingest sources, query knowledge, lint health. Karpathy pattern. Triggers on: wiki, wiki ingest, wiki query, wiki lint, wiki stats, add to wiki, knowledge base"
+description: "LLM Wiki — persistent, compounding knowledge base. Ingest sources, query knowledge, think/synthesize, auto-harvest, lint health. Karpathy + Memex pattern. Triggers on: wiki, wiki ingest, wiki query, wiki think, wiki lint, wiki stats, wiki harvest, add to wiki, knowledge base, remember this"
 user-invocable: true
 context: inline
 model: sonnet
@@ -62,7 +62,39 @@ When the user asks a question against the wiki:
 3. **Synthesize an answer** with citations to specific pages
 4. **Optionally file the answer** — if the answer is a valuable synthesis, offer to save it as a new wiki page
 
-### 3. Lint (`/wiki lint`)
+### 3. Think (`/wiki think <topic>`)
+
+Socratic synthesis mode — not lookup, but **reasoning** across the knowledge base:
+
+1. **Find all related pages** — keyword search + tag expansion + wikilink traversal (broader than query)
+2. **Detect contradictions** — find pages that make conflicting claims about the same subject
+3. **Surface connections** — identify shared entities across different domains/categories
+4. **Build thinking context** — structure all findings for LLM synthesis via `buildThinkContext()` from `src/wiki/think.ts`
+5. **Generate a thinking brief** with this structure:
+   - **What I know** — synthesized knowledge across all pages
+   - **What contradicts** — conflicting information and which source to trust
+   - **What connects** — non-obvious relationships between ideas
+   - **What's missing** — gaps that would strengthen understanding
+   - **Questions to explore** — 3-5 Socratic questions that push thinking further
+6. **Offer to save** — if the brief is valuable, save it as a wiki page via `saveThinkBrief()`
+
+The key difference from query: think mode asks questions, not just answers them. It's a thinking partner, not an encyclopedia.
+
+### 4. Harvest (`/wiki harvest` or automatic)
+
+Auto-ingest from multiple sources. Runs daily at 06:00 BRT via `wiki-harvest` scheduled task.
+
+**Sources:**
+
+- **Gmail starred emails** — starring an email = "worth remembering". Claudia fetches, extracts, ingests, then unstars.
+- **Trend research outputs** — briefs from `trend-research.ts` are auto-ingested into wiki pages.
+- **URL queue** — agents or users add URLs to `data/wiki-harvest-queue.json` for batch ingestion.
+
+**Manual trigger:** `/wiki harvest` runs the harvest immediately.
+
+**Adding URLs to the queue:** Any agent can call `queueUrlForHarvest(url, note?, addedBy?)` from `src/scheduler/wiki-harvest.ts`, or the user can say "remember this: <url>" and the URL is queued for the next harvest.
+
+### 5. Lint (`/wiki lint`)
 
 Health-check the wiki:
 
