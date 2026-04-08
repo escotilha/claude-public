@@ -5,6 +5,7 @@ user-invocable: true
 context: fork
 model: opus # Complex technical decisions require deep reasoning
 effort: high
+alwaysThinkingEnabled: true
 allowed-tools:
   - Read
   - Write

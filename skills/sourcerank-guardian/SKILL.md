@@ -1,6 +1,6 @@
 ---
 name: sourcerank-guardian
-description: "Pre-deploy guardian for SourceRank AI. Runs a comprehensive multi-layer analysis before any deploy to staging or production on Render. Covers code-level review (auth bypass, timing attacks, org isolation, secrets, API validation, dependency CVEs), infrastructure review (Render config, CORS, CSRF, rate limiting, worker health), runtime validation (health checks, auth enforcement, security headers, TLS), and diff-aware analysis. Uses parallel subagents for speed. Triggers on: sourcerank guardian, pre-deploy check, guardian sourcerank, sourcerank pre-deploy."
+description: "Pre-deploy guardian for SourceRank AI. Multi-layer analysis (code, infra, runtime, diff-aware) before deploy to Render. Parallel subagents. Triggers on: sourcerank guardian, pre-deploy check, guardian sourcerank, sourcerank pre-deploy."
 user-invocable: true
 context: fork
 model: opus

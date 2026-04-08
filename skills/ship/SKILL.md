@@ -6,6 +6,7 @@ user-invocable: true
 context: fork
 model: opus
 effort: high
+alwaysThinkingEnabled: true
 skills: [verify, test-and-fix, review-changes]
 allowed-tools:
   - Read
