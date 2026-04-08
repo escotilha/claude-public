@@ -7,7 +7,7 @@
 - [feedback_contably_uses_woodpecker.md](feedback_contably_uses_woodpecker.md) — Contably has DUAL CI/CD — both Woodpecker (ci.contably.ai) AND GitHub Actions are active and deploying
 - [feedback_github_token_override.md](feedback_github_token_override.md) — Invalid GITHUB_TOKEN env var overrides valid gh keyring credential — always unset it when using gh CLI or git clone
 - [feedback_memory_boost_weights.md](feedback_memory_boost_weights.md) — Boost weights for memory search ranking — feedback 3x, user 2x, reference 1.5x, project 1x, with 1.5x recency for last 7 days
-- [feedback_nuvini_ir_css_classes.md](feedback_nuvini_ir_css_classes.md) — nuvini-ir site uses section-label/section-title/section-description for styled headers — content-* variants are unstyled
+- [feedback_nuvini_ir_css_classes.md](feedback_nuvini_ir_css_classes.md) — nuvini-ir site uses section-label/section-title/section-description for styled headers — content-\* variants are unstyled
 - [feedback_oke_session_auth.md](feedback_oke_session_auth.md) — OKE kubectl doesn't work with API key auth (Unauthorized) despite correct IAM policies — use Woodpecker CI for all cluster operations
 - [feedback_parallel_first.md](feedback_parallel_first.md) — User wants Claude to always prefer parallel processing and swarm execution over sequential — maximize concurrent agents, tool calls, and background tasks
 - [feedback_run_guardian_before_deploy.md](feedback_run_guardian_before_deploy.md) — Always run /contably-guardian before deploying Contably to staging or production — never skip it
@@ -25,7 +25,7 @@
 - [project_contably_ops.md](project_contably_ops.md) — Contably-ops repo and deal data structure for accounting firm acquisitions — skills, directories, workflow
 - [project_esocial_plan.md](project_esocial_plan.md) — Contably eSocial module activation via TecnoSpeed middleware — decisions, phases, and partner strategy
 - [project_heartbeat_followup.md](project_heartbeat_followup.md) — Follow-up review of Claudia's HEARTBEAT.md system — check if it's useful after 2 weeks, decide whether to split tasks.md out
-- [project_nuvini_ir_deploy.md](project_nuvini_ir_deploy.md) — nuvini-ir deploys via Cloudflare Pages (wrangler) — build with eleventy, deploy _site folder, not auto-deployed from git
+- [project_nuvini_ir_deploy.md](project_nuvini_ir_deploy.md) — nuvini-ir deploys via Cloudflare Pages (wrangler) — build with eleventy, deploy \_site folder, not auto-deployed from git
 - [project_woodpecker_ci.md](project_woodpecker_ci.md) — Woodpecker CI running on OKE cluster at ci.contably.ai — replaces OCI DevOps for Contably CI/CD
 - [tech_glasswing_vuln_hunting.md](tech_glasswing_vuln_hunting.md) — Anthropic Project Glasswing — $100M+ AI vulnerability initiative using Claude Mythos Preview (83.1% CyberGym repro rate). Glasswing-style prompting added to /cto security analyst.
 
@@ -38,6 +38,7 @@
 - [tech_hyperskill_skill_tree.md](tech_hyperskill_skill_tree.md) — HyperSkill auto-generates SKILL.md files from live docs; skill-tree command splits deep docs into navigable index + sub-files to avoid context bloat
 - [tech_lightpanda_browser.md](tech_lightpanda_browser.md) — Lightpanda headless browser (Zig, CDP-compatible) — evaluated as Chrome/Browserless replacement, not ready due to missing PDF/Lighthouse/SPA gaps. Revisit Q3 2026.
 - [tech_openclaw_rl.md](tech_openclaw_rl.md) — OpenClaw-RL — Princeton async RL framework that trains local AI agents from conversations; unlocks Tier 0 local model self-improvement with Qwen 3.5-4B/8B
+- [tech_claude_managed_agents.md](tech_claude_managed_agents.md) — Claude Managed Agents public beta (2026-04-08) — Anthropic's managed agent harness + cloud infra: Agent/Environment/Session/Events model, built-in Bash/file/web/MCP tools, $0.08/session-hour, replaces DIY agent loops
 - [tech_token_efficient_search.md](tech_token_efficient_search.md) — Web search token efficiency research — Brave LLM Context API has explicit token budget, Exa highlights cut 50-75% tokens, pre-search orchestrator pattern saves 60-70% redundant searches
 
 ## References
@@ -55,4 +56,5 @@
 - [tech_hermes_subconscious_pattern.md](tech_hermes_subconscious_pattern.md) — Hermes agent patterns implemented in Claudia — periodic nudge, auto-skill generation, session consolidation, skill self-patch policy
 
 # currentDate
+
 Today's date is 2026-04-07.
