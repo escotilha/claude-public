@@ -1,16 +1,21 @@
 ---
 name: feedback_contably_uses_woodpecker
-description: Contably CI/CD is Woodpecker at ci.contably.ai — NEVER use GitHub Actions for deploy/CI changes
+description: Contably has DUAL CI/CD — both Woodpecker (ci.contably.ai) AND GitHub Actions are active and deploying
 type: feedback
 ---
 
-Contably's active CI/CD pipeline is **Woodpecker CI** at ci.contably.ai, NOT GitHub Actions. The `.github/workflows/` files exist but are inactive/secondary.
+Contably has **two active CI/CD pipelines** — both trigger on push to main:
 
-**Why:** User corrected after CI/CD changes were mistakenly added to `.github/workflows/deploy.yml` instead of `.woodpecker/deploy.yml`. GitHub Actions is not the active pipeline — Woodpecker runs on the OKE cluster with $0 cost and instant webhook triggers.
+1. **Woodpecker CI** at ci.contably.ai — `.woodpecker/ci.yml` + `.woodpecker/deploy.yml`
+2. **GitHub Actions** — `.github/workflows/ci.yml` + `.github/workflows/deploy.yml`
+
+Both build Docker images and deploy to the same OKE cluster. GHA runs were confirmed active (April 2026 — multiple successful deploy runs visible via `gh run list`).
+
+**Why:** Initially thought only Woodpecker was active (based on project_woodpecker_ci memory). Discovered GHA is also triggering and deploying when CI/CD changes added to Woodpecker weren't taking effect. Both pipelines need to stay in sync.
 
 **How to apply:**
 
-- For ANY CI/CD change (deploy steps, build config, migration steps, lint): edit `.woodpecker/ci.yml` or `.woodpecker/deploy.yml`
-- NEVER add deploy logic to `.github/workflows/`
-- Monitor pipelines at ci.contably.ai
-- Woodpecker deploy step has kubectl access via `kubeconfig` secret (ServiceAccount with RBAC)
+- When making CI/CD changes, update BOTH `.woodpecker/` AND `.github/workflows/`
+- Both pipelines now include `alembic upgrade head` before image update (added 2026-04-07)
+- Monitor: ci.contably.ai (Woodpecker) and github.com/Contably/contably/actions (GHA)
+- Long-term: consolidate to one pipeline to avoid drift
