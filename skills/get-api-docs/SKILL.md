@@ -1,6 +1,6 @@
 ---
 name: get-api-docs
-description: "Fetch current API documentation for any library/SDK using chub CLI instead of relying on training data. Covers 1,000+ API documents including Supabase, Anthropic SDK, Clerk, Prisma, Stripe, Resend, Playwright. Local annotations persist across sessions."
+description: "Fetch current API docs for any library/SDK via chub CLI. 1,000+ APIs (Supabase, Anthropic, Clerk, Prisma, Stripe, Playwright). Triggers on: get api docs, fetch docs, chub, api documentation."
 argument-hint: "<library name or chub doc ID>"
 user-invocable: true
 context: fork

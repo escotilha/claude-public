@@ -1,6 +1,6 @@
 ---
 name: rex
-description: "Infrastructure security audit across all machines (Mac, Mac Mini, VPS). Runs parallel security checks via SSH, produces consolidated findings with severity ratings and remediation steps. Triggers on: rex, security audit, security check, infra security, machine audit, /rex."
+description: "Infra security audit across all machines (Mac, Mini, VPS). Parallel SSH checks, consolidated findings. Triggers on: rex, security audit, security check, infra security, machine audit, /rex."
 argument-hint: "[target: all|mac|mini|vps] [--fix]"
 user-invocable: true
 context: fork

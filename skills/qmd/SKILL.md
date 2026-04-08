@@ -1,6 +1,6 @@
 ---
 name: qmd
-description: "Semantic search over indexed markdown collections (skills, agents, rules, memory, project docs). Uses QMD hybrid search (BM25 + vector + LLM rerank) for natural language queries. Triggers on: search skills, find pattern, which skill, search notes, search memory, qmd."
+description: "Semantic search over markdown collections via QMD hybrid search (BM25 + vector + LLM rerank). Triggers on: search skills, find pattern, which skill, search notes, search memory, qmd."
 argument-hint: "<search query>"
 user-invocable: true
 context: fork

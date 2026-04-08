@@ -1,6 +1,6 @@
 ---
 name: primer
-description: "Context recovery after compaction or session start. Generates a ~500-token summary of active context: recent memories, current project state, git status, and pending work. Triggers on: primer, context recovery, where was I, what was i doing, resume context."
+description: "Context recovery after compaction or session start. ~500-token summary of memories, project state, git status, pending work. Triggers on: primer, context recovery, where was I, what was i doing, resume context."
 argument-hint: ""
 user-invocable: true
 context: fork

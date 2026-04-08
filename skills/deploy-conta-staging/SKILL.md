@@ -1,6 +1,6 @@
 ---
 name: deploy-conta-staging
-description: "Deploy Contably to staging on OCI. Runs verify → guardian → push → monitor CI/build → deploy to staging-*.contably.ai → health check. Auto-fixes issues until staging is green. Triggers on: deploy conta staging, deploy staging, push to staging, staging deploy."
+description: "Deploy Contably to OCI staging. Verify → guardian → push → CI → deploy → health check. Auto-fixes. Triggers on: deploy conta staging, deploy staging, push to staging, staging deploy."
 argument-hint: "[--skip-guardian] [--skip-verify]"
 user-invocable: true
 context: fork

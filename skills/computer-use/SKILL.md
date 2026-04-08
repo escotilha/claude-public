@@ -1,6 +1,6 @@
 ---
 name: computer-use
-description: "Desktop automation via Claude's native computer use. Controls macOS apps, GUI-only tools, government portals, iOS Simulator. Triggers on: computer use, desktop automation, native app, gui automation, government portal, esocial, receita federal, legacy software, ios simulator."
+description: "Desktop automation via Claude computer use. macOS apps, GUI tools, government portals, iOS Simulator. Triggers on: computer use, desktop automation, native app, gui automation, government portal, esocial, receita federal, ios simulator."
 user-invocable: true
 context: fork
 model: opus

@@ -1,6 +1,6 @@
 ---
 name: cto
-description: "Swarm-enabled AI CTO advisor. Parallel specialist reviewers (architecture, security, performance, quality) via TeammateTool. Triggers on: CTO advice, architecture review, tech stack decision, system design, code quality, security audit, performance review, technical roadmap."
+description: "Swarm AI CTO advisor. Parallel reviewers (architecture, security, performance, quality) via TeammateTool. Triggers on: CTO advice, architecture review, tech stack, system design, code quality, security audit, performance review."
 user-invocable: true
 context: fork
 model: opus # Complex technical decisions require deep reasoning

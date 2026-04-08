@@ -1,6 +1,6 @@
 ---
 name: chief-geo
-description: "Chief GEO Officer for SourceRank AI. Autonomous daily agent: GEO knowledge base, product audit, manual updates, AI visibility testing across ChatGPT/Perplexity/Claude/Gemini. Triggers on: chief geo, geo officer, geo audit, geo strategy, geo knowledge, /chief-geo."
+description: "Chief GEO Officer for SourceRank AI. Knowledge base, product audit, manual updates, AI visibility testing. Triggers on: chief geo, geo officer, geo audit, geo strategy, geo knowledge, /chief-geo."
 argument-hint: "<mode: full|knowledge|audit|manual|visibility|daily> [--brand NAME] [--queries FILE]"
 user-invocable: true
 context: fork

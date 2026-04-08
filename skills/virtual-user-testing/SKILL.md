@@ -1,6 +1,6 @@
 ---
 name: virtual-user-testing
-description: "Swarm-enabled virtual user testing for Contably with QA database. Spawns parallel persona agents simulating real users, reports bugs, verifies fixes, detects regressions. Triggers on: virtual user test, persona test, user simulation, test as user, qa discover."
+description: "Virtual user testing for Contably with QA DB. Parallel persona agents, bug reports, fix verification, regression detection. Triggers on: virtual user test, persona test, user simulation, test as user, qa discover."
 user-invocable: true
 context: fork
 model: opus

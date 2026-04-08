@@ -1,6 +1,6 @@
 ---
 name: deploy-sourcerank
-description: "Full deployment pipeline for SourceRank AI on Render. Runs verify → guardian → push → monitor Render deploy → health check. Auto-fixes issues until code is production-ready. Triggers on: deploy sourcerank, deploy source, sourcerank deploy, push sourcerank."
+description: "Deploy SourceRank AI to Render. Verify → guardian → push → monitor → health check. Auto-fixes. Triggers on: deploy sourcerank, deploy source, sourcerank deploy, push sourcerank."
 argument-hint: "[--skip-guardian] [--skip-verify] [--skip-monitoring]"
 user-invocable: true
 context: fork
