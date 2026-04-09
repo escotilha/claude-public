@@ -1,8 +1,21 @@
 # Plan: Claude Managed Agents API Integration into Claudia
 
 **Date:** 2026-04-08
+**Revised:** 2026-04-08 (post-codebase review — 7 commits since initial draft)
 **Status:** Draft — awaiting approval before implementation
 **Research:** [research.md](./research.md)
+
+## Codebase Changes Since Initial Draft
+
+Seven commits landed between the initial research and this revision. Key changes that affect the plan:
+
+1. **Declarative inference config** (`data/inference.json`) — Inference routing (SDK agents, model tiers, tools) moved from hardcoded sets to a hot-reloadable JSON file with `watchFile`. The `managedAgents` list should go here, not in a separate env var.
+2. **Channel bindings externalized** (`data/bindings.json`) — Hot-reloadable JSON. No plan impact.
+3. **Lifecycle hooks** (`src/hooks.ts`) — `before_inference`, `after_inference`, `before_send`, `after_send` with priority ordering. The Managed Agents adapter **must fire these hooks** at the same points as the existing router.
+4. **AgentConfig expanded** — New fields: `autoResolver`, `tasks`, `priorityMap`. The `agent-sdk.ts` now builds a 6-section system prompt (persona + heartbeat + tasks + autoResolver + priorityMap + memory + memory rule + dynamic context). The Managed Agents adapter must mirror this exact prompt assembly.
+5. **Standing orders pattern** — All agent context files injected as system prompt sections. The Managed Agents agent config must use the same structure at session creation.
+6. **Task Flows** (`src/scheduler/task-flow.ts`) — Durable multi-step workflows. Could run inside Managed Agents sessions later, but not in scope for this plan.
+7. **SDK upgraded** to `claude-agent-sdk@0.2.97`. Transitive `@anthropic-ai/sdk` is **0.80.0** — this version does **NOT** have `beta.agents`/`beta.sessions`/`beta.environments`. Must upgrade to ^0.86.1 as a direct dependency.
 
 ## Decisions (from user input)
 
@@ -147,17 +160,21 @@ New message arrives for agent with useManagedAgents=true
 
 **Files to modify:**
 
-- `package.json` — add `@anthropic-ai/sdk` ^0.86.1 as direct dependency
+- `package.json` — add `@anthropic-ai/sdk` ^0.86.1 as **direct** dependency (current transitive 0.80.0 lacks Managed Agents API)
 - `src/agents/types.ts` — add `useManagedAgents`, `managedAgentId`, `managedEnvironmentId`
 - `src/config.ts` — add `ANTHROPIC_API_KEY`, `MANAGED_AGENTS_ENABLED`
-- `src/agents/registry.ts` — add `MANAGED_AGENTS_AGENTS` set, populate flag in `getAgent()`
+- `data/inference.json` — add `"managedAgents": ["swarmy", "claudia", "bella", "marco"]` (follows existing `sdkAgents` pattern, hot-reloadable)
+- `src/agents/registry.ts` — read `managedAgents` from `inferenceConfig`, populate flag in `getAgent()`
 
 **Types changes:**
 
 ```typescript
-// src/agents/types.ts
+// src/agents/types.ts — current fields for reference:
+// name, persona, memory, heartbeat, autoResolver, tasks, priorityMap,
+// model, workspaceDir, allowedTools, useAgentSDK
+
 export interface AgentConfig {
-  // ... existing fields ...
+  // ... all existing fields ...
   useManagedAgents: boolean; // NEW
   managedAgentId?: string; // NEW: Anthropic-side agent resource ID
   managedEnvironmentId?: string; // NEW: Anthropic-side environment resource ID
@@ -170,6 +187,22 @@ export interface InferenceResult {
 }
 ```
 
+**inference.json changes:**
+
+```json
+{
+  "sdkAgents": ["claudia", "bella", "marco", ...],
+  "managedAgents": ["swarmy", "claudia", "bella", "marco"],
+  ...
+}
+```
+
+**Registry changes** (in `getAgent()`):
+
+```typescript
+useManagedAgents: inferenceConfig.managedAgents?.includes(name) ?? false,
+```
+
 ### Phase 2: Managed Agents Adapter
 
 **New file: `src/inference/managed-agents.ts`**
@@ -178,11 +211,28 @@ Core functions:
 
 1. `ensureManagedAgent(agent)` — create or retrieve Anthropic agent resource
 2. `ensureManagedEnvironment(agent)` — create or retrieve environment
-3. `createManagedSession(agent, env, systemPrompt)` — start a new session
-4. `sendMessage(sessionId, message)` — send user message, stream response
-5. `handleCustomToolUse(event)` — bridge memory_query, memory_store, channel_send, wiki_query
-6. `getManagedSessionStatus(sessionId)` — check if idle/running/terminated
-7. `terminateManagedSession(sessionId)` — explicit termination
+3. `buildManagedSystemPrompt(agent, message)` — assemble system prompt **identically to `agent-sdk.ts`** (6 sections: persona + heartbeat + tasks + autoResolver + priorityMap + memory + memory rule + dynamic KG/wiki/skills context)
+4. `createManagedSession(agent, env, systemPrompt)` — start a new session
+5. `sendMessage(sessionId, message)` — send user message, stream SSE response
+6. `handleCustomToolUse(event)` — bridge memory_query, memory_store, channel_send, wiki_query
+7. `getManagedSessionStatus(sessionId)` — check if idle/running/terminated
+8. `terminateManagedSession(sessionId)` — explicit termination
+
+**Critical: System prompt parity with Agent SDK.** The `agent-sdk.ts` currently builds the system prompt as:
+
+```
+## Identity & Persona     → agent.persona (SOUL.md)
+## Standing Orders         → agent.heartbeat (HEARTBEAT.md)
+## Task List               → agent.tasks (tasks.md)
+## Auto-Resolution Policy  → agent.autoResolver (auto-resolver.md)
+## Email Priority Map      → agent.priorityMap (priority-map.md)
+## Long-Term Memory        → agent.memory (MEMORY.md)
+## Memory Rule             → hardcoded instruction
+--- (dynamic) ---
+{memoryContext}            → KG search + file memory + skills + wiki
+```
+
+The Managed Agents adapter must use this exact same structure. Extract a shared `buildSystemPrompt(agent, message)` function that both `agent-sdk.ts` and `managed-agents.ts` call, to prevent drift.
 
 **Custom tool definitions (declared in agent config):**
 
