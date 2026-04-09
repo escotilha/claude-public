@@ -3,7 +3,7 @@ name: cto
 description: "Swarm AI CTO advisor. Parallel reviewers (architecture, security, performance, quality) via TeammateTool. Triggers on: CTO advice, architecture review, tech stack, system design, code quality, security audit, performance review."
 user-invocable: true
 context: fork
-model: opus # Complex technical decisions require deep reasoning
+model: opus # Advisor pattern: Sonnet executor + Opus advisor for sequential; full Opus for swarm
 effort: high
 alwaysThinkingEnabled: true
 allowed-tools:
@@ -110,10 +110,10 @@ Auto-memory (v2.1.59) captures session context automatically. When saving findin
 
 ## Execution Modes
 
-| Mode           | Description                                   | When to Use                                 |
-| -------------- | --------------------------------------------- | ------------------------------------------- |
-| **Sequential** | One analysis area at a time                   | Simple reviews, focused questions           |
-| **Swarm**      | Parallel specialist analysts via TeammateTool | Full codebase reviews, comprehensive audits |
+| Mode           | Description                                   | When to Use                                 | Model Pattern                  |
+| -------------- | --------------------------------------------- | ------------------------------------------- | ------------------------------ |
+| **Sequential** | One analysis area at a time                   | Simple reviews, focused questions           | Sonnet executor + Opus advisor |
+| **Swarm**      | Parallel specialist analysts via TeammateTool | Full codebase reviews, comprehensive audits | Full Opus orchestrator         |
 
 ### Swarm Mode Architecture
 
@@ -732,6 +732,12 @@ After all 3 synthesis agents complete, the lead orchestrator merges:
 ---
 
 ### Step 3-Alt: Sequential Analysis (For Focused Reviews)
+
+> **Advisor Pattern (v3.1):** In sequential mode, the CTO skill can run as a Sonnet executor with Opus advisor.
+> Sonnet handles codebase exploration, file reading, and report generation. When a judgment call is needed
+> (architecture trade-off, security severity assessment, technology recommendation), Sonnet invokes the Opus
+> advisor via tool call. This delivers near-Opus quality at ~70% lower cost for typical sequential reviews.
+> The advisor shares the full conversation context, so no information is lost.
 
 Use sequential mode when:
 

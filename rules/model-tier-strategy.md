@@ -88,6 +88,52 @@ Within the current Claude API ecosystem, this is already partially implemented v
 | Sonnet subagent formats its own report            | Sonnet produces findings, Haiku formats the report           |
 | Each subagent explores the codebase independently | Orchestrator pre-computes context, passes it in spawn prompt |
 
+## Advisor Strategy (Platform-Native)
+
+Announced April 9, 2026 by Anthropic. The platform now supports a first-party advisor pattern where two models share a single context window with distinct roles.
+
+### How It Works
+
+```
+Executor (Sonnet) ← runs every turn, owns tool calls
+  ↓ (on-demand tool call)
+Advisor (Opus) ← reviews shared context, sends advice back
+  ↑
+Shared context: conversation + tools + history
+```
+
+Sonnet runs the agentic loop every turn (executor), handling file reads, code writes, tool orchestration, and report generation. When a judgment call is needed — architecture trade-off, security severity assessment, technology recommendation — Sonnet invokes Opus via a tool call. Opus reviews the full shared context and returns its advice. The executor then acts on that advice.
+
+### When to Use
+
+- **Long-running agentic sessions** where most turns are mechanical (read, edit, run tests) but a few turns require deep reasoning
+- **Skills currently running all-Opus** that only need Opus judgment at key decision points — the rest is Sonnet-capable work
+- **Cost-sensitive workflows** that currently avoid Opus entirely but would benefit from occasional Opus judgment
+
+### Cost Benefit
+
+Near-Opus intelligence at Sonnet cost. In a typical 50-turn agentic session, Opus might activate at 5-8 decision points. The other 42-45 turns run at Sonnet pricing. Estimated ~70% cost reduction vs all-Opus for sessions with sparse judgment needs.
+
+### Which Skills Benefit
+
+| Skill            | Pattern                                                                                 |
+| ---------------- | --------------------------------------------------------------------------------------- |
+| **cto**          | Sequential mode: Sonnet explores codebase, Opus advises on severity and recommendations |
+| **deep-plan**    | Phase 2 (planning): Sonnet synthesizes research, Opus advises at decision gates         |
+| **parallel-dev** | CI fix escalation: Sonnet fixes, Opus advisor after 2 failed attempts                   |
+
+Skills that require Opus on every turn (swarm orchestration, full architecture reviews) should remain all-Opus.
+
+### Relationship to Model Delegation
+
+The advisor strategy is the **platform-native, first-party version** of what the Model Delegation Pattern (below) describes as a DIY approach. Key differences:
+
+- **Shared context window** — no information loss between executor and advisor
+- **No custom routing logic** — the platform handles the model switching
+- **First-party API support** — stable, maintained by Anthropic
+
+Prefer the advisor strategy when available. Fall back to DIY model delegation only for non-Claude-Code environments (Claudia, Paperclip) where the platform API is not accessible.
+
 ### Local Model Tier (Tier 0) — Claudia Infrastructure
 
 Tier 0 is **production-deployed** via Claudia's 3-tier inference chain. These models handle message routing, text generation, and lightweight agentic tasks outside of Claude Code.
@@ -156,4 +202,5 @@ As of v2.1.75, Opus 4.6 defaults to **1M context** for Max/Team/Enterprise. This
 **If the subagent only reads files and reports results → haiku.**
 **If the subagent writes code or makes judgment calls → sonnet.**
 **If the subagent makes architectural or security decisions → opus.**
+**If a skill runs all-Opus but only needs Opus reasoning at decision points → advisor pattern (Sonnet executor + Opus advisor).**
 **If the task runs via Claudia (not Claude Code) → Tier 0b (Qwen3.5-35B-A3B on Mac Mini) or Tier 0a (OpenRouter).**
