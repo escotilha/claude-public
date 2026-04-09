@@ -15349,42 +15349,22 @@
   "hadError": false
 }
 {
-  "timestamp": "2026-04-10T09:06:40Z",
-  "date": "2026-04-10",
-  "skill": "deep-plan",
-  "args": "Shared Memory & Secrets Parity Across Machines (Mac, Mac Mini, VPS)\n\n## Goal\nAchieve full parity of memory, secrets, and knowledge systems across Pierre's three machines: MacBook Air (primary), Mac Mini M4 Pro (via Tailscale SSH), and Contabo VPS (via Tailscale SSH).\n\n## Research Findings (already gathered)\n\n### MCP Memory (Knowledge Graph)\n- Backend: Turso cloud DB at `libsql://claude-memory-escotilha.aws-us-east-1.turso.io`\n- Local replica: `~/.claude-setup/memory/turso-replica.db` (SQLite)\n- Server: custom `memory-turso` at `~/.claude-setup/mcp-servers/memory-turso/`\n- Schema: 3 tables (entities, observations, relations)\n- **Parity solution: Point Mini + VPS settings.json at same Turso URL + auth token → instant shared graph**\n\n### GBrain (Knowledge Brain)\n- Backend: PostgreSQL `gbrain` database on VPS (`127.0.0.1:5432`)\n- 30+ MCP tools via `gbrain serve` (stdio)\n- Claudia queries it directly via `gbrain-client.ts`\n- **Parity solution: Mac + Mini connect to VPS postgres via Tailscale tunnel (already on same network)**\n\n### Keychain Secrets\n- 12+ API keys stored as generic passwords with `claude-code-` prefix in macOS Keychain\n- iCloud Keychain does NOT sync generic passwords (only Safari passwords)\n- Setup scripts incorrectly claim iCloud sync works\n- Mac Mini has NONE of these keys\n- **Parity solution: Secure export/import mechanism or shared secrets store**\n\n### mem-search Index\n- SQLite FTS5 at `~/.claude-setup/tools/mem-search.db` (224 KB)\n- Auto-rebuilds from memory .md files via `--reindex`\n- **Parity solution: Already syncs via git (memory files). Just run `--reindex` on Mini/VPS after pull**\n\n### Auto-Memory Markdown Files\n- Already in git, synced via `/cs` to all remotes\n- Mini and VPS can `git pull` to get latest\n- **Already solved**\n\n### settings.json\n- Machine-specific (different MCP servers, env vars, paths)\n- Cannot be fully shared — needs per-machine overrides\n- **Parity solution: Shared base config + machine-specific overlays**\n\n## Constraints\n- All machines are on Tailscale (private network, encrypted)\n- VPS: Contabo, runs Claudia + GBrain PostgreSQL\n- Mac Mini: M4 Pro 48GB, runs MLX inference + Claude Code\n- Main Mac: MacBook Air, primary development machine\n- No plaintext secrets in git\n- Prefer reusing existing infrastructure (Turso, Tailscale, VPS postgres)",
-  "sessionId": "d0b0cea6-dc33-4601-bc8b-6d07c6e191f8",
-  "project": "Claude Setup",
-  "cwd": "/Users/ps/code/claude-setup",
-  "hadError": false
-}
-{
-  "timestamp": "2026-04-10T10:36:15Z",
-  "date": "2026-04-10",
-  "skill": "deploy-claudia",
+  "timestamp": "2026-04-09T21:02:00Z",
+  "date": "2026-04-09",
+  "skill": "deploy-conta-staging",
   "args": "",
-  "sessionId": "9a9e5be7-5727-42a4-87b4-ce88e7457231",
-  "project": "Unknown",
-  "cwd": "/Users/ps/code/claudia",
+  "sessionId": "f960f5da-d1f8-47a2-93b0-0fc9d525b8d9",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
 {
-  "timestamp": "2026-04-10T10:37:06Z",
-  "date": "2026-04-10",
-  "skill": "deep-plan",
-  "args": "Resume Phase 2 (Plan) with revised scope.\n\n## Revised Scope: Mac ↔ Mac Mini Parity ONLY\n\n**Goal:** Full parity between MacBook Air and Mac Mini M4 Pro for Claude Code sessions. VPS is out of scope. GBrain is out of scope (revisit later when it has 100+ pages).\n\n## What needs to sync (from research):\n\n### 1. MCP Memory (Knowledge Graph)\n- Already uses Turso cloud DB (`libsql://claude-memory-escotilha.aws-us-east-1.turso.io`)\n- Mac has the `memory-turso` MCP server at `~/.claude-setup/mcp-servers/memory-turso/`\n- Mini shares settings.json via symlink — already has the Turso URL + auth token\n- **BLOCKER: Mini has no Node.js** — can't run the memory-turso MCP server\n- **Fix: Install Node.js on Mini, then `npm install` in memory-turso directory**\n\n### 2. Secrets / API Keys\n- settings.json env{} block is already symlinked to Mini — Claude Code gets API keys\n- macOS Keychain has 12+ `claude-code-*` generic passwords that DON'T sync via iCloud\n- The setup-keychain.sh scripts incorrectly claim iCloud sync\n- **Decision: env{} block in settings.json is sufficient. Fix the incorrect iCloud sync claims in docs. Keychain is for non-Claude-Code tools only.**\n\n### 3. Node.js + npx-based MCP Servers\n- Mini has NO Node.js — all npx-based MCP servers are broken\n- This affects: memory-turso, and any other node-based MCP servers\n- **Fix: Install Node.js via nvm on Mini**\n\n### 4. Binary Tools on Mini\n- Missing: browse CLI, qmd, possibly others\n- **Fix: Install missing tools via setup script**\n\n### 5. mem-search Index\n- Already works (bash + sqlite3, both available on Mini)\n- Index auto-rebuilds from synced markdown files\n- **Fix: Just run `mem-search --reindex` after git pull on Mini**\n\n### 6. Auto-Memory Markdown Files\n- Already synced via git\n- **Already solved**\n\n### 7. settings.json\n- Already symlinked from Mini to the same file as Mac\n- **Already solved — but verify all MCP servers in it can actually run on Mini**\n\n## What does NOT need syncing:\n- VPS (out of scope)\n- GBrain (out of scope, revisit later)\n- Project-specific repos (Mini pulls from GitHub independently)\n\n## Constraints:\n- Both machines on Tailscale\n- Mini accessible via `ssh mini` (user: psm2, Tailscale IP: 100.66.244.112)\n- Prefer minimal maintenance — one-time setup, then auto-sync via git\n- Don't break existing Mini workflows (MLX inference, mini-remote relay)",
-  "sessionId": "d0b0cea6-dc33-4601-bc8b-6d07c6e191f8",
-  "project": "Claude Setup",
-  "cwd": "/Users/ps/code/claude-setup",
-  "hadError": false
-}
-{
-  "timestamp": "2026-04-10T10:41:36Z",
-  "date": "2026-04-10",
-  "skill": "deep-plan",
-  "args": "Continue to Phase 2 implementation steps. The approach from Phase 1 was approved by the user. \n\n## Approved Approach (recap)\n5 steps to Mac ↔ Mac Mini parity:\n1. Install nvm + Node.js on Mini (enables npx-based MCP servers)\n2. Build memory-turso MCP server on Mini (npm install so shared Turso cloud DB works)\n3. Install missing binary tools (browse CLI, qmd)\n4. Fix hardcoded `/Users/ps/` path in settings.json (Mini user is psm2, not ps)\n5. Clean up incorrect iCloud Keychain sync claims in setup scripts\n\n## Context from research\n- Mini SSH: `ssh mini` (user psm2, Tailscale IP 100.66.244.112)\n- settings.json is symlinked from Mini to the same repo file\n- memory-turso server at ~/.claude-setup/mcp-servers/memory-turso/\n- Turso cloud DB URL + auth token already in settings.json env block\n- mem-search just needs --reindex after git pull\n- browse CLI binary at ~/.local/bin/browse on Mac\n- qmd location needs to be found\n\n## What to write in plan.md\nWrite detailed implementation steps for each of the 5 tasks. Include exact SSH commands. The plan should be executable — someone should be able to follow it step by step.\n\n## Scope\nMac ↔ Mac Mini ONLY. No VPS. No GBrain.",
-  "sessionId": "d0b0cea6-dc33-4601-bc8b-6d07c6e191f8",
-  "project": "Claude Setup",
-  "cwd": "/Users/ps/code/claude-setup",
+  "timestamp": "2026-04-09T21:02:14Z",
+  "date": "2026-04-09",
+  "skill": "deploy-conta-full",
+  "args": "",
+  "sessionId": "f960f5da-d1f8-47a2-93b0-0fc9d525b8d9",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
