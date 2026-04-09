@@ -68,6 +68,12 @@ Internal testing: +10 points task success rate over standard prompting for struc
 
 Notion (Custom Agents in workspaces), Rakuten, Asana.
 
+### Notion Integration Detail (2026-04-08)
+
+Notion announced "Claude agents in Notion" — Anthropic runs the model and the **agent harness** (Managed Agents), while Notion acts as the **orchestration layer**: context, UI, and collaboration surface for teams. Key pattern: task board = Claude's to-do list. Waitlist: https://www.notion.com/partners/claude
+
+This is a significant partnership signal: Notion frames itself not as an AI company but as the UX/context/orchestration layer sitting on top of Anthropic's managed infrastructure. This is the canonical Managed Agents integration pattern for SaaS products.
+
 ## Relevance to Claudia
 
 - Could replace or augment the current Agent SDK CLI harness for session management
