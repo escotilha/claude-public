@@ -344,6 +344,8 @@ export async function infer(agent, message, sessionId?, peerId?) {
 }
 ```
 
+**Hooks integration:** The router already calls `runHooks("before_inference", ctx)` and `runHooks("after_inference", ctx)` around the `infer()` call. Since the Managed Agents path is inside `infer()`, hooks fire automatically — no additional work needed. However, the `inferWithManagedAgents()` function must respect `hookCtx.skip` and `hookCtx.modified` the same way the router does (these are handled at the router level, not inside `infer()`, so this is already correct).
+
 ### Phase 4: Session Management
 
 **Files to modify:**
@@ -449,20 +451,23 @@ Plus standard API token costs (same as current). Session-hour overhead is margin
 
 ## Files Summary
 
-| File                              | Action                       | Phase |
-| --------------------------------- | ---------------------------- | ----- |
-| `package.json`                    | Upgrade `@anthropic-ai/sdk`  | 1     |
-| `src/agents/types.ts`             | Add managed agents fields    | 1     |
-| `src/config.ts`                   | Add config vars              | 1     |
-| `src/agents/registry.ts`          | Add flag + agent set         | 1     |
-| `src/inference/managed-agents.ts` | **NEW** — full adapter       | 2     |
-| `src/inference/fallback.ts`       | Add managed agents path      | 3     |
-| `src/sessions/db.ts`              | Add `session_type` column    | 4     |
-| `src/sessions/manager.ts`         | Managed session lifecycle    | 4     |
-| `src/mcp/memory-endpoint.ts`      | **NEW** — HTTPS MCP endpoint | 5     |
-| `src/scheduler/dispatch.ts`       | Optional managed execution   | 6     |
-| `src/index.ts`                    | Startup provisioning         | 7     |
-| `.env`                            | Add API key + feature flag   | 7     |
+| File                              | Action                                                       | Phase |
+| --------------------------------- | ------------------------------------------------------------ | ----- |
+| `package.json`                    | Add `@anthropic-ai/sdk` ^0.86.1 as direct dependency         | 1     |
+| `src/agents/types.ts`             | Add `useManagedAgents`, `managedAgentId`, `managedEnvId`     | 1     |
+| `src/config.ts`                   | Add `ANTHROPIC_API_KEY`, `MANAGED_AGENTS_ENABLED`            | 1     |
+| `data/inference.json`             | Add `"managedAgents"` array (hot-reloadable, like sdkAgents) | 1     |
+| `src/agents/registry.ts`          | Read `managedAgents` from inferenceConfig, set flag          | 1     |
+| `src/inference/managed-agents.ts` | **NEW** — full adapter (SSE, custom tools, session mgmt)     | 2     |
+| `src/inference/system-prompt.ts`  | **NEW** — extract shared prompt builder from agent-sdk.ts    | 2     |
+| `src/inference/agent-sdk.ts`      | Refactor to use shared prompt builder                        | 2     |
+| `src/inference/fallback.ts`       | Add `inferWithManagedAgents()` path                          | 3     |
+| `src/sessions/db.ts`              | Add `session_type` column                                    | 4     |
+| `src/sessions/manager.ts`         | Managed Agents session lifecycle (status check, terminate)   | 4     |
+| `src/mcp/memory-endpoint.ts`      | **NEW** — HTTPS MCP endpoint for KG                          | 5     |
+| `src/scheduler/dispatch.ts`       | Optional Managed Agents execution path                       | 6     |
+| `src/index.ts`                    | Startup provisioning (create agents + environments)          | 7     |
+| `.env`                            | Add `ANTHROPIC_API_KEY`, `MANAGED_AGENTS_ENABLED=true`       | 7     |
 
 ---
 
