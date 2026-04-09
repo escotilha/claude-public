@@ -111,12 +111,16 @@ Managed Agents Session (Anthropic cloud)
 
 ### Per-Agent Environments
 
-| Agent     | Environment Config                                                                  | Rationale                                      |
-| --------- | ----------------------------------------------------------------------------------- | ---------------------------------------------- |
-| `claudia` | Full packages (Node, Python, git), unrestricted networking, GitHub repos mounted    | Primary orchestrator — needs full capability   |
-| `bella`   | Node + creative tools, restricted networking                                        | Creative agent — no need for arbitrary network |
-| `marco`   | Node + Python + research tools, unrestricted networking                             | Research agent — needs web access              |
-| `swarmy`  | Full packages, unrestricted networking, multi-agent coordination (research preview) | Multi-agent orchestrator — needs everything    |
+All 4 agents get **identical, maximum-capability environments** — no restrictions:
+
+| Agent     | Environment Config                                                                                                                                   |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `claudia` | Full packages (Node, Python, git, pip, cargo), unrestricted networking, GitHub repos mounted, all tools                                              |
+| `bella`   | Full packages (Node, Python, git, pip, cargo), unrestricted networking, GitHub repos mounted, all tools                                              |
+| `marco`   | Full packages (Node, Python, git, pip, cargo), unrestricted networking, GitHub repos mounted, all tools                                              |
+| `swarmy`  | Full packages (Node, Python, git, pip, cargo), unrestricted networking, GitHub repos mounted, all tools, multi-agent coordination (research preview) |
+
+**Rationale:** All agents need full capability to handle any task routed to them. Restricting environments creates artificial limitations that reduce usefulness without meaningful security benefit (agents are already scoped by their personas and task context).
 
 ### Hybrid Session Lifecycle
 
