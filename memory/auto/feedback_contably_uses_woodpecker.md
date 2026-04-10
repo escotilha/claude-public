@@ -1,21 +1,22 @@
 ---
-name: feedback_contably_uses_woodpecker
-description: Contably has DUAL CI/CD — both Woodpecker (ci.contably.ai) AND GitHub Actions are active and deploying
+name: feedback_contably_uses_github_actions
+description: Contably CI/CD runs on GitHub Actions — Woodpecker decommissioned 2026-04-10
 type: feedback
+originSessionId: 841486d8-b922-4627-81f8-2445760fe18e
 ---
 
-Contably has **two active CI/CD pipelines** — both trigger on push to main:
+Contably CI/CD is **GitHub Actions only** as of 2026-04-10.
 
-1. **Woodpecker CI** at ci.contably.ai — `.woodpecker/ci.yml` + `.woodpecker/deploy.yml`
-2. **GitHub Actions** — `.github/workflows/ci.yml` + `.github/workflows/deploy.yml`
+- **CI:** `.github/workflows/ci.yml` — Frontend (typecheck/lint/build), Backend (ruff), Security (gitleaks + trivy)
+- **Deploy:** `.github/workflows/deploy.yml` — Build 3 Docker images (Buildx + GHA cache) -> push to OCIR -> kubectl deploy to OKE
+- **Secrets:** `OCIR_USERNAME`, `OCIR_TOKEN`, `KUBECONFIG_DATA`, `ANTHROPIC_API_KEY` in GitHub repo settings
+- **SA:** `woodpecker-deploy` in `woodpecker` namespace (namespace-scoped RBAC for `contably` namespace only)
 
-Both build Docker images and deploy to the same OKE cluster. GHA runs were confirmed active (April 2026 — multiple successful deploy runs visible via `gh run list`).
-
-**Why:** Initially thought only Woodpecker was active (based on project_woodpecker_ci memory). Discovered GHA is also triggering and deploying when CI/CD changes added to Woodpecker weren't taking effect. Both pipelines need to stay in sync.
+**Why:** Woodpecker added operational overhead (Helm chart, pods on OKE, separate webhook). GHA is native to GitHub where the code lives. Previous attempt to run both caused deploy conflicts.
 
 **How to apply:**
 
-- When making CI/CD changes, update BOTH `.woodpecker/` AND `.github/workflows/`
-- Both pipelines now include `alembic upgrade head` before image update (added 2026-04-07)
-- Monitor: ci.contably.ai (Woodpecker) and github.com/Contably/contably/actions (GHA)
-- Long-term: consolidate to one pipeline to avoid drift
+- For CI/CD changes, edit `.github/workflows/` files ONLY
+- Monitor at `github.com/Contably/contably/actions`
+- Woodpecker webhook disabled, pods still on cluster (can be uninstalled with `helm uninstall woodpecker -n woodpecker`)
+- The deploy SA cannot do cluster-scoped operations (no `kubectl get nodes`, no `kubectl apply -k` with namespace resources)
