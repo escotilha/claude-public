@@ -47,11 +47,9 @@ Check whether Contably is up on OCI (staging and/or production). If anything is 
 - **Health endpoint**: `GET /health` (returns JSON with status, timestamp, environment, version, git_commit)
 - **Registry**: `sa-saopaulo-1.ocir.io/gr5ovmlswwos/`
 - **kubectl auth**: Session-based (`oci session authenticate`), expires in 1 hour
-- **CI/CD**: OCI DevOps pipelines (CI pipeline + build/push pipeline + deploy pipeline)
-- **Pipeline OCIDs**: Obtained via `terraform output` from `infrastructure/terraform/oci/`
-  - `devops_project_id` — DevOps project OCID
-  - `devops_ci_pipeline_id` — CI build pipeline (lint, type-check, tests)
-  - `devops_deploy_pipeline_id` — Deploy pipeline (staging -> approval -> production)
+- **CI/CD**: GitHub Actions (`.github/workflows/ci.yml`, `deploy.yml`, `deploy-staging.yml`)
+  - Monitor at: `github.com/Contably/contably/actions`
+  - CLI: `GITHUB_TOKEN= gh run list --repo Contably/contably --limit 5`
 
 ## Check Sequence
 
@@ -130,61 +128,23 @@ kubectl get svc -n <NAMESPACE> 2>&1
 kubectl get pods -n <NAMESPACE> -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{range .status.containerStatuses[*]}{.restartCount}{"\t"}{.state}{"\n"}{end}{end}' 2>&1
 ```
 
-### 4. OCI DevOps Pipeline Status
+### 4. GitHub Actions Pipeline Status
 
-Check recent CI builds and deployments:
-
-```bash
-# Get pipeline OCIDs from terraform (run from project root)
-cd /Users/ps/code/contably/infrastructure/terraform/oci
-CI_PIPELINE_ID=$(terraform output -raw devops_ci_pipeline_id 2>/dev/null)
-DEPLOY_PIPELINE_ID=$(terraform output -raw devops_deploy_pipeline_id 2>/dev/null)
-PROJECT_ID=$(terraform output -raw devops_project_id 2>/dev/null)
-
-# Recent CI build runs (last 5)
-if [ -n "$CI_PIPELINE_ID" ]; then
-  echo '=== Recent CI Builds ==='
-  oci devops build-run list \
-    --build-pipeline-id "$CI_PIPELINE_ID" \
-    --sort-by timeCreated \
-    --sort-order DESC \
-    --limit 5 \
-    --query 'data.items[*].{id:id, status:"lifecycle-state", commit:"commit-info"."commit-hash", started:"time-created"}' \
-    --output table 2>&1
-fi
-
-# Recent deployments (last 5)
-if [ -n "$DEPLOY_PIPELINE_ID" ]; then
-  echo '=== Recent Deployments ==='
-  oci devops deployment list \
-    --deploy-pipeline-id "$DEPLOY_PIPELINE_ID" \
-    --sort-by timeCreated \
-    --sort-order DESC \
-    --limit 5 \
-    --query 'data.items[*].{id:id, status:"lifecycle-state", type:"deployment-type", started:"time-created"}' \
-    --output table 2>&1
-fi
-```
-
-If terraform output is unavailable, fall back to listing by project:
+Check recent CI/CD runs:
 
 ```bash
-# Fallback: list all build runs in the DevOps project
-oci devops build-run list \
-  --project-id "$PROJECT_ID" \
-  --sort-by timeCreated \
-  --sort-order DESC \
-  --limit 5 \
-  --output table 2>&1
+# Recent workflow runs (last 5)
+echo '=== Recent GitHub Actions Runs ==='
+GITHUB_TOKEN= gh run list --repo Contably/contably --limit 5
 
-# Fallback: list all deployments in the DevOps project
-oci devops deployment list \
-  --project-id "$PROJECT_ID" \
-  --sort-by timeCreated \
-  --sort-order DESC \
-  --limit 5 \
-  --output table 2>&1
+# Check latest deploy result
+GITHUB_TOKEN= gh run list --repo Contably/contably --workflow deploy.yml --limit 3
+
+# Get job-level details for a specific run
+GITHUB_TOKEN= gh run view <RUN_ID> --repo Contably/contably --json jobs --jq '.jobs[] | "\(.name): \(.conclusion)"'
 ```
+
+**Note:** OCI DevOps pipelines have been decommissioned (2026-04-10). All CI/CD is via GitHub Actions.
 
 ### 5. Recent Logs (only if issues found)
 
@@ -279,9 +239,8 @@ CI Pipeline: Last 3 builds SUCCEEDED | Deploy Pipeline: Last deploy SUCCEEDED
 
 **Fix Steps:**
 1. Fix the import in `apps/api/src/api/routes/__init__.py`
-2. Push to main (OCI DevOps mirror syncs every 15 min, then auto-deploys)
-3. Or force mirror sync: `oci devops repository mirror --repository-id <MIRROR_REPO_OCID>`
-4. Or rollback: `kubectl rollout undo deployment/contably-api -n contably`
+2. Push to main (GitHub Actions auto-deploys)
+3. Or rollback: `kubectl rollout undo deployment/contably-api -n contably`
 
 #### Problem 2: ...
 
@@ -291,9 +250,8 @@ CI Pipeline: Last 3 builds SUCCEEDED | Deploy Pipeline: Last deploy SUCCEEDED
 - Rollback API (production): `kubectl rollout undo deployment/contably-api -n contably`
 - Restart API (staging): `kubectl rollout restart deployment/contably-api -n contably-staging`
 - Restart API (production): `kubectl rollout restart deployment/contably-api -n contably`
-- Force mirror sync: `oci devops repository mirror --repository-id <MIRROR_REPO_OCID>`
-- Check CI pipeline: `oci devops build-run list --build-pipeline-id <CI_PIPELINE_OCID> --limit 3`
-- Check deploy pipeline: `oci devops deployment list --deploy-pipeline-id <DEPLOY_PIPELINE_OCID> --limit 3`
+- Check GHA runs: `GITHUB_TOKEN= gh run list --repo Contably/contably --limit 5`
+- Watch GHA deploy: `GITHUB_TOKEN= gh run watch <RUN_ID> --repo Contably/contably`
 - Re-auth kubectl: `oci session authenticate --region sa-saopaulo-1 --profile-name oke-session`
 ```
 
@@ -308,4 +266,4 @@ CI Pipeline: Last 3 builds SUCCEEDED | Deploy Pipeline: Last deploy SUCCEEDED
 7. **Compare deployed version to main** — drift means CI/CD may be broken
 8. **Keep output concise when healthy** — a table is enough. Only expand for problems.
 9. **If kubectl auth expired** — report it clearly and suggest re-authentication via `oci session authenticate`
-10. **Report CI/CD status** — check OCI DevOps pipelines for recent build/deploy failures using `oci devops build-run list` and `oci devops deployment list`
+10. **Report CI/CD status** — check GitHub Actions for recent build/deploy failures using `GITHUB_TOKEN= gh run list --repo Contably/contably --limit 5`
