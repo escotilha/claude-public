@@ -88,25 +88,41 @@ finance-dcf, finance-comps, finance-lbo, finance-model, finance-memo, finance-pi
 
 backend-agent, database-agent, devops-agent, frontend-agent, oncall-guide, performance-agent, project-orchestrator, security-agent, review/ (multi-perspective)
 
-## Rules (6)
+## Plugins (7)
+
+discord, codex (OpenAI), frontend-design, typescript-lsp, security-guidance, hookify, pyright-lsp
+
+**Note:** swift-lsp was replaced by typescript-lsp + pyright-lsp. codex (OpenAI) added via external marketplace.
+
+## Rules (8)
 
 AGENT-TEAMS-STRATEGY.md, memory-strategy.md, model-tier-strategy.md, nuvini-sync-rules.md, parallel-first.md, skill-first.md, tool-annotations.md, web-search-efficiency.md
 
 ## Hooks (Active)
 
-| Event              | Purpose                                  |
-| ------------------ | ---------------------------------------- |
-| SessionStart       | git pull + core memory load              |
-| SubagentStart/Stop | Logging                                  |
-| PostToolUse        | Auto-formatting, skill execution logging |
-| TeammateIdle       | Task assignment prompts                  |
-| TaskCompleted      | Auto-assignment for idle teammates       |
-| TaskCreated        | Task creation logging                    |
-| PostCompact        | State file recovery                      |
-| CwdChanged         | Git branch context refresh               |
-| StopFailure        | API error logging                        |
-| ConfigChange       | Config audit logging                     |
-| Elicitation/Result | MCP elicitation logging                  |
+| Event                 | Purpose                                  |
+| --------------------- | ---------------------------------------- |
+| SessionStart          | git pull + core memory load              |
+| SessionEnd            | Session teardown                         |
+| SubagentStart/Stop    | Logging                                  |
+| PostToolUse           | Auto-formatting, skill execution logging |
+| PreToolUse            | Security checks                          |
+| UserPromptSubmit      | Prompt pre-processing                    |
+| TeammateIdle          | Task assignment prompts                  |
+| TaskCompleted         | Auto-assignment for idle teammates       |
+| TaskCreated           | Task creation logging                    |
+| PostCompact           | State file recovery                      |
+| CwdChanged            | Git branch context refresh               |
+| StopFailure           | API error logging                        |
+| ConfigChange          | Config audit logging                     |
+| Elicitation/Result    | MCP elicitation logging                  |
+| InstructionsLoaded    | Rules file load event                    |
+| WorktreeCreate/Remove | Worktree lifecycle management            |
+| FileChanged           | File change detection                    |
+| PermissionDenied      | Permission denial logging                |
+| Setup                 | Repo setup/maintenance                   |
+
+**Missing hook:** `PermissionRequest` — not yet configured (auto-approve/deny tool permissions)
 
 ## Role Coverage
 
