@@ -40,6 +40,7 @@
 - [tech_openclaw_rl.md](tech_openclaw_rl.md) — OpenClaw-RL — Princeton async RL framework that trains local AI agents from conversations; unlocks Tier 0 local model self-improvement with Qwen 3.5-4B/8B
 - [tech_claude_managed_agents.md](tech_claude_managed_agents.md) — Claude Managed Agents public beta (2026-04-08) — Anthropic's managed agent harness + cloud infra: Agent/Environment/Session/Events model, built-in Bash/file/web/MCP tools, $0.08/session-hour, replaces DIY agent loops
 - [tech_managed_agents_test.md](tech_managed_agents_test.md) — Live Managed Agents test (2026-04-09): $0.25, 90s active, works but no win over Agent SDK — don't enable yet, revisit when threads GA + native MCP
+- [tech_mempalace_memory_system.md](tech_mempalace_memory_system.md) — MemPalace — free local AI memory system, ChromaDB + 19 MCP tools, palace hierarchy (wings/rooms/halls), 96.6% R@5 LongMemEval, per-agent diaries, temporal KG — strong fit for Claudia Layer 6
 - [tech_token_efficient_search.md](tech_token_efficient_search.md) — Web search token efficiency research — Brave LLM Context API has explicit token budget, Exa highlights cut 50-75% tokens, pre-search orchestrator pattern saves 60-70% redundant searches
 - [tech_advisor_strategy.md](tech_advisor_strategy.md) — Claude Platform advisor strategy (Sonnet executor + Opus advisor) for cost-efficient agentic sessions
 - [tech_gbrain_integration.md](tech_gbrain_integration.md) — GBrain world-knowledge brain integrated into Claudia as Source 5 — separate Postgres DB, 30 MCP tools, compiled truth + timeline

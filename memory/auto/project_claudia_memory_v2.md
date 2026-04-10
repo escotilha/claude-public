@@ -2,6 +2,7 @@
 name: claudia-memory-v2-architecture
 description: Claudia Memory v2 — 5-layer composite memory system with nudge, consolidation, and complexity-aware skill generation (ALL PHASES COMPLETE)
 type: project
+originSessionId: f190a821-92df-48a8-b2e2-9fcc886dbb6f
 ---
 
 ## Claudia Memory v2 — Best-of-Breed Composite (COMPLETE)
@@ -65,3 +66,5 @@ Currently uses OpenAI text-embedding-3-small ($). Mac Mini has nomic-embed-text-
 
 **Why:** Agents need cross-session recall with semantic relevance, not just flat file journals.
 **How to apply:** All code is deployed. Future improvements: switch to local embeddings, add cross-agent fact promotion, tune nudge interval per agent.
+
+Related: [tech_mempalace_memory_system.md](tech_mempalace_memory_system.md) — MemPalace could extend this as Layer 6: per-agent palace wings + episodic diaries that mcp-memory-pg currently lacks (2026-04-09)

@@ -2,6 +2,7 @@
 name: ASMR Memory Retrieval Architecture
 description: Supermemory ASMR pipeline — 3-agent parallel retrieval (facts/context/temporal) replacing vector DB, ~99% on LongMemEval_s. Open-source ~April 2026.
 type: tech
+originSessionId: f190a821-92df-48a8-b2e2-9fcc886dbb6f
 ---
 
 **ASMR (Agentic Search and Memory Retrieval)** by Supermemory (Dhravya Shah).
@@ -27,3 +28,5 @@ Agentic retrieval eliminates the semantic similarity trap on temporal changes. B
 - **Open-source release:** ~April 2026 at github.com/supermemoryai
 - **Evaluate as:** Drop-in upgrade for `mem-search` tool (replace BM25 with agentic retrieval)
 - **Source tweet:** https://x.com/DhravyaShah/status/2035517012647272689
+
+Related: [tech_mempalace_memory_system.md](tech_mempalace_memory_system.md) — complementary local memory system, 96.6% R@5 via raw ChromaDB vs ASMR 99% agentic retrieval — zero inference cost tradeoff (2026-04-09)
