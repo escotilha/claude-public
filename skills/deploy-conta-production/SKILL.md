@@ -65,126 +65,89 @@ Deploys Contably to production via GitHub Actions. Pushes to main, which trigger
   - Dashboard: `https://contably.ai` / `https://admin.contably.ai`
   - Portal: `https://portal.contably.ai`
 
-### OCI CLI Commands Reference
+### GitHub CLI Commands Reference
 
 ```bash
-# List deployments (find the one waiting for approval)
-oci devops deployment list --deploy-pipeline-id $PIPELINE_ID --limit 5 --sort-order DESC --output json
+# List recent workflow runs
+GITHUB_TOKEN= gh run list --repo Contably/contably --limit 5
 
-# Get deployment status
-oci devops deployment get --deployment-id $DEPLOYMENT_ID
+# Watch a run in real-time
+GITHUB_TOKEN= gh run watch <RUN_ID> --repo Contably/contably
 
-# Approve production deployment
-oci devops deployment approve --deployment-id $DEPLOYMENT_ID --action APPROVE --reason "Staging verified"
+# Check job-level status
+GITHUB_TOKEN= gh run view <RUN_ID> --repo Contably/contably --json jobs --jq '.jobs[] | "\(.name): \(.conclusion)"'
+
+# Trigger manual deploy
+GITHUB_TOKEN= gh workflow run deploy.yml --repo Contably/contably
 ```
 
 ## Workflow
 
-### Phase 1: Verify Staging is Healthy (unless `--skip-staging-check`)
+### Phase 1: Pre-Deploy Verification (unless `--skip-staging-check`)
 
-1. **Check what's currently deployed on staging:**
-
-   ```bash
-   # Get the current staging image tag
-   kubectl get deployment contably-api -n contably-staging -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null
-
-   # Get the current staging pods status
-   kubectl get pods -n contably-staging -l app=contably-api --no-headers 2>/dev/null
-   ```
-
-2. **Run /oci-health staging:**
-   - Invoke the `oci-health` skill via the Skill tool with argument `staging`
-   - If ALL UP: proceed
-   - If DEGRADED or DOWN: **STOP** — report to user. Do not promote a broken staging to production.
-     ```
-     Staging is not healthy. Run /deploy-conta-staging first to fix and redeploy.
-     ```
-
-3. **Quick smoke tests on staging:**
+1. **Check current production health:**
 
    ```bash
-   curl -s --max-time 10 https://staging-api.contably.ai/health 2>/dev/null
-   curl -sI --max-time 10 https://staging.contably.ai/ 2>/dev/null | head -3
-   curl -sI --max-time 10 https://staging-portal.contably.ai/ 2>/dev/null | head -3
+   curl -s --max-time 10 https://api.contably.ai/health 2>/dev/null
+   curl -sI --max-time 10 https://contably.ai/ 2>/dev/null | head -3
+   curl -sI --max-time 10 https://portal.contably.ai/ 2>/dev/null | head -3
    ```
 
-### Phase 2: Find Pending Production Deployment
+2. **Run /oci-health production:**
+   - Invoke the `oci-health` skill via the Skill tool with argument `production`
+   - If DEGRADED or DOWN: warn the user but allow proceeding (deploy might fix it)
 
-1. **Get the OCI DevOps project ID:**
+### Phase 2: Confirm and Push
 
-   ```bash
-   oci devops project list \
-     --compartment-id $(oci iam compartment list --query 'data[0].id' --raw-output) \
-     --name contably \
-     --output json 2>/dev/null | jq -r '.data.items[0].id // empty'
-   ```
-
-2. **Find the deployment waiting for approval:**
-
-   ```bash
-   oci devops deployment list \
-     --project-id $DEVOPS_PROJECT_ID \
-     --limit 5 \
-     --sort-order DESC \
-     --output json
-   ```
-
-   Look for a deployment with `lifecycle-state` of `IN_PROGRESS` that has a manual approval stage pending. The deployment pipeline has a staging stage (already completed) followed by a manual approval gate and then the production stage.
-
-3. **If no pending deployment found:**
-   - Check if the staging deploy pipeline ran successfully
-   - If the pipeline hasn't reached the approval gate yet, wait and poll (every 30s, max 5 minutes)
-   - If there's genuinely no pipeline to approve, report: "No pending production deployment found. Run `/deploy-conta-staging` first."
-
-### Phase 3: Confirm and Approve
-
-1. **If `--auto-approve` is set**, skip the confirmation prompt and go directly to step 3.
+1. **If `--auto-approve` is set**, skip the confirmation prompt and push directly.
 
 2. **Otherwise, present the deployment details to the user:**
 
    ```
-   Ready to promote to production.
+   Ready to deploy to production.
 
-   Current staging state:
-   - Image: {image_tag}
-   - Staging health: ALL UP
-   - Staging API: https://staging-api.contably.ai ✓
-   - Staging Dashboard: https://staging.contably.ai ✓
-   - Staging Portal: https://staging-portal.contably.ai ✓
+   Current commit: {HEAD commit}
+   Unpushed commits: {list}
 
-   Production will be updated:
+   Production URLs:
    - API: https://api.contably.ai
    - Dashboard: https://contably.ai
    - Portal: https://portal.contably.ai
 
-   Approve production deployment? (yes/no)
+   Push to main and deploy? (yes/no)
    ```
 
-   If the user says no: report current state and exit. The deployment stays at the approval gate.
+   If the user says no: exit.
 
-3. **Approve the OCI DevOps manual gate:**
+3. **Push to main:**
 
    ```bash
-   oci devops deployment approve \
-     --deployment-id $DEPLOYMENT_ID \
-     --action APPROVE \
-     --reason "Staging verified via /deploy-conta-production. Image: $IMAGE_TAG"
+   GITHUB_TOKEN= git push origin main
+   IMAGE_TAG=$(git rev-parse --short HEAD)
    ```
 
-### Phase 4: Monitor Production Deployment
+### Phase 3: Monitor GitHub Actions Deploy
 
-1. **Poll production deployment** (every 30 seconds, max 15 minutes):
+1. **Find the workflow run:**
 
    ```bash
-   oci devops deployment get --deployment-id $DEPLOYMENT_ID --query 'data."lifecycle-state"' --raw-output
+   GITHUB_TOKEN= gh run list --repo Contably/contably --limit 1
    ```
 
-   Report progress:
-   - `IN_PROGRESS` → "Deploying to production..."
-   - `SUCCEEDED` → "Production deploy complete. Running health checks..."
-   - `FAILED` → Report failure, suggest rollback
+2. **Watch the run** (use `run_in_background: true`):
 
-2. **On failure**:
+   ```bash
+   GITHUB_TOKEN= gh run watch <RUN_ID> --repo Contably/contably --exit-status
+   ```
+
+3. **On completion, check results:**
+
+   ```bash
+   GITHUB_TOKEN= gh run view <RUN_ID> --repo Contably/contably --json jobs --jq '.jobs[] | "\(.name): \(.conclusion)"'
+   ```
+
+4. **On failure**:
+   - Get logs: `GITHUB_TOKEN= gh run view <RUN_ID> --repo Contably/contably --log`
    - Report failure details
    - Suggest rollback: `kubectl rollout undo deployment/contably-api -n contably`
    - Ask user if they want to rollback
@@ -250,17 +213,14 @@ Production is live at:
 ## Rules
 
 1. **NEVER auto-fix production** — always report and ask the user
-2. **NEVER push code** — this skill only promotes existing staging deployments
-3. **ALWAYS confirm before approving** — unless `--auto-approve` is passed (used by `/deploy-conta-full` after staging verification)
-4. **If staging is unhealthy, STOP** — do not promote broken code
-5. **If OCI CLI is unauthenticated** — report and exit (cannot approve without CLI)
-6. **Log timing for each phase** — report durations in the final summary
-7. **Suggest rollback on any production failure** — `kubectl rollout undo deployment/contably-api -n contably`
+2. **ALWAYS confirm before pushing** — unless `--auto-approve` is passed (used by `/deploy-conta-full`)
+3. **If `gh` CLI fails** — fall back to push-only mode with manual monitoring at github.com/Contably/contably/actions
+4. **Log timing for each phase** — report durations in the final summary
+5. **Suggest rollback on any production failure** — `kubectl rollout undo deployment/contably-api -n contably`
 
 ## Subagent Model Tiers
 
 | Task                   | Model  |
 | ---------------------- | ------ |
-| /oci-health staging    | haiku  |
 | /oci-health production | haiku  |
-| OCI CLI polling        | direct |
+| GHA run monitoring     | direct |
