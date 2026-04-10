@@ -15538,3 +15538,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-10T19:19:12Z",
+  "date": "2026-04-10",
+  "skill": "parallel-dev",
+  "args": "Implement SPED Fiscal Integration via TecnoSpeed API in a worktree. Use the plan at docs/sped-fiscal-deep-plan.md. \n\n## Features to parallelize (3 tracks):\n\n### Track 1: Backend Core (client + builders + service)\n- Create apps/api/src/integrations/sped_fiscal/__init__.py\n- Create apps/api/src/integrations/sped_fiscal/client.py (TecnoSpeed SPED REST client, async + sync)\n- Create apps/api/src/integrations/sped_fiscal/tx2_builders.py (TX2 builders for blocks 0000, 0150, 0200, C100, E100, E110, 9001, 9900, 9999)\n- Create apps/api/src/integrations/sped_fiscal/service.py (SPEDFiscalService orchestrator: generate_for_period, poll_and_update, download_file)\n- Modify apps/api/src/config/settings.py (add tecnospeed_sped_fiscal_base_url)\n\n### Track 2: Workflow Integration (closing + celery + routes)\n- Create apps/api/src/workflows/tasks/sped_fiscal_tasks.py (Celery polling task)\n- Modify apps/api/src/workflows/celery_app.py (register task + beat schedule + routing)\n- Modify apps/api/src/workflows/monthly_closing/checklist.py (add GENERATE_SPED_FISCAL step at seq 145)\n- Modify apps/api/src/workflows/monthly_closing/closing.py (add generate_sped_fiscal handler)\n- Create apps/api/src/api/routes/compliance/sped_fiscal.py (5 endpoints: generate, status, download, history, retry)\n- Register router in apps/api/src/api/routes/compliance/__init__.py\n\n### Track 3: Frontend (minimal — closing page already renders dynamically)\n- Verify ComplianceReportsPage supports sped_fiscal type\n- Add download button + manual trigger if missing\n\n## Critical context:\n- Mirror the eSocial TecnoSpeed pattern (same auth: cnpj_sh/token_sh headers)\n- TX2 format: INCLUIR{REGISTER}\\nFIELD_SEQ=VALUE\\n...SALVAR{REGISTER}\n- API base: https://api.tecnospeed.com.br/sped-fiscal with 4 routes: /iniciar, /registros/{id}, /gerar/{id}, /protocolo/{id}\n- Reuse ComplianceReport + ComplianceReportBlock models (already have SPED_FISCAL enum)\n- Non-blocking: SPED generation runs async via Celery, doesn't block period locking\n- Guard: skip Simples Nacional companies\n- MVP: Blocks 0, C, E, 9 only\n\n## Model strategy:\n- Opus for architecture decisions and service orchestration logic\n- Sonnet for writing the actual code (client, builders, routes)\n- All tracks can run in parallel since they touch different files",
+  "sessionId": "880181d0-1b14-4805-b7c6-ba9714f1ebe7",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably/docs",
+  "hadError": false
+}
