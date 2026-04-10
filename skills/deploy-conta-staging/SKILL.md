@@ -40,7 +40,9 @@ invocation-contexts:
 
 # Deploy Staging — Contably OCI
 
-Deploys Contably to the staging environment (`staging-*.contably.ai`). Runs pre-flight checks, auto-fixes issues, pushes to trigger OCI DevOps, monitors the pipeline through CI → build → staging deploy, and validates the staging environment. Loops until staging is green.
+Deploys Contably to the production environment via GitHub Actions. Runs pre-flight checks, auto-fixes issues, pushes to trigger GHA CI → build → deploy, monitors the pipeline, and validates. Loops until green.
+
+**Note:** Despite the name "staging", Contably's OKE staging cluster IS production (the "prod" cluster is decommissioned). Push to main triggers GHA deploy to the `contably` namespace on the staging cluster, which serves production traffic.
 
 This skill ONLY deploys to staging. To promote to production, use `/deploy-conta-production`.
 
@@ -62,37 +64,36 @@ This skill ONLY deploys to staging. To promote to production, use `/deploy-conta
   - Dashboard: `https://staging.contably.ai`
   - Portal: `https://staging-portal.contably.ai`
 
-### OCI DevOps Pipeline Chain
+### GitHub Actions Pipeline
 
 ```
 git push origin main
-    ↓ (GitHub mirror sync)
-CI Pipeline (build_spec_ci.yaml)
-  → Frontend CI, backend lint/typecheck/tests, security scans
+    ↓ (webhook)
+CI Workflow (.github/workflows/ci.yml)
+  → Frontend CI (typecheck, lint, build) — parallel
+  → Backend lint (ruff) — parallel
+  → Security scan (gitleaks + trivy) — parallel
     ↓ (on success)
-Build+Push Pipeline (build_spec_images.yaml)
-  → Build contably-api, contably-admin, contably-portal
-  → Push to OCIR with IMAGE_TAG={commit_sha:0:7}
-    ↓ (auto-trigger)
-Deploy Staging (deploy_spec_staging.yaml)
-  → Deploy to contably-staging namespace
-  → *** STOPS HERE — does NOT touch production ***
+Deploy Workflow (.github/workflows/deploy.yml)
+  → Build 3 images (Buildx + GHA cache) → push to OCIR
+  → kubectl set image → rollout restart → wait → alembic migrate
+  → Health check (api.contably.ai/health)
 ```
 
-### OCI CLI Commands Reference
+### GitHub CLI Commands Reference
 
 ```bash
-# List recent build runs
-oci devops build-run list --build-pipeline-id $PIPELINE_ID --limit 5 --sort-order DESC
+# List recent workflow runs
+GITHUB_TOKEN= gh run list --repo Contably/contably --limit 5
 
-# Get build run status
-oci devops build-run get --build-run-id $BUILD_RUN_ID
+# Watch a run in real-time
+GITHUB_TOKEN= gh run watch <RUN_ID> --repo Contably/contably
 
-# List deployments
-oci devops deployment list --deploy-pipeline-id $PIPELINE_ID --limit 5 --sort-order DESC
+# View run details and logs
+GITHUB_TOKEN= gh run view <RUN_ID> --repo Contably/contably --log
 
-# Get deployment status
-oci devops deployment get --deployment-id $DEPLOYMENT_ID
+# Check job-level status
+GITHUB_TOKEN= gh run view <RUN_ID> --repo Contably/contably --json jobs --jq '.jobs[] | "\(.name): \(.conclusion)"'
 ```
 
 ## Workflow
@@ -136,7 +137,7 @@ oci devops deployment get --deployment-id $DEPLOYMENT_ID
    fix(deploy): auto-fix {summary of what was fixed}
    ```
 
-### Phase 2: Push to Trigger OCI DevOps
+### Phase 2: Push to Trigger GitHub Actions
 
 1. Push to main:
 
@@ -152,104 +153,61 @@ oci devops deployment get --deployment-id $DEPLOYMENT_ID
 
 3. Report to user:
    ```
-   Pushed {commit_sha} to origin/main. OCI DevOps pipeline will trigger via GitHub mirror sync.
+   Pushed {commit_sha} to origin/main. GitHub Actions deploy workflow will trigger.
    IMAGE_TAG: {IMAGE_TAG}
    ```
 
-### Phase 3: Monitor CI Pipeline
+### Phase 3: Monitor GitHub Actions Pipeline
 
-The OCI DevOps pipeline is triggered by the GitHub mirror sync (not immediately on push). Allow up to 2 minutes for the mirror to sync and the pipeline to start.
+The GHA deploy workflow triggers immediately on push to main. It runs CI first, then builds images, then deploys.
 
-1. **Wait for CI build run to appear:**
-
-   ```bash
-   # Poll for a build run matching our commit (check every 30s, max 4 minutes)
-   oci devops build-run list \
-     --project-id $DEVOPS_PROJECT_ID \
-     --limit 3 \
-     --sort-order DESC \
-     --output json
-   ```
-
-   Look for a build run with `IN_PROGRESS` or `ACCEPTED` state that was created after our push.
-
-   **To get the project ID:**
+1. **Find the workflow run:**
 
    ```bash
-   oci devops project list \
-     --compartment-id $(oci iam compartment list --query 'data[0].id' --raw-output) \
-     --name contably \
-     --output json 2>/dev/null | jq -r '.data.items[0].id // empty'
+   GITHUB_TOKEN= gh run list --repo Contably/contably --limit 1
    ```
 
-   If the project ID cannot be determined programmatically, fall back to checking git push status and report that the pipeline was triggered.
+   The most recent run should match your commit.
 
-2. **Poll CI status** (every 30 seconds, max 15 minutes):
+2. **Watch the run in background** (use `run_in_background: true`):
 
    ```bash
-   oci devops build-run get --build-run-id $BUILD_RUN_ID --query 'data."lifecycle-state"' --raw-output
+   GITHUB_TOKEN= gh run watch <RUN_ID> --repo Contably/contably --exit-status
    ```
 
-   Report progress milestones to the user:
-   - `ACCEPTED` → "CI pipeline queued..."
-   - `IN_PROGRESS` → "CI running: {stage_name}..."
-   - `SUCCEEDED` → "CI passed. Build+Push pipeline starting..."
-   - `FAILED` → proceed to Phase 3a (CI failure recovery)
+3. **On completion, check job-level results:**
 
-3. **If CI cannot be polled** (OCI CLI auth issues, project ID unknown):
-   - Report: "Push complete. Monitor the pipeline in the OCI DevOps console."
-   - Skip to Phase 5 (health check) with a delay to allow deployment to complete.
+   ```bash
+   GITHUB_TOKEN= gh run view <RUN_ID> --repo Contably/contably --json jobs --jq '.jobs[] | "\(.name): \(.conclusion)"'
+   ```
+
+   Expected jobs: `ci / Frontend CI`, `ci / Backend CI`, `ci / Security Scan`, `Build & Push Images`, `Deploy to OKE`
+
+4. **If any job failed**, get the logs:
+
+   ```bash
+   GITHUB_TOKEN= gh run view <RUN_ID> --repo Contably/contably --log 2>&1 | grep -B2 -A10 "error\|Error\|FAILED\|exit code"
+   ```
+
+   Then proceed to Phase 3a.
 
 ### Phase 3a: CI Failure Recovery (auto-fix loop)
 
-If the CI pipeline fails:
+If the GitHub Actions pipeline fails:
 
-1. Get the build run logs:
+1. Parse the failure from the logs (see Phase 3 step 4).
 
-   ```bash
-   oci devops build-run get --build-run-id $BUILD_RUN_ID --output json | jq '.data."build-outputs"'
-   ```
-
-2. Parse the failure:
+2. Identify the failing job:
    - **Frontend CI failure** (typecheck, lint, build): auto-fix locally, commit, re-push
-   - **Backend lint/typecheck failure** (ruff, mypy): auto-fix locally, commit, re-push
-   - **Backend test failure** (pytest): invoke `test-and-fix` skill, commit, re-push
+   - **Backend lint failure** (ruff): auto-fix locally, commit, re-push
    - **Security scan failure** (gitleaks): BLOCK — report to user, do not auto-fix (may be a real secret leak)
    - **Security scan failure** (trivy CRITICAL): report to user with CVE details, suggest dependency update
+   - **Build & Push failure**: likely Dockerfile or registry issue — report to user
+   - **Deploy to OKE failure**: check kubectl errors in logs — report to user
 
 3. After fix: return to Phase 2 (push again). Max 3 CI retry cycles.
 
 4. If still failing after 3 cycles: report all failures and ask the user for guidance.
-
-### Phase 4: Monitor Build+Push and Staging Deploy
-
-After CI succeeds, the build+push pipeline auto-triggers:
-
-1. **Poll build+push status** (every 45 seconds, max 20 minutes — image builds are slow):
-
-   ```bash
-   oci devops build-run list \
-     --project-id $DEVOPS_PROJECT_ID \
-     --limit 1 \
-     --sort-order DESC \
-     --output json
-   ```
-
-2. **On build+push success**, the staging deployment pipeline auto-triggers. Poll deployment:
-
-   ```bash
-   oci devops deployment list \
-     --project-id $DEVOPS_PROJECT_ID \
-     --limit 1 \
-     --sort-order DESC \
-     --output json
-   ```
-
-3. **Poll staging deployment status** (every 30 seconds, max 10 minutes):
-   - `ACCEPTED` → "Staging deployment queued..."
-   - `IN_PROGRESS` → "Deploying to staging..."
-   - `SUCCEEDED` → "Staging deploy complete. Running health checks..."
-   - `FAILED` → Report failure details, suggest rollback command
 
 ### Phase 5: Staging Health Check
 
@@ -329,8 +287,8 @@ To promote to production: `/deploy-conta-production`
 3. **Commit fixes with conventional commits** — `fix(deploy): {description}`
 4. **Track all auto-fix commits** — report them in the final summary
 5. **Max 3 full push cycles** — if code still fails CI after 3 rounds, stop and report
-6. **Respect the pipeline chain** — don't bypass OCI DevOps by deploying directly via kubectl
-7. **If OCI CLI is unauthenticated** — fall back to push-only mode with manual monitoring instructions
+6. **Respect the pipeline chain** — don't bypass GitHub Actions by deploying directly via kubectl
+7. **If `gh` CLI fails** — fall back to push-only mode with manual monitoring at github.com/Contably/contably/actions
 8. **Log timing for each phase** — report durations in the final summary
 
 ## Subagent Model Tiers
@@ -342,5 +300,5 @@ To promote to production: `/deploy-conta-production`
 | /contably-guardian invocation | opus   |
 | /review-changes invocation    | sonnet |
 | /oci-health invocation        | haiku  |
-| OCI CLI polling               | direct |
+| GHA run monitoring            | direct |
 | Auto-fix edits                | direct |

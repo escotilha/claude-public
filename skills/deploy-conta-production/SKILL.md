@@ -40,9 +40,9 @@ invocation-contexts:
 
 # Deploy Production — Contably OCI
 
-Promotes the current staging deployment to production. Assumes `/deploy-conta-staging` has already been run and staging is healthy. This skill verifies staging, asks for confirmation, approves the OCI DevOps production gate, monitors the rollout, and validates the production environment.
+Deploys Contably to production via GitHub Actions. Pushes to main, which triggers the GHA deploy workflow (CI → build images → deploy to OKE `contably` namespace). Verifies health after deploy.
 
-This skill DOES NOT push code or run CI. It only promotes what's already on staging.
+**Note:** With GitHub Actions, push to main IS the production deploy. There is no separate staging-then-promote flow. This skill handles the push, monitoring, and validation.
 
 ## Arguments
 
