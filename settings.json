@@ -35,6 +35,11 @@
           {
             "type": "command",
             "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Stop failure: exit_reason=${EXIT_REASON:-unknown} error=${ERROR_MESSAGE:-none}\" >> ~/.claude/logs/stop-failures.log"
+          },
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude-setup/hooks/notify-whatsapp.sh\"",
+            "timeout": 6000
           }
         ]
       }
