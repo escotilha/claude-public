@@ -15838,3 +15838,13 @@
   "cwd": "/Users/ps/code/claudia",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-11T18:05:57Z",
+  "date": "2026-04-11",
+  "skill": "first-principles",
+  "args": "Should I migrate from Claudia (my custom TypeScript AI agent router) to OpenClaw (355k-star open-source personal AI assistant)?\n\nCONTEXT:\n- Claudia: 27k LOC custom TypeScript, 10 agents, 6 channels (WhatsApp broken), 5-layer memory (pgvector KG + fact extraction + nudge + consolidation + wiki), 22+ scheduled tasks, Pipecat real-time voice, dispatch queue to Claude Code. Solo maintained. 47.5% of recent commits are bug fixes. 5 features disabled/removed due to VPS destabilization (benchmark loop rm -rf'd production twice). Core architecture is solid but autonomous tasks are dangerous.\n\n- OpenClaw: 355k GitHub stars, MIT license, daily releases, 35+ channels, 60+ model providers, 130+ plugins, native macOS/iOS/Android apps, plugin SDK, Canvas/A2UI, WebSocket control plane, ClawRouter (92% cost reduction), massive community. Memory is simpler (MEMORY.md + daily notes + DREAMS.md). Uses Baileys for WhatsApp (which Claudia already abandoned due to bugs). No equivalent for: pgvector KG, fact extraction, periodic nudge, dispatch queue, roundtable, Pipecat voice.\n\nTHE TENSION:\n1. Claudia's memory system is genuinely more sophisticated — but is that sophistication delivering proportional value?\n2. OpenClaw gives me 35+ channels, native apps, plugin ecosystem, and community maintenance — things I literally cannot build solo\n3. The \"bugs\" in Claudia are concentrated in autonomous task safety (not architecture) — migrating doesn't fix them\n4. But maintaining 27k LOC solo with a 1:1 fix-to-feat ratio is unsustainable\n5. OpenClaw's plugin SDK means I could port the memory system as a plugin — but how hard is that really?\n6. I already migrated FROM OpenClaw (when it was \"Clawdbot\") TO Claudia 3 months ago because Baileys was broken. Now I'd be going back.\n\nWHAT I NEED: Break this down to fundamental truths. What is Claudia actually FOR? What's commodity infrastructure vs genuine IP? Is the memory system a real moat or over-engineering? What would a rational actor do?",
+  "sessionId": "7a5b17fc-fb02-4fe0-8040-d3d479bd1129",
+  "project": "Unknown",
+  "cwd": "/Users/ps/code/claudia",
+  "hadError": false
+}
