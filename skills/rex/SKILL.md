@@ -51,13 +51,57 @@ Run parallel security audits across all managed machines. Named after the guard 
 
 Before launching audits:
 
-1. **Check Tailscale status** if Mac Mini or VPS-TS is a target:
+### 0. Query Memory for Prior Context
 
-   ```bash
-   tailscale status 2>&1 | head -5
-   ```
+Search persistent memory for past Rex findings, known-safe exceptions, and previously flagged issues so subagents don't re-discover known issues or flag accepted risks:
 
-   If stopped, ask the user to start it. Do NOT attempt `sudo tailscale up`.
+```bash
+# Past Rex reports and security findings
+~/.claude-setup/tools/mem-search "rex security audit"
+
+# Known infrastructure decisions that affect security posture
+~/.claude-setup/tools/mem-search "infrastructure security"
+
+# Machine-specific known issues
+~/.claude-setup/tools/mem-search "vps security"
+~/.claude-setup/tools/mem-search "mac mini security"
+```
+
+Include relevant results (known-safe exceptions, previously accepted risks, past critical findings) in the context passed to each subagent. This avoids noisy re-flagging of accepted risks and lets subagents focus on new or changed state.
+
+### 0b. QMD Pre-Indexing for Deployed Codebases
+
+Before launching subagents, check if QMD has indexed any deployed applications on the target machines. If so, pre-compute security-relevant file lists so subagents don't waste tokens on `find` and `grep` during discovery.
+
+```bash
+# Check if deployed apps are indexed
+qmd collection list 2>/dev/null | grep -iE "claudia|contably|sourcerank|paperclip"
+```
+
+If indexed, run targeted queries:
+
+```bash
+# Auth and secrets handling
+qmd search "<collection>" "authentication authorization secrets credentials tokens"
+
+# API endpoints and middleware
+qmd search "<collection>" "API routes middleware endpoints handlers"
+
+# Configuration and environment
+qmd search "<collection>" "environment config .env database connection"
+```
+
+Store results as pre-computed file lists to include in each subagent's spawn prompt. This implements the "Avoid Re-Reading" pattern — each subagent gets exact file paths instead of spending tokens on independent discovery.
+
+If QMD is not available or apps are not indexed, subagents fall back to standard discovery (`find`, `grep`) on the remote machines.
+
+### 1. Check Tailscale status (if Mac Mini or VPS-TS is a target):
+
+```bash
+tailscale status 2>&1 | head -5
+```
+
+If stopped, ask the user to start it. Do NOT attempt `sudo tailscale up`.
 
 2. **Verify SSH connectivity** to each remote target:
    ```bash
