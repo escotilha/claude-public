@@ -15818,3 +15818,13 @@
   "cwd": "/Volumes/AI/Code/claudia",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-11T17:29:57Z",
+  "date": "2026-04-11",
+  "skill": "agentmail",
+  "args": "Send an email to p@xurman.com with subject \"AgentWave COO: Marketing Agent Created ✅\" and body \"Pierre, the COO successfully called create_agent and created the Marketing agent (📈). It's live in the dashboard. The fix was: 1) Switched from Nemotron to gpt-oss-120b (Nemotron doesn't reliably call tools), 2) Stripped 50 Composio noise tools down to 12 core tools, 3) Strengthened the persona prompt. Refresh xurman.agentwave.io — you'll see COO at the top and Marketing in the sidebar. — Claude\"",
+  "sessionId": "eb4e1baa-6aa8-4dfd-b4ee-6658330da543",
+  "project": "Unknown",
+  "cwd": "/Volumes/AI/Code/agentwave",
+  "hadError": false
+}
