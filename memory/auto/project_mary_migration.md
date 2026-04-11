@@ -42,10 +42,11 @@ All agents on `anthropic/claude-sonnet-4-6` except:
 
 **Remaining work:**
 
-1. WhatsApp QR pairing (manual — `openclaw channels login --channel whatsapp`)
+1. WhatsApp QR pairing (tomorrow morning — run `openclaw channels login --channel whatsapp` on VPS)
 2. OpenAI billing fix → switch agents to GPT-4.1-mini for cost savings
 3. Email triage as standing order
-4. Test dispatch queue end-to-end
+
+**Claudia: WIPED** from VPS on 2026-04-11. /opt/claudia deleted, claudia.service removed. No rollback possible.
 
 **Why:** Claudia was 27k LOC solo-maintained with 47% fix commits and 5 features disabled for VPS destabilization. Mary inherits all agent personalities, memories, and 43 skills while dropping 22 dangerous scheduled tasks. OpenClaw provides 35+ channels, native apps, plugin SDK, and community maintenance.
 
