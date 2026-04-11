@@ -1,5 +1,11 @@
 # Memory Index
 
+## Agent Identity & Operating Memory
+
+- [agent-memory-julia.md](agent-memory-julia.md) — Julia agent identity: Contably operational assistant — email triage preferences, Brazilian compliance domain (eSocial, NF-e), recurring tasks, infrastructure context, cross-agent handoffs
+- [agent-memory-marco.md](agent-memory-marco.md) — Marco agent identity: Nuvini M&A analyst — investment thesis (micro-SaaS BR, $200K–$5M ARR), research methodology (parallel DD tracks), evidence hierarchy, deal memo format
+- [agent-memory-bella.md](agent-memory-bella.md) — Bella agent identity: tech evaluator + skill indexer — adopt/watch/skip scoring methodology, skill library maintenance rules, content preferences, recurring tasks
+
 ## Tech Evaluation (Bella)
 
 - [bella-tech-eval-kb.md](bella-tech-eval-kb.md) — Persistent log of URL/tool evaluations with scores, verdicts, and reasoning — 8 entries seeded (adopt: browse CLI, Scrapling, PinchTab, MemPalace, GBrain; watch: OpenClaw-RL, Qwen3.5-27B-Opus-Distilled; skip: Lightpanda)
@@ -67,6 +73,7 @@
 - [claudia-heartbeat-tracker.md](claudia-heartbeat-tracker.md) — Spec for heartbeat issue dedup — active-issues.json on VPS, dedup by issue ID, escalation after count>5 or 2h, auto-resolve after 30min silence
 - [project_nuvini_ir_deploy.md](project_nuvini_ir_deploy.md) — nuvini-ir deploys via Cloudflare Pages (wrangler) — build with eleventy, deploy \_site folder, not auto-deployed from git
 - [project_woodpecker_ci.md](project_woodpecker_ci.md) — Woodpecker CI running on OKE cluster at ci.contably.ai — replaces OCI DevOps for Contably CI/CD
+- [julia-oci-health-monitor.md](julia-oci-health-monitor.md) — Design spec for persistent OCI health monitoring — hourly checks stored in SQLite, status page at /oci-status, change-driven Discord alerts
 - [tech_glasswing_vuln_hunting.md](tech_glasswing_vuln_hunting.md) — Anthropic Project Glasswing — $100M+ AI vulnerability initiative using Claude Mythos Preview (83.1% CyberGym repro rate). Glasswing-style prompting added to /cto security analyst.
 
 ## Tech Insights
@@ -88,6 +95,10 @@
 ## Infrastructure (Bella)
 
 - [bella-systemd-routines.md](bella-systemd-routines.md) — VPS service configuration — Claudia systemd unit with auto-restart ensures scheduled routines survive reboots; claudia-cron.service stale (safe to reset-failed)
+
+## Rex Agent (Security Audit)
+
+- [rex-mlx-benchmark-spec.md](rex-mlx-benchmark-spec.md) — Benchmark spec for local MLX models on Rex tasks — test design, metrics, routing recommendations (35B-A3B, 9B, 27B-Distilled vs Sonnet baseline across 5 task types)
 
 ## References
 
