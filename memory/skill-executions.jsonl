@@ -15748,3 +15748,33 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-11T13:44:39Z",
+  "date": "2026-04-11",
+  "skill": "deploy-conta-staging",
+  "args": "",
+  "sessionId": "718a201d-e730-4c0f-a4e5-44c369a371fe",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
+{
+  "timestamp": "2026-04-11T13:45:43Z",
+  "date": "2026-04-11",
+  "skill": "deploy-conta-production",
+  "args": "--skip-staging-check --auto-approve",
+  "sessionId": "718a201d-e730-4c0f-a4e5-44c369a371fe",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
+{
+  "timestamp": "2026-04-11T13:45:53Z",
+  "date": "2026-04-11",
+  "skill": "deploy-conta-full",
+  "args": "",
+  "sessionId": "718a201d-e730-4c0f-a4e5-44c369a371fe",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
