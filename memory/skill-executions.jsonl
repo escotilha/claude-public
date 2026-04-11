@@ -15798,3 +15798,13 @@
   "cwd": "/Volumes/AI/Code/claudia",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-11T14:21:01Z",
+  "date": "2026-04-11",
+  "skill": "computer-use",
+  "args": "Clear Safari cache for contably.ai and then reload https://contably.ai/login. Steps: 1) Switch to Safari, 2) Use Cmd+Option+E to empty caches, 3) Navigate to https://contably.ai/login, 4) Do Cmd+Shift+R to hard reload",
+  "sessionId": "718a201d-e730-4c0f-a4e5-44c369a371fe",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
