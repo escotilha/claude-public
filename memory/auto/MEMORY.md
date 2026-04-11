@@ -47,6 +47,11 @@
 
 ## Feedback
 
+- [mistake_nightly_unvalidated_db_columns.md](mistake_nightly_unvalidated_db_columns.md) — Nightly automation added DB columns to queries without verifying schema — crashed all API requests; always validate column existence before querying
+- [tech_insight_free_model_tool_calling.md](tech_insight_free_model_tool_calling.md) — Free/smaller LLMs describe tool calls instead of calling them — fix with imperative persona: "IMMEDIATELY call the function, do NOT describe it"
+- [pattern_sse_multi_agent_delegation.md](pattern_sse_multi_agent_delegation.md) — SSE broadcast pattern for inter-agent delegation: delegation:task + delegation:response events route specialist work to their own chat channel
+- [mistake_cdn_version_not_verified.md](mistake_cdn_version_not_verified.md) — CDN version 404 (qrcode@1.5.4) blocked onboarding in Safari; always verify CDN URLs + add async to non-critical scripts
+- [tech_insight_safari_api_caching.md](tech_insight_safari_api_caching.md) — Safari aggressively caches API responses causing stale UI; fix with Cache-Control: no-store on all /api/ routes at middleware level
 - [feedback_blackbox_vs_code_review.md](feedback_blackbox_vs_code_review.md) — Always run code-level review (/cto or /review-changes) in addition to black-box testing (/fulltest-skill) — they catch fundamentally different classes of issues
 - [feedback_claudia_vps_only.md](feedback_claudia_vps_only.md) — Any mention of Claudia means VPS — always SSH to /opt/claudia, never check local repo for state
 - [feedback_contably_uses_woodpecker.md](feedback_contably_uses_woodpecker.md) — Contably has DUAL CI/CD — both Woodpecker (ci.contably.ai) AND GitHub Actions are active and deploying
@@ -118,4 +123,4 @@
 
 # currentDate
 
-Today's date is 2026-04-10.
+Today's date is 2026-04-11.
