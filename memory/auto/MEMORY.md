@@ -102,6 +102,10 @@
 
 - [bella-systemd-routines.md](bella-systemd-routines.md) — VPS service configuration — Claudia systemd unit with auto-restart ensures scheduled routines survive reboots; claudia-cron.service stale (safe to reset-failed)
 
+## Mary Migration (OpenClaw)
+
+- [project_mary_migration.md](project_mary_migration.md) — Mary (OpenClaw v2026.4.10) replaced Claudia on VPS — config paths, model routing, channel status, deferred work (memory plugin, dispatch queue, OpenAI billing)
+
 ## Rex Agent (Security Audit)
 
 - [rex-mlx-benchmark-spec.md](rex-mlx-benchmark-spec.md) — Benchmark spec for local MLX models on Rex tasks — test design, metrics, routing recommendations (35B-A3B, 9B, 27B-Distilled vs Sonnet baseline across 5 task types)
