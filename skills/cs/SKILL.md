@@ -28,7 +28,7 @@ tool-annotations:
 ### 1. Commit local changes
 
 ```bash
-cd ~/.claude-setup && git add -A && git diff --cached --quiet || git commit -m "auto: sync claude-setup"
+cd ~/.claude-setup && git add -A && (git diff --cached --quiet || git commit -m "auto: sync claude-setup")
 ```
 
 ### 2. Push to origin
