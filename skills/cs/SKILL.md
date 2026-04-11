@@ -2,14 +2,11 @@
 name: cs
 description: Sync Claude setup to all remotes (origin, public, nuvini) + VPS sync via git pull
 user-invocable: true
-context: fork
+context: inline
 model: haiku
 effort: low
 allowed-tools:
   - Bash
-  - Read
-  - Glob
-  - Grep
 tool-annotations:
   Bash: { destructiveHint: false, idempotentHint: false }
 invocation-contexts:
@@ -20,6 +17,8 @@ invocation-contexts:
 ---
 
 # Claude Setup Sync — All Remotes + VPS
+
+**IMPORTANT**: This skill operates ONLY on `~/.claude-setup`. Do NOT explore, read, or search any other directories. Do NOT use Glob, Grep, or Read. Just run the git commands below in sequence.
 
 Syncs the local Claude setup repo (`~/.claude-setup`) to all configured remotes and the VPS:
 
