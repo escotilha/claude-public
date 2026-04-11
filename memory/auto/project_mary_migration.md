@@ -32,13 +32,19 @@ Claudia fully replaced by Mary (OpenClaw v2026.4.10) on VPS as of 2026-04-11.
 
 **Model routing (FINAL — $0/month total):**
 
-- mary (claudia): `claude-cli/claude-sonnet-4-6` — Max plan via CLI backend, FREE
+- mary/marco/swarmy (claudia): `claude-cli/claude-sonnet-4-6` — Max plan via CLI backend, FREE
 - rex: `claude-cli/claude-opus-4-6` — Max plan via CLI backend, FREE
-- marco: `openrouter/qwen/qwen3-coder-480b-a35b:free` — FREE
-- swarmy/bella/buzz/north: `openrouter/qwen/qwen3.6-plus:free` — FREE
-- julia/arnold/cris: `openrouter/google/gemma-4-26b-a4b-it:free` — FREE
+- buzz/bella/julia/arnold/cris/north: `openrouter/openai/gpt-oss-120b:free` — FREE
+- Fallback chain: anthropic/sonnet → anthropic/haiku → gpt-oss → nemotron → gemma
 
-**Token sync:** macOS launchd plist at `~/Library/LaunchAgents/com.mary.token-sync.plist` copies OAuth from Mac keychain to VPS every 6 hours. Script at `/tmp/sync-claude-token.sh`.
+**Token sync:** Two mechanisms:
+
+1. macOS launchd plist at `~/Library/LaunchAgents/com.mary.token-sync.plist` — copies OAuth from Mac keychain to VPS every 6h
+2. VPS crontab `0 */4 * * *` — pings `claude -p "ping"` to trigger CLI auto-refresh
+
+**Built-in memory disabled:** `memory-core` and `active-memory` plugins disabled in openclaw.json (we use mary-memory instead). This prevents OpenAI embedding errors from the inactive OpenAI account.
+
+**Discord bot:** Renamed from "ClaudIA" to "Mary" via Discord API.
 
 **14 cron jobs configured** in `/root/.openclaw/cron/jobs.json`
 
