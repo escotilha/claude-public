@@ -1,0 +1,25 @@
+wing: memory
+rooms:
+- name: archive
+  description: Files from archive/
+  keywords:
+  - archive
+  - archive
+- name: auto
+  description: Files from auto/
+  keywords:
+  - auto
+  - auto
+- name: sessions
+  description: Files from sessions/
+  keywords:
+  - sessions
+  - sessions
+- name: imported
+  description: Files from imported/
+  keywords:
+  - imported
+  - imported
+- name: general
+  description: Files that don't fit other rooms
+  keywords: []
