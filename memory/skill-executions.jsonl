@@ -15828,3 +15828,13 @@
   "cwd": "/Volumes/AI/Code/agentwave",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-11T17:37:38Z",
+  "date": "2026-04-11",
+  "skill": "deep-plan",
+  "args": "Migrate from Claudia to OpenClaw. The user believes Claudia is too buggy and OpenClaw is evolving fast. This is a FULL MIGRATION, not a hybrid approach. The previous deep-plan (research.md) recommended hybrid but the user rejected that — they want to switch.\n\nKey context from the previous research:\n- Claudia: 80 TS files, ~15k LOC, 10 agents, 6 channels, 5-layer memory, 22+ scheduled tasks, Pipecat voice, dispatch queue, video meetings, benchmark loop\n- OpenClaw: 353k stars, 35+ channels, 60+ model providers, plugin architecture, native apps, Canvas/A2UI, task flows, standing orders, formal security model\n- Claudia's unique features that need porting decisions: pgvector KG, fact extraction, periodic nudge, consolidation/dreaming, dispatch queue, roundtable, benchmark loop, video meetings, Pipecat voice, auto-skill generation\n\nThe plan should focus on:\n1. What Claudia features CAN be ported to OpenClaw (as plugins, standing orders, hooks, or config)\n2. What features should be DROPPED (not worth the effort or superseded by OpenClaw equivalents)\n3. Migration order and phases — what gets migrated first to get a working system fast\n4. Risk mitigation — running both in parallel during transition\n5. The memory system migration strategy specifically (Claudia's biggest differentiator)\n\nPrevious research artifact: research.md in the repo root. Previous state: .deep-plan-state.json. Override the previous plan direction completely.",
+  "sessionId": "7a5b17fc-fb02-4fe0-8040-d3d479bd1129",
+  "project": "Unknown",
+  "cwd": "/Users/ps/code/claudia",
+  "hadError": false
+}
