@@ -1,5 +1,13 @@
 # Memory Index
 
+## Tech Evaluation (Bella)
+
+- [bella-tech-eval-kb.md](bella-tech-eval-kb.md) — Persistent log of URL/tool evaluations with scores, verdicts, and reasoning — 8 entries seeded (adopt: browse CLI, Scrapling, PinchTab, MemPalace, GBrain; watch: OpenClaw-RL, Qwen3.5-27B-Opus-Distilled; skip: Lightpanda)
+
+## Nuvini Group Entity Registry
+
+- [cris-nuvini-entity-registry.md](cris-nuvini-entity-registry.md) — Canonical registry of all Nuvini Group entities — NVNI (HoldCo), Heru (Brazil sub), Contably, SourceRank AI, StoneGEO — with jurisdiction, ownership, status, and update protocol for new acquisitions
+
 ## Investor Email Triage (Cris)
 
 - [cris-investor-email-rules.md](cris-investor-email-rules.md) — Investor classification rules, PERSONAL_REPLY_NEEDED flag triggers, VIP tier routing, red-flag keywords, and rationale templates for Cris email triage
@@ -10,12 +18,26 @@
 
 - [buzz-daily-triage.md](buzz-daily-triage.md) — Buzz daily competitive triage: scans TechCrunch/Crunchbase/LinkedIn for OMIE, Brex, Stripe, NVNI portfolio — flags funding/hires/launches only, 3-5 bullets, Pierre brief at 08:00 UTC
 - [buzz-triage-state.json](buzz-triage-state.json) — Deduplication state for buzz-daily-triage — tracks seen item hashes (30-day TTL) and run stats
+- [buzz-skill-matching.md](buzz-skill-matching.md) — Living index of skill trigger patterns for Buzz — when to invoke /research, /growth, /firecrawl, /deep-research vs ad-hoc; missed routing and improvisation log templates
+
+## Competitive Intelligence — M&A (North)
+
+- [north-competitive-watchlist.md](north-competitive-watchlist.md) — Persistent watchlist of 10 key acquirers in Latin SaaS M&A space (Tiny, Vela, Volaris, PSG, Vista, Boopos, etc.) — weekly scan protocol, North Star briefing template, threat levels
 
 ## M&A Deal Intelligence (Marco)
 
+- [marco-agent-teams-routing.md](marco-agent-teams-routing.md) — Agent Teams vs subagents decision matrix — 3-5 rule, token multipliers (~1.5-2x), independence criteria, quickstart checklist, current migration status per skill
 - [marco-deal-registry.md](marco-deal-registry.md) — Master registry of all M&A deals Marco has analyzed — status, links, key takeaways per deal
 - [deal-template.md](deal-template.md) — Reusable template for new deal pages (company overview, triage, DD, financial model, IC decisions, integration, relationship graph)
 - [deal_stripe.md](deal_stripe.md) — Stripe deal page: fintech payments infrastructure, $65B+ valuation, watch status — IPO/carve-out monitor
+
+## Agent Routing (Arnold)
+
+- [arnold-task-routing.md](arnold-task-routing.md) — Pre-response checklist for Arnold: 5-step skill/parallelize/investigate/destructive gate + quick-reference task→skill routing table
+
+## Swarm Coordination (Swarmy)
+
+- [swarmy-context-handoff.md](swarmy-context-handoff.md) — Centralized context handoff: active priorities (Claudia v2, eSocial, M&A, SourceRank), key decisions (Agent Teams strategy, model tiers, memory pipeline), session ingest order, update protocol
 
 ## Feedback
 
@@ -42,6 +64,7 @@
 - [project_contably_ops.md](project_contably_ops.md) — Contably-ops repo and deal data structure for accounting firm acquisitions — skills, directories, workflow
 - [project_esocial_plan.md](project_esocial_plan.md) — Contably eSocial module activation via TecnoSpeed middleware — decisions, phases, and partner strategy
 - [project_heartbeat_followup.md](project_heartbeat_followup.md) — RESOLVED: Heartbeat validated and improved (2026-04-09) — state tracking added (heartbeat-state.json), routed to #tech-ops, quiet hours 22:30-04:30 BRT, no split needed
+- [claudia-heartbeat-tracker.md](claudia-heartbeat-tracker.md) — Spec for heartbeat issue dedup — active-issues.json on VPS, dedup by issue ID, escalation after count>5 or 2h, auto-resolve after 30min silence
 - [project_nuvini_ir_deploy.md](project_nuvini_ir_deploy.md) — nuvini-ir deploys via Cloudflare Pages (wrangler) — build with eleventy, deploy \_site folder, not auto-deployed from git
 - [project_woodpecker_ci.md](project_woodpecker_ci.md) — Woodpecker CI running on OKE cluster at ci.contably.ai — replaces OCI DevOps for Contably CI/CD
 - [tech_glasswing_vuln_hunting.md](tech_glasswing_vuln_hunting.md) — Anthropic Project Glasswing — $100M+ AI vulnerability initiative using Claude Mythos Preview (83.1% CyberGym repro rate). Glasswing-style prompting added to /cto security analyst.
@@ -62,6 +85,10 @@
 - [tech_advisor_strategy.md](tech_advisor_strategy.md) — Claude Platform advisor strategy (Sonnet executor + Opus advisor) for cost-efficient agentic sessions
 - [tech_gbrain_integration.md](tech_gbrain_integration.md) — GBrain world-knowledge brain integrated into Claudia as Source 5 — separate Postgres DB, 30 MCP tools, compiled truth + timeline
 
+## Infrastructure (Bella)
+
+- [bella-systemd-routines.md](bella-systemd-routines.md) — VPS service configuration — Claudia systemd unit with auto-restart ensures scheduled routines survive reboots; claudia-cron.service stale (safe to reset-failed)
+
 ## References
 
 - [reference_cloudflare.md](reference_cloudflare.md) — Cloudflare API token with Zone.DNS edit for all zones, account details, zone IDs, and where credentials are stored
@@ -73,6 +100,7 @@
 - [reference_search_api_keys.md](reference_search_api_keys.md) — API keys for web search tools — Brave Search LLM Context API and Exa.ai neural search, stored in macOS Keychain and settings.json
 - [reference_telnyx_voice.md](reference_telnyx_voice.md) — Telnyx voice infrastructure — API key in Keychain, Claudia's phone number, connection details
 - [reference_vps_connection.md](reference_vps_connection.md) — How to reach the Contabo VPS (Claudia, Paperclip) — Tailscale IP, SSH user, hostname, ports
+- [julia-searxng-fallback.md](julia-searxng-fallback.md) — SearXNG fallback chain — health checks, error patterns, tool fallback order for web search (Mac Mini :8888 → Brave → Exa → WebSearch)
 - [tech_anthropic_harness_design.md](tech_anthropic_harness_design.md) — Planner/generator/evaluator three-agent pattern and structured handoff (no compaction) for long-running agent sessions — from Anthropic engineering post on frontend design
 - [tech_hermes_subconscious_pattern.md](tech_hermes_subconscious_pattern.md) — Hermes agent patterns implemented in Claudia — periodic nudge, auto-skill generation, session consolidation, skill self-patch policy
 
