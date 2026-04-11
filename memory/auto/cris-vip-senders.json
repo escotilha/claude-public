@@ -1,0 +1,42 @@
+{
+  "_comment": "VIP investor/board senders that always trigger PERSONAL_REPLY_NEEDED. Add real emails here. Placeholder structure shown.",
+  "_updated": "2026-04-11",
+  "_approval": "apr-1775840427635",
+  "board_members": [
+    {
+      "name": "Board Member 1",
+      "email": "REPLACE_WITH_REAL_EMAIL",
+      "firm": "Lead VC Firm",
+      "tier": "board",
+      "note": "Board seat, lead investor"
+    }
+  ],
+  "lead_investors": [
+    {
+      "name": "Lead Investor 1",
+      "email": "REPLACE_WITH_REAL_EMAIL",
+      "firm": "Series A Lead",
+      "tier": "vip",
+      "note": "Led Series A, pro-rata rights"
+    }
+  ],
+  "board_observers": [
+    {
+      "name": "Observer 1",
+      "email": "REPLACE_WITH_REAL_EMAIL",
+      "firm": "Strategic Investor",
+      "tier": "board",
+      "note": "Board observer rights"
+    }
+  ],
+  "strategic_advisors": [
+    {
+      "name": "Advisor 1",
+      "email": "REPLACE_WITH_REAL_EMAIL",
+      "firm": "Advisory",
+      "tier": "vip",
+      "note": "High-trust advisor, personal relationship"
+    }
+  ],
+  "routing_rule": "Any email from these addresses sets PERSONAL_REPLY_NEEDED regardless of subject or content. Rationale: 'VIP/board member [Name] — always requires Pierre\\'s voice.'"
+}

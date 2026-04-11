@@ -1,5 +1,22 @@
 # Memory Index
 
+## Investor Email Triage (Cris)
+
+- [cris-investor-email-rules.md](cris-investor-email-rules.md) — Investor classification rules, PERSONAL_REPLY_NEEDED flag triggers, VIP tier routing, red-flag keywords, and rationale templates for Cris email triage
+- [cris-investor-email-triage-samples.md](cris-investor-email-triage-samples.md) — 5 sample triage outputs showing PERSONAL_REPLY_NEEDED flag with rationale (2 flagged, 1 negative-signal, 2 draft-ready)
+- [cris-vip-senders.json](cris-vip-senders.json) — Board members, lead investors, observers, and strategic advisors who always trigger personal reply (populate with real emails)
+
+## Competitive Intelligence (Buzz)
+
+- [buzz-daily-triage.md](buzz-daily-triage.md) — Buzz daily competitive triage: scans TechCrunch/Crunchbase/LinkedIn for OMIE, Brex, Stripe, NVNI portfolio — flags funding/hires/launches only, 3-5 bullets, Pierre brief at 08:00 UTC
+- [buzz-triage-state.json](buzz-triage-state.json) — Deduplication state for buzz-daily-triage — tracks seen item hashes (30-day TTL) and run stats
+
+## M&A Deal Intelligence (Marco)
+
+- [marco-deal-registry.md](marco-deal-registry.md) — Master registry of all M&A deals Marco has analyzed — status, links, key takeaways per deal
+- [deal-template.md](deal-template.md) — Reusable template for new deal pages (company overview, triage, DD, financial model, IC decisions, integration, relationship graph)
+- [deal_stripe.md](deal_stripe.md) — Stripe deal page: fintech payments infrastructure, $65B+ valuation, watch status — IPO/carve-out monitor
+
 ## Feedback
 
 - [feedback_blackbox_vs_code_review.md](feedback_blackbox_vs_code_review.md) — Always run code-level review (/cto or /review-changes) in addition to black-box testing (/fulltest-skill) — they catch fundamentally different classes of issues
