@@ -80,6 +80,7 @@
 - [project_nuvini_ir_deploy.md](project_nuvini_ir_deploy.md) — nuvini-ir deploys via Cloudflare Pages (wrangler) — build with eleventy, deploy \_site folder, not auto-deployed from git
 - [project_woodpecker_ci.md](project_woodpecker_ci.md) — Woodpecker CI running on OKE cluster at ci.contably.ai — replaces OCI DevOps for Contably CI/CD
 - [julia-oci-health-monitor.md](julia-oci-health-monitor.md) — Design spec for persistent OCI health monitoring — hourly checks stored in SQLite, status page at /oci-status, change-driven Discord alerts
+- [project_intel_scanner_vps.md](project_intel_scanner_vps.md) — Intel Scanner on VPS — Exa-powered cron scanning 30 X accounts for Claude/OpenClaw intel, posts to Discord #intel every 2h (5am-5pm BRT)
 - [tech_glasswing_vuln_hunting.md](tech_glasswing_vuln_hunting.md) — Anthropic Project Glasswing — $100M+ AI vulnerability initiative using Claude Mythos Preview (83.1% CyberGym repro rate). Glasswing-style prompting added to /cto security analyst.
 
 ## Tech Insights
