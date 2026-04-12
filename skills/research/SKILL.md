@@ -60,32 +60,51 @@ All reads and writes go to the iCloud path directly. Never use symlink paths.
 
 ## Active Projects
 
-| Project    | Path                | Stack                  | Key Needs                                                         |
-| ---------- | ------------------- | ---------------------- | ----------------------------------------------------------------- |
-| Contably   | ~/code/contably     | Next.js + Supabase     | Brazil accounting, tax compliance, financial data extraction      |
-| SourceRank | ~/code/sourcerankai | Next.js + GitHub API   | Repository analytics, developer metrics, open source intelligence |
-| Claudia    | ~/code/claudia      | TypeScript + Agent SDK | Agent router, multi-channel messaging, inference fallback         |
+| Project    | Path                | Stack                        | Key Needs                                                              |
+| ---------- | ------------------- | ---------------------------- | ---------------------------------------------------------------------- |
+| Contably   | ~/code/contably     | Next.js + Supabase           | Brazil accounting, tax compliance, financial data extraction           |
+| SourceRank | ~/code/sourcerankai | Next.js + GitHub API         | Repository analytics, developer metrics, open source intelligence      |
+| AgentWave  | ~/code/agentwave    | TypeScript + SQLite + Croner | Multi-agent SaaS platform, Visual Agent Builder, Skill Studio, billing |
+| OpenClaw   | ~/code/openclaw-vps | Shell + systemd              | VPS agent deployment, failsafe system, sentinel watchdog               |
 
-## Claudia Context
+## AgentWave Context
 
-Claudia is the agent runtime replacing OpenClaw. Routes multi-channel messages (Discord, Telegram, Slack, WhatsApp, Voice) to Claude Code Agent SDK sessions with 3-tier inference fallback (Claude Max → Mac Mini MLX → VPS Ollama).
+AgentWave is an open-core SaaS platform for deploying AI agent teams across communication channels (Telegram, Discord, Slack, WhatsApp). Multi-agent orchestration, 4-strategy knowledge graph search, JWT/OAuth auth, and a Visual Agent Builder.
 
-**On every run, read `~/code/claudia/claudia-config.md` for the current config snapshot.** This avoids re-scanning the project each time. If the file is missing, note it in the report and score Claudia relevance based on the summary above.
+**On every run, read `~/code/agentwave/prd-definition.md` for current product scope.** If the file is missing, note it in the report and score AgentWave relevance based on the summary above.
 
-### Claudia Skill Map (for matching content to Claudia)
+## OpenClaw Context
 
-- Agent orchestration/routing → Claudia router, session management
-- MCP servers → mcp-memory-pg (pgvector knowledge graph), new MCP integrations
-- Channel adapters → Discord, Telegram, Slack, WhatsApp, Voice adapters
-- Voice/audio/STT/TTS → Claudia voice pipeline (Groq Whisper, ElevenLabs, Twilio)
-- Local/small models → 3-tier inference (MLX, Ollama, model routing)
-- Scheduling/cron/proactive → Claudia scheduler (briefings, monitoring, heartbeat)
-- Agent personas/identity → 9 agent configs (claudia, buzz, marco, cris, julia, arnold, bella, rex, swarmy)
-- Knowledge graph/memory → mcp-memory-pg (semantic search, entity/relation storage)
-- Agent security/sandboxing → channel auth, rate limiting, session isolation
-- Cost optimization → inference routing, caching, batching, model selection
-- Observability/monitoring → agent session tracking, error reporting, health checks
-- Media processing → image/audio/video handling across channels
+OpenClaw is the VPS-deployed agent gateway on Contabo (`vmi3065960`). Config-driven agent routing with a two-layer failsafe (config rollback + AI watchdog via Claude Code CLI), sentinel monitoring, and systemd service management.
+
+### AgentWave Skill Map (for matching content to AgentWave)
+
+- Multi-agent orchestration/routing → agent router, strategy selection
+- Channel adapters → Telegram, Discord, Slack, WhatsApp integrations
+- Knowledge graph/memory → 4-strategy search (vector, semantic, entity, temporal)
+- Agent personas/identity → custom agent builder, persona config
+- Custom skills/tools → Skill Studio, webhook integrations, Composio bridge
+- Workspace/billing → multi-tenant workspaces, seat management, plan enforcement
+- Agent marketplace → templates, community-published agent packs
+- Auth → JWT/OAuth, workspace-level access control
+- Observability → agent session tracking, active agent-hours metrics
+
+### OpenClaw Skill Map (for matching content to OpenClaw)
+
+- Agent deployment/operations → systemd services, gateway config
+- Self-healing/failsafe → config rollback, crash-loop detection, AI watchdog
+- Monitoring/sentinel → health checks, escalation scripts
+- VPS infrastructure → systemd units, service management
+- Agent config management → openclaw.json, agent identities, workspaces
+
+### Claude Code Skill Map (for matching content to Claude Code setup)
+
+- CLI features/hooks/settings → ~/.claude-setup configuration, hooks, rules
+- MCP servers → new MCP integrations, tool discovery
+- Subagent patterns → model tiers, Agent Teams, parallel execution
+- Skills/agents → skill authoring, agent definitions, routing
+- Memory/knowledge → auto-memory, mem-search, knowledge graph
+- Cost optimization → model delegation, token efficiency, advisor strategy
 
 ## Claude Setup Skill Map (for matching content to existing skills)
 
@@ -181,12 +200,13 @@ Classify content type:
 | **Product/Feature**   | Product launch, feature demo, UX pattern         |
 | **Infrastructure**    | Deployment, CI/CD, monitoring, DevOps            |
 
-Score relevance 0-10 against four targets:
+Score relevance 0-10 against five targets:
 
-1. **Existing skills** — Does it introduce a tool/pattern an existing skill could use? Use the Claude Setup Skill Map to match.
-2. **New skill opportunity** — No existing skill covers this, it's reusable, aligns with our stack (TypeScript, Next.js, Supabase)?
-3. **Active projects** — Would Contably or SourceRank benefit directly?
-4. **Claudia** — Does it improve Claudia's router, agents, channels, MCP, inference, scheduler, voice, or observability? Use the Claudia Skill Map to match. Read `~/code/claudia/claudia-config.md` for current capabilities before scoring.
+1. **Claude Code setup** — Does it improve skills, agents, hooks, MCP servers, memory, or subagent patterns? Use the Claude Code Skill Map to match.
+2. **Existing skills** — Does it introduce a tool/pattern an existing skill could use? Use the Claude Setup Skill Map to match.
+3. **New skill opportunity** — No existing skill covers this, it's reusable, aligns with our stack (TypeScript, Next.js, Supabase)?
+4. **Active projects** — Would Contably or SourceRank benefit directly?
+5. **AgentWave / OpenClaw** — Does it improve AgentWave's orchestration, channels, knowledge graph, agent builder, skill studio, or marketplace? Or OpenClaw's failsafe, sentinel, deployment, or gateway? Use the AgentWave/OpenClaw Skill Maps to match. Read `~/code/agentwave/prd-definition.md` for current AgentWave scope before scoring.
 
 ### Phase 2: Recommend + Act
 
@@ -212,14 +232,14 @@ Score relevance 0-10 against four targets:
 - **Effort:** Low / Medium / High
 - **Score:** X/10 — [one-line justification]
 
-### Claudia Recommendations
+### AgentWave / OpenClaw Recommendations
 
-[Only include this section if Claudia relevance score >= 3]
+[Only include this section if AgentWave/OpenClaw relevance score >= 3]
 
 #### 1. [Improve Component / New Integration / Enhance Capability] — Score: X/10
 
-- **Target:** [router / channel adapter / MCP / inference / scheduler / voice / agents]
-- **What:** [specific change to Claudia]
+- **Target:** [AgentWave: orchestration / channels / knowledge graph / agent builder / skill studio / marketplace] or [OpenClaw: failsafe / sentinel / gateway / deployment]
+- **What:** [specific change]
 - **Why:** [concrete benefit]
 - **Effort:** Low / Medium / High
 - **Score:** X/10 — [one-line justification]
@@ -242,11 +262,12 @@ Use `AskUserQuestion` with recommendations as options. Each option label MUST in
 After presenting the report, **always** queue the researched URL for wiki auto-ingest so it becomes part of the persistent knowledge base:
 
 ```bash
-QUEUE_FILE="/opt/claudia/data/wiki-harvest-queue.json"
+QUEUE_FILE="$HOME/.claude-setup/data/wiki-harvest-queue.json"
 URL="<the researched URL>"
 NOTE="<one-line summary from Phase 1c>"
 
-# Create queue file if it doesn't exist
+# Create data dir and queue file if they don't exist
+mkdir -p "$HOME/.claude-setup/data"
 [ -f "$QUEUE_FILE" ] || echo '[]' > "$QUEUE_FILE"
 
 # Append URL if not already queued (jq dedup)
@@ -257,7 +278,7 @@ if ! jq -e --arg u "$URL" '.[] | select(.url == $u)' "$QUEUE_FILE" >/dev/null 2>
 fi
 ```
 
-This feeds into the daily wiki harvest (06:00 BRT) which ingests queued URLs into Claudia's wiki knowledge base automatically.
+This feeds into the wiki harvest which ingests queued URLs into the knowledge base.
 
 #### 2d. Do NOT Auto-Install
 
