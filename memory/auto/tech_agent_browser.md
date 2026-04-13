@@ -22,11 +22,12 @@ Native Rust CLI, drives Chrome via CDP directly (no Playwright/Puppeteer). Repla
 
 **Detection chain:** agent-browser (primary) > browse CLI (fallback) > PinchTab (fallback) > Chrome DevTools MCP (last resort)
 
-**Integrated skills (pending migration):** fulltest-skill, qa-cycle, qa-sourcerank, virtual-user-testing, qa-verify, growth, qa-conta, qa-stonegeo, chief-geo, pinchtab — all currently use `browse` as primary.
+**Integrated skills (MIGRATION COMPLETE):** fulltest-skill, qa-cycle, qa-sourcerank, virtual-user-testing, qa-verify, growth, qa-conta, qa-stonegeo, chief-geo, pinchtab — all migrated to agent-browser as primary with browse CLI as first fallback.
 
 ---
 
 ## Timeline
 
+- **2026-04-13** — [implementation] Migrated all 10 skills from browse CLI to agent-browser as primary. Updated detection logic, command references, spawn prompts, isolation patterns, version notes. browse CLI retained as first fallback. (Source: implementation — 10 SKILL.md files updated)
 - **2026-04-13** — [implementation] Installed v0.25.4 globally via npm, Chrome 147.0.7727.56. Created `/agent-browser` skill. Smoke tested on example.com — a11y tree with refs works. (Source: implementation — ~/.claude-setup/skills/agent-browser/SKILL.md)
 - **2026-04-13** — [research] Evaluated via /research skill. Score 9/10. Replaces browse CLI (garrytan/gstack) across 10 skills. (Source: research — github.com/vercel-labs/agent-browser)

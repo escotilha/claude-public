@@ -396,31 +396,23 @@ For each persona (spawn all in parallel via Agent tool):
     description="{persona-name} persona tester",
     prompt="You are {persona name}, a {role description}. {full persona context}.
 
-             ## Browser Automation Setup
+             ## Browser Automation
 
-             FIRST: Create your browse wrapper for session isolation:
+             Use agent-browser (primary) for all browser interactions.
+             agent-browser manages per-process Chrome isolation automatically — no setup needed.
+             Fallback chain: agent-browser → browse CLI → mcp__chrome-devtools__*
 
-               echo '#!/bin/bash
-               BROWSE_STATE_FILE=/tmp/browse-state-{slug}.json exec ~/.local/bin/browse \"$@\"' > /tmp/browse-{slug}.sh && chmod +x /tmp/browse-{slug}.sh
-
-             Then check availability:
-               test -x ~/.local/bin/browse && echo 'browse available' || echo 'fallback to MCP'
-
-             Use `/tmp/browse-{slug}.sh` (primary) for all browser interactions.
-             Fall back to mcp__chrome-devtools__* only if browse is not available.
-
-             browse commands (via your wrapper):
-               /tmp/browse-{slug}.sh goto <url>            — navigate
-               /tmp/browse-{slug}.sh snapshot -i           — list interactive elements with @e refs
-               /tmp/browse-{slug}.sh snapshot -D           — diff vs previous state
-               /tmp/browse-{slug}.sh snapshot -a -o f.png  — annotated screenshot
-               /tmp/browse-{slug}.sh screenshot [path]     — plain screenshot
-               /tmp/browse-{slug}.sh text                  — page text
-               /tmp/browse-{slug}.sh click @e3             — click element
-               /tmp/browse-{slug}.sh fill @e4 'value'      — fill input
-               /tmp/browse-{slug}.sh console               — console logs (check for JS errors)
-               /tmp/browse-{slug}.sh network               — network requests (check for API errors)
-               /tmp/browse-{slug}.sh js 'expr'             — evaluate JS
+             agent-browser commands:
+               agent-browser open <url>            — navigate
+               agent-browser snapshot              — list interactive elements with @e refs
+               agent-browser diff snapshot         — diff vs previous state
+               agent-browser screenshot [path]     — screenshot
+               agent-browser get text              — page text
+               agent-browser click @e3             — click element
+               agent-browser fill @e4 'value'      — fill input
+               agent-browser console               — console logs (check for JS errors)
+               agent-browser network requests      — network requests (check for API errors)
+               agent-browser eval 'expr'           — evaluate JS
 
              ## Session Context
 
@@ -446,23 +438,23 @@ For each persona (spawn all in parallel via Agent tool):
 
              Navigate to {app URL} and test these workflows: {workflow list}.
 
-             Login workflow (using your browse wrapper):
-               /tmp/browse-{slug}.sh goto {app_url}/login
-               /tmp/browse-{slug}.sh snapshot -i
-               /tmp/browse-{slug}.sh fill @e{email_field} '{email}'
-               /tmp/browse-{slug}.sh fill @e{pass_field} '{password}'
-               /tmp/browse-{slug}.sh click @e{submit_button}
-               /tmp/browse-{slug}.sh snapshot -D       # verify redirect to dashboard
-               /tmp/browse-{slug}.sh console            # check for JS errors
-               /tmp/browse-{slug}.sh network            # check for failed API calls
+             Login workflow:
+               agent-browser open {app_url}/login
+               agent-browser snapshot
+               agent-browser fill @e{email_field} '{email}'
+               agent-browser fill @e{pass_field} '{password}'
+               agent-browser click @e{submit_button}
+               agent-browser diff snapshot       # verify redirect to dashboard
+               agent-browser console             # check for JS errors
+               agent-browser network requests    # check for failed API calls
 
              For each page/action, evaluate:
              1. FUNCTIONALITY — Does it work? Any errors? Console errors?
-                (browse console after every interaction)
+                (agent-browser console after every interaction)
              2. UX/USABILITY — Is it intuitive? Confusing? Too many clicks?
                 (count clicks for core tasks)
              3. PERFORMANCE — Is it fast? Any loading delays?
-                (note slow network calls from browse network)
+                (note slow network calls from agent-browser network requests)
              4. PERMISSIONS — Can you access only what your role allows?
              5. DATA ACCURACY — Do numbers/dates/statuses look correct?
                 (browse text to extract displayed values)
@@ -892,8 +884,9 @@ Create `virtual-user-testing.config.md` in project root to customize:
 
 ### Requirements
 
-- **`browse` CLI** at `~/.local/bin/browse` — **PRIMARY** browser tool (zero MCP overhead, per-persona isolation via `BROWSE_STATE_FILE` wrapper)
-  - Fallback: Chrome DevTools MCP (`mcp__chrome-devtools__*`) — used only when `browse` is not installed
+- **`agent-browser`** at `/opt/homebrew/bin/agent-browser` — **PRIMARY** browser tool (Rust, CDP, auto-isolated Chrome per process)
+  - First fallback: `browse` CLI (`~/.local/bin/browse`)
+  - Second fallback: Chrome DevTools MCP (`mcp__chrome-devtools__*`)
 - Running Contably environment (admin + client portal + API)
 - QA database schema (migration 029_qa_schema)
 - qa_manager.py CLI script (apps/api/scripts/qa_manager.py)

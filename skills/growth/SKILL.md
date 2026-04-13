@@ -79,17 +79,18 @@ Include relevant past findings in the analysis context to avoid re-deriving know
 
 ### Process
 
-1. **Fetch and analyze the page** using `browse` (primary) or Firecrawl (fallback for content extraction):
+1. **Fetch and analyze the page** using `agent-browser` (primary) or Firecrawl (fallback for content extraction):
 
    ```bash
-   browse goto <url>
-   browse snapshot -a -o /tmp/cro-analysis.png   # annotated screenshot with element labels
-   browse snapshot -i                              # interactive elements + CTA refs
-   browse perf                                    # LCP, CLS, FCP metrics
-   browse responsive                              # mobile/tablet/desktop check
+   agent-browser open <url>
+   agent-browser screenshot /tmp/cro-analysis.png  # screenshot for visual analysis
+   agent-browser snapshot                           # interactive elements + CTA refs
+   agent-browser eval "JSON.stringify(performance.getEntriesByType('navigation')[0])"  # LCP, CLS, FCP
+   agent-browser set viewport 375 812 && agent-browser snapshot  # mobile check
+   agent-browser set viewport 1280 800              # reset to desktop
    ```
 
-   Use `browse text` or Firecrawl for full content extraction when needed.
+   Use `agent-browser get text` or Firecrawl for full content extraction when needed.
 
 2. **Score against CRO framework:**
 
@@ -188,13 +189,12 @@ Include relevant past findings in the analysis context to avoid re-deriving know
 
 ### Process
 
-1. **Map the current flow** using `browse`:
+1. **Map the current flow** using `agent-browser`:
 
    ```bash
-   browse goto <signup-url>
-   browse forms              # enumerate all form fields and step count
-   browse snapshot -i        # identify interactive elements, step indicators
-   browse snapshot -a -o /tmp/signup-flow.png  # annotated visual of the flow
+   agent-browser open <signup-url>
+   agent-browser snapshot        # enumerate all form fields, step indicators, interactive elements
+   agent-browser screenshot /tmp/signup-flow.png  # visual of the flow
    ```
 
    - How many steps from landing to first value?
@@ -257,16 +257,16 @@ Include relevant past findings in the analysis context to avoid re-deriving know
 
 ### Process
 
-1. **Technical SEO** using `browse`:
+1. **Technical SEO** using `agent-browser`:
 
    ```bash
-   browse goto <url>
-   browse links              # internal linking structure
-   browse js "document.title + ' | ' + document.querySelector('meta[name=description]')?.content"  # title + meta
-   browse js "JSON.stringify([...document.querySelectorAll('h1,h2,h3')].map(h=>({tag:h.tagName,text:h.innerText.trim()})))"  # heading hierarchy
-   browse js "[...document.querySelectorAll('script[type=\"application/ld+json\"]')].map(s=>s.textContent)"  # structured data
-   browse perf               # Core Web Vitals: LCP, CLS, FCP
-   browse responsive         # mobile-friendliness check
+   agent-browser open <url>
+   agent-browser snapshot     # internal linking structure visible in a11y tree
+   agent-browser eval "document.title + ' | ' + document.querySelector('meta[name=description]')?.content"  # title + meta
+   agent-browser eval "JSON.stringify([...document.querySelectorAll('h1,h2,h3')].map(h=>({tag:h.tagName,text:h.innerText.trim()})))"  # heading hierarchy
+   agent-browser eval "[...document.querySelectorAll('script[type=\"application/ld+json\"]')].map(s=>s.textContent)"  # structured data
+   agent-browser eval "JSON.stringify(performance.getEntriesByType('navigation')[0])"  # Core Web Vitals
+   agent-browser set viewport 375 812 && agent-browser snapshot  # mobile-friendliness check
    ```
 
    Check: sitemap.xml, robots.txt, canonical tags, meta titles/descriptions,

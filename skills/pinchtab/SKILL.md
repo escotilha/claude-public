@@ -32,6 +32,8 @@ invocation-contexts:
 
 # PinchTab - Local Browser Automation
 
+> **Note:** `agent-browser` is now the **primary** browser automation tool. Use `/agent-browser` for new work. PinchTab remains available for its unique strengths: profile management with persistent sessions, tab locking for multi-agent safety, stealth mode, and the HTTP API for non-Bash contexts.
+
 Lightweight HTTP server + CLI for AI-controlled Chrome. Uses accessibility tree snapshots with stable element refs instead of screenshots — **5-13x cheaper in tokens**.
 
 ## Architecture
@@ -343,19 +345,24 @@ For visual/CSS/layout failures that headless `browse` or PinchTab screenshots ca
 ### Detection Logic
 
 ```bash
-# Prefer browse if available
-if command -v browse >/dev/null 2>&1; then
-  # Use browse commands
+# Prefer agent-browser, then browse, then pinchtab
+if command -v agent-browser >/dev/null 2>&1; then
+  # Primary: agent-browser (Rust, CDP, sessions, batch)
+  agent-browser open "https://example.com"
+  agent-browser snapshot
+  agent-browser click @e5
+elif command -v browse >/dev/null 2>&1; then
+  # First fallback: browse CLI
   browse goto "https://example.com"
   browse snapshot -i
   browse click @e5
 elif command -v pinchtab >/dev/null 2>&1; then
-  # Use pinchtab commands
+  # Second fallback: PinchTab
   pinchtab nav "https://example.com"
   pinchtab snap -i -c
   pinchtab click e5
 else
-  # Fall back to Chrome DevTools MCP
+  # Last resort: Chrome DevTools MCP
   # Use mcp__chrome-devtools__* tools
 fi
 ```
