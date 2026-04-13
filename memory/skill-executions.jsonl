@@ -16178,3 +16178,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-13T23:14:22Z",
+  "date": "2026-04-13",
+  "skill": "deep-plan",
+  "args": "Design and plan a Copilot Knowledge Wiki system for Contably, inspired by Karpathy's LLM Wiki pattern. The wiki is fed by GitHub events (commits, PRs, releases) and maintains a persistent, compounding knowledge base that the Copiloto Contably reads at runtime to stay current with product changes.\n\nKey context:\n- The co-pilot is implemented in apps/api/src/ai_assistant/ (service.py, prompts.py, tools.py, proactive_insights.py)\n- Currently knowledge is hardcoded in prompts.py (NF-e, tax regimes, reconciliation, etc.)\n- The co-pilot uses Claude tool-use with 14 tools, max 5 iterations\n- Multi-tenant: queries filtered by company_id\n- Backend is Python/FastAPI with SQLAlchemy async, Alembic migrations, Celery background tasks\n- DB is PostgreSQL (Supabase)\n- Existing webhook infrastructure exists (Pluggy, SEFAZ, orchestrator webhooks)\n\nThe plan should cover:\n1. GitHub webhook endpoint to receive push/PR/release events\n2. Raw source storage (immutable records of GitHub events)\n3. LLM ingest worker (background Celery task) that reads diffs/PR bodies and updates wiki pages\n4. Wiki page storage (DB tables for markdown pages with metadata)\n5. Schema document that governs wiki structure and conventions\n6. Integration with the existing co-pilot — how wiki pages get injected into context at query time\n7. Index and log maintenance (per Karpathy pattern)\n8. A new Claude tool so the co-pilot can search the wiki\n9. Lint/health-check job to keep the wiki healthy\n10. Alembic migration for new tables\n\nDesign decisions already made:\n- Storage in DB (not filesystem) since it needs to be read by the production API\n- GitHub webhook as primary trigger (not polling)\n- Auto-ingest with optional human review flag\n- Wiki focuses on user-facing product features, but also captures API changes and new endpoints\n- Co-pilot searches wiki on demand via a new tool, doesn't load everything into every prompt",
+  "sessionId": "6ea5db7f-79e0-4d73-b797-b82e975141f0",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
