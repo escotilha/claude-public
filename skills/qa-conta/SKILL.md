@@ -125,22 +125,93 @@ Agent(model="sonnet", prompt="Investigate and fix the 500 on /invoices...")
 - **Git branch**: `main` (push triggers CI/CD via `oci-deploy.yaml`)
 - **K8s namespace**: `contably`
 
-## Test Credentials
+## Test Credentials & Personas
 
-| User         | Email               | Password     | Role      | Company ID |
-| ------------ | ------------------- | ------------ | --------- | ---------- |
-| Master Admin | master@contably.com | 1@Masterpass | superuser | 2          |
+| Persona             | Email                   | Password             | Role                          | Sees                                                                    | Company IDs         |
+| ------------------- | ----------------------- | -------------------- | ----------------------------- | ----------------------------------------------------------------------- | ------------------- |
+| **Master Admin**    | master@contably.com     | 1@Masterpass         | superuser                     | Everything                                                              | All                 |
+| **Group Admin**     | pedro@nuvini.ai         | kigKoh-9fawwo-buspoh | group_admin + company_manager | Nuvini group companies                                                  | 7,8                 |
+| **AF Admin**        | sevilha@sevilha.com.br  | 1@Testpass           | AF admin (Sevilha)            | ANALISTA + limited ADMIN                                                | Sevilha's companies |
+| **AF Analyst**      | analista@sevilha.com.br | 1@Testpass           | AF analyst                    | ANALISTA only, assigned companies                                       | Assigned            |
+| **Company Manager** | gerente@nuvini.ai       | 1@Testpass           | company_manager               | GESTAO FINANCEIRA + CONTABILIDADE + user mgmt                           | 7                   |
+| **Company Junior**  | auxiliar@nuvini.ai      | 1@Testpass           | company_user                  | GESTAO FINANCEIRA + CONTABILIDADE (no user mgmt, no payroll, no config) | 7                   |
 
-Login to get a token:
+### Active Entities
+
+| Entity          | ID  | Name                     |
+| --------------- | --- | ------------------------ |
+| Accounting Firm | 3   | Sevilha                  |
+| Company Group   | 1   | Nuvini                   |
+| Company         | 7   | NUVINI S.A               |
+| Company         | 8   | Dataminers Sistemas Ltda |
+
+Login to get a token (per persona):
 
 ```bash
+# Master Admin
 TOKEN=$(curl -s -X POST https://api.contably.ai/api/v1/auth/login \
   -H 'Content-Type: application/json' \
   -d '{"email":"master@contably.com","password":"1@Masterpass"}' \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['access_token'])")
+
+# Group Admin
+TOKEN_GROUP=$(curl -s -X POST https://api.contably.ai/api/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"pedro@nuvini.ai","password":"kigKoh-9fawwo-buspoh"}' \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['access_token'])")
 ```
 
-**IMPORTANT**: Rate limiting exists on auth endpoints. Login ONCE per cycle, save the token, reuse it.
+**IMPORTANT**: Rate limiting is 60 req/min on auth endpoints. Login ONCE per persona per cycle, save tokens, reuse.
+
+### Persona-Based Test Matrix
+
+Each persona must be tested for **access control correctness** — they should see only what their role allows and be denied everything else.
+
+#### Group Admin (pedro@nuvini.ai)
+
+- [x] Can access companies in Nuvini group (7, 8)
+- [x] CANNOT access companies outside group (should get 403)
+- [x] Can CRUD CompanyUser on group companies
+- [x] Can add/remove companies to Nuvini group
+- [x] Can manage group users
+- [x] Sidebar: CONTABILIDADE + EMPRESAS DO GRUPO + limited ADMIN (Empresas, Grupos)
+- [x] Company switcher: only NUVINI S.A and Dataminers
+
+#### AF Admin (sevilha@sevilha.com.br)
+
+- [x] Can access companies in Sevilha firm
+- [x] CANNOT access companies in other firms
+- [x] Sidebar: ANALISTA + ADMIN (Empresas, Grupos, Escritorios, Usuarios, Analistas)
+- [x] No GESTAO FINANCEIRA or CONTABILIDADE sections
+
+#### Company Manager (gerente@nuvini.ai)
+
+- [x] Can access NUVINI S.A only
+- [x] Can manage company users (Gestão de Usuários)
+- [x] Sidebar: GESTAO FINANCEIRA + CONTABILIDADE (full)
+- [x] No ADMIN section
+
+#### Company Junior (auxiliar@nuvini.ai)
+
+- [x] Can access NUVINI S.A only
+- [x] CANNOT manage users or settings
+- [x] Sidebar: GESTAO FINANCEIRA + CONTABILIDADE (minus Gestão de Usuários, Configurações, Folha de Pagamento)
+- [x] No ADMIN section
+
+#### AF Analyst (analista@sevilha.com.br)
+
+- [x] Can access assigned companies only (NUVINI S.A)
+- [x] Sidebar: ANALISTA section only
+- [x] No ADMIN section
+
+#### Cross-Persona Tests
+
+- [ ] Group admin CANNOT access AF admin endpoints
+- [ ] Junior CANNOT access /user-management page
+- [ ] Analyst CANNOT create/delete companies
+- [ ] File upload (statement import) works for all personas with company access
+- [ ] Company switcher shows correct companies per persona
+- [ ] Account switcher in user dropdown works for all personas
 
 ## Cycle Flow
 
