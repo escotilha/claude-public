@@ -52,58 +52,36 @@ Spawns parallel virtual user personas that simulate real Contably users navigati
 
 **Primary tool: `browse` CLI** (`~/.local/bin/browse`) — compiled headless Chromium, zero MCP token overhead, ~100ms per call.
 
-**Fallback: Chrome DevTools MCP** (`mcp__chrome-devtools__*`) — used only when `browse` is not available.
+**Fallback chain:** agent-browser → browse CLI (`~/.local/bin/browse`) → Chrome DevTools MCP (`mcp__chrome-devtools__*`).
 
 ### Detection
 
-At the start of the session, check for `browse`:
+At the start of the session, check for browser tools:
 
 ```bash
-test -x ~/.local/bin/browse && echo "browse available" || echo "fallback to MCP"
+command -v agent-browser >/dev/null 2>&1 && echo "agent-browser available" || \
+  (test -x ~/.local/bin/browse && echo "browse fallback" || echo "fallback to MCP")
 ```
 
-### browse Command Reference
+### agent-browser Command Reference
 
-| Task                                | Command                                             |
-| ----------------------------------- | --------------------------------------------------- |
-| Navigate                            | `browse goto <url>`                                 |
-| Interactive elements (with @e refs) | `browse snapshot -i`                                |
-| Diff vs previous snapshot           | `browse snapshot -D`                                |
-| Annotated screenshot                | `browse snapshot -a -o path.png`                    |
-| Plain screenshot                    | `browse screenshot [path]`                          |
-| Page text                           | `browse text`                                       |
-| Click element                       | `browse click @e3`                                  |
-| Fill input                          | `browse fill @e4 "value"`                           |
-| Console logs                        | `browse console`                                    |
-| Network requests                    | `browse network`                                    |
-| Evaluate JS                         | `browse js "expr"`                                  |
-| Get cookies                         | `browse cookies`                                    |
-| Import browser cookies              | `browse cookie-import-browser [chrome\|arc\|brave]` |
+| Task                                | Command                           |
+| ----------------------------------- | --------------------------------- |
+| Navigate                            | `agent-browser open <url>`        |
+| Interactive elements (with @e refs) | `agent-browser snapshot`          |
+| Diff vs previous snapshot           | `agent-browser diff snapshot`     |
+| Screenshot                          | `agent-browser screenshot [path]` |
+| Page text                           | `agent-browser get text`          |
+| Click element                       | `agent-browser click @e3`         |
+| Fill input                          | `agent-browser fill @e4 "value"`  |
+| Console logs                        | `agent-browser console`           |
+| Network requests                    | `agent-browser network requests`  |
+| Evaluate JS                         | `agent-browser eval "expr"`       |
+| Get cookies                         | `agent-browser cookies`           |
 
 ### Per-Persona Isolation
 
-Each persona agent runs an **isolated Chromium instance** via a unique `BROWSE_STATE_FILE`. Set this at the top of each persona agent's prompt:
-
-```bash
-# Prefix EVERY browse call with the env var (it does not persist across Bash tool calls):
-BROWSE_STATE_FILE="/tmp/browse-state-{persona-slug}.json" browse goto http://localhost:5173
-BROWSE_STATE_FILE="/tmp/browse-state-{persona-slug}.json" browse snapshot -i
-# etc.
-```
-
-**IMPORTANT:** Each `Bash` tool invocation runs in a new shell process — `export` does not persist between calls. You MUST prefix every `browse` call with `BROWSE_STATE_FILE=...` inline, or create a wrapper script at session start:
-
-```bash
-echo '#!/bin/bash
-BROWSE_STATE_FILE="/tmp/browse-state-{persona-slug}.json" exec ~/.local/bin/browse "$@"' > /tmp/browse-{persona-slug}.sh && chmod +x /tmp/browse-{persona-slug}.sh
-# Then use: /tmp/browse-{persona-slug}.sh goto http://localhost:5173
-```
-
-This keeps sessions fully isolated across parallel persona agents.
-
-### Headed Mode Escalation
-
-For visual/CSS/layout failures that headless screenshots can't diagnose, escalate to `/open-gstack-browser` — a steerable Chromium with Claude Code sidebar for live interactive debugging. Use before falling back to Chrome DevTools MCP when the issue is visual, not functional.
+`agent-browser` manages per-process Chrome instances automatically — each persona agent gets its own isolated browser. No wrapper scripts or env var prefixing needed.
 
 ## What It Does
 
@@ -354,18 +332,22 @@ python apps/api/scripts/qa_manager.py session start \
 ### Phase 1: Environment Discovery
 
 ```bash
-# Detect browse availability
-test -x ~/.local/bin/browse && BROWSE_AVAILABLE=true || BROWSE_AVAILABLE=false
+# Detect browser tool
+command -v agent-browser >/dev/null 2>&1 && BROWSER_TOOL="agent-browser" || \
+  (test -x ~/.local/bin/browse && BROWSER_TOOL="browse" || BROWSER_TOOL="mcp")
 
 # Detect running services
 # Admin app URL (default: http://localhost:5173)
 # Client portal URL (default: http://localhost:3000)
 # API URL (default: http://localhost:8000)
 
-# Verify services are accessible (using browse if available, MCP fallback)
-if [ "$BROWSE_AVAILABLE" = true ]; then
-  browse goto http://localhost:5173 && browse text | head -n 20 || true   # admin app
-  browse goto http://localhost:3000 && browse text | head -n 20 || true   # client portal
+# Verify services are accessible
+if [ "$BROWSER_TOOL" = "agent-browser" ]; then
+  agent-browser open http://localhost:5173 && agent-browser get text | head -n 20 || true   # admin app
+  agent-browser open http://localhost:3000 && agent-browser get text | head -n 20 || true   # client portal
+elif [ "$BROWSER_TOOL" = "browse" ]; then
+  browse goto http://localhost:5173 && browse text | head -n 20 || true
+  browse goto http://localhost:3000 && browse text | head -n 20 || true
 else
   # Fallback: mcp__chrome-devtools__navigate_page
 fi

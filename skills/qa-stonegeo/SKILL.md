@@ -154,11 +154,12 @@ Spawn 3 explore agents to cover different aspects:
 
 ### Phase 3: Browser Testing
 
-**Tool selection:** Use `browse` CLI (primary) or Chrome DevTools MCP (fallback).
+**Tool selection:** Use `agent-browser` (primary), `browse` CLI (fallback), or Chrome DevTools MCP (second fallback).
 
 ```bash
-# Detect browse
-test -x ~/.local/bin/browse && echo "browse available" || echo "fallback to Chrome MCP"
+# Detect browser tool
+command -v agent-browser >/dev/null 2>&1 && echo "agent-browser available" || \
+  (test -x ~/.local/bin/browse && echo "browse fallback" || echo "fallback to Chrome MCP")
 ```
 
 Start dev server:
@@ -169,28 +170,30 @@ pnpm --filter @stonegeo/web dev &
 BASE=http://localhost:3000
 ```
 
-Test each of the 6 dashboard routes using `browse`:
+Test each of the 6 dashboard routes using `agent-browser`:
 
 **Navigate and inspect each route:**
 
 ```bash
 # Navigate
-browse goto $BASE/overview
+agent-browser open $BASE/overview
 
 # Check console errors
-browse console --errors
+agent-browser console
 
 # Verify loading states + interactive elements (look for skeleton refs)
-browse snapshot -i
+agent-browser snapshot
 
 # Verify empty state text
-browse text
+agent-browser get text
 
 # Check responsive layout (sidebar collapse at <lg)
-browse responsive
+agent-browser set viewport 375 812    # mobile
+agent-browser snapshot
+agent-browser set viewport 1280 800   # desktop
 
 # Diff after interaction to verify state transitions
-browse snapshot -D
+agent-browser diff snapshot
 ```
 
 **Repeat for all routes:** `/overview`, `/visibility`, `/audit`, `/sources`, `/backlog`, `/settings`
@@ -199,18 +202,16 @@ browse snapshot -D
 
 ```bash
 # Look for Clerk component refs (@e refs for SignIn, UserButton, OrganizationSwitcher)
-browse snapshot -i | grep -i "clerk\|sign-in\|org-switch\|user-button"
+agent-browser snapshot | grep -i "clerk\|sign-in\|org-switch\|user-button"
 ```
 
 **Screenshot on failure:**
 
 ```bash
-browse screenshot /tmp/stonegeo-<route>-failure.png
+agent-browser screenshot /tmp/stonegeo-<route>-failure.png
 ```
 
-**Headed mode escalation:** For visual/CSS/layout failures that headless screenshots can't diagnose, escalate to `/open-gstack-browser` — a steerable Chromium with Claude Code sidebar for live interactive debugging.
-
-If `browse` is unavailable, fall back to `mcp__chrome-devtools__*` tools for navigation, console inspection, and screenshots.
+**Fallback chain:** If `agent-browser` is unavailable, use `browse` CLI. If neither is available, fall back to `mcp__chrome-devtools__*` tools.
 
 ### Phase 4: Fix Issues
 

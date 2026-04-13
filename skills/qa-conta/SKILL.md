@@ -557,14 +557,15 @@ After API tests pass, verify the frontend apps render correctly.
 
 > **Computer Use Fallback**: If browse CLI and Chrome MCP both fail to interact with a page (anti-bot, client certificate requirements, Java applets), escalate to computer use via `Skill("computer-use")`. This is especially relevant for government portals (eSocial, Receita Federal, SPED) that require desktop-level interaction.
 
-**Primary tool:** `browse` CLI (`~/.local/bin/browse`) — zero MCP overhead, ~100ms per call.
-**Headed mode escalation:** For visual/CSS/layout failures that headless screenshots can't diagnose, escalate to `/open-gstack-browser` — a steerable Chromium with Claude Code sidebar for live interactive debugging.
-**Fallback:** Chrome DevTools MCP (`mcp__chrome-devtools__*`) if `browse` is unavailable.
+**Primary tool:** `agent-browser` CLI (`/opt/homebrew/bin/agent-browser`) — Rust, CDP, zero MCP overhead.
+**Fallback chain:** agent-browser → browse CLI (`~/.local/bin/browse`) → Chrome DevTools MCP (`mcp__chrome-devtools__*`).
 
 #### Detection
 
 ```bash
-if command -v browse >/dev/null 2>&1 || test -x ~/.local/bin/browse; then
+if command -v agent-browser >/dev/null 2>&1; then
+  BROWSER_MODE="agent-browser"
+elif command -v browse >/dev/null 2>&1 || test -x ~/.local/bin/browse; then
   BROWSER_MODE="browse"
 else
   BROWSER_MODE="chrome-mcp"  # fallback
@@ -573,11 +574,7 @@ fi
 
 #### Per-Agent Isolation (REQUIRED for parallel browser agents)
 
-Each spawned browser agent MUST set its own `BROWSE_STATE_FILE` to get an isolated Chromium instance — agents running in parallel must not share state:
-
-```bash
-export BROWSE_STATE_FILE="/tmp/browse-qa-conta-agent-${AGENT_ID}.json"
-```
+`agent-browser` manages per-process Chrome instances automatically — each parallel agent gets its own isolated browser without manual state file configuration.
 
 | #    | Test                     | URL                              | Check                             |
 | ---- | ------------------------ | -------------------------------- | --------------------------------- |
@@ -586,49 +583,52 @@ export BROWSE_STATE_FILE="/tmp/browse-qa-conta-agent-${AGENT_ID}.json"
 | 44.3 | Dashboard renders charts | https://contably.ai/             | Sidebar, charts, company selector |
 | 44.4 | Portal login page        | https://portal.contably.ai/login | Login form visible                |
 
-#### Command Reference (browse CLI)
+#### Command Reference (agent-browser)
 
 ```bash
-browse goto <url>                        # Navigate
-browse snapshot -i                       # Interactive elements with @e refs
-browse snapshot -i -C                    # + non-ARIA clickable @c refs
-browse snapshot -D                       # Diff vs previous snapshot
-browse snapshot -a -o path.png           # Annotated screenshot with ref labels
-browse screenshot [path]                 # Plain screenshot
-browse text                              # Page text
-browse click @e3                         # Click element by ref
-browse fill @e4 "value"                  # Fill input by ref
-browse console                           # Console log ring buffer
-browse network                           # Network request ring buffer
-browse stop                              # Shutdown instance
+agent-browser open <url>                 # Navigate
+agent-browser snapshot                   # Interactive elements with @e refs
+agent-browser diff snapshot              # Diff vs previous snapshot
+agent-browser screenshot [path]          # Screenshot
+agent-browser get text                   # Page text
+agent-browser click @e3                  # Click element by ref
+agent-browser fill @e4 "value"           # Fill input by ref
+agent-browser console                    # Console logs
+agent-browser network requests           # Network requests
+agent-browser errors                     # Uncaught JS exceptions
+agent-browser close                      # Shutdown instance
 ```
 
-#### Implementation using `browse` (primary)
+#### Implementation using `agent-browser` (primary)
 
 ```bash
 # 44.1 — Admin login page loads, login form visible
-browse goto https://contably.ai/login
-browse snapshot -i   # check for email/password input refs
+agent-browser open https://contably.ai/login
+agent-browser snapshot   # check for email/password input refs
 
 # 44.2 — Admin login works
-browse fill @e<email-ref> "master@contably.com"
-browse fill @e<password-ref> "1@Masterpass"
-browse click @e<submit-ref>
-browse snapshot -D   # diff should show dashboard content, not login form
+agent-browser fill @e<email-ref> "master@contably.com"
+agent-browser fill @e<password-ref> "1@Masterpass"
+agent-browser click @e<submit-ref>
+agent-browser diff snapshot   # diff should show dashboard content, not login form
 
 # 44.3 — Dashboard renders charts
-browse goto https://contably.ai/
-browse screenshot /tmp/contably-dashboard.png
-browse text          # verify sidebar text, chart labels, company selector
+agent-browser open https://contably.ai/
+agent-browser screenshot /tmp/contably-dashboard.png
+agent-browser get text          # verify sidebar text, chart labels, company selector
 
 # 44.4 — Portal login page loads
-browse goto https://portal.contably.ai/login
-browse snapshot -i   # check for login form elements
+agent-browser open https://portal.contably.ai/login
+agent-browser snapshot   # check for login form elements
 ```
 
-#### Fallback using Chrome MCP (if browse unavailable)
+#### Fallback chain (if agent-browser unavailable)
 
-```
+```bash
+# First fallback: browse CLI
+browse goto <url> / browse snapshot -i / browse click @e3 / browse fill @e4 "value"
+
+# Second fallback: Chrome MCP
 mcp__chrome-devtools__navigate_page → url
 mcp__chrome-devtools__take_screenshot → verify visually
 mcp__chrome-devtools__fill → login form

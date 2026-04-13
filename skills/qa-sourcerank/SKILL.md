@@ -76,46 +76,30 @@ When you run `/qa-sourcerank`, it orchestrates a **continuous loop** that only s
 **Detection:**
 
 ```bash
-test -x ~/.local/bin/browse && echo "browse available" || echo "fallback to Chrome DevTools MCP"
+command -v agent-browser >/dev/null 2>&1 && echo "agent-browser available" || \
+  (test -x ~/.local/bin/browse && echo "browse fallback" || echo "fallback to Chrome DevTools MCP")
 ```
 
 **Command reference:**
 
-| Command                                  | Purpose                           |
-| ---------------------------------------- | --------------------------------- |
-| `browse goto <url>`                      | Navigate to URL                   |
-| `browse snapshot -i`                     | Interactive elements with @e refs |
-| `browse snapshot -i -C`                  | + non-ARIA clickable @c refs      |
-| `browse snapshot -D`                     | Diff vs previous snapshot         |
-| `browse snapshot -a -o path.png`         | Annotated screenshot              |
-| `browse screenshot [path]`               | Plain screenshot                  |
-| `browse text`                            | Page text content                 |
-| `browse click @e3`                       | Click element by ref              |
-| `browse fill @e4 "value"`                | Fill input by ref                 |
-| `browse console`                         | Console ring buffer               |
-| `browse network`                         | Network ring buffer               |
-| `browse links`                           | Extract all links                 |
-| `browse forms`                           | Extract all forms                 |
-| `browse js "expr"`                       | Evaluate JS                       |
-| `browse cookies`                         | Get cookies                       |
-| `browse cookie-import-browser [browser]` | Import from Chrome/Arc/Brave      |
-| `browse perf`                            | Performance metrics               |
+| Command                           | Purpose                           |
+| --------------------------------- | --------------------------------- |
+| `agent-browser open <url>`        | Navigate to URL                   |
+| `agent-browser snapshot`          | Interactive elements with @e refs |
+| `agent-browser diff snapshot`     | Diff vs previous snapshot         |
+| `agent-browser screenshot [path]` | Screenshot                        |
+| `agent-browser get text`          | Page text content                 |
+| `agent-browser click @e3`         | Click element by ref              |
+| `agent-browser fill @e4 "value"`  | Fill input by ref                 |
+| `agent-browser console`           | Console logs                      |
+| `agent-browser network requests`  | Network requests                  |
+| `agent-browser errors`            | Uncaught JS exceptions            |
+| `agent-browser eval "expr"`       | Evaluate JS                       |
+| `agent-browser cookies`           | Get cookies                       |
 
-**Headed mode escalation:** For visual/CSS/layout failures that headless screenshots can't diagnose, escalate to `/open-gstack-browser` — a steerable Chromium with Claude Code sidebar for live interactive debugging.
+**Fallback chain:** agent-browser → browse CLI (`~/.local/bin/browse`) → Chrome DevTools MCP (`mcp__chrome-devtools__*`).
 
-**Fallback:** If `browse` is not available, fall back to `mcp__chrome-devtools__*` tools.
-
-**Per-persona isolation:** Each persona agent MUST set a unique `BROWSE_STATE_FILE` env var so each gets its own Chromium instance, preventing session conflicts between the 4 concurrent testers:
-
-```bash
-# In each persona agent's spawn prompt, set before any browse command:
-export BROWSE_STATE_FILE="/tmp/browse-state-{persona_slug}.json"
-# e.g.:
-export BROWSE_STATE_FILE="/tmp/browse-state-sarah.json"
-export BROWSE_STATE_FILE="/tmp/browse-state-marcus.json"
-export BROWSE_STATE_FILE="/tmp/browse-state-diana.json"
-export BROWSE_STATE_FILE="/tmp/browse-state-alex.json"
-```
+**Per-persona isolation:** `agent-browser` manages per-process Chrome instances automatically — each persona agent gets its own isolated browser without manual state file configuration.
 
 ## Architecture
 
@@ -953,9 +937,9 @@ psql "$SRDB" -t -A -c "
    - Else use production: `https://sourcerank-web.onrender.com`
 2. Verify the site is accessible:
    ```bash
-   # Primary: browse CLI (zero MCP overhead)
-   browse goto {url} && browse text | head -20
-   # Fallback if browse unavailable: mcp__chrome-devtools__navigate_page
+   # Primary: agent-browser (zero MCP overhead)
+   agent-browser open {url} && agent-browser get text | head -20
+   # Fallback: browse CLI → mcp__chrome-devtools__navigate_page
    ```
 3. Check API health: `curl -s https://sourcerank-api.onrender.com/health`
 
@@ -1071,29 +1055,27 @@ VERIFICATION QUEUE (re-test these fixed bugs):
 
 == INSTRUCTIONS ==
 
-STEP 0: Set up browser isolation (REQUIRED — prevents session conflicts with other personas):
-export BROWSE_STATE_FILE="/tmp/browse-state-{slug}.json"
+STEP 0: Set up environment:
 export SRDB="postgresql://postgres.swpznmoctbtnmspmyrfu:Lmk48ZJTjRzCp4xh@aws-1-us-east-1.pooler.supabase.com:5432/postgres"
 
-BROWSER TOOL PRIORITY:
-1. PRIMARY: browse CLI (`~/.local/bin/browse`) — fast, zero MCP overhead
-   - Navigation:   browse goto <url>
-   - Page content: browse snapshot -i   (interactive elements with @e refs)
-   - Page text:    browse text
-   - Console:      browse console
-   - Network:      browse network
-   - Screenshot:   browse screenshot /tmp/{slug}-{page}.png
-   - Click:        browse click @e<N>
-   - Fill form:    browse fill @e<N> "value"
-2. FALLBACK: mcp__chrome-devtools__* (only if browse is unavailable)
+BROWSER TOOL (agent-browser manages per-process Chrome isolation automatically):
+   - Navigation:   agent-browser open <url>
+   - Page content: agent-browser snapshot   (interactive elements with @e refs)
+   - Page text:    agent-browser get text
+   - Console:      agent-browser console
+   - Network:      agent-browser network requests
+   - Screenshot:   agent-browser screenshot /tmp/{slug}-{page}.png
+   - Click:        agent-browser click @e<N>
+   - Fill form:    agent-browser fill @e<N> "value"
+   Fallback chain: agent-browser → browse CLI → mcp__chrome-devtools__*
 
-Login sequence using browse:
-  browse goto {url}/sign-in
-  browse snapshot -i   # find email/password fields by @e ref
-  browse fill @e<email_ref> "{email}"
-  browse fill @e<password_ref> "{password}"
-  browse click @e<submit_ref>
-  browse snapshot -i   # verify redirect to dashboard
+Login sequence:
+  agent-browser open {url}/sign-in
+  agent-browser snapshot   # find email/password fields by @e ref
+  agent-browser fill @e<email_ref> "{email}"
+  agent-browser fill @e<password_ref> "{password}"
+  agent-browser click @e<submit_ref>
+  agent-browser snapshot   # verify redirect to dashboard
 
 STEP 1: Start your persona session:
 psql "$SRDB" -t -A -c "INSERT INTO qa_persona_sessions (session_id, persona) VALUES ('{session_id}', '{slug}') RETURNING id"
@@ -1108,9 +1090,9 @@ For EACH feature in your assignment list:
 a) Mark it as in_progress:
    psql "$SRDB" -t -A -c "UPDATE qa_feature_coverage SET status = 'in_progress', tested_at = NOW() WHERE session_id = '{session_id}' AND feature_key = '{feature_key}' AND persona = '{slug}'"
 b) Navigate to the feature's route:
-   browse goto {url}{route}
-   browse snapshot -i   # inspect interactive elements
-   browse text          # read page content
+   agent-browser open {url}{route}
+   agent-browser snapshot   # inspect interactive elements
+   agent-browser get text   # read page content
 c) Test ALL workflows for that feature. For each page/action, evaluate:
    1. FUNCTIONALITY - Does it work? Any errors? Console errors?
       Check: browse console
@@ -1553,9 +1535,9 @@ Task({
   prompt: "Verify these QA issues are fixed on {url}:
     {issues_batch_1}
 
-    BROWSER TOOL: Use browse CLI as primary (export BROWSE_STATE_FILE=/tmp/browse-state-verifier-1.json).
-    For each issue: browse goto {url}{affected_page}, follow reproduction_steps, check browse console for errors.
-    Fallback to mcp__chrome-devtools__* if browse unavailable.
+    BROWSER TOOL: Use agent-browser as primary (auto-isolated Chrome per process).
+    For each issue: agent-browser open {url}{affected_page}, follow reproduction_steps, check agent-browser console for errors.
+    Fallback: agent-browser → browse CLI → mcp__chrome-devtools__*.
     Record result via psql."
 })
 
@@ -1566,9 +1548,9 @@ Task({
   prompt: "Verify these QA issues are fixed on {url}:
     {issues_batch_2}
 
-    BROWSER TOOL: Use browse CLI as primary (export BROWSE_STATE_FILE=/tmp/browse-state-verifier-2.json).
-    For each issue: browse goto {url}{affected_page}, follow reproduction_steps, check browse console for errors.
-    Fallback to mcp__chrome-devtools__* if browse unavailable.
+    BROWSER TOOL: Use agent-browser as primary (auto-isolated Chrome per process).
+    For each issue: agent-browser open {url}{affected_page}, follow reproduction_steps, check agent-browser console for errors.
+    Fallback: agent-browser → browse CLI → mcp__chrome-devtools__*.
     Record result via psql."
 })
 ```

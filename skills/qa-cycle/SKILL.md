@@ -157,16 +157,18 @@ Everything else — you decide, you execute, you verify.
 
 ## Browser Automation: browse CLI
 
-`browse` is the **primary** browser automation tool for all persona testers and verification agents in this skill.
+`agent-browser` is the **primary** browser automation tool for all persona testers and verification agents in this skill.
 
-- **Binary:** `~/.local/bin/browse` (compiled headless Chromium CLI)
-- **Token cost:** Zero MCP overhead — plain stdout, ~100ms per call after cold start
-- **Savings:** Avoids 1500-2000 tokens per Chrome DevTools MCP call
+- **Binary:** `/opt/homebrew/bin/agent-browser` (native Rust CLI, CDP)
+- **Token cost:** Zero MCP overhead — plain stdout
+- **Fallback chain:** agent-browser → browse CLI → Chrome DevTools MCP
 
 ### Detection
 
 ```bash
-if command -v browse >/dev/null 2>&1 || test -x ~/.local/bin/browse; then
+if command -v agent-browser >/dev/null 2>&1; then
+  BROWSER_MODE="agent-browser"
+elif command -v browse >/dev/null 2>&1 || test -x ~/.local/bin/browse; then
   BROWSER_MODE="browse"
 else
   BROWSER_MODE="chrome-mcp"  # fallback
@@ -176,55 +178,44 @@ fi
 ### Command Reference
 
 ```bash
-browse goto <url>                        # Navigate
-browse snapshot -i                       # Interactive elements with @e refs
-browse snapshot -i -C                    # + non-ARIA clickable @c refs
-browse snapshot -D                       # Diff vs previous snapshot
-browse snapshot -a -o path.png           # Annotated screenshot with ref labels
-browse screenshot [path]                 # Plain screenshot
-browse text                              # Page text
-browse click @e3                         # Click element by ref
-browse fill @e4 "value"                  # Fill input by ref
-browse console                           # Console log ring buffer
-browse network                           # Network request ring buffer
-browse links                             # Extract all links
-browse forms                             # Extract all forms
-browse js "expr"                         # Evaluate JS expression
-browse cookies                           # Get cookies
-browse cookie-import-browser [browser]   # Import from Chrome/Arc/Brave/Edge
-browse perf                              # Performance metrics
-browse stop                              # Shutdown instance
+agent-browser open <url>                 # Navigate
+agent-browser snapshot                   # Interactive elements with @e refs
+agent-browser diff snapshot              # Diff vs previous snapshot
+agent-browser screenshot [path]          # Screenshot
+agent-browser get text                   # Page text
+agent-browser click @e3                  # Click element by ref
+agent-browser fill @e4 "value"           # Fill input by ref
+agent-browser console                    # Console logs
+agent-browser network requests           # Network requests
+agent-browser eval "expr"                # Evaluate JS expression
+agent-browser cookies                    # Get cookies
+agent-browser errors                     # Uncaught JS exceptions
+agent-browser close                      # Shutdown instance
+```
+
+**Batch mode** for multi-step flows (single invocation):
+
+```bash
+echo '[
+  {"command": "open", "args": ["<url>"]},
+  {"command": "snapshot"},
+  {"command": "console"}
+]' | agent-browser batch
 ```
 
 ### Isolation: Per-Agent Instances
 
-Each spawned persona or verification agent must set its own `BROWSE_STATE_FILE` to get an isolated Chromium instance — agents running in parallel must not share state:
-
-```bash
-export BROWSE_STATE_FILE="/tmp/browse-{persona-slug}-{session_id}.json"
-```
-
-### Authenticated Testing
-
-If test credentials are unavailable, agents can import cookies from the user's browser for authenticated sessions:
-
-```bash
-browse cookie-import-browser chrome   # or: arc, brave, edge
-```
-
-### Headed Mode Escalation
-
-For visual/CSS/layout failures that headless screenshots can't diagnose, escalate to `/open-gstack-browser` — a steerable Chromium with Claude Code sidebar for live interactive debugging. Use before falling back to MCP when the issue is visual.
+`agent-browser` manages per-process Chrome instances automatically — each subagent gets its own isolated browser. No manual state file management needed.
 
 ### Fallback
 
-If `browse` is not found, fall back to Chrome DevTools MCP:
+If `agent-browser` is not found, fall back to `browse` CLI, then Chrome DevTools MCP:
 
-- `browse goto <url>` → `mcp__chrome-devtools__navigate_page`
-- `browse screenshot <path>` → `mcp__chrome-devtools__take_screenshot`
-- `browse js "expr"` → `mcp__chrome-devtools__evaluate_script`
-- `browse console` → `mcp__chrome-devtools__list_console_messages`
-- `browse network` → `mcp__chrome-devtools__list_network_requests`
+- `agent-browser open <url>` → `browse goto <url>` → `mcp__chrome-devtools__navigate_page`
+- `agent-browser screenshot <path>` → `browse screenshot <path>` → `mcp__chrome-devtools__take_screenshot`
+- `agent-browser eval "expr"` → `browse js "expr"` → `mcp__chrome-devtools__evaluate_script`
+- `agent-browser console` → `browse console` → `mcp__chrome-devtools__list_console_messages`
+- `agent-browser network requests` → `browse network` → `mcp__chrome-devtools__list_network_requests`
 
 ---
 
@@ -452,27 +443,26 @@ Agent({
 Each persona agent spawn prompt must include:
 
 ```
-Browser tool: use browse CLI (~/.local/bin/browse). Set:
-  export BROWSE_STATE_FILE="/tmp/browse-{slug}-{session_id}.json"
-before any browse command to get an isolated Chromium instance.
+Browser tool: use agent-browser CLI (primary).
+agent-browser manages per-process Chrome isolation automatically.
 
-Navigation:      browse goto <url>
-Screenshots:     browse screenshot /tmp/{slug}-{page}.png
-Element refs:    browse snapshot -i          (gets @e1, @e2, ... refs)
-Click/fill:      browse click @e3 / browse fill @e4 "value"
-JS evaluation:   browse js "document.title"
-Console errors:  browse console
-Network calls:   browse network
-Page text:       browse text
+Navigation:      agent-browser open <url>
+Screenshots:     agent-browser screenshot /tmp/{slug}-{page}.png
+Element refs:    agent-browser snapshot          (gets @e1, @e2, ... refs)
+Click/fill:      agent-browser click @e3 / agent-browser fill @e4 "value"
+JS evaluation:   agent-browser eval "document.title"
+Console errors:  agent-browser console
+Network calls:   agent-browser network requests
+Page text:       agent-browser get text
 
-If browse binary not found, fall back to mcp__chrome-devtools__* equivalents.
+Fallback chain: agent-browser → browse CLI (~/.local/bin/browse) → mcp__chrome-devtools__*
 ```
 
 Each persona:
 
 1. Starts persona session in DB
-2. Sets `BROWSE_STATE_FILE` for isolated Chromium instance
-3. Tests every assigned feature using `browse` commands
+2. Uses `agent-browser` (auto-isolated Chrome per process)
+3. Tests every assigned feature using `agent-browser` commands
 4. Marks features as `approved` or `blocked` (with blocking issue IDs)
 5. Creates issues in DB (with duplicate check first)
 6. Broadcasts failures to team
