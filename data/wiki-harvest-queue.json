@@ -22,5 +22,11 @@
     "note": "dux — TUI app for running multiple Claude Code/Codex agents in parallel via git worktrees, CLI wrapper approach",
     "addedAt": "2026-04-13T13:17:21Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/bcherny/status/2043715713551212834",
+    "note": "Boris Cherny (Claude Code @Anthropic): 1h prompt cache nuance — subagents kept at 5m, env vars coming, telemetry off disables experiment gates",
+    "addedAt": "2026-04-13T16:00:33Z",
+    "addedBy": "research-skill"
   }
 ]

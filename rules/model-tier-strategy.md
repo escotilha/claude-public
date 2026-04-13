@@ -189,6 +189,20 @@ Even without local models, apply the delegation mindset now:
 2. **Split reasoning from generation** — if a subagent needs to analyze AND format, consider two passes
 3. **Push formatting to Haiku** — any subagent whose final step is "format findings as markdown table" could delegate that step
 
+## Prompt Cache TTL (Subagents vs Orchestrator)
+
+Subagents run on **5m prompt cache TTL** — this is Anthropic's intentional design, not a bug (confirmed by Boris Cherny, Claude Code team, April 2026). Subagents are rarely resumed, so 1h cache would be a net overcharge. The main orchestrator session is getting **1h cache** rolled out selectively.
+
+**Cost implications for subagent-heavy patterns:**
+
+- Don't assume 1h cache benefits when estimating subagent token costs
+- Swarm patterns (3-5 reviewers) pay full cache-write cost per subagent at 5m TTL
+- The ScheduleWakeup "sleep under 270s to stay in cache" rule remains correct for subagents
+- Orchestrator sessions may benefit from longer intervals once 1h is confirmed active
+- Env vars to force 1h or 5m are coming (not yet available as of April 2026)
+
+**Note:** Disabling telemetry disables experiment gates client-side, forcing everything back to 5m — including the main session.
+
 ## Context Window Considerations
 
 As of v2.1.75, Opus 4.6 defaults to **1M context** for Max/Team/Enterprise. This changes the cost calculus:

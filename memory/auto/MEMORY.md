@@ -127,6 +127,7 @@
 - [julia-searxng-fallback.md](julia-searxng-fallback.md) — SearXNG fallback chain — health checks, error patterns, tool fallback order for web search (Mac Mini :8888 → Brave → Exa → WebSearch)
 - [tech_anthropic_harness_design.md](tech_anthropic_harness_design.md) — Planner/generator/evaluator three-agent pattern and structured handoff (no compaction) for long-running agent sessions — from Anthropic engineering post on frontend design
 - [tech_hermes_subconscious_pattern.md](tech_hermes_subconscious_pattern.md) — Hermes agent patterns implemented in Claudia — periodic nudge, auto-skill generation, session consolidation, skill self-patch policy
+- [tech_prompt_cache_1h_vs_5m.md](tech_prompt_cache_1h_vs_5m.md) — Prompt cache TTL: subagents = 5m (intentional), main agent = 1h (rolling out), telemetry off = 5m — from Boris Cherny (Anthropic)
 
 # currentDate
 
