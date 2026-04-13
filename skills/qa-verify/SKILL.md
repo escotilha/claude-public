@@ -39,43 +39,40 @@ invocation-contexts:
 
 # QA Verify Skill (v1.0)
 
-Loads issues in TESTING status from the QA database and verifies fixes by running the reproduction steps via the `browse` CLI (primary). Records results in DB and updates issue status.
+Loads issues in TESTING status from the QA database and verifies fixes by running the reproduction steps via `agent-browser` (primary). Records results in DB and updates issue status.
 
-## Browser Automation: `browse` CLI (Primary)
+## Browser Automation: `agent-browser` (Primary)
 
-**`browse`** is a compiled headless Chromium CLI at `~/.local/bin/browse`. Zero MCP token overhead, ~100ms per call.
+**`agent-browser`** is a native Rust CLI at `/opt/homebrew/bin/agent-browser`. Drives Chrome via CDP directly. Zero MCP token overhead.
 
 ```bash
-browse goto <url>           # Navigate to page
-browse snapshot -i          # Interactive elements with @e refs (for clicking/filling)
-browse snapshot -D          # Diff vs previous snapshot (see exactly what changed)
-browse screenshot [path]    # Screenshot for evidence capture
-browse text                 # Get page text content
-browse click @e3            # Click element by ref
-browse fill @e4 "value"     # Fill input by ref
-browse console              # Check console errors
-browse network              # List network requests
-browse js "expr"            # Evaluate JavaScript expression
-browse perf                 # Performance metrics
+agent-browser open <url>            # Navigate to page
+agent-browser snapshot              # Interactive elements with @e refs (for clicking/filling)
+agent-browser diff snapshot         # Diff vs previous snapshot (see exactly what changed)
+agent-browser screenshot [path]     # Screenshot for evidence capture
+agent-browser get text              # Get page text content
+agent-browser click @e3             # Click element by ref
+agent-browser fill @e4 "value"      # Fill input by ref
+agent-browser console               # Check console errors
+agent-browser network requests      # List network requests
+agent-browser eval "expr"           # Evaluate JavaScript expression
 ```
 
-**Headed mode escalation:** For visual/CSS/layout failures that headless screenshots can't diagnose, escalate to `/open-gstack-browser` — a steerable Chromium with Claude Code sidebar for live interactive debugging.
+**Fallback chain:** `agent-browser` → `browse` CLI (`~/.local/bin/browse`) → Chrome DevTools MCP (`mcp__chrome-devtools__*`).
 
-**Chrome DevTools MCP** (`mcp__chrome-devtools__*`) remains available as a fallback when `browse` cannot handle a specific interaction.
-
-### The snapshot -D Verification Pattern
+### The diff snapshot Verification Pattern
 
 This pattern is ideal for verifying that an action produced the expected change:
 
 ```bash
-browse goto <page>
-browse snapshot -i          # baseline — capture initial state
-browse fill @e5 "credentials"
-browse click @e10           # submit action
-browse snapshot -D          # shows exactly what changed — did login succeed?
+agent-browser open <page>
+agent-browser snapshot              # baseline — capture initial state
+agent-browser fill @e5 "credentials"
+agent-browser click @e10            # submit action
+agent-browser diff snapshot         # shows exactly what changed — did login succeed?
 ```
 
-Use `snapshot -D` after any action that should change the UI — form submissions, button clicks, state transitions. It shows only the diff, making pass/fail determination fast and unambiguous.
+Use `diff snapshot` after any action that should change the UI — form submissions, button clicks, state transitions. It shows only the diff, making pass/fail determination fast and unambiguous.
 
 ## What It Does
 

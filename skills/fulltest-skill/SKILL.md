@@ -494,11 +494,19 @@ const items = cart?.items || []
 
 ## Version
 
-**Current Version:** 5.0.0 (browse-primary)
-**Last Updated:** March 2026
+**Current Version:** 6.0.0 (agent-browser-primary)
+**Last Updated:** April 2026
 
 ### Changelog
 
+- **6.0.0**: `agent-browser` CLI as primary browser tool
+  - Replaced `browse` CLI with `agent-browser` (Rust, CDP, native sessions) as primary browser automation
+  - Batch mode for multi-step test flows (single invocation, eliminates per-command process overhead)
+  - Visual diff via `agent-browser diff screenshot --baseline` for regression detection
+  - Built-in session isolation (no more `BROWSE_STATE_FILE` workarounds)
+  - Network interception, HAR recording, video recording
+  - Self-updating skill docs via `agent-browser skills get`
+  - `browse` CLI retained as first fallback, Chrome DevTools MCP as second fallback
 - **5.0.0**: `browse` CLI as primary browser tool
   - Replaced PinchTab with `browse` (~/.local/bin/browse) as primary browser automation
   - Zero MCP token overhead: ~100ms per call after cold start vs 2–5s + 1,500–2,000 tokens per MCP call
@@ -519,94 +527,105 @@ const items = cart?.items || []
 
 ### Requirements
 
-- **Primary browser tool**: `browse` CLI at `~/.local/bin/browse` (zero MCP overhead)
-- **Fallback**: Chrome DevTools MCP or Browserless MCP (cloud) when `browse` is unavailable
+- **Primary browser tool**: `agent-browser` CLI (`/opt/homebrew/bin/agent-browser`) — Rust, CDP, batch mode, sessions
+- **First fallback**: `browse` CLI at `~/.local/bin/browse` (zero MCP overhead)
+- **Second fallback**: Chrome DevTools MCP or Browserless MCP (cloud)
 - **Both Modes**: Memory MCP
 - **Sequential Mode**: Standard Claude Code
 - **Swarm Mode**: Requires `claude-sneakpeek` or official TeammateTool support
 
-### `browse` Integration (Primary Browser Tool)
+### `agent-browser` Integration (Primary Browser Tool)
 
-`browse` is a compiled headless Chromium CLI binary backed by a persistent Playwright daemon. It is the **primary browser tool** for all page testers. Chrome DevTools MCP is the fallback only when `browse` is unavailable.
+`agent-browser` is a native Rust CLI that drives Chrome via CDP directly. It is the **primary browser tool** for all page testers. `browse` CLI is the first fallback, Chrome DevTools MCP is the second fallback.
 
 **Check availability before testing:**
 
 ```bash
-~/.local/bin/browse status 2>/dev/null && echo "browse available" || echo "use Chrome DevTools MCP fallback"
+command -v agent-browser >/dev/null 2>&1 && echo "agent-browser available" || echo "fallback to browse or Chrome DevTools MCP"
 ```
 
 #### Token and Speed Comparison
 
-| Task                  | `browse` (primary)               | Chrome DevTools MCP (fallback) | MCP Token Overhead |
-| --------------------- | -------------------------------- | ------------------------------ | ------------------ |
-| Navigate to page      | `browse goto <url>` ~100ms       | `navigate_page` 2–5s           | ~1,500–2,000/call  |
-| Interactive snapshot  | `browse snapshot -i` ~100ms      | `take_snapshot` ~56KB output   | ~1,500–2,000/call  |
-| Console errors        | `browse console`                 | `list_console_messages`        | ~1,500–2,000/call  |
-| Network requests      | `browse network`                 | `list_network_requests`        | ~1,500–2,000/call  |
-| Screenshot on failure | `browse screenshot path.png`     | `take_screenshot`              | ~1,500–2,000/call  |
-| Annotated screenshot  | `browse snapshot -a -o path.png` | N/A                            | —                  |
-| Fill form input       | `browse fill @e4 "value"`        | `fill`                         | ~1,500–2,000/call  |
-| Click element         | `browse click @e3`               | `click`                        | ~1,500–2,000/call  |
+| Task                  | `agent-browser` (primary)                           | Chrome DevTools MCP (fallback) | MCP Token Overhead |
+| --------------------- | --------------------------------------------------- | ------------------------------ | ------------------ |
+| Navigate to page      | `agent-browser open <url>`                          | `navigate_page` 2–5s           | ~1,500–2,000/call  |
+| Interactive snapshot  | `agent-browser snapshot`                            | `take_snapshot` ~56KB output   | ~1,500–2,000/call  |
+| Console errors        | `agent-browser console`                             | `list_console_messages`        | ~1,500–2,000/call  |
+| Network requests      | `agent-browser network requests`                    | `list_network_requests`        | ~1,500–2,000/call  |
+| Screenshot on failure | `agent-browser screenshot path.png`                 | `take_screenshot`              | ~1,500–2,000/call  |
+| Visual diff           | `agent-browser diff screenshot --baseline path.png` | N/A                            | —                  |
+| Fill form input       | `agent-browser fill @e4 "value"`                    | `fill`                         | ~1,500–2,000/call  |
+| Click element         | `agent-browser click @e3`                           | `click`                        | ~1,500–2,000/call  |
 
-**Over 20 commands, MCP burns 30–40K tokens in protocol overhead. `browse` burns 0.**
+**Over 20 commands, MCP burns 30–40K tokens in protocol overhead. `agent-browser` burns 0.**
 
-Cold start is ~3s (first call per session). All subsequent calls are ~100ms.
+#### Key `agent-browser` Features for Testing
 
-#### Key `browse` Features for Testing
-
-- **`browse snapshot -i`** — Interactive ARIA tree with `@e1`, `@e2`... element refs for clicking/filling
-- **`browse snapshot -i -C`** — Adds `@c1`, `@c2`... cursor-interactive refs for clickable elements NOT in the ARIA tree (catches non-semantic buttons, custom widgets)
-- **`browse snapshot -D`** — Diff vs previous snapshot: shows exactly what changed after an action (verification pattern)
-- **`browse snapshot -a -o path.png`** — Annotated screenshot with element ref overlays (visual debugging)
-- **`browse console`** — Console messages from ring buffer (CSS 404s, JS errors, warnings)
-- **`browse network`** — Network requests from ring buffer (4xx/5xx, asset failures)
+- **`agent-browser snapshot`** — Accessibility tree with `@e1`, `@e2`... element refs for clicking/filling
+- **`agent-browser diff snapshot`** — Diff vs previous snapshot: shows exactly what changed after an action (verification pattern)
+- **`agent-browser screenshot path.png`** — Screenshot for visual debugging
+- **`agent-browser console`** — Console messages (CSS 404s, JS errors, warnings)
+- **`agent-browser network requests`** — Network requests (4xx/5xx, asset failures)
+- **`agent-browser errors`** — Uncaught JS exceptions (structured)
+- **`agent-browser batch`** — Multi-step test flows in a single invocation (eliminates per-command process overhead)
 
 #### Hybrid Pattern for Page Testers
 
 ```bash
-# Primary: use browse for all browser operations (zero MCP overhead)
-browse goto "$URL"
-browse snapshot -i          # interactive elements, check for styled content
-browse console              # console errors (CSS 404s, JS errors)
-browse network              # network requests (4xx/5xx on assets)
+# Primary: use agent-browser for all browser operations (zero MCP overhead)
+agent-browser open "$URL"
+agent-browser snapshot          # interactive elements, check for styled content
+agent-browser console           # console errors (CSS 404s, JS errors)
+agent-browser network requests  # network requests (4xx/5xx on assets)
 
 # On failure: capture evidence
-browse screenshot /tmp/fulltest-failure-$(date +%s).png
-# Or annotated (shows element refs overlaid):
-browse snapshot -a -o /tmp/fulltest-annotated-$(date +%s).png
+agent-browser screenshot /tmp/fulltest-failure-$(date +%s).png
 
-# Verification pattern (snapshot -D diff):
-browse snapshot              # baseline before action
-browse click @e5             # perform action
-browse snapshot -D           # shows only what changed — fast verification
+# Verification pattern (diff snapshot):
+agent-browser snapshot          # baseline before action
+agent-browser click @e5         # perform action
+agent-browser diff snapshot     # shows only what changed — fast verification
 ```
 
-**Headed mode escalation:** For visual/CSS/layout failures that headless screenshots can't diagnose, escalate to `/open-gstack-browser` — a steerable Chromium with Claude Code sidebar for live interactive debugging. Use before falling back to MCP when the issue is visual.
+**Batch mode** for multi-step test flows (eliminates per-command overhead):
 
-**Fallback when `browse` is unavailable** (binary not at `~/.local/bin/browse`):
-
+```bash
+echo '[
+  {"command": "open", "args": ["'$URL'"]},
+  {"command": "snapshot"},
+  {"command": "console"},
+  {"command": "network", "args": ["requests"]}
+]' | agent-browser batch
 ```
-# Fall back to Chrome DevTools MCP
-mcp__chrome-devtools__navigate_page
-mcp__chrome-devtools__list_console_messages
-mcp__chrome-devtools__list_network_requests
-mcp__chrome-devtools__take_screenshot
+
+**Fallback chain:**
+
+```bash
+if command -v agent-browser >/dev/null 2>&1; then
+  # Primary: agent-browser (Rust, CDP, sessions, batch)
+  agent-browser open "$URL"
+elif command -v browse >/dev/null 2>&1; then
+  # First fallback: browse CLI
+  browse goto "$URL"
+else
+  # Second fallback: Chrome DevTools MCP
+  mcp__chrome-devtools__navigate_page
+fi
 ```
 
 #### Multi-Workspace Isolation (Swarm Mode)
 
-Each parallel tester can set `BROWSE_STATE_FILE` to get its own isolated Chromium instance, preventing port conflicts between concurrent page testers:
+`agent-browser` supports built-in session management for parallel testers. Each tester connects to its own Chrome instance automatically. No manual state file management needed.
+
+For explicit isolation, use separate sessions:
 
 ```bash
-# In each parallel tester's environment:
-export BROWSE_STATE_FILE="/tmp/browse-tester-${TESTER_ID}.json"
-browse goto "$URL"
-# This tester now has its own browser state, isolated from other testers
+# Each parallel tester uses agent-browser's built-in session isolation
+agent-browser open "$URL"
+# agent-browser manages per-process Chrome instances automatically
 ```
 
-This is especially important in swarm mode where multiple testers run concurrently — without state isolation, testers would share browser state and interfere with each other's sessions.
-
-This approach reduces per-page token cost from ~56KB (Chrome DevTools MCP snapshot) to near zero for the inspection phase, allowing more pages to be tested within the same context window.
+This reduces per-page token cost from ~56KB (Chrome DevTools MCP snapshot) to near zero for the inspection phase, allowing more pages to be tested within the same context window.
 
 ---
 
