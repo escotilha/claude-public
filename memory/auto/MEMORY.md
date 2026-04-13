@@ -124,6 +124,7 @@
 - [reference_gemini_api.md](reference_gemini_api.md) — Google Gemini API key in macOS Keychain (GEMINI_API_KEY)
 - [reference_cloudflare.md](reference_cloudflare.md) — Cloudflare API token with Zone.DNS edit for all zones, account details, zone IDs, and where credentials are stored
 - [reference_cloudflare_nuvini.md](reference_cloudflare_nuvini.md) — Cloudflare API token for nuvini.ai domain DNS — separate account (P@nuvini.co) from main (p@nove.co)
+- [reference_orchestrator_technical.md](reference_orchestrator_technical.md) — Contably Orchestrator full technical reference — webhook API, service accounts, job types, circuit breaker, dead letter, DB models, integration patterns
 - [reference_oci_contably.md](reference_oci_contably.md) — OCI infrastructure credentials, OCIDs, cluster topology, kubectl auth, and CI/CD pipeline details for Contably
 - [reference_openrouter_api.md](reference_openrouter_api.md) — OpenRouter API key for Qwen 3.6 Plus and other models — stored in macOS Keychain and Claudia VPS .env
 - [reference_paperclip_vps.md](reference_paperclip_vps.md) — Paperclip AI orchestration running on VPS with 3 companies (Nuvini, Contably, SourceRank) — hybrid claude_local + openclaw_gateway adapters, Nemotron 3 Super via Ollama for CEOs
