@@ -16168,3 +16168,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-13T22:52:49Z",
+  "date": "2026-04-13",
+  "skill": "deep-plan",
+  "args": "Plan for creating a proper staging environment for Contably, separate from production. Codebase at /Volumes/AI/Code/contably.\n\nCONTEXT: Currently there is ONE environment — the \"staging\" OKE cluster (contably-oke-staging) serves production traffic at contably.ai. Every push to main deploys directly to production. This was fine during development but now we have real users and real data (NUVINI S.A, Dataminers, Sevilha accounting firm).\n\nINFRASTRUCTURE ALREADY IN PLACE:\n- OKE cluster: contably-oke-staging (2 nodes, LB IP 137.131.156.136)\n- MySQL HeatWave in staging VCN (10.0.2.25)\n- Redis at 10.0.2.202\n- infrastructure/kubernetes/overlays/oci/ (current \"staging\" = production)\n- infrastructure/kubernetes/overlays/oci-prod/ (exists but decommissioned)\n- GitHub Actions deploy.yml triggers on push to main\n- OCIR (Oracle Container Registry) for Docker images\n- Cloudflare for DNS (contably.ai)\n\nWHAT WE NEED:\n1. A staging environment at staging.contably.ai that's separate from production\n2. Push to main → deploys to staging. Manual promote (or merge to prod branch) → deploys to production\n3. Separate database for staging (or shared DB with separate schema/prefix)\n4. Same Redis or separate Redis\n5. Should work within the existing OKE cluster (same nodes, different namespace)\n6. Don't break the current production deployment\n\nCONSTRAINTS:\n- Only 2 nodes in the OKE cluster (can't add more without cost)\n- MySQL is in the staging VCN — both namespaces can reach it\n- The \"prod\" cluster is decommissioned (different VCN, can't reach MySQL)\n- Budget-conscious: reuse existing infrastructure\n\nResearch the current K8s setup, deploy workflow, DNS, and propose the simplest path to a proper staging + production separation. DO NOT execute anything.",
+  "sessionId": "e6d31d80-a692-4748-8aa8-4c780e3a64a3",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
