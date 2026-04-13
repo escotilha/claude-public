@@ -16088,3 +16088,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-13T21:09:09Z",
+  "date": "2026-04-13",
+  "skill": "cto",
+  "args": "Audit the Contably codebase at /Volumes/AI/Code/contably for **disconnected features** — code that was built but never wired into the live application. We just found that a full OFX parser existed in services/ofx/parser.py but was never called from the upload endpoint. Find ALL similar cases across the platform. Focus on: (1) Services/parsers that exist but aren't called from any route (2) Frontend pages/components that exist but aren't in the router (3) API endpoints defined but not registered in routers (4) Ingestion workflows that exist but aren't triggered (5) Models/tables that exist but have no API surface. Report as a prioritized list with file paths.",
+  "sessionId": "e6d31d80-a692-4748-8aa8-4c780e3a64a3",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
