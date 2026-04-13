@@ -83,6 +83,10 @@
 - [project_intel_scanner_vps.md](project_intel_scanner_vps.md) — Intel Scanner on VPS — Exa-powered cron scanning 30 X accounts for Claude/OpenClaw intel, posts to Discord #intel every 2h (5am-5pm BRT)
 - [tech_glasswing_vuln_hunting.md](tech_glasswing_vuln_hunting.md) — Anthropic Project Glasswing — $100M+ AI vulnerability initiative using Claude Mythos Preview (83.1% CyberGym repro rate). Glasswing-style prompting added to /cto security analyst.
 
+## Mary / OpenClaw Operations
+
+- [project_mary_openclaw_fixes.md](project_mary_openclaw_fixes.md) — OpenClaw operational fixes: memory-core blocks readiness, groupPolicy must be "open", claude-cli fails as root, WhatsApp allowFrom/pairing rules, config file locations
+
 ## Tech Insights
 
 - [tech_agent_sandbox_distrust.md](tech_agent_sandbox_distrust.md) — Security principle for multi-agent systems — enforce isolation at OS/VM layer, not by trusting agent behavior. NanoClaw + Docker Sandbox as reference implementation.
