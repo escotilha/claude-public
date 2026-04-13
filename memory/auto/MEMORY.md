@@ -104,6 +104,8 @@
 - [tech_token_efficient_search.md](tech_token_efficient_search.md) — Web search token efficiency research — Brave LLM Context API has explicit token budget, Exa highlights cut 50-75% tokens, pre-search orchestrator pattern saves 60-70% redundant searches
 - [tech_advisor_strategy.md](tech_advisor_strategy.md) — Claude Platform advisor strategy (Sonnet executor + Opus advisor) for cost-efficient agentic sessions
 - [tech_gbrain_integration.md](tech_gbrain_integration.md) — GBrain world-knowledge brain integrated into Claudia as Source 5 — separate Postgres DB, 30 MCP tools, compiled truth + timeline
+- [tech_pluggable_context_engine.md](tech_pluggable_context_engine.md) — Pluggable context injection for swarm skills — context manifest YAML, parallel gather, role-based slicing, 65-80% token savings
+- [tech_hermes_channel_adapters.md](tech_hermes_channel_adapters.md) — Hermes v0.9.0 iMessage/WeChat/WeCom adapter architecture — integration brief for AgentWave channel expansion
 
 ## Infrastructure (Bella)
 
