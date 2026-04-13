@@ -16058,3 +16058,13 @@
   "cwd": "/Volumes/AI/Code",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-13T16:03:21Z",
+  "date": "2026-04-13",
+  "skill": "deep-plan",
+  "args": "User role restructuring for Contably. Two changes: (1) CompanyGroupUser with role group_admin should be able to add/remove companies to the group AND add/remove users to any company within the group — essentially the holding company's leadership role. (2) CompanyUser roles should be simplified from admin/editor/viewer to just two levels: manager (can CRUD company users, edit company data, full operational access) and junior (day-to-day operations like transactions, invoices, payroll — no user management). The current code is at /Volumes/AI/Code/contably. Key files: apps/api/src/models/multi_tenant.py (CompanyGroupUser, CompanyUser models), apps/api/src/api/deps/permissions.py (permission checks), apps/api/src/api/routes/admin/company_groups.py (group management — currently requires master admin), apps/api/src/api/routes/tenancy/companies.py (company management). Research the current permission model, access control checks, and frontend role displays, then propose the simplest implementation.",
+  "sessionId": "e6d31d80-a692-4748-8aa8-4c780e3a64a3",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
