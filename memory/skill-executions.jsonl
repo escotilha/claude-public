@@ -16138,3 +16138,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-13T22:10:25Z",
+  "date": "2026-04-13",
+  "skill": "deep-plan",
+  "args": "Continue the plan for process_single_document. The user has REJECTED Option A (simple Celery task) and APPROVED Option B (BaseWorkflowTask subclass). The approach should: (1) Create a WorkflowDefinition for document processing, (2) Create WorkflowRun + WorkflowTask records per upload for full audit trail, (3) Use BaseIngestionWorkflow subclass pattern matching NF-e/OFX/PDF workflows, (4) Track granular progress (STORING → STRUCTURING → NORMALIZING → VALIDATING → CANONIZING → COMPLETED), (5) Use WorkflowException for error handling, (6) Wire DataLineage for source→output tracking, (7) Show up in Status Orchestrator / workflow instance detail in admin UI. The research is already done in research.md — proceed directly to writing the plan.",
+  "sessionId": "96fa5c1c-d809-4cfd-a1b4-a73ab6632232",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
