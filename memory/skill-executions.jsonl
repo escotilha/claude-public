@@ -16128,3 +16128,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-13T22:04:25Z",
+  "date": "2026-04-13",
+  "skill": "deep-plan",
+  "args": "Scope and implement the process_single_document Celery task for client portal document uploads. The upload endpoint at apps/api/src/api/routes/client/documents.py:107 already saves file metadata to ClientDocument but: (1) never stores the actual file to S3/local storage despite StorageService existing at src/core/storage.py, (2) references a non-existent src/workflows/tasks/document_collection_tasks.py, (3) never connects to the DocumentRouter or ingestion workflows (NF-e, OFX, PDF/image, CSV) that are fully built. Scope: wire the upload to actually store files, create the Celery task, route through DocumentRouter, dispatch to correct workflow, update ClientDocument status/extracted_data, and connect to canonical tables.",
+  "sessionId": "96fa5c1c-d809-4cfd-a1b4-a73ab6632232",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
