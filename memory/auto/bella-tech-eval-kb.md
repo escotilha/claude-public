@@ -86,6 +86,15 @@ Bella's running evaluation log for tools, libraries, frameworks, and AI componen
 - Verdict: skip
 - Reasoning: Zig-based CDP browser, impressive speed, but missing PDF rendering, Lighthouse audits, and reliable SPA hydration — gaps block it replacing Chrome/Browserless. Revisit Q3 2026.
 
+### agent-browser (Vercel Labs)
+
+- Date: 2026-04-13
+- URL: https://github.com/vercel-labs/agent-browser
+- Relevance: 9/10
+- Confidence: 9/10
+- Verdict: adopt
+- Reasoning: Native Rust CDP CLI, 28,900+ stars. Replaces browse CLI as primary browser automation — adds batch mode, visual diff, network interception, session persistence, self-updating skill docs. Installed v0.25.4, skill created.
+
 ### Qwen3.5-27B-Claude-Opus-Distilled
 
 - Date: 2026-04-08
@@ -99,4 +108,5 @@ Bella's running evaluation log for tools, libraries, frameworks, and AI componen
 
 ## Timeline
 
+- **2026-04-13** — [research] Added agent-browser (Vercel Labs) — adopt, 9/10 relevance, replaces browse CLI (Source: research — github.com/vercel-labs/agent-browser)
 - **2026-04-11** — [session] KB created with 8 seed evaluations from existing memory/context (Source: session — bella-tech-eval-kb init)
