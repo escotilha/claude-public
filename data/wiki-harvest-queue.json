@@ -10,5 +10,11 @@
     "note": "LLM cheat-sheet for agent systems: 4-tier model stack (Frontier/Execution/Balanced/Local) with 12+ models, benchmarks, costs, and use cases for OpenClaw/Hermes agents",
     "addedAt": "2026-04-12T10:11:20Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://github.com/vercel-labs/agent-browser",
+    "note": "agent-browser: native Rust browser automation CLI for AI agents — accessibility tree snapshots, CDP-based, 28k+ stars, Claude Code plugin built-in",
+    "addedAt": "2026-04-13T08:16:03Z",
+    "addedBy": "research-skill"
   }
 ]
