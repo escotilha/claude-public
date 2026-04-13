@@ -90,6 +90,7 @@
 ## Tech Insights
 
 - [tech_agent_sandbox_distrust.md](tech_agent_sandbox_distrust.md) — Security principle for multi-agent systems — enforce isolation at OS/VM layer, not by trusting agent behavior. NanoClaw + Docker Sandbox as reference implementation.
+- [tech_agent_credential_proxy.md](tech_agent_credential_proxy.md) — Egress credential proxy pattern — inject API keys at proxy layer, never expose to agent. Implemented in AgentWave.
 - [tech_ai_platform_attack_surface.md](tech_ai_platform_attack_surface.md) — Attack chain from McKinsey Lilli breach — unauthenticated endpoints + JSON-key SQLi + system prompt write access = full AI platform compromise
 - [tech_asmr_memory_retrieval.md](tech_asmr_memory_retrieval.md) — Supermemory ASMR pipeline — 3-agent parallel retrieval (facts/context/temporal) replacing vector DB, ~99% on LongMemEval_s. Open-source ~April 2026.
 - [tech_agent_browser.md](tech_agent_browser.md) — agent-browser (Vercel Labs) v0.25.4 — Rust CDP CLI, primary browser tool, batch mode, visual diff, self-updating docs

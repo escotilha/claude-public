@@ -2,6 +2,7 @@
 name: agent-sandbox-design-for-distrust
 description: Security principle for multi-agent systems — enforce isolation at OS/VM layer, not by trusting agent behavior. NanoClaw + Docker Sandbox as reference implementation.
 type: tech
+originSessionId: 79b36636-4198-42c1-b9b2-2193bf7e12b1
 ---
 
 Enforce security outside the agentic surface (at the OS/VM layer), not by relying on agent behavior.
@@ -16,3 +17,5 @@ Enforce security outside the agentic surface (at the OS/VM layer), not by relyin
 **How to apply:** Relevant to any multi-agent skill — `parallel-dev` (worktree isolation is git-level, not OS-level), `cto` swarm, `fulltest-skill`, `qa-cycle`. When evaluating agent isolation strategies, prefer container/VM boundaries over behavioral trust.
 
 **Source:** https://nanoclaw.dev/blog/nanoclaw-docker-sandboxes/ (2026-03-13)
+
+Related: [agent-credential-proxy](tech_agent_credential_proxy.md) — extends this principle to credential isolation via egress proxy (2026-04-13)
