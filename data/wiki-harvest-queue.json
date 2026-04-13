@@ -40,5 +40,11 @@
     "note": "Cloudflare Outbound Workers for Sandboxes — programmatic credential injection and zero-trust egress control for AI agent sandboxes",
     "addedAt": "2026-04-13T16:18:51Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://github.com/NousResearch/hermes-agent/releases/tag/v2026.4.13",
+    "note": "Hermes Agent v0.9.0 - multi-platform expansion (Android/Termux, iMessage, WeChat), local web dashboard, pluggable context engine, background process monitoring, deep security hardening",
+    "addedAt": "2026-04-13T20:49:33Z",
+    "addedBy": "research-skill"
   }
 ]
