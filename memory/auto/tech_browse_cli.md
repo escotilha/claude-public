@@ -2,7 +2,10 @@
 name: browse-cli-installation
 description: gstack browse CLI binary installed at ~/.local/bin/browse — zero-MCP-overhead headless Chromium for browser automation across 10 skills
 type: tech
+originSessionId: 9492d4ca-813e-4881-82bf-371bbc274f94
 ---
+
+**SUPERSEDED by agent-browser (2026-04-13).** Use `agent-browser` as primary; `browse` remains as fallback.
 
 **gstack `browse` CLI** (MIT, from garrytan/gstack) installed at `~/.local/lib/browse/` with symlink at `~/.local/bin/browse`.
 
