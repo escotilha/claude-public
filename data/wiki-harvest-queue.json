@@ -16,5 +16,11 @@
     "note": "agent-browser: native Rust browser automation CLI for AI agents — accessibility tree snapshots, CDP-based, 28k+ stars, Claude Code plugin built-in",
     "addedAt": "2026-04-13T08:16:03Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://www.patrickdap.com/post/how-to-run-multiple-agents/",
+    "note": "dux — TUI app for running multiple Claude Code/Codex agents in parallel via git worktrees, CLI wrapper approach",
+    "addedAt": "2026-04-13T13:17:21Z",
+    "addedBy": "research-skill"
   }
 ]
