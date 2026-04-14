@@ -1,6 +1,18 @@
 ---
 name: officecli
-description: Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check formatting, find issues, add charts, or modify Office documents.
+description: "Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check formatting, find issues, add charts, or modify Office documents."
+user-invocable: true
+context: inline
+model: sonnet
+effort: medium
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Glob
+  - Grep
+  - AskUserQuestion
 ---
 
 # officecli
@@ -38,6 +50,7 @@ officecli auto-updates daily in the background.
 **When unsure about property names, value formats, or command syntax, ALWAYS run help instead of guessing.** One help query is faster than guess-fail-retry loops.
 
 **Three-layer navigation** — start from the deepest level you know:
+
 ```bash
 officecli pptx set              # All settable elements and their properties
 officecli pptx set shape        # Shape properties in detail
@@ -51,6 +64,7 @@ Replace `pptx` with `docx` or `xlsx`. Commands: `view`, `get`, `query`, `set`, `
 ## Performance: Resident Mode
 
 For multi-step workflows (3+ commands on the same file), use `open`/`close`:
+
 ```bash
 officecli open report.docx       # keep in memory — fast subsequent commands
 officecli set report.docx ...    # no file I/O overhead
@@ -62,6 +76,7 @@ officecli close report.docx      # save and release
 ## Quick Start
 
 **PPT:**
+
 ```bash
 officecli create slides.pptx
 officecli add slides.pptx / --type slide --prop title="Q4 Report" --prop background=1A1A2E
@@ -70,6 +85,7 @@ officecli set slides.pptx '/slide[1]' --prop transition=fade --prop advanceTime=
 ```
 
 **Word:**
+
 ```bash
 officecli create report.docx
 officecli add report.docx /body --type paragraph --prop text="Executive Summary" --prop style=Heading1
@@ -77,6 +93,7 @@ officecli add report.docx /body --type paragraph --prop text="Revenue increased 
 ```
 
 **Excel:**
+
 ```bash
 officecli create data.xlsx
 officecli set data.xlsx /Sheet1/A1 --prop value="Name" --prop bold=true
@@ -99,13 +116,13 @@ officecli validate <file>             # Validate against OpenXML schema
 
 ### view modes
 
-| Mode | Description | Useful flags |
-|------|-------------|-------------|
-| `outline` | Document structure | |
-| `stats` | Statistics (pages, words, shapes) | |
-| `issues` | Formatting/content/structure problems | `--type format\|content\|structure`, `--limit N` |
-| `text` | Plain text extraction | `--start N --end N`, `--max-lines N` |
-| `annotated` | Text with formatting annotations | |
+| Mode        | Description                           | Useful flags                                     |
+| ----------- | ------------------------------------- | ------------------------------------------------ |
+| `outline`   | Document structure                    |                                                  |
+| `stats`     | Statistics (pages, words, shapes)     |                                                  |
+| `issues`    | Formatting/content/structure problems | `--type format\|content\|structure`, `--limit N` |
+| `text`      | Plain text extraction                 | `--start N --end N`, `--max-lines N`             |
+| `annotated` | Text with formatting annotations      |                                                  |
 
 ### get
 
@@ -124,6 +141,7 @@ Run `officecli docx get` / `officecli xlsx get` / `officecli pptx get` for all a
 Elements with stable IDs return `@attr=value` paths instead of positional indices. These paths survive insert/delete operations — use them for multi-step workflows.
 
 **Returned path format (output):**
+
 ```
 /slide[1]/shape[@id=550950021]                    # PPT shape (cNvPr.Id)
 /slide[1]/shape[@id=550950021]/paragraph[1]       # child inherits parent's @id=
@@ -136,6 +154,7 @@ Elements with stable IDs return `@attr=value` paths instead of positional indice
 ```
 
 **All formats accepted as input** — use returned paths directly for subsequent `set`/`remove`:
+
 ```bash
 officecli set slides.pptx '/slide[1]/shape[@id=550950021]' --prop bold=true
 officecli set slides.pptx '/slide[1]/shape[@name=Title 1]' --prop text="New"   # @name= also works (PPT)
@@ -249,11 +268,11 @@ Run `officecli <format> set` for all settable elements. Run `officecli <format> 
 
 **Value formats:**
 
-| Type | Format | Examples |
-|------|--------|---------|
-| Colors | Hex, named, RGB, theme | `FF0000`, `red`, `rgb(255,0,0)`, `accent1`..`accent6` |
-| Spacing | Unit-qualified | `12pt`, `0.5cm`, `1.5x`, `150%` |
-| Dimensions | EMU or suffixed | `914400`, `2.54cm`, `1in`, `72pt`, `96px` |
+| Type       | Format                 | Examples                                              |
+| ---------- | ---------------------- | ----------------------------------------------------- |
+| Colors     | Hex, named, RGB, theme | `FF0000`, `red`, `rgb(255,0,0)`, `accent1`..`accent6` |
+| Spacing    | Unit-qualified         | `12pt`, `0.5cm`, `1.5x`, `150%`                       |
+| Dimensions | EMU or suffixed        | `914400`, `2.54cm`, `1in`, `72pt`, `96px`             |
 
 ### find — format or replace matched text
 
@@ -305,10 +324,10 @@ Path controls search scope: `/` = all slides, `/slide[N]` = single slide, `/slid
 
 **Behavior matrix:**
 
-| Props | Effect |
-|-------|--------|
-| `find` + format props | Split runs, apply format to matched text |
-| `find` + `replace` | Replace matched text |
+| Props                             | Effect                                    |
+| --------------------------------- | ----------------------------------------- |
+| `find` + format props             | Split runs, apply format to matched text  |
+| `find` + `replace`                | Replace matched text                      |
 | `find` + `replace` + format props | Replace text and apply format to new text |
 
 - Add `regex=true` to enable regex matching: `--prop 'find=\d+%' --prop regex=true`
@@ -332,6 +351,7 @@ officecli add <file> <parent> --from <path>                               # clon
 ```
 
 **Insert position** (`--after`, `--before`, `--index` are mutually exclusive):
+
 - `--after "p[@paraId=1A2B3C4D]"` — insert after the anchor element (short or full path)
 - `--before "/body/p[@paraId=5E6F7A8B]"` — insert before the anchor element
 - `--index N` — insert at 0-based position (legacy, prefer --after/--before)
@@ -339,11 +359,11 @@ officecli add <file> <parent> --from <path>                               # clon
 
 **Element types (with aliases):**
 
-| Format | Types |
-|--------|-------|
-| **pptx** | slide, shape (textbox), picture (image/img), chart, table, row (tr), connector (connection/line), group, video (audio/media), equation (formula/math), notes, paragraph (para), run, zoom (slidezoom) |
+| Format   | Types                                                                                                                                                                                                                                                                          |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **pptx** | slide, shape (textbox), picture (image/img), chart, table, row (tr), connector (connection/line), group, video (audio/media), equation (formula/math), notes, paragraph (para), run, zoom (slidezoom)                                                                          |
 | **docx** | paragraph (para), run, table, row (tr), cell (td), image (picture/img), header, footer, section, bookmark, comment, footnote, endnote, formfield, sdt (contentcontrol), chart, equation (formula/math), field, hyperlink, style, toc, watermark, break (pagebreak/columnbreak) |
-| **xlsx** | sheet, row, cell, chart, image (picture), comment, table (listobject), namedrange (definedname), pivottable (pivot), sparkline, validation (datavalidation), autofilter, shape, textbox, databar/colorscale/iconset/formulacf (conditional formatting), csv (tsv) |
+| **xlsx** | sheet, row, cell, chart, image (picture), comment, table (listobject), namedrange (definedname), pivottable (pivot), sparkline, validation (datavalidation), autofilter, shape, textbox, databar/colorscale/iconset/formulacf (conditional formatting), csv (tsv)              |
 
 **Text-anchored insert** (`--after find:X` / `--before find:X`):
 
@@ -431,16 +451,16 @@ Run `officecli <format> raw` for available parts per format.
 
 ## Common Pitfalls
 
-| Pitfall | Correct Approach |
-|---------|-----------------|
-| `--name "foo"` | ❌ Use `--prop name="foo"` — all attributes go through `--prop` |
-| `x=-3cm` | ❌ Negative coordinates not supported. Use `x=0cm` or `x=36cm` |
-| PPT `shape[1]` for content | ❌ `shape[1]` is typically the title placeholder. Use `shape[2]` or higher for content shapes |
-| `/shape[myname]` | ❌ Name indexing not supported. Use numeric index: `/shape[3]` |
-| Guessing property names | ❌ Run `officecli <format> set <element>` to see exact names |
-| Modifying an open file | ❌ Close the file in PowerPoint/WPS first |
-| `\n` in shell strings | ❌ Use `\\n` for newlines in `--prop text="..."` |
-| `officecli set f.pptx /slide[1]` | ❌ Shell glob expands brackets. Always single-quote paths: `'/slide[1]'` |
+| Pitfall                          | Correct Approach                                                                              |
+| -------------------------------- | --------------------------------------------------------------------------------------------- |
+| `--name "foo"`                   | ❌ Use `--prop name="foo"` — all attributes go through `--prop`                               |
+| `x=-3cm`                         | ❌ Negative coordinates not supported. Use `x=0cm` or `x=36cm`                                |
+| PPT `shape[1]` for content       | ❌ `shape[1]` is typically the title placeholder. Use `shape[2]` or higher for content shapes |
+| `/shape[myname]`                 | ❌ Name indexing not supported. Use numeric index: `/shape[3]`                                |
+| Guessing property names          | ❌ Run `officecli <format> set <element>` to see exact names                                  |
+| Modifying an open file           | ❌ Close the file in PowerPoint/WPS first                                                     |
+| `\n` in shell strings            | ❌ Use `\\n` for newlines in `--prop text="..."`                                              |
+| `officecli set f.pptx /slide[1]` | ❌ Shell glob expands brackets. Always single-quote paths: `'/slide[1]'`                      |
 
 ---
 
@@ -448,15 +468,15 @@ Run `officecli <format> raw` for available parts per format.
 
 This skill covers the officecli CLI basics. For complex scenarios, load the dedicated skill for better results:
 
-| Scenario | Skill | Min Version | When to Use |
-|----------|-------|:-----------:|-------------|
-| **Word documents** | `officecli-docx` | v1.0.23 | Create, read, edit .docx — reports, letters, memos, proposals |
-| **Academic papers** | `officecli-academic-paper` | v1.0.24 | Research papers, white papers with TOC, equations, footnotes, bibliography |
-| **Presentations** | `officecli-pptx` | v1.0.23 | Create, read, edit .pptx — general slide decks |
-| **Pitch decks** | `officecli-pitch-deck` | v1.0.24 | Investor decks, product launches, sales decks with charts and stat callouts |
-| **Morph PPT** | `morph-ppt` | v1.0.24 | Morph-animated cinematic presentations |
-| **Excel** | `officecli-xlsx` | v1.0.23 | Create, read, edit .xlsx — financial models, trackers, formulas |
-| **Data dashboards** | `officecli-data-dashboard` | v1.0.24 | CSV/tabular data → Excel dashboards with KPI cards, charts, sparklines |
+| Scenario            | Skill                      | Min Version | When to Use                                                                 |
+| ------------------- | -------------------------- | :---------: | --------------------------------------------------------------------------- |
+| **Word documents**  | `officecli-docx`           |   v1.0.23   | Create, read, edit .docx — reports, letters, memos, proposals               |
+| **Academic papers** | `officecli-academic-paper` |   v1.0.24   | Research papers, white papers with TOC, equations, footnotes, bibliography  |
+| **Presentations**   | `officecli-pptx`           |   v1.0.23   | Create, read, edit .pptx — general slide decks                              |
+| **Pitch decks**     | `officecli-pitch-deck`     |   v1.0.24   | Investor decks, product launches, sales decks with charts and stat callouts |
+| **Morph PPT**       | `morph-ppt`                |   v1.0.24   | Morph-animated cinematic presentations                                      |
+| **Excel**           | `officecli-xlsx`           |   v1.0.23   | Create, read, edit .xlsx — financial models, trackers, formulas             |
+| **Data dashboards** | `officecli-data-dashboard` |   v1.0.24   | CSV/tabular data → Excel dashboards with KPI cards, charts, sparklines      |
 
 > **How to load:** Ask your AI tool to enable the skill by name, or load the skill file from `skills/<skill-name>/SKILL.md`.
 

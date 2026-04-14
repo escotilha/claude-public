@@ -226,6 +226,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "\"$HOME/.claude-setup/hooks/pre-compact.sh\""
+          },
+          {
+            "type": "command",
             "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Compaction completed in $(pwd)\" >> ~/.claude/logs/compaction.log"
           },
           {

@@ -30,43 +30,43 @@
 
 **Note:** plugin:discord and plugin:swift-lsp moved to `enabledPlugins` system. google-workspace is active but configured outside settings.json (uvx workspace-mcp).
 
-## Skills (80 on-disk)
+## Skills (78 on-disk)
 
-### Developer Workflow (24)
+### Developer Workflow (23)
 
-ship, deep-plan, cto, first-principles, verify, test-and-fix, review-changes, cpr, sc, cs, run-local, parallel-dev, codebase-cleanup, website-design, project-orchestrator, maketree, revert-track, simplify, get-api-docs, architecture, mini-remote, architect, tech-audit, local-inference
+ship, deep-plan, cto, first-principles, verify, test-and-fix, review-changes, cpr, sc, cs, run-local, parallel-dev, codebase-cleanup, website-design, project-orchestrator, maketree, revert-track, get-api-docs, architecture, mini-remote, architect, tech-audit, local-inference
 
 ### QA & Testing (9)
 
 qa-cycle, qa-conta, qa-sourcerank, qa-stonegeo, qa-fix, qa-verify, fulltest-skill, virtual-user-testing, health-report
 
-### Deploy & Ops (5)
+### Deploy & Ops (7)
 
-deploy-conta-staging, deploy-conta-production, deploy-sourcerank, contably-guardian, sourcerank-guardian, oci-health
+deploy-conta-staging, deploy-conta-production, deploy-conta-full, deploy-sourcerank, contably-guardian, sourcerank-guardian, oci-health
 
-### Research & Scraping (9)
+### Research & Scraping (10)
 
-deep-research, research, firecrawl, scrapling, browserless, pinchtab, qmd, last30days, wiki
+deep-research, last30days, research, firecrawl, scrapling, browserless, pinchtab, agent-browser, qmd, wiki
 
-### AI & Growth (3)
+### AI & Growth (5)
 
-llm-eval, growth, chief-geo
+llm-eval, growth, chief-geo, gbrain, claude-api
 
-### Communication (4)
+### Communication (5)
 
-agentmail, slack, tweet, gws
+agentmail, slack, tweet, gws, officecli
 
-### Product & Business (3)
+### Product & Business (4)
 
-cpo, office-hours, proposal-source
+cpo, office-hours, proposal-source, pr-impact
 
-### Meta & Setup (7)
+### Meta & Setup (8)
 
-claude-setup-optimizer, memory-consolidation, meditate, primer, skill-tree, demo, manual
+claude-setup-optimizer, memory-consolidation, meditate, primer, skill-tree, demo, manual, schedule
 
 ### Infra & Agents (4)
 
-nanoclaw, computer-use, paperclip, paperclip-create-agent
+nanoclaw, computer-use, agent-platform, platform-sweep
 
 ### Built-in Extensions (3)
 
@@ -76,9 +76,9 @@ loop, batch, memory
 
 rex
 
-### Advisory (1)
+### Advisory (2)
 
-vibc
+vibc, vault-bootstrap
 
 ## Agents (9)
 
