@@ -17018,3 +17018,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-14T22:07:27Z",
+  "date": "2026-04-14",
+  "skill": "agentmail",
+  "args": "Send email from xurman@agentmail.to to pierre@nuvini.ai with subject \"Contably Nuvem Fiscal — Deployed to Production\" and body: \"Pierre,\\n\\nNuvem Fiscal is deployed and working in production.\\n\\n✅ NF-e sync: fully working (OAuth2 → API → ingestion pipeline → invoice_purchases)\\n✅ NFS-e sync: backend ready, Celery periodic task now syncs both NF-e and NFS-e\\n✅ 62 unit tests covering client, service, and workflow — all green\\n✅ 3 bugs fixed: source= kwarg, process() vs run(), datetime comparison\\n\\nBoth active companies (NUVINI S.A. and Dataminers) return 0 notas for the last 90 days — expected since they're a holding co and a software co (no product NF-e or service NFS-e on SEFAZ).\\n\\n⚠️ Docker GHA cache issue: the route-level doc_type parameter isn't deploying due to stale COPY layers. The Celery task path works fine. Needs a CI cache cleanup.\\n\\nRunning /cto next for a full architecture review.\\n\\n— Claude\"",
+  "sessionId": "28135f0a-e0f5-4bdd-9017-4cbb291db471",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
