@@ -66,17 +66,36 @@ Runs the complete deployment pipeline: staging deploy followed by automatic prod
    - If staging deploy succeeded and health checks pass → proceed to Phase 2
    - If staging deploy failed or health checks failed → **STOP**. Report the failure. Do not touch production.
 
-### Phase 2: Promote to Production (Auto-Approve)
+### Phase 2: Promote to Production
 
-1. Invoke the `deploy-conta-production` skill via the Skill tool with `--skip-staging-check --auto-approve` (staging was just verified in Phase 1 — no need to re-check or ask for confirmation).
+1. Get the staging image tag from the GHA deploy run (format: `stg-<sha>`):
 
-2. The production skill will:
-   - Find the pending production deployment in OCI DevOps
-   - **Auto-approve the OCI DevOps manual gate without asking** (staging is verified green)
-   - Monitor the production rollout
-   - Run production health checks
+   ```bash
+   unset GITHUB_TOKEN && gh run list --repo Contably/contably --workflow "Deploy to Staging" --limit 1 --json headSha -q '.[0].headSha[:7]'
+   ```
 
-3. **Evaluate the result:**
+   The image tag is `stg-<sha>`.
+
+2. Trigger the production deploy via GitHub Actions workflow_dispatch:
+
+   ```bash
+   unset GITHUB_TOKEN && gh workflow run deploy-production.yml --repo Contably/contably -f image_tag=stg-<sha> -f confirm=yes
+   ```
+
+3. Monitor the production deploy:
+
+   ```bash
+   unset GITHUB_TOKEN && gh run list --repo Contably/contably --workflow "Deploy to Production" --limit 1
+   unset GITHUB_TOKEN && gh run watch <RUN_ID> --repo Contably/contably
+   ```
+
+4. Run production health checks:
+
+   ```bash
+   curl -s https://api.contably.ai/health
+   ```
+
+5. **Evaluate the result:**
    - If production deploy succeeded → proceed to Phase 3
    - If production deploy failed → report failure. The production skill will suggest rollback.
 

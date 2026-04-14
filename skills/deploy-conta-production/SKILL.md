@@ -40,9 +40,11 @@ invocation-contexts:
 
 # Deploy Production — Contably OCI
 
-Deploys Contably to production via GitHub Actions. Pushes to main, which triggers the GHA deploy workflow (CI → build images → deploy to OKE `contably` namespace). Verifies health after deploy.
+Promotes Contably from staging to production via GitHub Actions workflow_dispatch.
 
-**Note:** With GitHub Actions, push to main IS the production deploy. There is no separate staging-then-promote flow. This skill handles the push, monitoring, and validation.
+**Flow:** Push to main deploys to STAGING (contably-staging namespace). This skill triggers `deploy-production.yml` workflow_dispatch to promote a tested staging image to PRODUCTION (contably namespace).
+
+**Requires:** A staging image tag (e.g., `stg-abc1234`) from a successful staging deploy. Use `/deploy-conta-staging` first.
 
 ## Arguments
 

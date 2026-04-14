@@ -40,11 +40,9 @@ invocation-contexts:
 
 # Deploy Staging — Contably OCI
 
-Deploys Contably to the production environment via GitHub Actions. Runs pre-flight checks, auto-fixes issues, pushes to trigger GHA CI → build → deploy, monitors the pipeline, and validates. Loops until green.
+Deploys Contably to the staging environment via GitHub Actions. Push to main triggers GHA deploy to the `contably-staging` namespace. Staging serves at staging.contably.ai.
 
-**Note:** Despite the name "staging", Contably's OKE staging cluster IS production (the "prod" cluster is decommissioned). Push to main triggers GHA deploy to the `contably` namespace on the staging cluster, which serves production traffic.
-
-This skill ONLY deploys to staging. To promote to production, use `/deploy-conta-production`.
+To promote staging to production, use `/deploy-conta-production` which triggers the `deploy-production.yml` workflow_dispatch with the staging image tag.
 
 ## Arguments
 
