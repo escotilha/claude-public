@@ -30,9 +30,7 @@
 
 **Note:** plugin:discord and plugin:swift-lsp moved to `enabledPlugins` system. google-workspace is active but configured outside settings.json (uvx workspace-mcp).
 
-## Skills (80 on-disk; ~130 in baseline including Finance/M&A not yet created)
-
-**Note (2026-04-14):** Finance/M&A skills listed below under "Finance & M&A" are NOT yet on disk — they were listed in baseline as planned/future skills. The 80 on-disk skills are the actually-deployed set.
+## Skills (80 on-disk)
 
 ### Developer Workflow (24)
 
@@ -81,10 +79,6 @@ rex
 ### Advisory (1)
 
 vibc
-
-### Finance & M&A (12+)
-
-finance-dcf, finance-comps, finance-lbo, finance-model, finance-memo, finance-pitch, finance-cim, finance-dataroom, finance-ic, finance-nda, finance-loi, finance-spa, mna-pipeline, mna-diligence, mna-synergies, mna-integration, ir-deck, ir-earnings, ir-model, compliance-kyc, compliance-aml, compliance-reporting, legal-review, legal-redline, analyze-deal, committee-presenter, aimpact, generate-deck, portfolio-monitor, portfolio-report, portfolio-valuation, financial-model
 
 ## Agents (9)
 
@@ -140,16 +134,12 @@ AGENT-TEAMS-STRATEGY.md, memory-strategy.md, model-tier-strategy.md, nuvini-sync
 
 ### M&A Analyst (Secondary) — Coverage: MEDIUM
 
-- Deep research for due diligence (deep-research — active; mna-diligence — NOT ON DISK)
-- Financial modeling: uses officecli + gws + deep-research ad-hoc (finance-\* skills NOT on disk)
-- Deal pipeline: analyze-deal, proposal-source (active); finance-memo, finance-cim NOT on disk
-- IC and board presentation: committee-presenter NOT on disk; officecli covers deck creation
-- Legal: legal-review, legal-redline NOT on disk
-- Portfolio: portfolio-\* skills NOT on disk
-- AI impact: aimpact NOT on disk
-- Google Workspace for docs/sheets (active via gws + officecli)
+- Deep research for due diligence (deep-research)
+- Deal pipeline and client proposals (proposal-source)
+- Document creation via officecli and gws (decks, memos, spreadsheets)
+- Google Workspace for docs/sheets (gws + officecli)
 
-**Coverage downgraded from HIGH to MEDIUM** — finance/M&A skill suite was listed as planned but not yet built. Core capabilities (research, doc creation) exist but specialized financial modeling skills are absent.
+No dedicated finance/M&A skills exist on disk. Core M&A workflows rely on general-purpose skills (deep-research, officecli, gws, proposal-source).
 
 ### Gaps Identified
 

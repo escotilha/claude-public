@@ -7,7 +7,7 @@ context: fork
 model: opus
 effort: high
 alwaysThinkingEnabled: true
-skills: [verify, test-and-fix, review-changes]
+skills: [verify, test-and-fix, review-changes, get-api-docs]
 allowed-tools:
   - Read
   - Write
@@ -488,7 +488,7 @@ If user provides a detailed sprint plan (like the Sprint 1 example), treat it as
 
 2. **Fetch API docs for key dependencies:**
    - From the deep-read, identify external libraries/SDKs this feature will use
-   - For each, run `chub search "<library>" --json` → `chub get <id> --lang ts`
+   - If the feature uses external libraries/APIs, invoke `/get-api-docs` to fetch current API documentation before writing the tech spec
    - Include fetched docs in the tech spec context (accurate method signatures, not training-data guesses)
    - Skip for internal-only features with no external API calls
    - After implementation, annotate any gotchas: `chub annotate <id> "note"`
