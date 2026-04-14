@@ -106,5 +106,11 @@
     "note": "Cloudflare Mesh + Workers VPC: private networking for AI agents/Workers/Durable Objects, connects to private MCPs, APIs, DBs — 50 nodes + 50 users free",
     "addedAt": "2026-04-14T16:39:52Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/claudeai/status/2044095086460309790",
+    "note": "Anthropic announces Claude Code Routines (research preview) — scheduled/API-triggered/event-driven agent runs on Anthropic cloud infra",
+    "addedAt": "2026-04-14T17:05:59Z",
+    "addedBy": "research-skill"
   }
 ]
