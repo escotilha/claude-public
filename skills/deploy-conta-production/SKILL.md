@@ -6,7 +6,7 @@ user-invocable: true
 context: fork
 model: opus
 effort: high
-skills: [oci-health]
+skills: [oci-health, contably-snapshot]
 allowed-tools:
   - Read
   - Write
@@ -180,6 +180,16 @@ GITHUB_TOKEN= gh workflow run deploy.yml --repo Contably/contably
    - Suggest rollback command if critical
    - Ask user for next steps
    - **Never auto-fix production**
+
+### Phase 5a: Refresh Codebase Snapshot
+
+After a successful production health check (ALL UP), refresh the codebase reference:
+
+1. **Invoke `/contably-snapshot`** via the Skill tool
+2. This runs in the background — do not block the final report on it
+3. If the snapshot fails, log a warning but do not fail the deploy
+
+**Why:** Every deploy may change the codebase structure (new routes, models, dependencies). Keeping the snapshot fresh means the next session starts with accurate context.
 
 ### Phase 6: Final Report
 

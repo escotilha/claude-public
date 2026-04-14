@@ -6,7 +6,7 @@ user-invocable: true
 context: fork
 model: opus
 effort: high
-skills: [verify, contably-guardian, oci-health]
+skills: [verify, contably-guardian, oci-health, contably-snapshot]
 allowed-tools:
   - Read
   - Write
@@ -233,6 +233,16 @@ After staging deployment succeeds (or after a timeout if we couldn't poll):
    # Verify security headers on staging
    curl -sI https://staging.contably.ai/ 2>/dev/null | grep -iE 'x-frame|x-content|x-xss|referrer|permissions|content-security'
    ```
+
+### Phase 5a: Refresh Codebase Snapshot
+
+After a successful staging health check (ALL UP), refresh the codebase reference:
+
+1. **Invoke `/contably-snapshot`** via the Skill tool
+2. This runs in the background — do not block the final report on it
+3. If the snapshot fails, log a warning but do not fail the deploy
+
+**Why:** Every deploy may change the codebase structure (new routes, models, dependencies). Keeping the snapshot fresh means the next session starts with accurate context.
 
 ### Phase 6: Final Report
 
