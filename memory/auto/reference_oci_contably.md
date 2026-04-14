@@ -2,7 +2,10 @@
 name: reference:oci-contably
 description: OCI infrastructure credentials, OCIDs, cluster topology, kubectl auth, and CI/CD pipeline details for Contably
 type: reference
+originSessionId: e6d31d80-a692-4748-8aa8-4c780e3a64a3
 ---
+
+Contably runs **entirely on Oracle Cloud Infrastructure (OCI)** — Kubernetes (OKE), MySQL HeatWave, Object Storage (S3-compatible), Container Registry (OCIR), networking, DNS. No AWS, no Railway, no Vercel.
 
 ## OCI Contably Infrastructure
 
