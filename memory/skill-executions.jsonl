@@ -16798,3 +16798,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-14T15:33:05Z",
+  "date": "2026-04-14",
+  "skill": "cto",
+  "args": "Review the CertControl integration plan for Contably's eSocial module. The plan is in /Volumes/AI/Code/contably/plan.md.\n\nContext: This adds a digital certificate sales channel via CertControl API to Contably's existing eSocial module. The flow: admin initiates certificate purchase → CertControl handles sale/validation/issuance → webhook notifies Contably → auto-download .pfx → auto-upload to TecnoSpeed → certificate ready for eSocial signing.\n\nKey areas to review:\n1. **Security** — Webhook HMAC verification, certificate password handling (EncryptedString), tenant isolation on sale queries, webhook endpoint auth (public vs authenticated)\n2. **Architecture** — Is Option A (integrated into eSocial module) the right call? Is inline webhook processing safe (vs Celery)? State machine transitions.\n3. **Performance** — Auto-upload pipeline inline in webhook handler. What if TecnoSpeed is slow? Retry strategy for failed downloads.\n4. **Correctness** — The CertControl client uses speculative endpoint patterns (/sales, /sales/{id}/certificate) since their actual API uses /api/integracao/vendas and /api/public/venda/{uuid}/certificado. The plan should use the REAL endpoints.\n5. **Missing pieces** — No product catalog lookup (user requested this). The create_sale in certcontrol_client.py doesn't match the real CertControl API spec (which requires venda{tipo_lancamento_id, tabela_id, produto_id, valor_total}, comissionado_id, certificado{nome, documento, documento_tipo, emails, celular, endereco}, faturamento{...}).\n\nThe REAL CertControl API spec (from their OpenAPI docs):\n- Base URL: https://service.certcontrol.com.br\n- Auth: Bearer token\n- POST /api/integracao/vendas — Create sale (complex nested body with venda, comissionado_id, certificado, faturamento objects)\n- GET /api/integracao/vendas — List sales\n- GET /api/integracao/vendas/{uuid} — Sale detail (includes soluti.situação, validade)\n- POST /api/public/venda/{uuid}/certificado — Issue/download cert (needs senha, returns {url, expires_at, mime: \"pfx\"})\n- GET /api/integracao/cupons — Vouchers\n- GET /api/integracao/postos — Stations\n- POST /api/public/venda/{uuid}/agenda — Schedule appointment\n- GET /api/public/venda/{uuid}/agenda/horarios-disponiveis — Available slots\n\nFocus on: security risks, architectural flaws, API spec mismatch, missing features (product catalog), and whether the plan is production-ready or has gaps.",
+  "sessionId": "4dbae309-cc60-45e3-aac5-28237cd9345b",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}

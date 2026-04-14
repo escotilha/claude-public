@@ -85,6 +85,7 @@
 - [project_claudia_voice_pipecat.md](project_claudia_voice_pipecat.md) — Claudia voice pipeline migrated from Twilio to Pipecat + Telnyx + Deepgram + Cartesia — real-time streaming voice
 - [project_contably_ops.md](project_contably_ops.md) — Contably-ops repo and deal data structure for accounting firm acquisitions — skills, directories, workflow
 - [project_esocial_plan.md](project_esocial_plan.md) — Contably eSocial module activation via TecnoSpeed middleware — decisions, phases, and partner strategy
+- [project_certcontrol_integration.md](project_certcontrol_integration.md) — CertControl digital certificate integration plan at docs/certcontrol-integration-plan.md — architecture, review notes, 6 pre-impl fixes
 - [project_heartbeat_followup.md](project_heartbeat_followup.md) — RESOLVED: Heartbeat validated and improved (2026-04-09) — state tracking added (heartbeat-state.json), routed to #tech-ops, quiet hours 22:30-04:30 BRT, no split needed
 - [claudia-heartbeat-tracker.md](claudia-heartbeat-tracker.md) — Spec for heartbeat issue dedup — active-issues.json on VPS, dedup by issue ID, escalation after count>5 or 2h, auto-resolve after 30min silence
 - [project_nuvini_ir_deploy.md](project_nuvini_ir_deploy.md) — nuvini-ir deploys via Cloudflare Pages (wrangler) — build with eleventy, deploy \_site folder, not auto-deployed from git
