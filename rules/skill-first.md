@@ -43,6 +43,7 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Tech stack audit              | `/tech-audit`           | Compare versions, find EOL libs, recommend upgrades      |
 | Knowledge base / wiki         | `/wiki`                 | Ingest sources, query knowledge, persistent KB           |
 | Local inference gateway       | `/local-inference`      | Set up LiteLLM multi-model gateway, local models         |
+| Bootstrap vault CLAUDE.md     | `/vault-bootstrap`      | Obsidian/markdown vault setup with API contract          |
 
 ### QA & Testing
 

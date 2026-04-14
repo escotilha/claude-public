@@ -230,6 +230,34 @@ Focus: N+1 queries, missing indexes, uncached expensive operations.
 
 Each teammate reading `package.json`, running `find`, and exploring the directory structure wastes tokens that the lead already spent gathering.
 
+### 3.6 Vault-as-Context for Subagents
+
+When the project has a knowledge vault (Obsidian, `~/.claude-setup/memory/`, wiki pages, or any structured markdown corpus), the orchestrator should read the vault's `CLAUDE.md` and relevant context files **once**, then inject distilled context into spawn prompts. This prevents N subagents from each reading the same vault files independently.
+
+**Pattern:**
+
+```
+# Orchestrator pre-computes vault context (one-time cost):
+1. Read CLAUDE.md (vault overview, conventions, guardrails)
+2. Read memory.md or _session.md (recent decisions, in-progress work)
+3. Search vault for topic-relevant notes (mem-search or Grep)
+4. Distill into ~200-token context block
+
+# Each subagent receives the block in its spawn prompt:
+Spawn teammate "auth-reviewer":
+  Vault context: {distilled block}
+  Focus: Review auth module against vault decision log.
+```
+
+**When to apply:**
+
+- Any skill that spawns 3+ subagents and the project has a `CLAUDE.md` or knowledge vault
+- `/cto` swarm mode — inject project decisions into all analysts
+- `/parallel-dev` — inject shared API contracts and conventions into feature agents
+- `/deep-plan` Phase 2 — inject prior research notes into the planning agent
+
+**Token math:** Reading a vault `CLAUDE.md` (~500 tokens) once in the orchestrator costs 500 tokens. Reading it in 4 subagents costs 2,000 tokens. Pre-computing and injecting a 200-token distilled block into 4 spawn prompts costs 500 + 800 = 1,300 tokens — 35% savings, and subagents get higher-quality context because the orchestrator curated it.
+
 ---
 
 ## 4. Implementation Patterns
