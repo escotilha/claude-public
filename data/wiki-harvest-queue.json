@@ -88,5 +88,11 @@
     "note": "Claude Code + Obsidian second brain: CLAUDE.md as API contract, vault-as-context pattern, skills as slash commands, MCP integration for external tools",
     "addedAt": "2026-04-14T08:55:08Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://github.com/openclaw/openclaw/releases/tag/v2026.4.14",
+    "note": "OpenClaw 2026.4.14 release: GPT-5.4 routing, Chrome/CDP fixes, subagent stuck fix, Slack/Telegram/Discord fixes",
+    "addedAt": "2026-04-14T16:21:13Z",
+    "addedBy": "research-skill"
   }
 ]
