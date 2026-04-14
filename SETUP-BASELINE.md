@@ -1,6 +1,6 @@
 # Setup Baseline Inventory
 
-**Last verified:** 2026-04-10
+**Last verified:** 2026-04-14
 **Next review:** Biweekly (Wednesday + Sunday, 6am)
 
 ---
@@ -30,7 +30,9 @@
 
 **Note:** plugin:discord and plugin:swift-lsp moved to `enabledPlugins` system. google-workspace is active but configured outside settings.json (uvx workspace-mcp).
 
-## Skills (130+)
+## Skills (80 on-disk; ~130 in baseline including Finance/M&A not yet created)
+
+**Note (2026-04-14):** Finance/M&A skills listed below under "Finance & M&A" are NOT yet on disk — they were listed in baseline as planned/future skills. The 80 on-disk skills are the actually-deployed set.
 
 ### Developer Workflow (24)
 
@@ -88,11 +90,11 @@ finance-dcf, finance-comps, finance-lbo, finance-model, finance-memo, finance-pi
 
 backend-agent, database-agent, devops-agent, frontend-agent, oncall-guide, performance-agent, project-orchestrator, security-agent, review/ (multi-perspective)
 
-## Plugins (7)
+## Plugins (8)
 
-discord, codex (OpenAI), frontend-design, typescript-lsp, security-guidance, hookify, pyright-lsp
+discord, codex (OpenAI), frontend-design, typescript-lsp, security-guidance, hookify, pyright-lsp, warp
 
-**Note:** swift-lsp was replaced by typescript-lsp + pyright-lsp. codex (OpenAI) added via external marketplace.
+**Note:** swift-lsp was replaced by typescript-lsp + pyright-lsp. codex (OpenAI) added via external marketplace. warp added via claude-code-warp marketplace.
 
 ## Rules (8)
 
@@ -136,18 +138,18 @@ AGENT-TEAMS-STRATEGY.md, memory-strategy.md, model-tier-strategy.md, nuvini-sync
 - Browser automation (3 options)
 - Web scraping (3 options)
 
-### M&A Analyst (Secondary) — Coverage: HIGH
+### M&A Analyst (Secondary) — Coverage: MEDIUM
 
-- Deep research for due diligence (deep-research, mna-diligence)
-- Financial modeling: DCF, LBO, comps, valuation (finance-dcf, finance-lbo, finance-comps, financial-model)
-- Deal pipeline and memo generation (mna-pipeline, finance-memo, finance-cim)
-- IC and board presentation (committee-presenter, generate-deck, ir-deck)
-- Legal document review and redlining (legal-review, legal-redline, finance-nda, finance-loi, finance-spa)
-- Portfolio monitoring and reporting (portfolio-monitor, portfolio-report, portfolio-valuation)
-- Compliance: KYC, AML, regulatory reporting (compliance-kyc, compliance-aml, compliance-reporting)
-- AI impact analysis (aimpact)
-- IR materials: earnings decks, investor model (ir-earnings, ir-model)
-- Google Workspace for docs/sheets
+- Deep research for due diligence (deep-research — active; mna-diligence — NOT ON DISK)
+- Financial modeling: uses officecli + gws + deep-research ad-hoc (finance-\* skills NOT on disk)
+- Deal pipeline: analyze-deal, proposal-source (active); finance-memo, finance-cim NOT on disk
+- IC and board presentation: committee-presenter NOT on disk; officecli covers deck creation
+- Legal: legal-review, legal-redline NOT on disk
+- Portfolio: portfolio-\* skills NOT on disk
+- AI impact: aimpact NOT on disk
+- Google Workspace for docs/sheets (active via gws + officecli)
+
+**Coverage downgraded from HIGH to MEDIUM** — finance/M&A skill suite was listed as planned but not yet built. Core capabilities (research, doc creation) exist but specialized financial modeling skills are absent.
 
 ### Gaps Identified
 

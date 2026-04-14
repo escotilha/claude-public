@@ -21,7 +21,7 @@ allowed-tools:
   - mcp__browserless__*
   - mcp__brave-search__*
   - mcp__exa__*
-  - mcp__searxng-crawl4ai__*
+  # mcp__searxng-crawl4ai__* — removed: server not in settings.json (use Brave/Exa/WebSearch instead)
   - mcp__memory__*
   - mcp__qmd__*
 memory: user
@@ -58,14 +58,14 @@ Auto-memory (v2.1.59) captures session context automatically. When saving resear
 
 Choose the most token-efficient search tool for each query type:
 
-| Query Type                  | Best Tool                                                 | Token Budget                            | When                                    |
-| --------------------------- | --------------------------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Quick factual lookup        | Brave LLM Context (`mcp__brave-search__brave_web_search`) | Set `count=5`                           | Single-answer questions                 |
-| Deep content research       | Exa highlights (`mcp__exa__search`)                       | `maxCharacters=1500`, `highlights=true` | Need actual page content, not just URLs |
-| Discovery (what exists?)    | WebSearch (built-in)                                      | N/A (titles+URLs only)                  | Broad topic exploration                 |
-| Full page extraction        | Firecrawl scrape                                          | `onlyMainContent=true`                  | Known URL, need full content            |
-| High-volume subagent search | SearXNG (`mcp__searxng-crawl4ai__search`)                 | Free, unlimited                         | Subagent parallel searches              |
-| Anti-bot / blocked URLs     | Scrapling → browse CLI                                    | N/A                                     | Cloudflare, captchas                    |
+| Query Type                  | Best Tool                                                 | Token Budget                            | When                                                |
+| --------------------------- | --------------------------------------------------------- | --------------------------------------- | --------------------------------------------------- |
+| Quick factual lookup        | Brave LLM Context (`mcp__brave-search__brave_web_search`) | Set `count=5`                           | Single-answer questions                             |
+| Deep content research       | Exa highlights (`mcp__exa__search`)                       | `maxCharacters=1500`, `highlights=true` | Need actual page content, not just URLs             |
+| Discovery (what exists?)    | WebSearch (built-in)                                      | N/A (titles+URLs only)                  | Broad topic exploration                             |
+| Full page extraction        | Firecrawl scrape                                          | `onlyMainContent=true`                  | Known URL, need full content                        |
+| High-volume subagent search | Brave (`mcp__brave-search__brave_web_search`, `count=10`) | Low cost                                | Subagent parallel searches (SearXNG not configured) |
+| Anti-bot / blocked URLs     | Scrapling → browse CLI                                    | N/A                                     | Cloudflare, captchas                                |
 
 ### Token Budget Rules
 
@@ -80,7 +80,7 @@ Choose the most token-efficient search tool for each query type:
 
 Not all MCP tools may be available in every session. Use this fallback chain:
 
-1. **Search:** Brave LLM Context → Exa → WebSearch → SearXNG (if VPS available)
+1. **Search:** Brave LLM Context → Exa → WebSearch
 2. **Content:** Exa highlights → Firecrawl scrape → WebFetch → Scrapling → browse CLI
 3. **Always works:** WebSearch + WebFetch (built-in, always available)
 

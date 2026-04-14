@@ -69,7 +69,8 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Web scraping                 | `/firecrawl`     | Extract data from websites                        |
 | Anti-bot / Cloudflare scrape | `/scrapling`     | Stealth scraping, TLS impersonation, anti-bot     |
 | Headless browser automation  | `/browserless`   | PDFs, screenshots, Lighthouse                     |
-| Local browser automation     | `/pinchtab`      | Token-efficient a11y tree, element refs, local    |
+| Local browser automation     | `/agent-browser` | Primary: Rust CDP CLI, batch, visual diff, native |
+| Local browser (fallback)     | `/pinchtab`      | Token-efficient a11y tree, element refs, local    |
 
 ### AI Quality & Growth
 
