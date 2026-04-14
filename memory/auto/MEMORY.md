@@ -62,7 +62,7 @@
 - [tech_insight_safari_api_caching.md](tech_insight_safari_api_caching.md) — Safari aggressively caches API responses causing stale UI; fix with Cache-Control: no-store on all /api/ routes at middleware level
 - [feedback_blackbox_vs_code_review.md](feedback_blackbox_vs_code_review.md) — Always run code-level review (/cto or /review-changes) in addition to black-box testing (/fulltest-skill) — they catch fundamentally different classes of issues
 - [feedback_claudia_vps_only.md](feedback_claudia_vps_only.md) — Any mention of Claudia means VPS — always SSH to /opt/claudia, never check local repo for state
-- [feedback_contably_uses_woodpecker.md](feedback_contably_uses_woodpecker.md) — Contably has DUAL CI/CD — both Woodpecker (ci.contably.ai) AND GitHub Actions are active and deploying
+- [feedback_contably_uses_github_actions.md](feedback_contably_uses_github_actions.md) — Contably CI/CD is GitHub Actions only — Woodpecker decommissioned 2026-04-10
 - [feedback_github_token_override.md](feedback_github_token_override.md) — Invalid GITHUB_TOKEN env var overrides valid gh keyring credential — always unset it when using gh CLI or git clone
 - [feedback_memory_boost_weights.md](feedback_memory_boost_weights.md) — Boost weights for memory search ranking — feedback 3x, user 2x, reference 1.5x, project 1x, with 1.5x recency for last 7 days
 - [feedback_nuvini_ir_css_classes.md](feedback_nuvini_ir_css_classes.md) — nuvini-ir site uses section-label/section-title/section-description for styled headers — content-\* variants are unstyled
