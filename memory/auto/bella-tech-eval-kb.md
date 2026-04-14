@@ -95,6 +95,15 @@ Bella's running evaluation log for tools, libraries, frameworks, and AI componen
 - Verdict: adopt
 - Reasoning: Native Rust CDP CLI, 28,900+ stars. Replaces browse CLI as primary browser automation — adds batch mode, visual diff, network interception, session persistence, self-updating skill docs. Installed v0.25.4, skill created.
 
+### dev-browser (SawyerHood)
+
+- Date: 2026-04-14
+- URL: https://github.com/SawyerHood/dev-browser
+- Relevance: 6/10
+- Confidence: 8/10
+- Verdict: watch
+- Reasoning: AI writes full Playwright JS executed in QuickJS WASM sandbox (zero fs/network access). 5.8k stars, v0.2.7, MIT. Benchmarks well ($0.88/3m53s) but lacks network interception, visual diff, video/trace that agent-browser has. Solo maintainer vs Vercel Labs. The "write full script" pattern is the real innovation — adoptable as a technique without switching tools. QuickJS sandbox pattern valuable for AgentWave Skill Studio (untrusted user code). Revisit at v1.0+ or if sandbox isolation becomes a requirement.
+
 ### Qwen3.5-27B-Claude-Opus-Distilled
 
 - Date: 2026-04-08
@@ -108,5 +117,6 @@ Bella's running evaluation log for tools, libraries, frameworks, and AI componen
 
 ## Timeline
 
+- **2026-04-14** — [research] Added dev-browser (SawyerHood) — watch, 6/10 relevance, QuickJS sandbox + Playwright codegen pattern interesting but agent-browser is more capable (Source: research — github.com/SawyerHood/dev-browser)
 - **2026-04-13** — [research] Added agent-browser (Vercel Labs) — adopt, 9/10 relevance, replaces browse CLI (Source: research — github.com/vercel-labs/agent-browser)
 - **2026-04-11** — [session] KB created with 8 seed evaluations from existing memory/context (Source: session — bella-tech-eval-kb init)

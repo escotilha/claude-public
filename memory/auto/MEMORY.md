@@ -8,7 +8,7 @@
 
 ## Tech Evaluation (Bella)
 
-- [bella-tech-eval-kb.md](bella-tech-eval-kb.md) — Persistent log of URL/tool evaluations — 9 entries (adopt: agent-browser, browse CLI, Scrapling, PinchTab, MemPalace, GBrain; watch: OpenClaw-RL, Qwen3.5-27B-Opus-Distilled; skip: Lightpanda)
+- [bella-tech-eval-kb.md](bella-tech-eval-kb.md) — Persistent log of URL/tool evaluations — 10 entries (adopt: agent-browser, browse CLI, Scrapling, PinchTab, MemPalace, GBrain; watch: dev-browser, OpenClaw-RL, Qwen3.5-27B-Opus-Distilled; skip: Lightpanda)
 
 ## Nuvini Group Entity Registry
 
