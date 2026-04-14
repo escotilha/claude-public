@@ -76,5 +76,17 @@
     "note": "Membase.so — personal AI memory layer with knowledge graph, MCP support, multi-agent sync (Gmail, Calendar, Slack, Notion, GitHub), free beta",
     "addedAt": "2026-04-14T08:39:00Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://blog.cloudflare.com/cf-cli-local-explorer/",
+    "note": "Cloudflare cf CLI — unified CLI for all 3000+ Cloudflare APIs, AI-agent-optimized with consistent syntax and Local Explorer for D1/R2/KV debugging",
+    "addedAt": "2026-04-14T08:54:15Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/RoundtableSpace/status/2043664246639063289",
+    "note": "Claude Code + Obsidian second brain: CLAUDE.md as API contract, vault-as-context pattern, skills as slash commands, MCP integration for external tools",
+    "addedAt": "2026-04-14T08:55:08Z",
+    "addedBy": "research-skill"
   }
 ]
