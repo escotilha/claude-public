@@ -33,6 +33,7 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Revert a feature/track        | `/revert-track`         | Undo a feature, phase, or commit range                   |
 | Reproducible demo document    | `/demo`                 | Executable narrative with captured output                |
 | Recurring interval task       | `/loop` (built-in)      | Poll status, repeat a command on a schedule              |
+| Schedule a remote agent       | `/schedule`             | Cron-based triggers, remote agents (Routines when GA)    |
 | Fetch API docs for a library  | `/get-api-docs`         | Before writing code that uses external APIs              |
 | Split large docs into tree    | `/skill-tree`           | API docs or references too large for subagent context    |
 | Build with Claude API/SDK     | `/claude-api`           | Code imports anthropic SDK or user asks about Claude API |
