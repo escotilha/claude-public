@@ -45,6 +45,14 @@
 
 - [swarmy-context-handoff.md](swarmy-context-handoff.md) — Centralized context handoff: active priorities (Claudia v2, eSocial, M&A, SourceRank), key decisions (Agent Teams strategy, model tiers, memory pipeline), session ingest order, update protocol
 
+## Patterns & Tech Insights (Contably Sessions)
+
+- [pattern_sqlalchemy_checkfirst_pytest.md](pattern_sqlalchemy_checkfirst_pytest.md) — Use checkfirst=True in Base.metadata.create_all() to prevent duplicate-index errors when SQLAlchemy metadata is shared across a pytest session
+- [pattern_oci_staging_prod_promote.md](pattern_oci_staging_prod_promote.md) — Push to main builds stg-<sha> image → staging namespace; promote to production via workflow_dispatch with image_tag + confirm=yes guard
+- [pattern_karpathy_wiki_github_events.md](pattern_karpathy_wiki_github_events.md) — Feed an AI copilot knowledge wiki by subscribing to GitHub push/PR webhook events and ingesting commit messages + diffs
+- [tech_insight_ruff_pin_ci.md](tech_insight_ruff_pin_ci.md) — Ruff changes rules between versions — always pin ruff==x.y.z in CI to prevent random lint failures
+- [architecture_k8s_namespace_env_separation.md](architecture_k8s_namespace_env_separation.md) — Separate staging/production into distinct K8s namespaces with separate DB URLs, Redis DB slots (/0 vs /1), and subdomains
+
 ## Feedback
 
 - [mistake_nightly_unvalidated_db_columns.md](mistake_nightly_unvalidated_db_columns.md) — Nightly automation added DB columns to queries without verifying schema — crashed all API requests; always validate column existence before querying
