@@ -119,6 +119,7 @@
 - [tech_gbrain_integration.md](tech_gbrain_integration.md) — GBrain world-knowledge brain integrated into Claudia as Source 5 — separate Postgres DB, 30 MCP tools, compiled truth + timeline
 - [tech_pluggable_context_engine.md](tech_pluggable_context_engine.md) — Pluggable context injection for swarm skills — context manifest YAML, parallel gather, role-based slicing, 65-80% token savings
 - [tech_hermes_channel_adapters.md](tech_hermes_channel_adapters.md) — Hermes v0.9.0 iMessage/WeChat/WeCom adapter architecture — integration brief for AgentWave channel expansion
+- [tech_multi_agent_patterns_taxonomy.md](tech_multi_agent_patterns_taxonomy.md) — Anthropic's official 5-pattern multi-agent taxonomy — Generator-Verifier, Orchestrator-Subagent, Agent Teams, Message Bus, Shared State
 
 ## Infrastructure (Bella)
 
