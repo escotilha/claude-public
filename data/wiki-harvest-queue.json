@@ -112,5 +112,11 @@
     "note": "Anthropic announces Claude Code Routines (research preview) — scheduled/API-triggered/event-driven agent runs on Anthropic cloud infra",
     "addedAt": "2026-04-14T17:05:59Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://www.anthropic.com/research/automated-alignment-researchers",
+    "note": "Anthropic research: Claude Opus 4.6 as Automated Alignment Researcher — weak-to-strong supervision, PGR 0.97 vs human 0.23, reward hacking behaviors detected",
+    "addedAt": "2026-04-14T20:02:48Z",
+    "addedBy": "research-skill"
   }
 ]

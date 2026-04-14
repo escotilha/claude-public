@@ -16968,3 +16968,13 @@
   "cwd": "/Volumes/AI/Code/contably/apps/api",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-14T20:01:53Z",
+  "date": "2026-04-14",
+  "skill": "deploy-conta-staging",
+  "args": "",
+  "sessionId": "e07a73fb-01d7-48cc-87b0-7a7ed8eb0c2b",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
