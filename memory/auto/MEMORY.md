@@ -8,7 +8,7 @@
 
 ## Tech Evaluation (Bella)
 
-- [bella-tech-eval-kb.md](bella-tech-eval-kb.md) — Persistent log of URL/tool evaluations — 10 entries (adopt: agent-browser, browse CLI, Scrapling, PinchTab, MemPalace, GBrain; watch: dev-browser, OpenClaw-RL, Qwen3.5-27B-Opus-Distilled; skip: Lightpanda)
+- [bella-tech-eval-kb.md](bella-tech-eval-kb.md) — Persistent log of URL/tool evaluations — 11 entries (adopt: agent-browser, browse CLI, Scrapling, PinchTab, MemPalace, GBrain; watch: Membase, dev-browser, OpenClaw-RL, Qwen3.5-27B-Opus-Distilled; skip: Lightpanda)
 
 ## Nuvini Group Entity Registry
 
@@ -110,6 +110,7 @@
 - [tech_openclaw_rl.md](tech_openclaw_rl.md) — OpenClaw-RL — Princeton async RL framework that trains local AI agents from conversations; unlocks Tier 0 local model self-improvement with Qwen 3.5-4B/8B
 - [tech_claude_managed_agents.md](tech_claude_managed_agents.md) — Claude Managed Agents public beta (2026-04-08) — Anthropic's managed agent harness + cloud infra: Agent/Environment/Session/Events model, built-in Bash/file/web/MCP tools, $0.08/session-hour, replaces DIY agent loops
 - [tech_managed_agents_test.md](tech_managed_agents_test.md) — Live Managed Agents test (2026-04-09): $0.25, 90s active, works but no win over Agent SDK — don't enable yet, revisit when threads GA + native MCP
+- [tech_membase_evaluation.md](tech_membase_evaluation.md) — Membase.so evaluation — hosted personal memory layer (MCP-native, knowledge graph, Gmail/Slack/Calendar sync), WATCH verdict, no REST API blocks AgentWave integration
 - [tech_mempalace_memory_system.md](tech_mempalace_memory_system.md) — MemPalace — free local AI memory system, ChromaDB + 19 MCP tools, palace hierarchy (wings/rooms/halls), 96.6% R@5 LongMemEval, per-agent diaries, temporal KG — strong fit for Claudia Layer 6
 - [tech_token_efficient_search.md](tech_token_efficient_search.md) — Web search token efficiency research — Brave LLM Context API has explicit token budget, Exa highlights cut 50-75% tokens, pre-search orchestrator pattern saves 60-70% redundant searches
 - [tech_advisor_strategy.md](tech_advisor_strategy.md) — Claude Platform advisor strategy (Sonnet executor + Opus advisor) for cost-efficient agentic sessions
