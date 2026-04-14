@@ -16198,3 +16198,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-14T00:00:07Z",
+  "date": "2026-04-13",
+  "skill": "slack",
+  "args": "Send a message to Pierre via the WhatsApp channel through Mary/OpenClaw on the VPS. Message: \"Wiki deploy is in CI pipeline now. I'll handle all post-deploy steps (migration, seed, webhook setup) autonomously. Will ping you here when everything is live. Go rest 🙏\"",
+  "sessionId": "6ea5db7f-79e0-4d73-b797-b82e975141f0",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}

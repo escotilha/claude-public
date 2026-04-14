@@ -67,6 +67,8 @@
 
 ## Projects
 
+- [project_copilot_wiki.md](project_copilot_wiki.md) — Copilot Knowledge Wiki — Karpathy LLM Wiki pattern, GitHub events → Haiku ingest → DB wiki pages → co-pilot search tool
+- [project_mfa_activation.md](project_mfa_activation.md) — Contably MFA was 85% done — fixed login flow + settings endpoint paths (405 bug), now fully functional
 - [project_agentwave_deploy.md](project_agentwave_deploy.md) — AgentWave deploys to Contabo VPS via SSH, not Railway
 - [project_benchmark_loop_scaleup.md](project_benchmark_loop_scaleup.md) — RESOLVED: Benchmark loop removed (2026-04-09) — too dangerous for autonomous execution (sent rm -rf /opt/claudia twice); compound-review (observe-only) kept
 - [project_claudia_memory_v2.md](project_claudia_memory_v2.md) — Claudia Memory v2 — 5-layer composite memory system with nudge, consolidation, and complexity-aware skill generation (ALL PHASES COMPLETE)
