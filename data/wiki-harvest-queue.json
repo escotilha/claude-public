@@ -46,5 +46,11 @@
     "note": "Hermes Agent v0.9.0 - multi-platform expansion (Android/Termux, iMessage, WeChat), local web dashboard, pluggable context engine, background process monitoring, deep security hardening",
     "addedAt": "2026-04-13T20:49:33Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://open-agents.dev",
+    "note": "Open Agents — Vercel open-source reference platform for cloud coding agents with Fluid/Workflow/Sandbox/AI Gateway infra",
+    "addedAt": "2026-04-14T07:26:19Z",
+    "addedBy": "research-skill"
   }
 ]
