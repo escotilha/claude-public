@@ -64,5 +64,17 @@
     "note": "dev-browser: AI writes real Playwright code in QuickJS sandbox for browser control — 3m53s, $0.88, 100% success rate",
     "addedAt": "2026-04-14T08:36:40Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/JoshuaIPark/status/2043734397225157043",
+    "note": "Membase — Karpathy LLM-Wiki + GBrain as a product: persistent memory, wiki, auto-update, live agent sync, MCP support",
+    "addedAt": "2026-04-14T08:38:57Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://membase.so",
+    "note": "Membase.so — personal AI memory layer with knowledge graph, MCP support, multi-agent sync (Gmail, Calendar, Slack, Notion, GitHub), free beta",
+    "addedAt": "2026-04-14T08:39:00Z",
+    "addedBy": "research-skill"
   }
 ]
