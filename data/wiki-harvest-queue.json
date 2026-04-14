@@ -100,5 +100,11 @@
     "note": "Anthropic's 5 multi-agent coordination patterns: generator-verifier, orchestrator-subagent, agent-teams, message-bus, shared-state — with selection framework",
     "addedAt": "2026-04-14T16:38:31Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/thomasgauvin/status/2044039230595211761",
+    "note": "Cloudflare Mesh + Workers VPC: private networking for AI agents/Workers/Durable Objects, connects to private MCPs, APIs, DBs — 50 nodes + 50 users free",
+    "addedAt": "2026-04-14T16:39:52Z",
+    "addedBy": "research-skill"
   }
 ]
