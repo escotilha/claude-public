@@ -19,7 +19,8 @@ SESSION_TURN=$(echo "$input" | jq -r '.session.turn_number // 1')
 if [ "${SESSION_TURN}" = "1" ]; then
   # Truncate prompt to first 80 chars for title
   TITLE=$(echo "$prompt" | head -c 80 | tr '\n' ' ' | sed 's/[[:space:]]*$//')
-  echo "{\"hookSpecificOutput\": {\"sessionTitle\": \"$TITLE\"}}"
+  TITLE_JSON=$(printf '%s' "$TITLE" | jq -Rs .)
+  echo "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\", \"sessionTitle\": $TITLE_JSON}}"
 fi
 
 exit 0
