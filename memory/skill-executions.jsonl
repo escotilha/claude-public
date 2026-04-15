@@ -17038,3 +17038,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-15T00:53:12Z",
+  "date": "2026-04-14",
+  "skill": "schedule",
+  "args": "Create a scheduled trigger at 10pm BRT (01:00 UTC) tonight (2026-04-15) to run this prompt: \"You have two tasks to complete in the Contably codebase at /Volumes/AI/Code/contably, then deploy.\\n\\n## Task 1: Fix Docker GHA Cache\\n\\nThe GHA Docker build cache is serving stale COPY layers for apps/api/src/api/routes/admin/nuvem_fiscal.py. The file has a doc_type field in SyncRequest and NFS-e sync logic that isn't reaching production.\\n\\nFix:\\n1. Run: unset GITHUB_TOKEN && gh cache list --key api | head -20\\n2. Delete all api-related caches: gh cache delete <key> for each one\\n3. The deploy.yml already has cache-from: type=gha,scope=api-v2 — after purging, the next build will be fresh\\n4. Verify by checking the OpenAPI schema after deploy shows doc_type in SyncRequest and 3 nuvem-fiscal routes\\n\\n## Task 2: Fix Password Reset Full Table Scan (CTO HIGH)\\n\\nFile: apps/api/src/api/routes/auth/password_reset.py:193-206\\n\\nThe reset_password endpoint loads ALL active users with preferences, then iterates comparing SHA-256 hashes. This is O(n) on every reset attempt.\\n\\nFix: Encode the user email (base64) in the reset token URL. The endpoint then looks up one user by email before verifying the token hash. Change:\\n- generate_reset_token(): include email in the token URL\\n- reset_password(): extract email from request, lookup single user, verify token\\n\\n## After Both Tasks\\n\\n1. Run ruff check on changed files\\n2. Run python3 -m pytest tests/unit/ -q --tb=short (full backend unit suite)\\n3. Run pnpm test:run in apps/admin (vitest)\\n4. Run pnpm test in apps/client-portal (vitest)\\n5. Fix any failures\\n6. Commit with conventional commit message\\n7. Push to main\\n8. Run /deploy-conta-full (staging → production)\\n9. After deploy, verify:\\n   - curl the OpenAPI schema for doc_type in SyncRequest\\n   - curl /admin/nuvem-fiscal/sync with doc_type=nfse\\n   - Health check passes\"",
+  "sessionId": "28135f0a-e0f5-4bdd-9017-4cbb291db471",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
