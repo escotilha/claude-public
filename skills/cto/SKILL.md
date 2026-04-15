@@ -1,6 +1,7 @@
 ---
 name: cto
 description: "Swarm AI CTO advisor. Parallel reviewers (architecture, security, performance, quality) via TeammateTool. Triggers on: CTO advice, architecture review, tech stack, system design, code quality, security audit, performance review."
+argument-hint: "[question or area to review — e.g. 'evaluate SLA architecture scalability', 'security audit auth module']"
 user-invocable: true
 context: fork
 model: opus # Advisor pattern: Sonnet executor + Opus advisor for sequential; full Opus for swarm
@@ -170,16 +171,28 @@ Auto-memory (v2.1.59) captures session context automatically. When saving findin
 
 ## Entry Point Detection
 
-When this skill activates, determine the context:
+When this skill activates, determine the context IN THIS ORDER:
 
-| Condition                         | Action                                |
-| --------------------------------- | ------------------------------------- |
-| `cto-requirements.md` exists      | Load requirements and focus review    |
-| No config, fulltest reports exist | Read reports first for context        |
-| No config, no reports             | Full codebase exploration             |
-| Specific question asked           | Answer directly with codebase context |
+| Priority | Condition                                         | Action                                                                            |
+| -------- | ------------------------------------------------- | --------------------------------------------------------------------------------- |
+| **1**    | **Skill was invoked with `args` (inline prompt)** | **Treat args as the directive. Do NOT wait for another prompt. Execute now.**     |
+| 2        | `cto-requirements.md` exists in CWD               | Load requirements and focus review on them                                        |
+| 3        | No config, fulltest reports exist                 | Read reports first for context                                                    |
+| 4        | No config, no reports                             | Full codebase exploration in current dir                                          |
 
-**First Action:** Check for existing context:
+### Rule for inline args (priority 1)
+
+If the skill caller provided a prompt via `args` (the text after `/cto <text>` or `Skill({skill: "cto", args: "..."})`), that prompt **IS the CTO directive**. The skill must immediately:
+
+1. Parse the args to extract: scope (full review / focused), question, specific files/modules to read, deliverable format.
+2. Skip "wait for user input" — the args ARE the input.
+3. If args request swarm mode explicitly or describe multiple concerns (architecture + security + performance + quality), spawn 3-5 parallel analyst subagents via the Agent tool.
+4. If args describe a single focused question, answer sequentially in this session.
+5. Deliver a concrete, opinionated report per the args' format directive (or a default markdown summary with Recommendations section if unspecified).
+
+**Anti-pattern (do NOT do this):** acknowledging that the skill is loaded and then asking "what would you like me to do?" — the args already told you what to do. Execute.
+
+**First Action (only when no args):** Check for existing context:
 
 ```bash
 ls -la cto-requirements.md fulltest-report*.md AGENTS.md .claude/*.md 2>/dev/null
