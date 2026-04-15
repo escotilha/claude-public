@@ -538,8 +538,14 @@ When the heuristic triggers:
 
 1. **Extract the procedure:** Identify the sequence of steps that solved the task
 2. **Name it:** Generate a kebab-case name from the task description (e.g., `deploy-oci-staging`)
-3. **Dedup check:** Search existing skills via `~/.claude-setup/tools/mem-search "skill:{name}"` — skip if a similar skill exists
-4. **Draft the stub** to `~/.claude-setup/skills/{name}/SKILL.md`:
+3. **MECE validation** (from GBrain skill-creator pattern):
+   a. List all existing skills: `ls -1 ~/.claude-setup/skills/`
+   b. Check trigger overlap: compare the new skill's trigger phrases against existing skill descriptions
+   c. If overlap > 80% with an existing skill → **extend** that skill instead of creating a new one
+   d. If partial overlap (30-80%) → add a `## See Also` section cross-referencing the related skill
+   e. If no overlap → proceed with creation
+4. **Dedup check:** Search existing skills via `~/.claude-setup/tools/mem-search "skill:{name}"` — skip if a similar skill exists
+5. **Draft the stub** to `~/.claude-setup/skills/{name}/SKILL.md`:
 
 ```yaml
 ---
@@ -573,7 +579,8 @@ Auto-generated from session: {session context}
 - Mark as verified after first successful manual use
 ```
 
-5. **Log it** in the meditation report (Phase 5) under a new section:
+6. **Update routing:** If the new skill is user-invocable, add it to `~/.claude-setup/rules/skill-first.md` routing table
+7. **Log it** in the meditation report (Phase 5) under a new section:
 
 ```markdown
 ### Auto-Generated Skills ({N})

@@ -211,7 +211,64 @@ Manages M&A, investor relations, and portfolio companies
 - **2026-04-05** — [research] Evaluated GBrain for Claudia integration (Source: session)
 ```
 
-## Nightly Dream Cycle (Future)
+## Always-On Skills (GBrain Skillpacks)
+
+Three skills adopted from GBrain skillpacks that run as background behaviors in Claude Code
+sessions. They make the brain compound automatically from every interaction.
+
+### Signal Detector
+
+Runs in parallel on every substantive user message. Captures two things:
+
+1. **Original thinking** — user ideas, observations, theses, frameworks. Create or update
+   pages in `originals/`, `concepts/`, or `ideas/` directories. Preserve exact user phrasing.
+2. **Entity mentions** — people, companies, media references. Search brain for existing pages,
+   create new ones for notable mentions, add timeline entries for new facts.
+
+**How it fires in Claude Code:**
+
+- After processing each user message, evaluate if it contains signal (skip "ok", "thanks", operational noise)
+- If signal detected, capture entities/ideas via `mcp__memory__create_entities` and `mcp__memory__add_observations`
+- For VPS brain: SSH `gbrain put_page <slug>` or use GBrain MCP tools if connected
+- Runs silently — never blocks the main response
+
+**Iron Law: Back-Linking** — every page creation/update that mentions a person or company
+MUST add a reverse link from that entity's page:
+`- **YYYY-MM-DD** | Referenced in [page title](path) — brief context`
+
+### Brain-Ops
+
+Brain-first lookup protocol. Before answering questions about people, companies, deals,
+or concepts:
+
+1. **Search brain first** — keyword search, hybrid query, backlink check
+2. **Only then** consult external APIs (web search, Exa, Brave)
+3. **Read-Enrich-Write** — after answering, update the brain page with any new facts learned
+
+**Tools (in priority order):**
+
+- `mcp__memory__search_nodes` → `mcp__memory__open_nodes` (MCP memory graph)
+- SSH `gbrain query "<question>"` (VPS brain, hybrid RAG)
+- Then external: Brave, Exa, WebSearch
+
+**Anti-patterns:**
+
+- Answering about a known entity without checking the brain first
+- Using web search when the brain already has the answer
+- Learning new facts and NOT writing them back to the brain
+
+### Conventions
+
+Non-negotiable quality rules for all brain writes:
+
+1. **Citations** — every fact needs `[Source: {type} — {detail}]`. User statements = highest authority.
+2. **Back-linking** — every entity mention with an existing page gets a reciprocal link. No exceptions.
+3. **Notability gate** — before creating a new page, assess: will we reference this again?
+   People: future interaction likely. Companies: relevant to work/investments. Concepts: reusable mental model.
+4. **Compiled truth gets rewritten** — don't append, rewrite the current understanding when evidence changes.
+5. **Timeline is append-only** — reverse-chronological, never edited.
+
+## Nightly Dream Cycle
 
 Schedule as Claudia proactive task at 02:00 BRT:
 

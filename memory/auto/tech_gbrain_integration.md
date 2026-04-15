@@ -15,6 +15,7 @@ GBrain (garrytan/gbrain v0.4.1) installed as Claudia's world-knowledge layer. St
 
 ## Timeline
 
+- **2026-04-15** — [implementation] Adopted GBrain skillpacks into Claude Code: added signal-detector, brain-ops, and conventions as always-on sections in /gbrain SKILL.md. Upgraded /meditate Phase 6 with MECE validation from GBrain skill-creator pattern. (Source: research — x.com/garrytan skillpacks tweet)
 - **2026-04-10** — [implementation] Integrated GBrain into Claudia: gbrain-pool.ts, gbrain-client.ts, context.ts Source 5, BRAIN.md shared prompt, types.ts + registry.ts + system-prompt.ts + index.ts updates (Source: session — /research garrytan/gbrain)
 - **2026-04-10** — [implementation] Created /gbrain Claude Code skill at ~/.claude-setup/skills/gbrain/SKILL.md (Source: session)
 - **2026-04-10** — [implementation] Created install script at scripts/install-gbrain.sh for VPS deployment (Source: session)
