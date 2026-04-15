@@ -17088,3 +17088,13 @@
   "cwd": "/Users/ps/code",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-15T11:41:26Z",
+  "date": "2026-04-15",
+  "skill": "deep-plan",
+  "args": "Redesign the Scheduled Jobs page (/admin/scheduled-jobs) to be intuitive for non-technical accounting analysts.\n\n## Context\nThe current page (ScheduledJobsPage.tsx) has:\n- Free-text job name\n- Free-text description  \n- Generic \"Tipo de Job\" dropdown (Sincronização de Dados, Geração de Relatórios, Backup, Limpeza de Dados, Notificações, Análise de Dados, Personalizado)\n- Raw cron expression input (0 0 * * *)\n- No connection to actual app features\n\n## Problems\n1. Job types are generic categories, not mapped to real app functions\n2. Cron expression is technical — these users know zero about technology\n3. No personal vs company-wide scope distinction\n4. No clarity on what actually happens when a job runs\n5. The \"Tipo de Job\" options don't correspond to executable backend functions\n\n## Requirements\n1. **Map to real features**: Every schedulable job should correspond to an actual function/feature in the Contably app (e.g., \"Gerar relatório DRE\", \"Sincronizar notas fiscais\", \"Enviar lembrete de documentos pendentes\"). Research the backend to discover all schedulable/automatable features.\n2. **No cron expressions**: Replace with intuitive click-based scheduling — dropdown for frequency (Diário, Semanal, Mensal, etc.), time picker, day-of-week/month selector.\n3. **Scope**: Add personal (just me) vs company-wide (for this client/company) toggle.\n4. **Show what happens**: Each job type should have a clear description of what it does, what data it touches, and what output it produces.\n5. **Super admin only for now**: This page is already gated behind requiresSuperuser.\n\n## What to research\n- Backend: apps/api/src/models/scheduled_jobs.py — current model\n- Backend: apps/api/src/workflows/tasks/scheduled_tasks.py — what tasks actually exist\n- Backend: apps/api/src/workflows/scheduler.py — how scheduling works\n- Backend: apps/api/src/api/routes/workflows/scheduled_jobs.py — API endpoints\n- Frontend: apps/admin/src/pages/admin/ScheduledJobsPage.tsx — current UI\n- Also scan Celery tasks, any existing cron-like patterns, report generation endpoints, sync endpoints, notification endpoints — anything that could be a scheduled job\n- Look at the orchestrator workflows too — those may be schedulable",
+  "sessionId": "2bbe6e60-8a85-49ab-a4c4-6856fbf26477",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably/apps/admin",
+  "hadError": false
+}
