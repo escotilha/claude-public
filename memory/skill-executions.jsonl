@@ -17198,3 +17198,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-15T17:51:02Z",
+  "date": "2026-04-15",
+  "skill": "manual",
+  "args": "SLA module user manual for Contably — PT-BR, Word format (.docx), audience is accounting firm owners and analysts (non-technical users), simple language, focused on: what SLA means in Contably, how the agenda works, how to read deadlines and metrics, what to do when items are AT_RISK or BREACHED, escalation rules. Based on the SLA implementation in apps/api/src/workflows/sla_service.py, agenda_service.py, and /agenda endpoints. Skip technical/developer content — this is for end users running an accounting firm.",
+  "sessionId": "7b2437ec-9cc1-4b2d-813c-43c23f2528e6",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
