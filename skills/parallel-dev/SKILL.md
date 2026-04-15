@@ -24,6 +24,7 @@ allowed-tools:
   - CronCreate
   - CronList
   - CronDelete
+  - Monitor
   - EnterWorktree
   - ExitWorktree
   - AskUserQuestion

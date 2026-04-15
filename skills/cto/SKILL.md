@@ -20,6 +20,7 @@ allowed-tools:
   - mcp__context-mode__*
   - mcp__qmd__*
   - Agent
+  - Monitor
   - TaskCreate
   - TaskUpdate
   - TaskList

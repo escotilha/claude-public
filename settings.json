@@ -5,7 +5,8 @@
     "CLAUDE_BASH_NO_LOGIN": "1",
     "RESEND_API_KEY": "re_SBHeSKNj_AM1wzDrF5eJZ2LKmuyDyNvE2",
     "BRAVE_API_KEY": "BSAYdiKG6QoqYPSm9rCGdPlwM_fnzNu",
-    "EXA_API_KEY": "81538a60-ff60-46e3-9fd4-78e954bc85d0"
+    "EXA_API_KEY": "81538a60-ff60-46e3-9fd4-78e954bc85d0",
+    "ENABLE_PROMPT_CACHING_1H": "1"
   },
   "hooks": {
     "SessionStart": [
@@ -74,7 +75,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/.claude-setup/hooks/format-file.sh\""
+            "command": "FILE=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // \"\"'); case \"${FILE##*.}\" in js|jsx|ts|tsx|mjs|cjs|py|go|rs|swift|sh|bash|zsh|rb|lua|tf|sql|c|cpp|cc|h|hpp|java|kt|kts|css|scss|sass|less|html|htm|vue|svelte|ex|exs|dart|zig|nix|toml|xml) \"$HOME/.claude-setup/hooks/format-file.sh\" ;; *) exit 0 ;; esac"
           }
         ]
       },
@@ -83,7 +84,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/.claude-setup/hooks/format-file.sh\""
+            "command": "FILE=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // \"\"'); case \"${FILE##*.}\" in js|jsx|ts|tsx|mjs|cjs|py|go|rs|swift|sh|bash|zsh|rb|lua|tf|sql|c|cpp|cc|h|hpp|java|kt|kts|css|scss|sass|less|html|htm|vue|svelte|ex|exs|dart|zig|nix|toml|xml) \"$HOME/.claude-setup/hooks/format-file.sh\" ;; *) exit 0 ;; esac"
           }
         ]
       },
@@ -221,6 +222,16 @@
         ]
       }
     ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Compaction starting in $(pwd)\" >> ~/.claude/logs/compaction.log"
+          }
+        ]
+      }
+    ],
     "PostCompact": [
       {
         "hooks": [
@@ -283,6 +294,16 @@
         ]
       }
     ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date -Iseconds)] Permission requested: ${TOOL_NAME:-unknown}\" >> ~/.claude/logs/permission-requests.log"
+          }
+        ]
+      }
+    ],
     "PermissionDenied": [
       {
         "hooks": [
@@ -312,7 +333,8 @@
   "disableSkillShellExecution": false,
   "statusLine": {
     "type": "command",
-    "command": "$HOME/.claude-setup/hooks/statusline-command.sh"
+    "command": "$HOME/.claude-setup/hooks/statusline-command.sh",
+    "refreshInterval": 30
   },
   "enabledPlugins": {
     "discord@claude-plugins-official": true,

@@ -24,6 +24,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+  - Monitor
   - WebSearch
   - mcp__chrome-devtools__*
   - mcp__playwright__*

@@ -24,6 +24,7 @@ allowed-tools:
   - TaskList
   - TaskGet
   - AskUserQuestion
+  - Monitor
   - WebSearch
   - WebFetch
   - mcp__sequential-thinking__*

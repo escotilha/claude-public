@@ -17,6 +17,7 @@ allowed-tools:
   - WebSearch
   - WebFetch
   - Agent
+  - Monitor
   - AskUserQuestion
   - mcp__firecrawl__*
   - mcp__exa__*

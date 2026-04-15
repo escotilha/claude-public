@@ -1,6 +1,6 @@
 ---
 name: agent-platform
-description: "Build or extend an LLM multi-agent platform — COO orchestration, specialist delegation, SSE routing, dynamic agent creation — auto-generated from session on 2026-04-11"
+description: "(DRAFT) Build or extend an LLM multi-agent platform — COO orchestration, specialist delegation, SSE routing, dynamic agent creation — auto-generated from session on 2026-04-11"
 user-invocable: true
 context: fork
 model: sonnet
