@@ -1,7 +1,8 @@
 # Setup Baseline Inventory
 
-**Last verified:** 2026-04-14
+**Last verified:** 2026-04-15
 **Next review:** Biweekly (Wednesday + Sunday, 6am)
+**Claude Code version at last review:** 2.1.109
 
 ---
 
@@ -30,7 +31,7 @@
 
 **Note:** plugin:discord and plugin:swift-lsp moved to `enabledPlugins` system. google-workspace is active but configured outside settings.json (uvx workspace-mcp).
 
-## Skills (78 on-disk)
+## Skills (82 on-disk)
 
 ### Developer Workflow (23)
 
@@ -40,9 +41,9 @@ ship, deep-plan, cto, first-principles, verify, test-and-fix, review-changes, cp
 
 qa-cycle, qa-conta, qa-sourcerank, qa-stonegeo, qa-fix, qa-verify, fulltest-skill, virtual-user-testing, health-report
 
-### Deploy & Ops (7)
+### Deploy & Ops (8)
 
-deploy-conta-staging, deploy-conta-production, deploy-conta-full, deploy-sourcerank, contably-guardian, sourcerank-guardian, oci-health
+deploy-conta-staging, deploy-conta-production, deploy-conta-full, deploy-sourcerank, contably-guardian, contably-snapshot, sourcerank-guardian, oci-health
 
 ### Research & Scraping (10)
 
@@ -118,7 +119,14 @@ AGENT-TEAMS-STRATEGY.md, memory-strategy.md, model-tier-strategy.md, nuvini-sync
 | PermissionDenied      | Permission denial logging                |
 | Setup                 | Repo setup/maintenance                   |
 
-**Missing hook:** `PermissionRequest` — not yet configured (auto-approve/deny tool permissions)
+**Missing hooks:**
+
+- `PermissionRequest` — not yet configured (auto-approve/deny tool permissions)
+- `PreCompact` — available since v2.1.105 (block compaction or inject pre-compact state)
+
+**Unreferenced hook scripts** (exist in hooks/ but not wired in settings.json):
+
+- learning-capture.sh, load-secrets.sh, health-check.sh, security-check.sh, setup-keychain.sh, subagent-activity.sh
 
 ## Role Coverage
 
