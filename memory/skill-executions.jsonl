@@ -17238,3 +17238,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-15T21:13:10Z",
+  "date": "2026-04-15",
+  "skill": "codebase-cleanup",
+  "args": "Audit /Volumes/AI/Code/contably for unused files, dead code, and redundant modules. REPORT ONLY — do not delete anything. Focus on: legacy eSocial modules (SOAP client.py, in-memory submission.py) now that Phase 2 wired real service, orphan SQL migrations, unused schemas, stale API routes, duplicate utility files, unused frontend components. Produce a categorized report with confidence levels (high/medium/low) and reasoning for each candidate.",
+  "sessionId": "7b2437ec-9cc1-4b2d-813c-43c23f2528e6",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
