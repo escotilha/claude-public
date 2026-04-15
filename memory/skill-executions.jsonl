@@ -17188,3 +17188,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-15T17:16:51Z",
+  "date": "2026-04-15",
+  "skill": "fulltest-skill",
+  "args": "Full-spectrum test of production Contably at https://contably.ai — admin surface. Focus on the newly-shipped areas:\n\n1. **Minha Agenda** (`/tickets`) — tickets page, SLA widget, fiscal calendar card (super admin only), SLA em Risco / SLA Excedido filter distinction, stats cards auto-refresh\n2. **Scheduled Jobs** (`/admin/scheduled-jobs`) — catalog dropdown, 3-step create wizard, schedule builder (Diário/Semanal/Mensal)\n3. **Agenda endpoints** (`/agenda/deadlines`, `/agenda/metrics`) — verify they return 200 with proper multi-tenant filtering\n4. Cross-page navigation regressions\n\nLog in with any admin/super admin credentials stored for Contably. Screenshot bugs, check console errors and network 4xx/5xx. For any regression found, auto-fix, push, redeploy.\n\nWorking directory: /Volumes/AI/Code/contably. Report final status — all green or list of remaining issues.",
+  "sessionId": "2bbe6e60-8a85-49ab-a4c4-6856fbf26477",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
