@@ -24,6 +24,12 @@ Claude Code **Routines** are in research preview as of 2026-04-14. A Routine is 
 
 ---
 
+**Opus 4.7 + Routines pairing (April 2026):**
+Claude Opus 4.7 was purpose-built for full-throttle agentic work, judgment under ambiguity, and self-verifying outputs — making it the optimal model for Routines. Noah Zweben (Claude Code PM) explicitly positioned the combination as "the real unlock." This changes the model tier recommendation for Routines: use Opus 4.7 as default, not Sonnet, for scheduled background agents that require judgment.
+
+---
+
 ## Timeline
 
 - **2026-04-14** — [research] Announced via @claudeai on X. Research preview, not GA. Source: https://x.com/claudeai/status/2044095086460309790
+- **2026-04-16** — [user-feedback] Noah Zweben (Claude Code PM) tweets Routines + Opus 4.7 as the explicit unlock pairing. Opus 4.7 described as built for "full-throttle agentic work, judgment under ambiguity, self-verifying outputs." Source: https://x.com/noahzweben/status/2044812118063747341

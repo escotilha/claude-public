@@ -148,5 +148,11 @@
     "note": "Qwen3.6-35B-A3B released: sparse MoE, 35B total/3B active params, Apache 2.0, multimodal, agentic coding parity with 10x-larger models",
     "addedAt": "2026-04-16T13:44:33Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/noahzweben/status/2044812118063747341",
+    "note": "Noah Zweben (Claude Code PM) announces Routines + Opus 4.7 as the key unlock for background agentic work",
+    "addedAt": "2026-04-16T16:27:44Z",
+    "addedBy": "research-skill"
   }
 ]

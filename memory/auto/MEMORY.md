@@ -48,6 +48,9 @@
 ## Patterns & Tech Insights (Contably Sessions)
 
 - [pattern_sqlalchemy_checkfirst_pytest.md](pattern_sqlalchemy_checkfirst_pytest.md) — Use checkfirst=True in Base.metadata.create_all() to prevent duplicate-index errors when SQLAlchemy metadata is shared across a pytest session
+- [mistake_fastapi_dep_injection_order.md](mistake_fastapi_dep_injection_order.md) — FastAPI route params: Depends() injected deps must come before Query()/Path() params in function signature, or Python raises SyntaxError; also Contably uses src.api.deps not src.api.dependencies
+- [pattern_nginx_vite_spa_cache.md](pattern_nginx_vite_spa_cache.md) — Vite SPAs need short nginx cache (1h) + no-cache meta on index.html to prevent browsers holding stale hashed-bundle references after deploys
+- [pattern_contably_integration_module_structure.md](pattern_contably_integration_module_structure.md) — Contably 3rd-party integration layout: integrations/{name}/{client,service,cache,schemas}.py + models + routes/system + celery tasks; registration checklist included
 - [pattern_oci_staging_prod_promote.md](pattern_oci_staging_prod_promote.md) — Push to main builds stg-<sha> image → staging namespace; promote to production via workflow_dispatch with image_tag + confirm=yes guard
 - [pattern_karpathy_wiki_github_events.md](pattern_karpathy_wiki_github_events.md) — Feed an AI copilot knowledge wiki by subscribing to GitHub push/PR webhook events and ingesting commit messages + diffs
 - [tech_insight_ruff_pin_ci.md](tech_insight_ruff_pin_ci.md) — Ruff changes rules between versions — always pin ruff==x.y.z in CI to prevent random lint failures

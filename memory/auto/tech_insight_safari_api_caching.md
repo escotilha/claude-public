@@ -26,3 +26,4 @@ Source: failure — Safari caching /api/agents causing stale agent list in Agent
 Relevance score: 6
 Use count: 1
 Applied in: agentwave - 2026-04-11 - HELPFUL
+Related: [pattern_nginx_vite_spa_cache.md](pattern_nginx_vite_spa_cache.md) — complementary browser cache fix for SPAs (nginx + meta no-cache for index.html) (2026-04-16)
