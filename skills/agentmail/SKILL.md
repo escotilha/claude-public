@@ -362,10 +362,100 @@ resend emails send --from "bot@contably.ai" --to "user@example.com" --subject "A
 When this skill is invoked:
 
 1. **If the task involves receiving, replying, threading, or an `@agentmail.to` address** → use AgentMail (above)
-2. **If the task is a one-way send from a verified domain AND `resend` CLI is available** → use Resend CLI
-3. **Fallback**: if `resend` is not installed, send via AgentMail from the appropriate inbox
+2. **If the domain is hosted on Cloudflare AND bidirectional (send + receive) is needed** → use Cloudflare Email Service (below)
+3. **If the task is a one-way send from a verified domain AND `resend` CLI is available** → use Resend CLI
+4. **Fallback**: if `resend` is not installed, send via AgentMail from the appropriate inbox
 
 Check availability: `which resend && echo "resend available" || echo "use agentmail"`
+
+## Cloudflare Email Service — Bidirectional Channel (Workers + REST API)
+
+**Public beta, April 2026.** Cloudflare Email Service lets you **send and receive** emails from Cloudflare Workers or via REST API, using Cloudflare's global network for delivery and IP reputation. Unlike Resend (send-only from our setup) or AgentMail (`@agentmail.to` only), Cloudflare Email gives you full bidirectional email on **your own domain** without a separate vendor — and it's a first-class trigger in the Cloudflare Agents SDK.
+
+### When to use Cloudflare Email
+
+| Need | Use |
+| ---- | --- |
+| Send + receive on a Cloudflare-managed domain (agentwave.io, nuvini.ai) | **Cloudflare Email** |
+| Email as a Worker event trigger → run agent → reply | **Cloudflare Email** |
+| Unified inbound routing + outbound transactional on same domain | **Cloudflare Email** |
+| One-way transactional only | Resend CLI (simpler) |
+| Agent inbox on `@agentmail.to` | AgentMail |
+
+### Prerequisites
+
+- Domain on Cloudflare (already true for agentwave.io, nuvini.ai)
+- **Workers Paid plan** (sending requires paid; inbound routing is free)
+- `wrangler` CLI installed: `pnpm add -g wrangler && wrangler login`
+
+### Sending via REST API (simplest — no Worker required)
+
+```bash
+curl -X POST "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/email/routing/send" \
+  -H "Authorization: Bearer $CF_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "from": "bot@agentwave.io",
+    "to": "user@example.com",
+    "subject": "Report ready",
+    "text": "Plain body",
+    "html": "<p>HTML body</p>"
+  }'
+```
+
+### Sending from a Worker (binding)
+
+```jsonc
+// wrangler.jsonc
+{
+  "send_email": [{ "name": "EMAIL", "destination_address": "bot@agentwave.io" }]
+}
+```
+
+```ts
+export default {
+  async fetch(req, env) {
+    await env.EMAIL.send({
+      to: "user@example.com",
+      from: "bot@agentwave.io",
+      subject: "Agent reply",
+      html: "<p>…</p>",
+    });
+    return new Response("sent");
+  },
+};
+```
+
+### Receiving via email_workers (inbound → agent trigger)
+
+```jsonc
+// wrangler.jsonc
+{
+  "email_workers": [{ "name": "inbox", "destination_address": "agent@agentwave.io" }]
+}
+```
+
+```ts
+export default {
+  async email(message, env) {
+    // message.from, message.to, message.headers, message.raw (ReadableStream)
+    // Forward to AgentWave dispatcher webhook, or run agent inline
+    await fetch(env.AGENTWAVE_WEBHOOK, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-webhook-secret": env.SHARED_SECRET },
+      body: JSON.stringify({ from: message.from, to: message.to, subject: message.headers.get("subject") }),
+    });
+  },
+};
+```
+
+### Keys & Secrets
+
+- `CF_ACCOUNT_ID` — Cloudflare account ID (already in `reference_cloudflare.md` for main account)
+- `CF_API_TOKEN` — needs `Email > Send` + `Email Routing Addresses > Edit` scopes
+- Store in macOS Keychain: `security add-generic-password -s CF_EMAIL_TOKEN -a p@nove.co -w "<token>"`
+
+See also: `reference_cloudflare.md`, `reference_cloudflare_nuvini.md` for account IDs and zone IDs.
 
 ## Workflow Tips
 
