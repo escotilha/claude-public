@@ -383,7 +383,7 @@
     ]
   },
   "alwaysThinkingEnabled": false,
-  "effortLevel": "high",
+  "effortLevel": "xhigh",
   "plansDirectory": "~/.claude/plans",
   "autoMemoryDirectory": "~/.claude-setup/memory/auto",
   "skipDangerousModePermissionPrompt": true,
