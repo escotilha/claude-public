@@ -160,5 +160,29 @@
     "note": "Cloudflare Email Service public beta — send/receive emails from Workers or REST API, integrates with Agents SDK for email agents",
     "addedAt": "2026-04-16T18:59:14Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code",
+    "note": "Anthropic official best practices for Opus 4.7 in Claude Code: effort levels (xhigh default), adaptive thinking, subagent delegation, interactive vs async modes",
+    "addedAt": "2026-04-16T19:03:21Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/bcherny/status/2044847848035156457",
+    "note": "Boris Cherny (Claude Code creator) tweet on Opus 4.7 launch and tips - April 16 2026",
+    "addedAt": "2026-04-16T19:03:28Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/bcherny/status/2044822408826380440",
+    "note": "Boris Cherny (Claude Code creator) tweet on Opus 4.7 launch and tips - April 16 2026",
+    "addedAt": "2026-04-16T19:03:28Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/bcherny/status/2044802532388774313",
+    "note": "Boris Cherny (Claude Code creator) tweet on Opus 4.7 launch and tips - April 16 2026",
+    "addedAt": "2026-04-16T19:03:28Z",
+    "addedBy": "research-skill"
   }
 ]
