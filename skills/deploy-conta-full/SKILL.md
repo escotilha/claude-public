@@ -68,36 +68,41 @@ Runs the complete deployment pipeline: staging deploy followed by automatic prod
 
 ### Phase 2: Promote to Production
 
-1. Get the staging image tag from the GHA deploy run (format: `stg-<sha>`):
+1. Get the staging image tag from the latest successful staging deploy run:
 
    ```bash
-   unset GITHUB_TOKEN && gh run list --repo Contably/contably --workflow "Deploy to Staging" --limit 1 --json headSha -q '.[0].headSha[:7]'
+   SHA=$(unset GITHUB_TOKEN && gh run list --repo Contably/contably --workflow "Deploy to Staging" --status success --limit 1 --json headSha -q '.[0].headSha' | head -c 7)
+   echo "stg-$SHA"
    ```
 
-   The image tag is `stg-<sha>`.
+   The image tag is `stg-<7-char-sha>`.
 
 2. Trigger the production deploy via GitHub Actions workflow_dispatch:
 
    ```bash
-   unset GITHUB_TOKEN && gh workflow run deploy-production.yml --repo Contably/contably -f image_tag=stg-<sha> -f confirm=yes
+   unset GITHUB_TOKEN && gh workflow run deploy-production.yml --repo Contably/contably -f image_tag=stg-$SHA -f confirm=yes
    ```
 
-3. Monitor the production deploy:
+   **IMPORTANT:** Production deploys via `workflow_dispatch` on `deploy-production.yml`, NOT via `git push origin main`. Pushing to main only triggers staging.
+
+3. Wait 5 seconds, then monitor the production deploy (use `run_in_background: true`):
 
    ```bash
-   unset GITHUB_TOKEN && gh run list --repo Contably/contably --workflow "Deploy to Production" --limit 1
-   unset GITHUB_TOKEN && gh run watch <RUN_ID> --repo Contably/contably
+   sleep 5
+   RUN_ID=$(unset GITHUB_TOKEN && gh run list --repo Contably/contably --workflow "Deploy to Production" --limit 1 --json databaseId -q '.[0].databaseId')
+   unset GITHUB_TOKEN && gh run watch $RUN_ID --repo Contably/contably --exit-status
    ```
 
-4. Run production health checks:
+4. On completion, check results and run production health checks:
 
    ```bash
+   unset GITHUB_TOKEN && gh run view $RUN_ID --repo Contably/contably --json jobs --jq '.jobs[] | "\(.name): \(.conclusion)"'
    curl -s https://api.contably.ai/health
    ```
 
 5. **Evaluate the result:**
    - If production deploy succeeded → proceed to Phase 3
-   - If production deploy failed → report failure. The production skill will suggest rollback.
+   - If production deploy failed → report failure, suggest rollback: `kubectl rollout undo deployment/contably-api -n contably`
 
 ### Phase 3: Final Report
 

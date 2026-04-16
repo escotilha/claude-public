@@ -140,7 +140,7 @@ unset GITHUB_TOKEN && gh run view <RUN_ID> --repo Contably/contably --json jobs 
 1. Push to main:
 
    ```bash
-   GITHUB_TOKEN= git push origin main
+   unset GITHUB_TOKEN && git push origin main
    ```
 
 2. Record the commit SHA for tracking:
@@ -207,7 +207,7 @@ If the GitHub Actions pipeline fails:
 
 4. If still failing after 3 cycles: report all failures and ask the user for guidance.
 
-### Phase 5: Staging Health Check
+### Phase 4: Staging Health Check
 
 After staging deployment succeeds (or after a timeout if we couldn't poll):
 
@@ -234,7 +234,7 @@ After staging deployment succeeds (or after a timeout if we couldn't poll):
    curl -sI https://staging.contably.ai/ 2>/dev/null | grep -iE 'x-frame|x-content|x-xss|referrer|permissions|content-security'
    ```
 
-### Phase 5a: Refresh Codebase Snapshot
+### Phase 4a: Refresh Codebase Snapshot
 
 After a successful staging health check (ALL UP), refresh the codebase reference:
 
@@ -244,7 +244,7 @@ After a successful staging health check (ALL UP), refresh the codebase reference
 
 **Why:** Every deploy may change the codebase structure (new routes, models, dependencies). Keeping the snapshot fresh means the next session starts with accurate context.
 
-### Phase 6: Final Report
+### Phase 5: Final Report
 
 Output a deployment summary:
 
