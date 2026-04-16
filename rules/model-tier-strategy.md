@@ -11,6 +11,17 @@ Route subagent tasks to the cheapest model that can handle the work. This saves 
 | **Tier 3** | Opus       | High   | Architecture decisions, security audits, complex reasoning, production code |
 | **Tier R** | Opus 4.7   | High   | **Routines** — autonomous scheduled/event-triggered runs, judgment under ambiguity, self-verifying outputs |
 
+### Opus 4.7 Behavior (per Boris Cherny, 2026-04-16)
+
+Opus 4.7 changes three things that affect this setup:
+
+- **Default effort is `xhigh`** (auto-upgraded from 4.6's `high`). Tiers: `low` / `high` / `xhigh` (recommended) / `max` (evals only — overthinks). Don't use `max` in production routines.
+- **Adaptive thinking replaces `budget_tokens`** — no more fixed thinking budget. Steer with prompts instead (see `opus-4-7-prompting.md`).
+- **More judicious subagent delegation** — 4.7 won't auto-fan-out the way 4.6 did. Skills that rely on parallel subagents (`/cto` swarm, `/parallel-dev`, `/qa-cycle`) must include an explicit fan-out instruction:
+  > "Do not spawn a subagent for work you can complete directly in a single response. Spawn multiple subagents in the same turn when fanning out across items or reading multiple files."
+
+Interactive (multi-turn) mode reasons more per turn than autonomous (single-turn) mode — front-load full intent + constraints + acceptance criteria in the first message, then batch follow-ups.
+
 ## Decision Matrix
 
 | Task Type                        | Model  | Rationale                                   |

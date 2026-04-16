@@ -26,3 +26,5 @@ Mechanical tasks (explore codebase, run tests, format reports) can remain Haiku/
 ## Timeline
 
 - **2026-04-11** — [user-feedback] Safari blank page debugging: Sonnet agent couldn't find root cause, Opus agent launched instead. User explicitly requested "Opus for both" and "anything that requires investigating or bug fixes should be run on OPUS exclusively." (Source: session — contably groups + AI assistant work)
+
+Related: [opus-4-7-best-practices](tech_insight_opus_4_7_best_practices.md) — "Opus for investigation" now means 4.7 with xhigh default effort; subagent delegation requires explicit fan-out prompt (2026-04-16)
