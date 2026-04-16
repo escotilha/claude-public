@@ -82,16 +82,16 @@ Deploy Workflow (.github/workflows/deploy.yml)
 
 ```bash
 # List recent workflow runs
-GITHUB_TOKEN= gh run list --repo Contably/contably --limit 5
+unset GITHUB_TOKEN && gh run list --repo Contably/contably --limit 5
 
 # Watch a run in real-time
-GITHUB_TOKEN= gh run watch <RUN_ID> --repo Contably/contably
+unset GITHUB_TOKEN && gh run watch <RUN_ID> --repo Contably/contably
 
 # View run details and logs
-GITHUB_TOKEN= gh run view <RUN_ID> --repo Contably/contably --log
+unset GITHUB_TOKEN && gh run view <RUN_ID> --repo Contably/contably --log
 
 # Check job-level status
-GITHUB_TOKEN= gh run view <RUN_ID> --repo Contably/contably --json jobs --jq '.jobs[] | "\(.name): \(.conclusion)"'
+unset GITHUB_TOKEN && gh run view <RUN_ID> --repo Contably/contably --json jobs --jq '.jobs[] | "\(.name): \(.conclusion)"'
 ```
 
 ## Workflow
@@ -162,7 +162,7 @@ The GHA deploy workflow triggers immediately on push to main. It runs CI first, 
 1. **Find the workflow run:**
 
    ```bash
-   GITHUB_TOKEN= gh run list --repo Contably/contably --limit 1
+   unset GITHUB_TOKEN && gh run list --repo Contably/contably --limit 1
    ```
 
    The most recent run should match your commit.
@@ -170,13 +170,13 @@ The GHA deploy workflow triggers immediately on push to main. It runs CI first, 
 2. **Watch the run in background** (use `run_in_background: true`):
 
    ```bash
-   GITHUB_TOKEN= gh run watch <RUN_ID> --repo Contably/contably --exit-status
+   unset GITHUB_TOKEN && gh run watch <RUN_ID> --repo Contably/contably --exit-status
    ```
 
 3. **On completion, check job-level results:**
 
    ```bash
-   GITHUB_TOKEN= gh run view <RUN_ID> --repo Contably/contably --json jobs --jq '.jobs[] | "\(.name): \(.conclusion)"'
+   unset GITHUB_TOKEN && gh run view <RUN_ID> --repo Contably/contably --json jobs --jq '.jobs[] | "\(.name): \(.conclusion)"'
    ```
 
    Expected jobs: `ci / Frontend CI`, `ci / Backend CI`, `ci / Security Scan`, `Build & Push Images`, `Deploy to OKE`
@@ -184,7 +184,7 @@ The GHA deploy workflow triggers immediately on push to main. It runs CI first, 
 4. **If any job failed**, get the logs:
 
    ```bash
-   GITHUB_TOKEN= gh run view <RUN_ID> --repo Contably/contably --log 2>&1 | grep -B2 -A10 "error\|Error\|FAILED\|exit code"
+   unset GITHUB_TOKEN && gh run view <RUN_ID> --repo Contably/contably --log 2>&1 | grep -B2 -A10 "error\|Error\|FAILED\|exit code"
    ```
 
    Then proceed to Phase 3a.

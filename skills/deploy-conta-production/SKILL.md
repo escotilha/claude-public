@@ -71,16 +71,16 @@ Promotes Contably from staging to production via GitHub Actions workflow_dispatc
 
 ```bash
 # List recent workflow runs
-GITHUB_TOKEN= gh run list --repo Contably/contably --limit 5
+unset GITHUB_TOKEN && gh run list --repo Contably/contably --limit 5
 
 # Watch a run in real-time
-GITHUB_TOKEN= gh run watch <RUN_ID> --repo Contably/contably
+unset GITHUB_TOKEN && gh run watch <RUN_ID> --repo Contably/contably
 
 # Check job-level status
-GITHUB_TOKEN= gh run view <RUN_ID> --repo Contably/contably --json jobs --jq '.jobs[] | "\(.name): \(.conclusion)"'
+unset GITHUB_TOKEN && gh run view <RUN_ID> --repo Contably/contably --json jobs --jq '.jobs[] | "\(.name): \(.conclusion)"'
 
-# Trigger manual deploy
-GITHUB_TOKEN= gh workflow run deploy.yml --repo Contably/contably
+# Trigger production deploy (workflow_dispatch)
+unset GITHUB_TOKEN && gh workflow run deploy-production.yml --repo Contably/contably -f image_tag=stg-<sha> -f confirm=yes
 ```
 
 ## Workflow
@@ -99,57 +99,66 @@ GITHUB_TOKEN= gh workflow run deploy.yml --repo Contably/contably
    - Invoke the `oci-health` skill via the Skill tool with argument `production`
    - If DEGRADED or DOWN: warn the user but allow proceeding (deploy might fix it)
 
-### Phase 2: Confirm and Push
+### Phase 2: Confirm and Trigger Production Deploy
 
-1. **If `--auto-approve` is set**, skip the confirmation prompt and push directly.
+1. **Determine the staging image tag.** This must be provided as an argument or extracted from the latest successful staging deploy:
 
-2. **Otherwise, present the deployment details to the user:**
+   ```bash
+   unset GITHUB_TOKEN && gh run list --repo Contably/contably --workflow "Deploy to Staging" --status success --limit 1 --json headSha -q '.[0].headSha' | head -c 7
+   ```
+
+   The image tag is `stg-<7-char-sha>`.
+
+2. **If `--auto-approve` is set**, skip the confirmation prompt and trigger directly.
+
+3. **Otherwise, present the deployment details to the user:**
 
    ```
-   Ready to deploy to production.
+   Ready to promote to production.
 
-   Current commit: {HEAD commit}
-   Unpushed commits: {list}
+   Staging image tag: stg-{sha}
+   Source commit: {full sha}
 
    Production URLs:
    - API: https://api.contably.ai
    - Dashboard: https://contably.ai
    - Portal: https://portal.contably.ai
 
-   Push to main and deploy? (yes/no)
+   Trigger production deploy? (yes/no)
    ```
 
    If the user says no: exit.
 
-3. **Push to main:**
+4. **Trigger production deploy via workflow_dispatch:**
 
    ```bash
-   GITHUB_TOKEN= git push origin main
-   IMAGE_TAG=$(git rev-parse --short HEAD)
+   unset GITHUB_TOKEN && gh workflow run deploy-production.yml --repo Contably/contably -f image_tag=stg-<sha> -f confirm=yes
    ```
 
-### Phase 3: Monitor GitHub Actions Deploy
+   **IMPORTANT:** Production deploys via `workflow_dispatch` on `deploy-production.yml`, NOT via `git push origin main`. Pushing to main only triggers staging.
 
-1. **Find the workflow run:**
+### Phase 3: Monitor Production Deploy
+
+1. **Wait 5 seconds**, then find the workflow run:
 
    ```bash
-   GITHUB_TOKEN= gh run list --repo Contably/contably --limit 1
+   sleep 5 && unset GITHUB_TOKEN && gh run list --repo Contably/contably --workflow "Deploy to Production" --limit 1
    ```
 
 2. **Watch the run** (use `run_in_background: true`):
 
    ```bash
-   GITHUB_TOKEN= gh run watch <RUN_ID> --repo Contably/contably --exit-status
+   unset GITHUB_TOKEN && gh run watch <RUN_ID> --repo Contably/contably --exit-status
    ```
 
 3. **On completion, check results:**
 
    ```bash
-   GITHUB_TOKEN= gh run view <RUN_ID> --repo Contably/contably --json jobs --jq '.jobs[] | "\(.name): \(.conclusion)"'
+   unset GITHUB_TOKEN && gh run view <RUN_ID> --repo Contably/contably --json jobs --jq '.jobs[] | "\(.name): \(.conclusion)"'
    ```
 
 4. **On failure**:
-   - Get logs: `GITHUB_TOKEN= gh run view <RUN_ID> --repo Contably/contably --log`
+   - Get logs: `unset GITHUB_TOKEN && gh run view <RUN_ID> --repo Contably/contably --log`
    - Report failure details
    - Suggest rollback: `kubectl rollout undo deployment/contably-api -n contably`
    - Ask user if they want to rollback
