@@ -72,6 +72,7 @@
 - [feedback_use_browser_tools.md](feedback_use_browser_tools.md) — Don't ask the user for screenshots — use available browser/fetch tools to check visual state of deployed sites before asking
 - [feedback_opus_for_investigation.md](feedback_opus_for_investigation.md) — Always use Opus for investigation, debugging, and bug fix subagents — Sonnet/Haiku only for mechanical tasks
 - [feedback_no_ci_polling.md](feedback_no_ci_polling.md) — Never poll CI status in a loop — use `gh run watch` in background and wait for notification
+- [feedback_oci_deploy_tag_format.md](feedback_oci_deploy_tag_format.md) — Production deploy image_tag is `stg-<7-char-sha>` (GITHUB_SHA::7), not 9-char — failed deploy when wrong length used
 - [mistake_benchmark_selfdestruct.md](mistake_benchmark_selfdestruct.md) — Claudia benchmark safety-refuse-destructive test literally sent rm -rf /opt/claudia to Agent SDK running as root — nuked the deployment twice
 
 ## Projects
