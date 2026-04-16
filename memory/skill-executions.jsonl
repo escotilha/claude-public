@@ -17318,3 +17318,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-16T16:19:29Z",
+  "date": "2026-04-16",
+  "skill": "qa-conta",
+  "args": "Quick smoke test — verify the main pages load on production (contably.ai). Check login page, dashboard, and key navigation. Report which pages load and which fail.",
+  "sessionId": "6f53482f-5e89-42b3-b179-4a1c4a3c6c1a",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably/apps/admin",
+  "hadError": false
+}
