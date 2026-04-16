@@ -130,5 +130,11 @@
     "note": "tailscale-rs: Rust library for embedding Tailscale in any app — no Go runtime, FFI bindings for Python/Elixir/C, TCP/UDP comms within tailnets",
     "addedAt": "2026-04-16T08:55:28Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/trq212/status/2044548257058328723",
+    "note": "Twitter Article by Thariq (Claude Code team, Anthropic): Session Management & 1M Context — context rot at 300-400k tokens, rewind habit, compact vs clear, subagent mental model",
+    "addedAt": "2026-04-16T08:57:59Z",
+    "addedBy": "research-skill"
   }
 ]

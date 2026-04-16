@@ -399,6 +399,39 @@ After all memory writes (creates, updates, new observations, cross-links) are co
 
 This is a fast operation (~1s) and ensures `/meditate`, `/consolidate`, and any other skill using `mem-search` will find the freshly written memories.
 
+## Phase 5a: Next-Session Intent
+
+Before generating the report, capture a **next-session intent** — a 1-2 sentence statement of what comes next. This serves two purposes:
+
+1. **Anti-bad-compact:** If autocompact fires before the next session starts, the compact summary will include this direction context, preventing the "compact dropped what matters" failure mode
+2. **Session continuity:** The next `/primer` run picks up where this session left off
+
+### How to generate
+
+```
+Look at:
+- What was just completed (git log, state files)
+- What remains undone (TODO items, pending phases, open QA issues)
+- What the user's last messages indicated they wanted next
+
+Produce:
+"Next session intent: {1-2 sentences describing what should happen next}"
+```
+
+### Where to save
+
+Write the intent to `~/.claude-setup/memory/auto/.next-session-intent` (plain text, overwritten each time — not a memory entity, just a transient handoff note):
+
+```
+{date} | {intent statement}
+```
+
+This file is ephemeral — `/primer` reads it if present, then it gets overwritten by the next `/meditate` run.
+
+### Nudge mode
+
+In nudge mode (Phase 0), skip this phase — intent only matters at session end.
+
 ## Phase 5: Report
 
 Output a concise summary:

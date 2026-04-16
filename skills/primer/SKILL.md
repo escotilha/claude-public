@@ -93,6 +93,11 @@ Produce this exact structure (replace placeholders with real values):
 - {file}: {1-2 sentence summary}
 - {file}: {1-2 sentence summary}
 - (or "No project context files found" if none exist)
+
+**Session hygiene reminders:**
+- Rewind-first: double-tap Esc instead of "that didn't work, try X" — rewind to after the file reads and re-prompt with what you learned
+- Compact proactively: `/compact focus on {next task}` before autocompact fires (~300-400k tokens)
+- Subagent test: "Will I need this output again, or just the conclusion?" — if just conclusion, spin a subagent
 ```
 
 ## Rules
