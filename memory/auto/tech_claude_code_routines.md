@@ -22,6 +22,16 @@ Claude Code **Routines** are in research preview as of 2026-04-14. A Routine is 
 
 **Action:** Use CronCreate/RemoteTrigger today. Migrate to Routines when GA. Do not over-invest in VPS-based scheduling infrastructure.
 
+**Migration priority (2026-04-16, accelerated after Opus 4.7 pairing signal):**
+
+With Opus 4.7 as the canonical Routines model, migration stops being a "wait for GA" project and starts being a "move judgment-heavy scheduled agents off Sonnet-routed VPS crons ASAP" project. Prioritized candidates:
+
+1. **`/chief-geo`** — daily autonomous, judgment-heavy, multi-track research → perfect Routines + 4.7 fit
+2. **`/health-report`** — scheduled synthesis + self-verification of outputs → 4.7 self-checks catch regressions
+3. **`/buzz-daily-triage`** — competitive intel filtering under ambiguity → judgment-heavy, Sonnet currently misses nuance
+4. **`/intel-scanner`** (VPS cron) — keyword scans + relevance scoring → 4.7 improves signal/noise
+5. **Claudia VPS crons** (long tail) — migrate incrementally as Routines adds features to match Claudia's memory + dispatch capabilities
+
 ---
 
 **Opus 4.7 + Routines pairing (April 2026):**

@@ -30,6 +30,8 @@ Create, update, list, or run scheduled remote agents (triggers) on a cron schedu
 > **Current status:** Research preview. Use `CronCreate`/`RemoteTrigger` for production scheduling today. When Routines reach GA, migrate scheduled skills to Routines for zero-VPS-dependency execution.
 >
 > **Migration candidates:** Any skill currently run via Claudia's VPS cron (`/chief-geo`, `/health-report`, `/buzz-daily-triage`, `/intel-scanner`) or via `CronCreate` in Claude Code sessions.
+>
+> **Model recommendation (2026-04-16):** Use **Opus 4.7** as the default model for Routines and judgment-heavy scheduled agents. Per Noah Zweben (Claude Code PM), Opus 4.7 was purpose-built for full-throttle agentic work, judgment under ambiguity, and self-verifying outputs — the exact profile needed for autonomous background runs without human oversight. Only downgrade to Sonnet for mechanical scheduled tasks (log rotation, status pings, template-driven reports).
 
 ## Workflow
 

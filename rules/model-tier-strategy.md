@@ -4,11 +4,12 @@ Route subagent tasks to the cheapest model that can handle the work. This saves 
 
 ## Tier Definitions
 
-| Tier       | Model  | Cost   | Use For                                                                     |
-| ---------- | ------ | ------ | --------------------------------------------------------------------------- |
-| **Tier 1** | Haiku  | Low    | Deterministic execution, template-driven, report formatting, scaffolding    |
-| **Tier 2** | Sonnet | Medium | Nuanced judgment, code review, investigation, moderate complexity           |
-| **Tier 3** | Opus   | High   | Architecture decisions, security audits, complex reasoning, production code |
+| Tier       | Model      | Cost   | Use For                                                                     |
+| ---------- | ---------- | ------ | --------------------------------------------------------------------------- |
+| **Tier 1** | Haiku      | Low    | Deterministic execution, template-driven, report formatting, scaffolding    |
+| **Tier 2** | Sonnet     | Medium | Nuanced judgment, code review, investigation, moderate complexity           |
+| **Tier 3** | Opus       | High   | Architecture decisions, security audits, complex reasoning, production code |
+| **Tier R** | Opus 4.7   | High   | **Routines** — autonomous scheduled/event-triggered runs, judgment under ambiguity, self-verifying outputs |
 
 ## Decision Matrix
 
@@ -26,6 +27,7 @@ Route subagent tasks to the cheapest model that can handle the work. This saves 
 | Architecture review              | opus   | Cross-system reasoning, trade-off analysis  |
 | Full CTO review (orchestrator)   | opus   | Synthesizes across multiple domains         |
 | Product spec / PRD generation    | opus   | Requires product thinking + technical depth |
+| Claude Code Routine (scheduled)  | opus-4.7 | Autonomous background run — needs judgment under ambiguity + self-verification (per Anthropic PM, 2026-04-16) |
 
 ## Per-Skill Recommendations
 
@@ -216,5 +218,6 @@ As of v2.1.75, Opus 4.6 defaults to **1M context** for Max/Team/Enterprise. This
 **If the subagent only reads files and reports results → haiku.**
 **If the subagent writes code or makes judgment calls → sonnet.**
 **If the subagent makes architectural or security decisions → opus.**
+**If the task runs as a Claude Code Routine (scheduled, autonomous, no human oversight) → opus-4.7.** Noah Zweben (Claude Code PM) explicitly positioned Routines + Opus 4.7 as "the real unlock" (2026-04-16). Default all Routines to 4.7 — background agents need self-verification and strong judgment under ambiguity.
 **If a skill runs all-Opus but only needs Opus reasoning at decision points → advisor pattern (Sonnet executor + Opus advisor).**
 **If the task runs via Claudia (not Claude Code) → Tier 0b (Qwen3.5-35B-A3B on Mac Mini) or Tier 0a (OpenRouter).**
