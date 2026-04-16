@@ -107,6 +107,7 @@
 
 ## Tech Insights
 
+- [tech_cf_email_send_binding_limitation.md](tech_cf_email_send_binding_limitation.md) — CF Workers send_email binding only delivers to verified Email Routing destinations — not a workable Resend replacement for arbitrary-recipient outbound (confirmed 2026-04-16 during AgentWave migration)
 - [tech_agent_sandbox_distrust.md](tech_agent_sandbox_distrust.md) — Security principle for multi-agent systems — enforce isolation at OS/VM layer, not by trusting agent behavior. NanoClaw + Docker Sandbox as reference implementation.
 - [tech_agent_credential_proxy.md](tech_agent_credential_proxy.md) — Egress credential proxy pattern — inject API keys at proxy layer, never expose to agent. Implemented in AgentWave.
 - [tech_ai_platform_attack_surface.md](tech_ai_platform_attack_surface.md) — Attack chain from McKinsey Lilli breach — unauthenticated endpoints + JSON-key SQLi + system prompt write access = full AI platform compromise
