@@ -2,14 +2,14 @@
 name: Cloudflare DNS access
 description: Cloudflare API token with Zone.DNS edit for all zones, account details, zone IDs, and where credentials are stored
 type: reference
+originSessionId: d6242344-10b1-4ad9-82f2-1ff3acbf1076
 ---
-
 ## Cloudflare Account
 
 - **Email:** p@nove.co
 - **Account ID:** b886a80921ef41357eedbf9ff10f4d01
 - **Account Name:** P@nove.co's Account
-- **Plan:** Free
+- **Plan:** Workers Paid ($5/mo, upgraded 2026-04-16 for AgentWave Cloudflare Email migration)
 
 ## API Tokens
 
