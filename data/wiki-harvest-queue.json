@@ -142,5 +142,11 @@
     "note": "Gemini 3.1 Flash TTS launch — scene direction, speaker specificity, 70 languages, available via Gemini API",
     "addedAt": "2026-04-16T09:02:21Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/Alibaba_Qwen/status/2044768734234243427",
+    "note": "Qwen3.6-35B-A3B released: sparse MoE, 35B total/3B active params, Apache 2.0, multimodal, agentic coding parity with 10x-larger models",
+    "addedAt": "2026-04-16T13:44:33Z",
+    "addedBy": "research-skill"
   }
 ]
