@@ -59,7 +59,13 @@ Already injected above. Parse:
 - **Recent commits** from `git log --oneline -5` (use the first 3 for the summary line)
 - **Uncommitted changes** from `git status --short` — summarize as "clean" if empty, otherwise list file count and types (modified, added, deleted)
 
-### Step 4: Project Context Files
+### Step 4: Next-Session Intent
+
+Check if `~/.claude-setup/memory/auto/.next-session-intent` exists. If it does, read it and include the content in the output under "Next intent" — this was written by the previous session's `/meditate` run to indicate what should happen next.
+
+If the file does not exist or is empty, skip this section.
+
+### Step 5: Project Context Files
 
 Glob the current working directory for these files (non-recursive, then one level deep):
 
@@ -71,7 +77,7 @@ Glob the current working directory for these files (non-recursive, then one leve
 
 Read the first 50 lines of each found file. Extract a 1-2 sentence summary of each.
 
-### Step 5: Format Output
+### Step 6: Format Output
 
 Produce this exact structure (replace placeholders with real values):
 
@@ -88,6 +94,8 @@ Produce this exact structure (replace placeholders with real values):
 - {memory_3_filename}: {one-line summary}
 - {memory_4_filename}: {one-line summary}
 - {memory_5_filename}: {one-line summary}
+
+**Next intent:** {content from .next-session-intent, or "No prior intent recorded" if file missing}
 
 **Active project context:**
 - {file}: {1-2 sentence summary}

@@ -136,5 +136,11 @@
     "note": "Twitter Article by Thariq (Claude Code team, Anthropic): Session Management & 1M Context — context rot at 300-400k tokens, rewind habit, compact vs clear, subagent mental model",
     "addedAt": "2026-04-16T08:57:59Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/OfficialLoganK/status/2044447596010435054",
+    "note": "Gemini 3.1 Flash TTS launch — scene direction, speaker specificity, 70 languages, available via Gemini API",
+    "addedAt": "2026-04-16T09:02:21Z",
+    "addedBy": "research-skill"
   }
 ]
