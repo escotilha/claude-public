@@ -34,8 +34,8 @@ if echo "$INPUT" | jq -e '.tool_output.error // empty' >/dev/null 2>&1; then
   HAS_ERROR="true"
 fi
 
-# Write log entry
-jq -n \
+# Write log entry (compact single-line JSON for valid JSONL)
+jq -cn \
   --arg ts "$TIMESTAMP" \
   --arg date "$DATE" \
   --arg skill "$SKILL_NAME" \

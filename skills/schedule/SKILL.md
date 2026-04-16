@@ -17,6 +17,20 @@ allowed-tools:
   - CronList
   - RemoteTrigger
   - AskUserQuestion
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    confirmDestructive: true
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    confirmDestructive: false
+    outputFormat: structured
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  CronCreate: { destructiveHint: false, idempotentHint: false }
+  CronDelete: { destructiveHint: true, idempotentHint: true }
+  RemoteTrigger: { destructiveHint: false, idempotentHint: false }
 ---
 
 # Schedule Skill

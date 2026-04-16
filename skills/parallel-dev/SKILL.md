@@ -28,6 +28,19 @@ allowed-tools:
   - EnterWorktree
   - ExitWorktree
   - AskUserQuestion
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    confirmDestructive: true
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    confirmDestructive: false
+    outputFormat: structured
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  Write: { destructiveHint: true, idempotentHint: true }
+  Edit: { destructiveHint: true, idempotentHint: true }
 slots:
   runtime:
     default: "node"

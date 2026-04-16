@@ -14,6 +14,21 @@ allowed-tools:
   - Grep
   - WebFetch
   - WebSearch
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    confirmDestructive: true
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    confirmDestructive: false
+    outputFormat: structured
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  Write: { destructiveHint: false, idempotentHint: true }
+  Edit: { destructiveHint: false, idempotentHint: true }
+  WebFetch: { readOnlyHint: true, openWorldHint: true }
+  WebSearch: { readOnlyHint: true, openWorldHint: true }
 ---
 
 # LLM Wiki

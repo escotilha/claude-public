@@ -32,6 +32,19 @@ allowed-tools:
   - mcp__chrome-devtools__*
   - mcp__playwright__*
   - mcp__postgres__*
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    confirmDestructive: true
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    confirmDestructive: false
+    outputFormat: structured
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  Write: { destructiveHint: true, idempotentHint: true }
+  Edit: { destructiveHint: true, idempotentHint: true }
 memory: user
 slots:
   runtime:
