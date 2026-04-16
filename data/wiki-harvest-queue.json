@@ -154,5 +154,11 @@
     "note": "Noah Zweben (Claude Code PM) announces Routines + Opus 4.7 as the key unlock for background agentic work",
     "addedAt": "2026-04-16T16:27:44Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/thomasgauvin/status/2044766954032951792",
+    "note": "Cloudflare Email Service public beta — send/receive emails from Workers or REST API, integrates with Agents SDK for email agents",
+    "addedAt": "2026-04-16T18:59:14Z",
+    "addedBy": "research-skill"
   }
 ]
