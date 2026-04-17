@@ -109,29 +109,30 @@ refresh_root_readme() {
   echo "refreshing root README.md"
 
   local readme="README.md"
+  [[ -f "$readme" ]] || { echo "  skip: README.md missing"; return 0; }
+
   local recent
   recent="$(git log -3 --pretty=format:'- **%ad** — %s' --date=short -- . 2>/dev/null || echo '')"
+  [[ -z "$recent" ]] && { echo "  skip: no git history"; return 0; }
 
-  local base_content=""
-  if [[ -f "$readme" ]]; then
-    base_content="$(awk '/^## Últimas 3 atualizações/{exit} {print}' "$readme")"
-  fi
+  local tmp="$(mktemp)"
+  # Strip any existing "## Últimas 3 atualizações" section (from previous runs)
+  awk '
+    /^## Últimas 3 atualizações$/ { skip=1; next }
+    skip && /^## / { skip=0 }
+    !skip { print }
+  ' "$readme" > "$tmp"
 
-  if [[ -z "$base_content" ]]; then
-    base_content="# Claude Code Skills — Public
-
-Biblioteca pública de skills reutilizáveis para o Claude Code. Documentação em português disponível em \`skills/<nome>/README.pt.md\`.
-"
-  fi
-
+  # Append the fresh section at the end
   {
-    echo "$base_content"
+    cat "$tmp"
     echo ""
     echo "## Últimas 3 atualizações"
     echo ""
     echo "$recent"
     echo ""
   } > "$readme"
+  rm -f "$tmp"
 }
 
 # Post Slack notification. Reads token from Keychain.
