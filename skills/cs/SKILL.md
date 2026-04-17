@@ -55,15 +55,15 @@ If rejected (diverged), force push — local is always source of truth:
 git push origin master --force
 ```
 
-### 3. Push filtered to public
+### 3. Orphan-push to public
 
-**CRITICAL**: Run this EXACTLY as one single Bash command. NEVER run `git rm` on master.
+Creates a **single-commit orphan branch** from master, applies deletions + Contably sed scrubbing, runs a safety gate (aborts if any "contably" remains), and force-pushes. Always a fresh single commit — no history ever leaks. Exclude list lives in `EXCLUDED_SKILLS` inside the helper.
 
 ```bash
-cd ~/.claude-setup && git checkout -B nuvini-public master && [ "$(git branch --show-current)" = "nuvini-public" ] || { echo "ABORT: not on nuvini-public branch"; exit 1; } && git rm -rf --ignore-unmatch memory/ tools/ hooks/ rules/ backups/ config/ launchd/ plans/ guides/ bin/ commands/ mcp-servers/ settings.json .deep-plan-state.json .gstack/ settings.json.backup* plan.md research.md && git rm -rf --ignore-unmatch skills/qa-conta skills/qa-sourcerank skills/qa-stonegeo skills/virtual-user-testing skills/oci-health skills/proposal-source skills/chief-geo skills/health-report skills/cs skills/cpr skills/sc skills/slack skills/agentmail skills/tweet skills/gws skills/claude-setup-optimizer skills/memory-consolidation skills/meditate skills/test-memory skills/deploy-conta-staging skills/deploy-conta-production skills/deploy-conta-full skills/deploy-sourcerank skills/deploy-claudia skills/contably-guardian skills/sourcerank-guardian skills/pr-impact skills/rex skills/mini-remote skills/nanoclaw skills/computer-use skills/office-hours skills/primer skills/vibc skills/discord skills/loop skills/schedule skills/verify-conta skills/contably-ci-rescue skills/contably-eod skills/contably-snapshot skills/alembic-chain-repair skills/qa-verify && git add -A && git commit -m "chore: filter for public" --allow-empty && unset GITHUB_TOKEN && git remote set-url public https://github.com/escotilha/claude-public.git && git push public nuvini-public:main --force && git checkout master
+cd ~/.claude-setup && ~/.claude-setup/tools/cs-public-extras.sh push-public
 ```
 
-If any part fails, ensure you return to master: `cd ~/.claude-setup && git checkout master`
+If the safety gate aborts, fix the sed rules in `tools/cs-public-extras.sh` (push-public block), then retry.
 
 ### 4. Sync VPS
 

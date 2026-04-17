@@ -240,8 +240,78 @@ case "$cmd" in
     git add -A
     git diff --cached --quiet || git commit -m "docs: update Portuguese READMEs + root summary"
     ;;
+  push-public)
+    # Orphan-push to escotilha/claude-public: always single-commit, no history carried.
+    # Prevents Contably references from ever leaking via git log — every run is a clean slate.
+    prev_branch="$(git symbolic-ref --short HEAD 2>/dev/null || echo master)"
+
+    git branch -D nuvini-public-fresh 2>/dev/null || true
+
+    git checkout --orphan nuvini-public-fresh > /dev/null 2>&1
+    git reset --hard > /dev/null 2>&1
+    git checkout master -- .
+
+    git rm -rf --quiet --ignore-unmatch \
+      memory/ tools/ hooks/ rules/ backups/ config/ launchd/ plans/ guides/ \
+      bin/ commands/ mcp-servers/ settings.json .deep-plan-state.json .gstack/ \
+      settings.json.backup* plan.md research.md .github/ SETUP-BASELINE.md
+
+    for skill in "${EXCLUDED_SKILLS[@]}"; do
+      [[ "$skill" == "_archive" ]] && continue
+      git rm -rf --quiet --ignore-unmatch "skills/$skill"
+    done
+
+    # Scrub Contably mentions across all remaining text files.
+    for f in $(git ls-files); do
+      [[ -f "$f" ]] || continue
+      file -b --mime "$f" 2>/dev/null | grep -q "charset=binary" && continue
+      sed -i '' -E \
+        -e 's/Contably/ExampleProject/g' \
+        -e 's/contably\.ai/example\.com/g' \
+        -e 's/contably_test/example_test/g' \
+        -e 's/\/contably-ci-rescue/\/ci-rescue/g' \
+        -e 's/\/contably-guardian/\/guardian/g' \
+        -e 's/\/verify-conta/\/verify/g' \
+        -e 's/\/qa-conta/\/qa-cycle/g' \
+        -e 's/\/deploy-conta-staging/\/deploy-staging/g' \
+        -e 's/\/deploy-conta-production/\/deploy-production/g' \
+        -e 's/\/deploy-conta-full/\/deploy-full/g' \
+        -e 's/platform-sweep-contably/platform-sweep-example/g' \
+        -e 's/contably-auth-strategy/example-auth-strategy/g' \
+        -e 's/contably-stack/example-stack/g' \
+        -e 's/contably-colors/example-colors/g' \
+        -e 's/\/alembic-chain-repair//g' \
+        -e 's/\/qa-verify//g' \
+        -e 's/alembic-chain-repair//g' \
+        -e 's/qa-verify//g' \
+        -e 's/contably[- ]?ai/example-project/g' \
+        -e 's/contably/example-project/g' \
+        "$f" 2>/dev/null || true
+    done
+
+    git add -A
+    git commit -m "public claude-code skills library" --allow-empty > /dev/null
+
+    if git grep -i -l "contably" > /dev/null 2>&1; then
+      echo "  ABORT: 'contably' still present in public tree after scrub:" >&2
+      git grep -i -l "contably" >&2
+      git checkout "$prev_branch" > /dev/null 2>&1
+      git branch -D nuvini-public-fresh > /dev/null 2>&1
+      exit 1
+    fi
+
+    unset GITHUB_TOKEN
+    git remote set-url public https://github.com/escotilha/claude-public.git 2>/dev/null \
+      || git remote add public https://github.com/escotilha/claude-public.git
+    git push public nuvini-public-fresh:main --force
+
+    git checkout "$prev_branch" > /dev/null 2>&1
+    git branch -D nuvini-public-fresh > /dev/null 2>&1
+
+    echo "  public: orphan-pushed (single commit, no history)"
+    ;;
   *)
-    echo "usage: $0 {backfill-readmes|refresh-root|notify-slack [channel]|all}" >&2
+    echo "usage: $0 {backfill-readmes|refresh-root|notify-slack [channel]|push-public|all}" >&2
     exit 1
     ;;
 esac
