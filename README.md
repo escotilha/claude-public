@@ -231,3 +231,10 @@ user-invocable: true
 
 - Claude Code docs: https://docs.anthropic.com/claude-code
 - Report issues: https://github.com/anthropics/claude-code/issues
+
+## Últimas 3 atualizações
+
+- **2026-04-17** — auto: sync claude-setup
+- **2026-04-17** — fix(cs): preserve README.md content + correct keychain svc names
+- **2026-04-17** — docs: update Portuguese READMEs + root summary
+
