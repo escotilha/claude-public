@@ -14,6 +14,7 @@ The `escotilha/claude-public` repo is a **public-facing showcase** of reusable C
 - `qa-sourcerank` — SourceRank-specific QA
 - `qa-stonegeo` — StoneGEO-specific QA
 - `virtual-user-testing` — Contably-specific persona testing
+- `verify-conta` — Contably-specific verification suite (ruff, mypy, tsc, vitest)
 - `oci-health` — Contably OCI infrastructure health check
 - `proposal-source` — SourceRank client proposals
 - `chief-geo` — SourceRank GEO officer (daily autonomous)
