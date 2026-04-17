@@ -2,46 +2,26 @@
 
 ## O que faz
 
-Audit completo de saúde da plataforma em 5 trilhas paralelas — UX, limpeza de código, segurança, dependências e performance. Sintetiza achados em relatório único priorizado, aguarda aprovação do usuário e aplica correções autonomamente em worktrees git isoladas. Compõe skills existentes (`/fulltest-skill`, `/codebase-cleanup`, `/tech-audit`, `/cto`, `/verify`) e preenche gaps com agentes Sonnet/Opus especializados.
+Executa uma auditoria completa e paralela da plataforma em 5 trilhas simultâneas (UX, limpeza de código, segurança, dependências, performance), consolida achados em um relatório priorizado por severidade, e após aprovação do usuário, aplica automaticamente todas as correções em worktrees git isoladas.
+
+Delega para skills especializados (`fulltest-skill`, `codebase-cleanup`, `tech-audit`, `cto`) e complementa com agentes customizados onde há gaps. Após a primeira execução bem-sucedida, gera automaticamente uma skill específica do projeto que encapsula o conhecimento adquirido (URLs, padrões recorrentes, checks customizados).
 
 ## Como invocar
 
-```bash
-/platform-sweep [--url <url>] [--tracks a,b,c | all] [--fix-mode auto|manual|report-only]
+```
+/platform-sweep [--url <site-url>] [--tracks a,b,c,d,e | all] [--fix-mode auto|manual|report-only]
 ```
 
 **Exemplos:**
-- `/platform-sweep` — auditoria completa com fixes automáticos
-- `/platform-sweep --tracks security,deps --fix-mode report-only` — audit de segurança + dependências sem aplicar correções
-- `/platform-sweep --url https://staging.example.com --fix-mode manual` — audit de URL específica, usuário controla fixes
+
+- `/platform-sweep` — auditoria completa com correção automática
+- `/platform-sweep --tracks security,deps` — apenas segurança e dependências
+- `/platform-sweep --fix-mode report-only` — auditoria sem correções
+- `/platform-sweep --url https://staging.conta.app` — URL customizada
 
 ## Quando usar
 
-- **Auditoria regularmente** (semanal/quinzenal) — detectar regressões antes de escalarem
-- **Antes de releases** — verificar saúde em 5 dimensões de uma vez
-- **Após integração de dependências** — combinar audit de deps com security review
-- **Para melhorar codebase** — run com `--fix-mode manual` para revisar e aprender com as correções propostas
-
-# Platform Sweep
-
-# O que faz
-
-Audit completo de saúde da plataforma em 5 trilhas paralelas — UX, limpeza de código, segurança, dependências e performance. Sintetiza achados em relatório único priorizado, aguarda aprovação do usuário e aplica correções autonomamente em worktrees git isoladas. Compõe skills existentes (`/fulltest-skill`, `/codebase-cleanup`, `/tech-audit`, `/cto`, `/verify`) e preenche gaps com agentes Sonnet/Opus especializados.
-
-## Como invocar
-
-```bash
-/platform-sweep [--url <url>] [--tracks a,b,c | all] [--fix-mode auto|manual|report-only]
-```
-
-**Exemplos:**
-- `/platform-sweep` — auditoria completa com fixes automáticos
-- `/platform-sweep --tracks security,deps --fix-mode report-only` — audit de segurança + dependências sem aplicar correções
-- `/platform-sweep --url https://staging.example.com --fix-mode manual` — audit de URL específica, usuário controla fixes
-
-## Quando usar
-
-- **Auditoria regularmente** (semanal/quinzenal) — detectar regressões antes de escalarem
-- **Antes de releases** — verificar saúde em 5 dimensões de uma vez
-- **Após integração de dependências** — combinar audit de deps com security review
-- **Para melhorar codebase** — run com `--fix-mode manual` para revisar e aprender com as correções propostas
+- **Auditoria completa da plataforma** — antes de releases importantes ou sprints de saúde técnica
+- **Revisão de segurança e dependências** — quando há patches críticos ou CVEs anunciados
+- **Identificar dead code e performance bottlenecks** — rotina trimestral de saúde do código
+- **Validar stack técnico** — verificar EOL, deprecations e oportunidades de otimização

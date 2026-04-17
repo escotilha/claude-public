@@ -1,24 +1,27 @@
-# CTO — Assessor Técnico Geral
+# CTO - Assessor Técnico de IA Universal
 
 ## O que faz
 
-Realiza avaliação técnica completa do projeto em múltiplas perspectivas — arquitetura, segurança, performance e qualidade de código. Executa em dois modos: **sequencial** (para questões focadas) ou **enxame paralelo** (análise completa com 4 especialistas simultâneos). Cada analista investiga seu domínio em profundidade, detecta padrões transversais e prioriza achados por impacto e esforço de correção.
+Analisa codebases, avalia arquitetura, identifica vulnerabilidades e guia decisões técnicas. Funciona em **modo sequencial** (análise focada em uma área) ou **modo swarm** (4 analistas especializados em paralelo para revisões completas). Detecta automaticamente padrões problemáticos, dívida técnica, falhas de segurança e oportunidades de otimização, integrando-se com memory para aprender padrões recorrentes.
+
+Aplica a metodologia Glasswing para encontrar vulnerabilidades em código antigo e verificação de injeção de IA em aplicações com agentes.
 
 ## Como invocar
 
-```bash
-/cto <pergunta ou area para revisar>
+```
+/cto [pergunta ou área para revisar]
 ```
 
 **Exemplos:**
 
-- `/cto "Faça auditoria de segurança no módulo de autenticação"`
-- `/cto "Avalie escalabilidade da arquitetura do sistema"`
-- `/cto` (sem argumentos — inicia descoberta completa do projeto)
+- `/cto revisar segurança do módulo de autenticação`
+- `/cto avaliação completa de escalabilidade`
+- `/cto isso é uma boa arquitetura?` (sequencial)
+- `Revisar este projeto como CTO` (swarm automático)
 
 ## Quando usar
 
-- **Auditoria pré-lançamento**: Validar projeto antes de colocar em produção
-- **Questões técnicas específicas**: "Devemos migrar para GraphQL?" ou "Como otimizar as queries?"
-- **Avaliação de dívida técnica**: Identificar padrões problemáticos e priorizar refatoração
-- **Onboarding de novo projeto**: Entender arquitetura, dependências e riscos em uma sessão completa
+- **Pré-lançamento**: Auditoria completa antes de produção
+- **Revisão de segurança**: Análise de vulnerabilidades OWASP e padrões fail-open
+- **Decisões técnicas**: Avaliar alternativas de tech stack ou arquitetura
+- **Refatoração**: Priorizar débito técnico e gerar planos de implementação

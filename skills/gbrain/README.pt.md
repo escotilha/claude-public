@@ -2,9 +2,9 @@
 
 ## O que faz
 
-GBrain é um cérebro de conhecimento pessoal nativo em Postgres com busca híbrida RAG. Armazena informações sobre pessoas, empresas, conceitos e reuniões como páginas com verdade compilada + timeline append-only, interligadas via grafo tipado. Integra busca por palavra-chave (tsvector) + vetores (HNSW) + fusão RRF para recuperação precisa.
+GBrain é um sistema de gestão de conhecimento pessoal nativo em PostgreSQL com busca híbrida RAG. Armazena informações sobre pessoas, empresas, conceitos e reuniões como páginas com verdade compilada e timelines append-only, interligadas via grafo tipado. Combina busca por palavra-chave (tsvector), busca vetorial (embeddings 1536-dim) e fusão RRF para recuperação precisa e contextualizada.
 
-Funciona em três camadas: importa arquivos markdown para Postgres, disponibiliza 30 ferramentas MCP para agentes, e injeta páginas relevantes no contexto do Claudia antes de cada inferência — sem overhead de MCP.
+Integra-se nativamente ao Claudia injetando conhecimento relevante antes de cada inferência, funcionando como Source 5 no context builder de memória.
 
 ## Como invocar
 
@@ -13,14 +13,15 @@ Funciona em três camadas: importa arquivos markdown para Postgres, disponibiliz
 ```
 
 **Exemplos:**
-- `/gbrain query "O que sabemos sobre a Empresa X?"` — busca híbrida com expansão multi-query
+- `/gbrain setup` — instala GBrain no VPS (uma única vez)
 - `/gbrain import /path/to/markdown/` — indexa diretório de markdown
-- `/gbrain ingest` — processa informações novas, atualiza páginas existentes
-- `/gbrain get_stats` — visão geral do cérebro (contagem de páginas, chunks, links)
+- `/gbrain query "O que sabemos sobre a Empresa X?"` — busca híbrida com expansão multi-query
+- `/gbrain ingest` — processa novas informações e atualiza páginas
+- `/gbrain stats` — estatísticas do brain
 
 ## Quando usar
 
-- **Centralizar conhecimento pessoal** — pessoas, empresas, conceitos que você referencia frequentemente
-- **Buscar contexto antes de respostas** — integração automática no prompt do Claudia para decisões informadas
-- **Capturar aprendizados** — sinal original (ideias, frameworks) e menções de entidades durante sessões
-- **Manter relacionamentos tipados** — rastrear quem conhece quem, investimentos, discussões com atribuição de data e fonte
+- **Consultar conhecimento pessoal** antes de responder questões sobre pessoas, empresas ou conceitos já rastreados
+- **Ingerir informações** de conversas, reuniões ou pesquisa para construir conhecimento composto automaticamente
+- **Manter qualidade** — verificar saúde do brain, encontrar páginas órfãs ou obsoletas, consolidar entradas de timeline
+- **Expandir capacidade** — importar arquivos markdown novos ou sincronizar repositórios existentes regularmente

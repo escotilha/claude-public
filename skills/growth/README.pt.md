@@ -2,30 +2,30 @@
 
 ## O que faz
 
-Analisa e otimiza funis de conversão, precificação, retenção e aquisição em SaaS. Executa auditorias estruturadas em 8 modos: CRO em landing pages, estratégia de preços, fluxo de signup, onboarding, SEO/GEO, prevenção de churn, sequências de email e páginas de comparação com concorrentes. Cada modo produz um relatório acionável com recomendações específicas, diffs de código e planos de implementação.
+Analisa e otimiza funis de conversão em SaaS através de 8 modos especializados: CRO em landing pages, estratégia de pricing, fluxo de signup, onboarding, auditoria SEO/GEO, prevenção de churn, sequências de email e páginas de comparação. Cada modo gera relatório estruturado com recomendações acionáveis, diffs de código e estratégias A/B.
+
+Integra busca na memória de testes anteriores, análise visual com navegador, pesquisa competitiva e frameworks de crescimento (Van Westendorp, health score, GEO readiness).
 
 ## Como invocar
 
-```bash
-/growth <url ou modo>
+```
+/growth <modo> [url ou argumentos]
 ```
 
-**Modos disponíveis:**
-- `/growth cro https://exemplo.com` — Otimizar landing page
-- `/growth pricing` — Analisar modelo de preços
-- `/growth signup` — Auditar fluxo de registro
-- `/growth onboarding` — Otimizar primeiro uso
-- `/growth seo` — SEO técnico + GEO (AI Overviews)
-- `/growth churn` — Análise de retenção
-- `/growth email` — Design de sequências de email
-- `/growth competitor https://concorrente.com` — Página de comparação
-- `/growth full-audit` — Executar todos os modos
+**Exemplos:**
+- `/growth cro https://app.com/landing` — análise CRO da página
+- `/growth pricing` — otimização de modelo de preços
+- `/growth signup` — auditoria do fluxo de registro
+- `/growth onboarding` — otimização da experiência inicial
+- `/growth seo` — auditoria técnica SEO + GEO readiness
+- `/growth churn` — análise de retenção e intervenções
+- `/growth email` — design de sequências de email
+- `/growth competitor https://rival.com` — página de comparação
+- `/growth full-audit` — executa todos os modos
 
 ## Quando usar
 
-- **Aumentar taxa de conversão** em landing pages, signup ou checkout
-- **Revisar precificação** para melhorar receita e adoção
-- **Otimizar visibilidade em buscas**, incluindo readiness para AI Overviews do Google
-- **Reduzir churn** e aumentar retenção com intervenções específicas
-- **Validar positioning** contra concorrentes com página comparativa
-- **Acelerar onboarding** para reduzir tempo até "aha moment"
+- **Aumentar taxa de conversão** em landing pages, signup ou onboarding
+- **Validar ou redesenhar pricing** para capturar mais receita
+- **Investigar e reduzir churn** com identificação de fatores de risco
+- **Melhorar visibilidade orgânica** incluindo otimização para AI Overviews (GEO)

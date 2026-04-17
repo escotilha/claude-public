@@ -2,26 +2,27 @@
 
 ## O que faz
 
-Cria websites B2B SaaS, dashboards e landing pages profissionais com UX/UI moderno. Implementa design responsivo com Tailwind CSS e React, otimizado para conversão. Trabalha com cores, tipografia, componentes reutilizáveis e padrões comprovados de design SaaS, utilizando ferramentas atômicas (Write, Edit, Read, WebFetch) para iterar até alcançar o resultado final.
+Cria websites B2B SaaS profissionais, dashboards e landing pages com UX/UI moderno. Utiliza Tailwind CSS e React, otimizando para conversão. Trabalha com navegação intuitiva, paletas de cores estratégicas, tipografia harmoniosa e componentes reutilizáveis.
+
+Incorpora boas práticas de design responsivo, acessibilidade (WCAG AA), SEO/AEO e oferece suporte a dark mode. Salva padrões de componentes bem-sucedidos em memória para evolução contínua sem mudanças de código.
 
 ## Como invocar
 
 ```
-/website-design [tipo de página] [contexto/indústria]
+/website-design
 ```
 
 **Exemplos:**
-
-- `/website-design homepage startup fintech`
-- `/website-design landing-page geração de leads SaaS`
-- `/website-design dashboard analytics dark-mode`
-- `/website-design pricing page B2B conversão`
+- `/website-design` - Homepage B2B com hero, features e CTA
+- `/website-design dashboard analytics` - Dashboard com gráficos e KPIs
+- `/website-design landing page freemium` - Landing page otimizada para conversão
+- `/website-design dashboard admin` - Painel administrativo com tabelas e formulários
 
 ## Quando usar
 
-- Construir websites de marketing B2B SaaS
-- Criar dashboards de produtos e painéis admin
-- Desenhar landing pages otimizadas para conversão
-- Projetar páginas de preços e comparações
-- Implementar dashboards de visualização de dados
-- Qualquer interface web profissional com UX/UI moderno
+- Construir websites de marketing para SaaS B2B
+- Criar dashboards de produto e painéis administrativos
+- Desenhar landing pages para geração de leads
+- Otimizar páginas de preços e comparações de features
+- Implementar visualização de dados com gráficos interativos
+- Qualquer interface web profissional exigindo UX/UI moderno
