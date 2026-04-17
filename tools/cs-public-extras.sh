@@ -168,10 +168,17 @@ post_slack() {
 }
 
 # Build a dynamic message listing new/changed skills since last push to public.
-# Reads origin/nuvini-public (if exists) as the baseline.
+# Baseline: local tag `cs-last-push` (updated at end of each successful run).
+# If the tag doesn't exist yet, falls back to HEAD~5 — good enough for first few runs.
 build_slack_message() {
-  local base_ref="refs/remotes/public/main"
-  git fetch public main --quiet 2>/dev/null || base_ref="HEAD~1"
+  local base_ref
+  if git rev-parse --verify --quiet refs/tags/cs-last-push > /dev/null; then
+    base_ref="cs-last-push"
+  else
+    # First run — diff last 5 commits to capture recent activity
+    base_ref="HEAD~5"
+    git rev-parse --verify --quiet "$base_ref" > /dev/null || base_ref="$(git rev-list --max-parents=0 HEAD | head -1)"
+  fi
 
   local changed_skills
   changed_skills="$(git diff --name-only "$base_ref"...HEAD -- 'skills/' 2>/dev/null \
@@ -182,6 +189,7 @@ build_slack_message() {
   while IFS= read -r s; do
     [[ -z "$s" ]] && continue
     is_excluded "$s" && continue
+    # "new" means the skill dir didn't exist at the baseline commit
     if git cat-file -e "$base_ref":"skills/$s/SKILL.md" 2>/dev/null; then
       updated_skills+=" $s"
     else
@@ -216,7 +224,10 @@ case "$cmd" in
   notify-slack)
     channel="${2:-C0AS64REV4J}"
     msg="$(build_slack_message)"
-    post_slack "$channel" "$msg"
+    if post_slack "$channel" "$msg"; then
+      # Advance the baseline tag so next run diffs from here
+      git tag -f cs-last-push HEAD > /dev/null 2>&1
+    fi
     ;;
   all)
     # Run after step 1 (commit) so new skills already on disk get READMEs.
