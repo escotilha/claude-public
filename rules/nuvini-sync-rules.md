@@ -15,6 +15,9 @@ The `escotilha/claude-public` repo is a **public-facing showcase** of reusable C
 - `qa-stonegeo` — StoneGEO-specific QA
 - `virtual-user-testing` — Contably-specific persona testing
 - `verify-conta` — Contably-specific verification suite (ruff, mypy, tsc, vitest)
+- `contably-ci-rescue` — Contably-specific CI failure diagnosis and fix playbook
+- `contably-eod` — Contably end-of-day autonomous pipeline
+- `contably-snapshot` — Generate Contably CODEBASE-REFERENCE.md
 - `oci-health` — Contably OCI infrastructure health check
 - `proposal-source` — SourceRank client proposals
 - `chief-geo` — SourceRank GEO officer (daily autonomous)
