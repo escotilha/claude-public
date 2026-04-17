@@ -17,7 +17,7 @@ Paste-ready config for https://claude.ai/code/routines → **New routine**.
 
 | Field | Value |
 |---|---|
-| **Repo** | `escotilha/contably` |
+| **Repo** | `Contably/contably` |
 | **Branch (base)** | `main` |
 | **Allow unrestricted branch pushes** | ✅ enabled (scoped to `claude/eod-*`) |
 | **Create PRs** | ❌ disabled (morning review, not auto-PR) |
@@ -38,7 +38,7 @@ Paste these as secrets in the Routine config. **Never commit these values anywhe
 |---|---|---|
 | `RESEND_API_KEY` | macOS Keychain → Contably staging secret | ✅ |
 | `CONTABLY_EOD_DISCORD_WEBHOOK` | Discord server → EOD alerts channel → Integrations → Webhooks → New Webhook | ✅ |
-| `GH_TOKEN` | GitHub fine-grained token with `contents:write`, `actions:read`, `pull_requests:read` on `escotilha/contably` | ✅ |
+| `GH_TOKEN` | GitHub fine-grained token with `contents:write`, `actions:read`, `pull_requests:read` on `Contably/contably` | ✅ |
 | `QA_DB_URL` | Contably Supabase QA database connection string | ✅ |
 | `ENABLE_KUBECTL` | `false` (start without kubectl; enable later if /contably-ci-rescue needs prod-side introspection) | optional |
 | `KUBECONFIG_B64` | `cat ~/.kube/config \| base64` — only if `ENABLE_KUBECTL=true` | optional |

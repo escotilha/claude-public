@@ -143,6 +143,7 @@
 
 ## References
 
+- [reference_contably_repo.md](reference_contably_repo.md) — Contably code lives at Contably/contably (org), NOT escotilha/contably. escotilha = Pierre's personal GitHub handle with admin on the Contably org.
 - [reference_gemini_api.md](reference_gemini_api.md) — Google Gemini API key in macOS Keychain (GEMINI_API_KEY)
 - [reference_cloudflare.md](reference_cloudflare.md) — Cloudflare API token with Zone.DNS edit for all zones, account details, zone IDs, and where credentials are stored
 - [reference_cloudflare_nuvini.md](reference_cloudflare_nuvini.md) — Cloudflare API token for nuvini.ai domain DNS — separate account (P@nuvini.co) from main (p@nove.co)
