@@ -564,6 +564,20 @@ Evaluate the session for skill-worthiness ONLY if at least 2 of these conditions
 | User correction happened   | "No, do X instead" — the corrected approach is worth saving |
 | Same pattern seen 2+ times | Repetition signals reusability                              |
 | Session > 45 minutes       | Long sessions often contain extractable procedures          |
+| Orchestrate chain novelty  | `/orchestrate` ran a skill sequence not in patterns.json    |
+| Orchestrate chain repeat   | Same `/orchestrate` skill sequence appeared ≥3 times in .orchestrate/ history |
+
+### Orchestrate-Aware Detection (Phase 6a)
+
+If the session includes `/orchestrate` runs, also check:
+
+1. Look for `.orchestrate/<run-id>/REPORT.md` files in the current repo or (if multi-session) the last 30 days.
+2. Extract the skill sequence from each run's `phase-plan.md` → `[deep-plan, ship, verify, cpr]` form.
+3. Compare against `~/.claude-setup/skills/orchestrate/patterns.json` canonical chains.
+4. **Trigger skill generation** if either:
+   - A chain appears ≥3 times in the last 30 days AND is NOT in `patterns.json` → propose adding it as a new canonical chain (update `patterns.json`, not a new skill).
+   - A chain appears ≥3 times AND spans ≥4 skills AND has a distinctive intent prefix (e.g., "eSocial event implementation") → propose a new composite skill wrapping that chain.
+5. **Never auto-commit.** Always surface the proposal to the user for `go` approval, consistent with `/orchestrate`'s gate model.
 
 ### Skill Stub Generation
 

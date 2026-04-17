@@ -236,7 +236,8 @@ Iterate `phase-plan.md`. For each sub-phase:
 
 ### Phase 9: Report + Learn
 - Write `REPORT.md` — per-phase outcomes, files, SHAs, PR, deploys, cost, duration, attention items.
-- Auto-invoke `/meditate` if run > 30 min.
+- Auto-invoke `/meditate` if run > 30 min OR run used ≥3 distinct skills in a sequence. Pass `run-id` and `phase-plan.md` path so `/meditate` Phase 6a can detect chain novelty/repetition and propose new skills or canonical chains.
+- `/meditate` Phase 6a may return a skill/chain proposal. If yes, display to user and require `go` to save (never auto-commit).
 - `--pdf` flag → render REPORT via `/officecli`.
 
 ---

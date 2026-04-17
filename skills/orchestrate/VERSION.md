@@ -1,5 +1,15 @@
 # /orchestrate — Version History
 
+## v1.1.0 — 2026-04-17 (same day)
+
+**Skill-authoring loop** wired via `/meditate` Phase 6a.
+
+- Phase 9 now passes `run-id` + `phase-plan.md` to `/meditate`.
+- `/meditate` Phase 6a detects: (a) novel chains not in `patterns.json`, (b) chains repeated ≥3× in last 30 days.
+- Novel repeat → proposes new canonical chain (updates `patterns.json`).
+- Novel repeat + ≥4 skills + distinctive intent → proposes new composite skill.
+- **Never auto-commits.** User must reply `go` to save. Consistent with orchestrate's gate model.
+
 ## v1.0.0 — 2026-04-17
 
 **Shipped.** Supersedes `/project-orchestrator` (deleted same day).
