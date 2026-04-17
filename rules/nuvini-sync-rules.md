@@ -1,12 +1,12 @@
 # Nuvini Claude Repo Sync Rules
 
-Rules for what to include/exclude when pushing to `Nuvinigroup/claude`.
+Rules for what to include/exclude when pushing to `escotilha/claude-public`.
 
 ## Purpose
 
-The Nuvinigroup/claude repo is a **public-facing showcase** of reusable Claude Code skills and agents. It should contain only generic, portable skills — not project-specific, infrastructure-specific, or internal tooling.
+The `escotilha/claude-public` repo is a **public-facing showcase** of reusable Claude Code skills and agents. It should contain only generic, portable skills — not project-specific, infrastructure-specific, or internal tooling.
 
-## EXCLUDE from Nuvinigroup/claude
+## EXCLUDE from escotilha/claude-public
 
 ### Project-Specific Skills (tied to a single project)
 
@@ -70,7 +70,7 @@ Never push content containing:
 - `meditate` — tied to personal memory pipeline
 - `test-memory` — debug skill
 
-## INCLUDE in Nuvinigroup/claude
+## INCLUDE in escotilha/claude-public
 
 ### Generic, Reusable Skills
 
@@ -114,7 +114,7 @@ All agents in `~/.claude-setup/agents/` are generic and safe to share.
 
 ## Decision Rule
 
-**Before sharing a skill to Nuvinigroup/claude, ask:**
+**Before sharing a skill to escotilha/claude-public, ask:**
 
 1. Does it reference a specific project name (Contably, SourceRank, StoneGEO)? -> EXCLUDE
 2. Does it contain hardcoded IPs, URLs, or credentials? -> EXCLUDE
