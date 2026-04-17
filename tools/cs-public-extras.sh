@@ -53,7 +53,10 @@ generate_pt_readme() {
   echo "  generating README.pt.md for $skill"
 
   local api_key
-  api_key="$(security find-generic-password -a "$USER" -s ANTHROPIC_API_KEY -w 2>/dev/null || true)"
+  api_key="$(security find-generic-password -s claude-code-anthropic-api-key -w 2>/dev/null || true)"
+  if [[ -z "$api_key" ]]; then
+    api_key="$(security find-generic-password -s ANTHROPIC_API_KEY -w 2>/dev/null || true)"
+  fi
   if [[ -z "$api_key" ]]; then
     api_key="${ANTHROPIC_API_KEY:-}"
   fi
@@ -138,9 +141,12 @@ post_slack() {
   local message="$2"
 
   local token
-  token="$(security find-generic-password -a "$USER" -s SLACK_BOT_TOKEN -w 2>/dev/null || true)"
+  token="$(security find-generic-password -s claude-code-slack-bot-token -w 2>/dev/null || true)"
   if [[ -z "$token" ]]; then
-    echo "  WARN: SLACK_BOT_TOKEN not in Keychain — skipping Slack post" >&2
+    token="$(security find-generic-password -s SLACK_BOT_TOKEN -w 2>/dev/null || true)"
+  fi
+  if [[ -z "$token" ]]; then
+    echo "  WARN: Slack bot token not in Keychain — skipping Slack post" >&2
     return 0
   fi
 
