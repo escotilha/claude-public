@@ -247,6 +247,12 @@ case "$cmd" in
 
     git branch -D nuvini-public-fresh 2>/dev/null || true
 
+    # Stash the public README to a temp location BEFORE we git rm tools/.
+    public_readme_tmp="$(mktemp)"
+    if [[ -f "$SETUP_DIR/tools/cs-public-readme.md" ]]; then
+      cp "$SETUP_DIR/tools/cs-public-readme.md" "$public_readme_tmp"
+    fi
+
     git checkout --orphan nuvini-public-fresh > /dev/null 2>&1
     git reset --hard > /dev/null 2>&1
     git checkout master -- .
@@ -262,8 +268,9 @@ case "$cmd" in
     done
 
     # Swap in the public-facing README (friendlier showcase) + append changelog.
-    if [[ -f "$SETUP_DIR/tools/cs-public-readme.md" ]]; then
-      cp "$SETUP_DIR/tools/cs-public-readme.md" README.md
+    if [[ -s "$public_readme_tmp" ]]; then
+      cp "$public_readme_tmp" README.md
+      rm -f "$public_readme_tmp"
       recent="$(git log master -3 --pretty=format:'- **%ad** — %s' --date=short 2>/dev/null || echo '')"
       if [[ -n "$recent" ]]; then
         {
