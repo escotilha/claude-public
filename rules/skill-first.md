@@ -24,7 +24,7 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Parallel feature branches     | `/parallel-dev`         | Multiple independent features                            |
 | Clean unused files            | `/codebase-cleanup`     | Project has cruft                                        |
 | Design website/landing page   | `/website-design`       | Any web UI design task                                   |
-| Full project lifecycle        | `/project-orchestrator` | New project from zero to production                      |
+| Meta-orchestration (any task) | `/orchestrate`          | Refine intent → plan → execute → verify → ship → deploy, with configurable gates. Supersedes `/project-orchestrator`. |
 | End-of-session reflection     | `/meditate`             | After /ship, /cto, /parallel-dev, long work              |
 | Full product from idea        | `/cpo`                  | Product lifecycle: discovery → spec → build              |
 | Git worktree management       | `/maketree`             | Create/manage isolated worktrees                         |
