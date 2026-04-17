@@ -261,6 +261,23 @@ case "$cmd" in
       git rm -rf --quiet --ignore-unmatch "skills/$skill"
     done
 
+    # Swap in the public-facing README (friendlier showcase) + append changelog.
+    if [[ -f "$SETUP_DIR/tools/cs-public-readme.md" ]]; then
+      cp "$SETUP_DIR/tools/cs-public-readme.md" README.md
+      recent="$(git log master -3 --pretty=format:'- **%ad** — %s' --date=short 2>/dev/null || echo '')"
+      if [[ -n "$recent" ]]; then
+        {
+          echo ""
+          echo "---"
+          echo ""
+          echo "## Últimas 3 atualizações"
+          echo ""
+          echo "$recent"
+          echo ""
+        } >> README.md
+      fi
+    fi
+
     # Scrub Contably mentions across all remaining text files.
     for f in $(git ls-files); do
       [[ -f "$f" ]] || continue
