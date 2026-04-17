@@ -83,14 +83,29 @@ Runs three phases nightly:
 
 ---
 
+## Execution Modes
+
+`/contably-eod` runs in one of two modes:
+
+| Mode | Detected by | Gate behavior | Branch target |
+|---|---|---|---|
+| **Interactive** | running inside a `claude` REPL, user present | `go` gates honored | current feature branch |
+| **Routine** | env var `CLAUDE_ROUTINE_ID` set OR `--autonomous` flag | No gates (impossible in cloud); safety floors still enforced | `claude/eod-<date>` branch |
+
+Routine mode is what fires on Anthropic's cloud at 22:00 BRT. Everything below adapts.
+
 ## Pre-Flight
 
 1. **Repo lock:** `git remote get-url origin` must match Contably's origin. Abort otherwise.
-2. **Clean working dir:** uncommitted changes → abort with message "EOD runs on committed code only. Commit or stash first."
-3. **Branch check:** must be on a feature/work branch, NOT `main` or `master`. Abort otherwise.
-4. **Budget bounds:** $10 ≤ budget ≤ $50.
-5. **Discord webhook:** if `$CONTABLY_EOD_DISCORD_WEBHOOK` not set, warn user (failure alerts will fall back to console only).
-6. **AgentMail/Resend reachable:** test the agenda send channel. If unreachable, skip Phase 3 email (write file only).
+2. **Mode detection:** set `MODE=routine` if `$CLAUDE_ROUTINE_ID` or `--autonomous`, else `MODE=interactive`.
+3. **Clean working dir** (interactive only): uncommitted changes → abort. In Routine mode, the env is fresh-cloned so this is always clean.
+4. **Branch check**:
+   - Interactive: must be on a feature/work branch, NOT `main`/`master`.
+   - Routine: create/checkout `claude/eod-$(date +%Y-%m-%d)` from `main` — never work on `main` directly.
+5. **Budget bounds:** $10 ≤ budget ≤ $50.
+6. **Required env vars (Routine mode)**: `ANTHROPIC_API_KEY`, `GITHUB_TOKEN`, `RESEND_API_KEY`, `CONTABLY_EOD_DISCORD_WEBHOOK`. Missing any → write failure to stdout + Discord, exit 1.
+7. **Optional env vars**: `KUBECONFIG_B64` (if present, decode to `~/.kube/config` for CI rescue paths), `OCI_CLI_KEY_CONTENT` (decode for OCI kubectl).
+8. **Skip in Routine mode**: the startup summary gate. Proceed directly to Phase 1.
 
 ### Startup Summary
 
@@ -332,23 +347,34 @@ If run as Routine: do NOT invoke `/meditate` recursively on the EOD run itself (
 
 ---
 
-## Scheduling as a Routine
+## Scheduling as a Claude Code Routine
 
+Routines are cloud-hosted (Anthropic infrastructure), so `/contably-eod` runs nightly without any local machine being on.
+
+**Create via web UI** (recommended — supports env vars + setup script):
+1. Go to https://claude.ai/code/routines → **New routine**
+2. Paste config from `~/.claude-setup/skills/contably-eod/routine-config.md`
+3. Set trigger: daily 22:00 local (BRT), weekdays
+4. Bind repo: `escotilha/contably`, enable "Allow unrestricted branch pushes" (scoped to `claude/*`)
+5. Add env vars + setup script per `routine-setup.sh`
+
+**Create via `/schedule` skill** (simpler, prompt-only):
 ```bash
-/contably-eod --as-routine "0 1 * * 2-6"
+/schedule create \
+  --name contably-eod \
+  --cron "0 22 * * 1-5" \
+  --prompt "/contably-eod --autonomous" \
+  --repo escotilha/contably
 ```
+Note: this path doesn't expose env-var or setup-script config, so `/contably-ci-rescue` subtasks that need kubectl will fall back to console-only reporting.
 
-Translates to:
-- 01:00 UTC Tuesday–Saturday (= 22:00 BRT Monday–Friday)
-- Delegates to `/schedule` skill for registration
-- Routine invocation runs with `--autonomous` implicit (no live gating possible)
-- Budget cap $30 still enforced
-- Safety floors (no prod, no main merge) still enforced
-- Failure escalation to Discord webhook remains active
+**Routine limits:**
+- Pro: 5 runs/day · Max: 15 · Team: 25
+- Cloud MCP connectors only (no local MCP servers)
+- Repo clones fresh each run; `claude/`-prefixed branches for writes
+- No interactive prompts; `--autonomous` implicit
 
-To change schedule: `/schedule update contably-eod <new-cron>`
-To pause: `/schedule pause contably-eod`
-To list: `/schedule list`
+To manage: claude.ai/code/routines OR `/schedule list|pause|resume|delete`
 
 ---
 
