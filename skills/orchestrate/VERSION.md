@@ -18,7 +18,7 @@
 1. Budget: $10 warn / $50 cap per run
 2. Approval password: literal word `go` (case-insensitive, whole-word match)
 3. v1 scope: Contably single-repo only
-4. Location: private `~/.claude-setup/skills/` — not published to Nuvinigroup/claude
+4. Location: `~/.claude-setup/skills/` (private origin: escotilha/claude) — also published to the public sibling `escotilha/claude-public` via `/cs`
 5. `/project-orchestrator` removed immediately
 6. Fan-out: sequential in `--gated`, parallel in `--autonomous`
 7. Routines: first-class via `--as-routine <cron>`
