@@ -51,6 +51,7 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Task                        | Skill                   | When                                                                |
 | --------------------------- | ----------------------- | ------------------------------------------------------------------- |
 | Full QA cycle (any project) | `/qa-cycle`             | Master orchestrator — auto-detects project                          |
+| Contably verification suite | `/verify-conta`         | Full ruff + mypy + pytest + tsc + eslint + build + vitest + gitleaks |
 | Contably QA specifically    | `/qa-conta`             | Contably-specific testing                                           |
 | SourceRank QA specifically  | `/qa-sourcerank`        | SourceRank-specific testing                                         |
 | SourceRank GEO strategy     | `/chief-geo`            | GEO knowledge base, product audit, visibility testing, daily runs   |

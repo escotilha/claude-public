@@ -11,7 +11,13 @@
   "modelOverrides": {
     "claude-opus-4-6": "claude-opus-4-6",
     "claude-sonnet-4-6": "claude-sonnet-4-6",
+    "claude-opus-4-7": "claude-opus-4-7",
+    "claude-sonnet-4-7": "claude-sonnet-4-7",
     "claude-haiku-4-5-20251001": "claude-haiku-4-5-20251001"
+  },
+  "attribution": {
+    "enabled": true,
+    "footer": "🤖 Generated with Claude Code"
   },
   "hooks": {
     "SessionStart": [
