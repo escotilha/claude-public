@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>com.psm2.mlx-proxy</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/usr/local/bin/python3</string>
+      <string>/Users/psm2/bin/mlx-proxy.py</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+    <key>StandardOutPath</key>
+    <string>/Users/psm2/Library/Logs/mlx-proxy.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/psm2/Library/Logs/mlx-proxy.log</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>HOME</key>
+      <string>/Users/psm2</string>
+      <key>PATH</key>
+      <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin</string>
+      <key>MLX_PROXY_HOST</key>
+      <string>0.0.0.0</string>
+      <key>MLX_PROXY_PORT</key>
+      <string>1240</string>
+      <key>MLX_UPSTREAM</key>
+      <string>http://127.0.0.1:1235</string>
+      <key>MLX_UPSTREAM_TIMEOUT</key>
+      <string>120</string>
+      <key>MLX_LAUNCHD_LABEL</key>
+      <string>com.psm2.mlx-server</string>
+    </dict>
+  </dict>
+</plist>

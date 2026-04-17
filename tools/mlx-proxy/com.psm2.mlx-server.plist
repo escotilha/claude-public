@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>com.psm2.mlx-server</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/Users/psm2/Library/Python/3.12/bin/mlx_lm.server</string>
+      <string>--model</string>
+      <string>mlx-community/Qwen3.5-35B-A3B-4bit</string>
+      <string>--host</string>
+      <string>0.0.0.0</string>
+      <string>--port</string>
+      <string>1235</string>
+      <string>--trust-remote-code</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+    <key>Nice</key>
+    <integer>5</integer>
+    <key>LowPriorityIO</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Users/psm2/Library/Logs/mlx-server.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/psm2/Library/Logs/mlx-server.log</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>HOME</key>
+      <string>/Users/psm2</string>
+      <key>PATH</key>
+      <string>/Users/psm2/Library/Python/3.12/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+  </dict>
+</plist>
