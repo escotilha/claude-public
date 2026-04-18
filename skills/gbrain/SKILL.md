@@ -161,6 +161,81 @@ Quick brain overview.
 gbrain get_stats
 ```
 
+## Minions — Durable Job Queue (v0.11+)
+
+GBrain v0.11 ships **Minions**: a BullMQ-backed durable job queue that uses GBrain's
+existing Postgres/PGLite as the backend. Solves the "subagent timed out silently"
+failure mode — jobs persist, retry on failure, and survive process crashes.
+
+**Why it matters:** Replaces fire-and-forget subagent spawns with a guaranteed-delivery
+queue. Directly analogous to the `/parallel-dev` and `/qa-cycle` timeout problems.
+See `~/.claude-setup/memory/auto/tech_gbrain_integration.md` for the full pattern.
+
+### Setup (VPS)
+
+```bash
+# Minions ships with gbrain v0.11+ — verify
+gbrain --version   # >= 0.11.0
+
+# Redis optional — Postgres backend is default (uses gbrain DB)
+gbrain minions init
+
+# Start the worker process (run under systemd for durability)
+gbrain minions worker --concurrency 4 &
+```
+
+**Systemd unit** (`/etc/systemd/system/gbrain-minions.service`):
+
+```ini
+[Unit]
+Description=GBrain Minions worker
+After=postgresql.service
+
+[Service]
+ExecStart=/usr/local/bin/gbrain minions worker --concurrency 4
+Restart=always
+EnvironmentFile=/opt/claudia/.env
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Enqueue a job
+
+```bash
+# CLI
+gbrain minions enqueue \
+  --queue "intel-scan" \
+  --name "scan-openclaw" \
+  --payload '{"targets": ["@garrytan", "@openclawHQ"]}' \
+  --attempts 3 \
+  --backoff exponential
+
+# From TypeScript (Claudia, AgentWave)
+import { enqueueJob } from "gbrain/minions";
+await enqueueJob("intel-scan", { name: "scan-openclaw", payload: {...} });
+```
+
+### Inspect / manage
+
+```bash
+gbrain minions list --queue intel-scan          # pending + active
+gbrain minions failed --queue intel-scan        # failed jobs
+gbrain minions retry <job-id>                   # re-enqueue
+gbrain minions drain --queue intel-scan         # clear queue
+gbrain minions stats                            # global health
+```
+
+### When to use Minions vs Task/TeamCreate
+
+| Pattern                              | Use Minions? | Reason                                |
+| ------------------------------------ | ------------ | ------------------------------------- |
+| Scheduled background task (cron)     | **Yes**      | Retry + durability > systemd cron     |
+| Agent subtask likely to timeout      | **Yes**      | Workflow needs guaranteed completion  |
+| Long-running ingest (brain, docs)    | **Yes**      | Idempotent + checkpointed             |
+| Short interactive subagent (<30s)    | No           | Task tool is lower overhead           |
+| Real-time cross-agent coordination   | No           | Use TeamCreate/SendMessage — messaging, not work queue |
+
 ## MCP Tools (30)
 
 When running as MCP server (`gbrain serve`), these tools are available:

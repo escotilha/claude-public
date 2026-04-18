@@ -220,6 +220,22 @@ If `agent-browser` is not found, fall back to `browse` CLI, then Chrome DevTools
 
 ---
 
+## Durability: Minions Queue (optional)
+
+Long-running QA cycles (discovery + fix loops) can silently timeout. When `gbrain minions` is available, enqueue each persona/fix run as a durable job instead of a live Task — workers retry on failure, jobs survive crashes.
+
+```bash
+# Enqueue persona discovery as a job
+gbrain minions enqueue --queue qa-{project} \
+  --name "persona-{slug}" \
+  --payload '{"persona": "...", "project": "{project}"}' \
+  --attempts 2 --backoff exponential
+```
+
+Use Minions when: nightly/scheduled QA runs, persona runs taking >10min, fix loops with flaky CI. Use Task/TeamCreate when: interactive debugging, real-time cross-persona coordination. See `/gbrain` skill for queue setup.
+
+---
+
 ## Phase 0: Detect + Route
 
 ### 0a. Identify the Project

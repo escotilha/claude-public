@@ -727,11 +727,26 @@ This serves as a compressed context checkpoint if the agent's window fills up.
 ```
 IF TeamCreate is available AND ready features >= 2:
   → Agent Teams mode (preferred — real-time coordination)
+ELIF gbrain Minions available AND features expected to exceed 10min runtime:
+  → Minions mode (durable queue — survives timeouts, auto-retry)
 ELSE:
   → Task mode (fallback — fully supported)
 ```
 
-Both modes produce identical outputs. Agent Teams mode adds real-time cross-feature coordination, immediate blocker detection, and no polling overhead.
+All three modes produce identical outputs. Agent Teams adds real-time cross-feature coordination. Minions adds guaranteed delivery with retry — prefer for long or flaky features.
+
+#### Minions Mode (Durable Queue — optional)
+
+When features are long-running or have flaky external dependencies (remote APIs, slow CI), enqueue each feature as a `gbrain minions` job instead of a live Task/Teammate. Workers pick up jobs, run the agent invocation, and write completion back into the task registry. See the `/gbrain` skill for queue setup. Fall back to Agent Teams or Task if Minions worker is unavailable.
+
+```bash
+gbrain minions enqueue --queue parallel-dev \
+  --name "feat-{feature-id}" \
+  --payload '{"worktree": "{path}", "feature": "{id}", "spec": "..."}' \
+  --attempts 3 --backoff exponential
+```
+
+**Tradeoff:** Minions gives durability but loses real-time messaging — teammates can't coordinate cross-feature APIs mid-flight. Use Agent Teams when features share interfaces; Minions when features are fully independent and runtime is the risk.
 
 #### Agent Teams Mode (Preferred)
 
