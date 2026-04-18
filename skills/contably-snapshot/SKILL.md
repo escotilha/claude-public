@@ -3,7 +3,7 @@ name: contably-snapshot
 description: "Generate Contably CODEBASE-REFERENCE.md — tech stack, product modules, API surface, infra, architecture. Triggers on: contably snapshot, stack snapshot, codebase reference, refresh snapshot."
 user-invocable: true
 context: fork
-model: sonnet
+model: haiku-4-5
 effort: medium
 allowed-tools:
   - Read
@@ -42,21 +42,18 @@ Referenced by `/Volumes/AI/Code/contably/CLAUDE.md` so it auto-loads every sessi
 
 ## Workflow
 
-### Step 0: Check for Existing Snapshot (Update Mode)
+### Step 0: Diff-Based Update (Default Mode)
 
-**Before doing any work, check if `/Volumes/AI/Code/contably/CODEBASE-REFERENCE.md` already exists.**
+**The file always exists. Never rewrite from scratch. Always update incrementally.**
 
-- **If it exists → UPDATE MODE** (default):
-  1. Read the existing file
-  2. Compute diff signal: run `git log --since="{last-generated date from header}" --name-only --pretty=format:` in the contably repo to find files changed since the last snapshot
-  3. If no files changed in the relevant paths (`apps/api/src/`, `apps/*/package.json`, `pyproject.toml`, `.github/workflows/`, `infrastructure/`, `docker-compose.yml`) → **report "snapshot is up-to-date, no regeneration needed"** and exit
-  4. If files did change → run Step 1 scoped ONLY to the changed areas (not a full re-scan), then patch the existing file section-by-section via Edit (not Write)
-  5. Update the date stamp in the header to today
-  6. Report: sections touched, lines changed
+1. Read the existing `/Volumes/AI/Code/contably/CODEBASE-REFERENCE.md` header to get the last-generated date
+2. Run `git log --since="{last-generated date}" --name-only --pretty=format:` in the contably repo to find changed files
+3. If no files changed in relevant paths (`apps/api/src/`, `apps/*/package.json`, `pyproject.toml`, `.github/workflows/`, `infrastructure/`, `docker-compose.yml`) → **report "snapshot is up-to-date, no changes"** and exit
+4. If files did change → run Step 1 scoped ONLY to the changed areas, then patch affected sections via Edit (never Write the whole file)
+5. Update the date stamp in the header to today
+6. Report: sections touched, lines changed
 
-- **If it does NOT exist → FULL GENERATE MODE**: run Step 1 through Step 3 as a full first-time build.
-
-- **Force regenerate**: if the user explicitly passes `--force` or says "regenerate from scratch", skip Step 0 and do a full rebuild.
+**Force full rebuild** only if the user explicitly passes `--force` or says "regenerate from scratch".
 
 ### Step 1: Gather Raw Data (Parallel)
 

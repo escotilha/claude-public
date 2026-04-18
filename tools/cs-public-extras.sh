@@ -141,6 +141,7 @@ refresh_root_readme() {
 post_slack() {
   local channel="$1"
   local message="$2"
+  local blocks_json="${3:-}"
 
   local token
   token="$(security find-generic-password -s claude-code-slack-bot-token -w 2>/dev/null || true)"
@@ -153,7 +154,12 @@ post_slack() {
   fi
 
   local payload
-  payload="$(jq -n --arg ch "$channel" --arg txt "$message" '{channel: $ch, text: $txt}')"
+  if [[ -n "$blocks_json" ]]; then
+    payload="$(jq -n --arg ch "$channel" --arg txt "$message" --argjson bl "$blocks_json" \
+      '{channel: $ch, text: $txt, blocks: $bl}')"
+  else
+    payload="$(jq -n --arg ch "$channel" --arg txt "$message" '{channel: $ch, text: $txt}')"
+  fi
 
   local response
   response="$(curl -sS -X POST https://slack.com/api/chat.postMessage \
@@ -168,15 +174,48 @@ post_slack() {
   echo "  Slack: posted to $channel"
 }
 
-# Build a dynamic message listing new/changed skills since last push to public.
+# Extract the Portuguese "O que faz" summary from a skill's README.pt.md.
+# Returns the first paragraph after "## O que faz", trimmed.
+# Falls back to the SKILL.md description field if README.pt.md is missing.
+extract_pt_summary() {
+  local skill="$1"
+  local pt_md="skills/$skill/README.pt.md"
+  local skill_md="skills/$skill/SKILL.md"
+
+  if [[ -f "$pt_md" ]]; then
+    # Grab the content between "## O que faz" and the next "## " heading,
+    # then join lines and squeeze whitespace.
+    local summary
+    summary="$(awk '
+      /^## O que faz/ { in_section=1; next }
+      /^## / && in_section { exit }
+      in_section { print }
+    ' "$pt_md" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/^ +//; s/ +$//')"
+    if [[ -n "$summary" ]]; then
+      echo "$summary"
+      return 0
+    fi
+  fi
+
+  # Fallback: SKILL.md description
+  if [[ -f "$skill_md" ]]; then
+    awk '/^description:/ {
+      sub(/^description:[[:space:]]*/, "")
+      gsub(/^["\x27]|["\x27]$/, "")
+      print
+      exit
+    }' "$skill_md"
+  fi
+}
+
+# Build a dynamic Block Kit message listing new/changed skills since last push.
 # Baseline: local tag `cs-last-push` (updated at end of each successful run).
-# If the tag doesn't exist yet, falls back to HEAD~5 — good enough for first few runs.
+# Outputs: "<plain-text-fallback>|||<json-blocks>" — caller splits on |||.
 build_slack_message() {
   local base_ref
   if git rev-parse --verify --quiet refs/tags/cs-last-push > /dev/null; then
     base_ref="cs-last-push"
   else
-    # First run — diff last 5 commits to capture recent activity
     base_ref="HEAD~5"
     git rev-parse --verify --quiet "$base_ref" > /dev/null || base_ref="$(git rev-list --max-parents=0 HEAD | head -1)"
   fi
@@ -185,27 +224,76 @@ build_slack_message() {
   changed_skills="$(git diff --name-only "$base_ref"...HEAD -- 'skills/' 2>/dev/null \
     | awk -F/ 'NF>=2 {print $2}' | sort -u)"
 
-  local new_skills=""
-  local updated_skills=""
+  local new_list=() updated_list=()
   while IFS= read -r s; do
     [[ -z "$s" ]] && continue
     is_excluded "$s" && continue
-    # "new" means the skill dir didn't exist at the baseline commit
+    [[ -f "skills/$s/SKILL.md" ]] || continue
     if git cat-file -e "$base_ref":"skills/$s/SKILL.md" 2>/dev/null; then
-      updated_skills+=" $s"
+      updated_list+=("$s")
     else
-      new_skills+=" $s"
+      new_list+=("$s")
     fi
   done <<< "$changed_skills"
 
-  local msg="📦 Nova atualização no repo: https://github.com/escotilha/claude-public"
-  if [[ -n "$new_skills" ]]; then
-    msg+=$'\n'"🆕 Novos skills:$new_skills"
+  # If nothing changed, emit a minimal message
+  if [[ ${#new_list[@]} -eq 0 && ${#updated_list[@]} -eq 0 ]]; then
+    local fallback="📦 Sync do repo claude-public — sem skills novos ou atualizados nesta rodada. https://github.com/escotilha/claude-public"
+    local blocks
+    blocks="$(jq -n --arg t "$fallback" '[{type:"section",text:{type:"mrkdwn",text:$t}}]')"
+    printf '%s|||%s' "$fallback" "$blocks"
+    return 0
   fi
-  if [[ -n "$updated_skills" ]]; then
-    msg+=$'\n'"🔧 Atualizados:$updated_skills"
+
+  # Build plain-text fallback (for notifications + clients without block support)
+  local fallback="📦 Nova atualização em claude-public"
+  [[ ${#new_list[@]} -gt 0 ]] && fallback+=" — 🆕 ${new_list[*]}"
+  [[ ${#updated_list[@]} -gt 0 ]] && fallback+=" — 🔧 ${updated_list[*]}"
+
+  # Build one section block per skill: bold name + italic PT summary.
+  # Use jq to safely assemble JSON (handles quoting, emoji, newlines).
+  local blocks_json
+  blocks_json="$(jq -n \
+    --arg header "📦 Nova atualização em *claude-public*" \
+    --arg repo_url "https://github.com/escotilha/claude-public" \
+    '[
+       {type: "section", text: {type: "mrkdwn", text: $header}}
+     ]')"
+
+  # Append "New skills" section if any
+  if [[ ${#new_list[@]} -gt 0 ]]; then
+    blocks_json="$(echo "$blocks_json" | jq '. += [{type: "divider"}, {type: "section", text: {type: "mrkdwn", text: "*🆕 Novos skills*"}}]')"
+    for s in "${new_list[@]}"; do
+      local summary
+      summary="$(extract_pt_summary "$s")"
+      # Trim to ~400 chars to stay within Slack block limits
+      if (( ${#summary} > 400 )); then
+        summary="${summary:0:397}..."
+      fi
+      blocks_json="$(echo "$blocks_json" | jq --arg name "$s" --arg sum "$summary" \
+        '. += [{type: "section", text: {type: "mrkdwn", text: ("• */" + $name + "*\n_" + $sum + "_")}}]')"
+    done
   fi
-  echo "$msg"
+
+  # Append "Updated skills" section if any
+  if [[ ${#updated_list[@]} -gt 0 ]]; then
+    blocks_json="$(echo "$blocks_json" | jq '. += [{type: "divider"}, {type: "section", text: {type: "mrkdwn", text: "*🔧 Atualizados*"}}]')"
+    for s in "${updated_list[@]}"; do
+      local summary
+      summary="$(extract_pt_summary "$s")"
+      if (( ${#summary} > 400 )); then
+        summary="${summary:0:397}..."
+      fi
+      blocks_json="$(echo "$blocks_json" | jq --arg name "$s" --arg sum "$summary" \
+        '. += [{type: "section", text: {type: "mrkdwn", text: ("• */" + $name + "*\n_" + $sum + "_")}}]')"
+    done
+  fi
+
+  # Footer with repo link
+  blocks_json="$(echo "$blocks_json" | jq \
+    '. += [{type: "divider"}, {type: "context", elements: [{type: "mrkdwn", text: "<https://github.com/escotilha/claude-public|Ver no GitHub →>"}]}]')"
+
+  printf '%s|||%s' "$fallback" "$blocks_json"
 }
 
 # -------- Entry points --------
@@ -232,8 +320,11 @@ case "$cmd" in
     ;;
   notify-slack)
     channel="${2:-C0AS64REV4J}"
-    msg="$(build_slack_message)"
-    if post_slack "$channel" "$msg"; then
+    raw="$(build_slack_message)"
+    # Split on "|||" delimiter: first half is plain-text fallback, second is JSON blocks.
+    fallback="${raw%%|||*}"
+    blocks="${raw#*|||}"
+    if post_slack "$channel" "$fallback" "$blocks"; then
       # Advance the baseline tag so next run diffs from here
       git tag -f cs-last-push HEAD > /dev/null 2>&1
     fi
