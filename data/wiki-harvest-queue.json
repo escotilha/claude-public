@@ -214,5 +214,11 @@
     "note": "GBrain v0.12 self-wiring knowledge graph — typed links auto-created on put_page, zero LLM calls, graph-query command, 94% recall vs 83% before",
     "addedAt": "2026-04-18T12:21:56Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://github.com/vercel-labs/wterm",
+    "note": "wterm — DOM-rendering terminal emulator with Zig/WASM core, React component, in-browser Bash shell, Markdown streaming from LLMs, and WebSocket-to-SSH bridge",
+    "addedAt": "2026-04-18T22:07:28Z",
+    "addedBy": "research-skill"
   }
 ]
