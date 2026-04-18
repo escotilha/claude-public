@@ -24,8 +24,10 @@ OpenClaw gateway on VPS requires specific configuration to work. These are the h
 **Current working config (2026-04-18):**
 
 - Gateway runs as `mary` system user under `/home/mary/.openclaw/`
-- mary/bella/rex/cris: `claude-cli/claude-opus-4-6` (Max plan, FREE)
-- Others: `mlx/mlx-community/Qwen3.5-35B-A3B-4bit` (local Mac Mini)
+- mary: `claude-cli/claude-opus-4-6` (Max plan, FREE)
+- bella: `claude-cli/claude-opus-4-7` (Max plan, FREE — Contably CTO)
+- julia: `claude-cli/claude-sonnet-4-6` (Max plan, FREE — Contably PM)
+- rex, cris, and the rest: `mlx/mlx-community/Qwen3.5-35B-A3B-4bit` (local Mac Mini)
 - Discord: `groupPolicy: "open"`, bot @Mary
 - WhatsApp: `dmPolicy: "allowlist"`, `allowFrom: ["+5511945661111"]`, paired to +5511992241891
 - memory-core: disabled
