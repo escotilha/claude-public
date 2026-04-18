@@ -57,7 +57,7 @@ reindex() {
   tmpdir=$(mktemp -d)
   trap "rm -rf '$tmpdir'" RETURN
 
-  for f in "$MEMORY_DIR"/*.md; do
+  while IFS= read -r f; do
     [[ "$(basename "$f")" == "MEMORY.md" ]] && continue
     [[ ! -f "$f" ]] && continue
 
@@ -111,7 +111,7 @@ reindex() {
 
     sqlite3 "$DB_PATH" < "$sql_file"
     count=$((count + 1))
-  done
+  done < <(find "$MEMORY_DIR" -type f -name '*.md')
 
   echo "[mem-search] Indexed $count memory files."
 }

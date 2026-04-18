@@ -47,4 +47,4 @@ Use count: 1
 - **2026-04-14** — [implementation] Discovered: Contably Phase C — full staging/production namespace separation on OCI/OKE. (Source: implementation — kubernetes/overlays/oci/, .github/workflows/)
 - **2026-04-14** — [session] Applied in: Contably - 2026-04-14 - HELPFUL
 
-Related: [pattern:oci-staging-prod-promote](pattern_oci_staging_prod_promote.md) — CI/CD promote workflow that pairs with this namespace pattern (2026-04-14)
+Related: [pattern:oci-staging-prod-promote](concepts/pattern_oci_staging_prod_promote.md) — CI/CD promote workflow that pairs with this namespace pattern (2026-04-14)

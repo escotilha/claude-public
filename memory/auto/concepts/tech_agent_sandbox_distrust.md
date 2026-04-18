@@ -18,4 +18,4 @@ Enforce security outside the agentic surface (at the OS/VM layer), not by relyin
 
 **Source:** https://nanoclaw.dev/blog/nanoclaw-docker-sandboxes/ (2026-03-13)
 
-Related: [agent-credential-proxy](tech_agent_credential_proxy.md) — extends this principle to credential isolation via egress proxy (2026-04-13)
+Related: [agent-credential-proxy](concepts/tech_agent_credential_proxy.md) — extends this principle to credential isolation via egress proxy (2026-04-13)

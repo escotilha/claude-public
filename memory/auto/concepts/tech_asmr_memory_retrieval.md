@@ -29,4 +29,4 @@ Agentic retrieval eliminates the semantic similarity trap on temporal changes. B
 - **Evaluate as:** Drop-in upgrade for `mem-search` tool (replace BM25 with agentic retrieval)
 - **Source tweet:** https://x.com/DhravyaShah/status/2035517012647272689
 
-Related: [tech_mempalace_memory_system.md](tech_mempalace_memory_system.md) — complementary local memory system, 96.6% R@5 via raw ChromaDB vs ASMR 99% agentic retrieval — zero inference cost tradeoff (2026-04-09)
+Related: [tech_mempalace_memory_system.md](concepts/tech_mempalace_memory_system.md) — complementary local memory system, 96.6% R@5 via raw ChromaDB vs ASMR 99% agentic retrieval — zero inference cost tradeoff (2026-04-09)

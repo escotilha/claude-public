@@ -106,6 +106,6 @@ mempalace wake-up > context.txt
 
 ## Applied in: claudia - 2026-04-09 - PENDING
 
-Related: [tech_asmr_memory_retrieval.md](tech_asmr_memory_retrieval.md) — competing/complementary memory benchmark, ASMR 99% vs MemPalace 96.6% (2026-04-09)
-Related: [project_claudia_memory_v2.md](project_claudia_memory_v2.md) — Claudia 5-layer memory system that MemPalace could extend as Layer 6 per-agent episodic (2026-04-09)
-Related: [tech_membase_evaluation.md](tech_membase_evaluation.md) — Competing hosted alternative. MemPalace wins on tools (19 vs 3), local cost ($0 vs hosted), per-agent isolation, benchmark quality. Membase wins on cross-platform ingestion (Gmail/Slack/Calendar). Different target markets. (2026-04-14)
+Related: [tech_asmr_memory_retrieval.md](concepts/tech_asmr_memory_retrieval.md) — competing/complementary memory benchmark, ASMR 99% vs MemPalace 96.6% (2026-04-09)
+Related: [project_claudia_memory_v2.md](projects/project_claudia_memory_v2.md) — Claudia 5-layer memory system that MemPalace could extend as Layer 6 per-agent episodic (2026-04-09)
+Related: [tech_membase_evaluation.md](concepts/tech_membase_evaluation.md) — Competing hosted alternative. MemPalace wins on tools (19 vs 3), local cost ($0 vs hosted), per-agent isolation, benchmark quality. Membase wins on cross-platform ingestion (Gmail/Slack/Calendar). Different target markets. (2026-04-14)

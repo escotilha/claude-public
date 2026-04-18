@@ -33,4 +33,4 @@ Announced April 9, 2026 by Anthropic. First-party platform pattern for cost-effi
 Source: https://x.com/claudeai/status/2042308622181339453
 Discovered: 2026-04-09
 
-Related: [opus-4-7-best-practices](tech_insight_opus_4_7_best_practices.md) — advisor pattern still applies with 4.7 as the advisor; 4.7's adaptive thinking + xhigh default replaces fixed budgets (2026-04-16)
+Related: [opus-4-7-best-practices](concepts/tech_insight_opus_4_7_best_practices.md) — advisor pattern still applies with 4.7 as the advisor; 4.7's adaptive thinking + xhigh default replaces fixed budgets (2026-04-16)

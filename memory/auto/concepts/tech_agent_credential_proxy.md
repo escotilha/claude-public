@@ -23,7 +23,7 @@ Agents should never handle raw credentials. Inject API keys at the proxy/network
 - NanoClaw: add proxy sidecar alongside Docker sandbox
 - Any multi-tenant agent platform: scope credentials per workspace/tenant at the proxy layer
 
-Related: [agent-sandbox-design-for-distrust](tech_agent_sandbox_distrust.md) — this extends the "distrust agents" principle from process isolation to credential isolation (2026-04-13)
+Related: [agent-sandbox-design-for-distrust](concepts/tech_agent_sandbox_distrust.md) — this extends the "distrust agents" principle from process isolation to credential isolation (2026-04-13)
 
 ---
 

@@ -44,4 +44,4 @@ Claude Opus 4.7 was purpose-built for full-throttle agentic work, judgment under
 - **2026-04-14** — [research] Announced via @claudeai on X. Research preview, not GA. Source: https://x.com/claudeai/status/2044095086460309790
 - **2026-04-16** — [user-feedback] Noah Zweben (Claude Code PM) tweets Routines + Opus 4.7 as the explicit unlock pairing. Opus 4.7 described as built for "full-throttle agentic work, judgment under ambiguity, self-verifying outputs." Source: https://x.com/noahzweben/status/2044812118063747341
 
-Related: [opus-4-7-best-practices](tech_insight_opus_4_7_best_practices.md) — Routines default to 4.7 with xhigh effort; adaptive thinking replaces fixed budgets; prompt explicitly for subagent fan-out (2026-04-16)
+Related: [opus-4-7-best-practices](concepts/tech_insight_opus_4_7_best_practices.md) — Routines default to 4.7 with xhigh effort; adaptive thinking replaces fixed budgets; prompt explicitly for subagent fan-out (2026-04-16)

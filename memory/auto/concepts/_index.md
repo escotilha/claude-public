@@ -1,0 +1,46 @@
+# Concepts, Patterns, Tech Insights
+
+Category index. See [MEMORY.md](../MEMORY.md) for the top-level TOC.
+
+- [architecture_k8s_namespace_env_separation](architecture_k8s_namespace_env_separation.md) — Separate staging and production into distinct K8s namespaces with separate DB URLs, Redis DB slots, and subdomains — prevents prod accidents and enables proper image promotion
+- [mistake_benchmark_selfdestruct](mistake_benchmark_selfdestruct.md) — Claudia benchmark safety-refuse-destructive test literally sent rm -rf /opt/claudia to Agent SDK running as root — nuked the deployment twice
+- [mistake_cdn_version_not_verified](mistake_cdn_version_not_verified.md) — Pinning a CDN package version that doesn't exist causes 404 and blocks page load in Safari
+- [mistake_fastapi_dep_injection_order](mistake_fastapi_dep_injection_order.md) — FastAPI route params — injected Depends() must come before Query() params, or Python raises a SyntaxError
+- [mistake_nightly_unvalidated_db_columns](mistake_nightly_unvalidated_db_columns.md) — Nightly automation added DB columns to queries without verifying they exist in the schema, crashing production
+- [pattern_contably_integration_module_structure](pattern_contably_integration_module_structure.md) — Contably 3rd-party integration layout: integrations/{name}/{client,service,cache,schemas}.py + models/{name}.py + routes/system/{name}.py + tasks/{name}_tasks.py
+- [pattern_karpathy_wiki_github_events](pattern_karpathy_wiki_github_events.md) — Feed an AI copilot knowledge wiki by subscribing to GitHub push/PR webhook events and ingesting commit messages + diffs into a searchable store
+- [pattern_nginx_vite_spa_cache](pattern_nginx_vite_spa_cache.md) — Vite SPAs need short nginx cache + no-cache meta on index.html to prevent stale bundle references after deploys
+- [pattern_oci_staging_prod_promote](pattern_oci_staging_prod_promote.md) — Push to main builds stg-<sha> image and deploys to staging namespace; promote to production via workflow_dispatch with image_tag input + confirm=yes guard
+- [pattern_sqlalchemy_checkfirst_pytest](pattern_sqlalchemy_checkfirst_pytest.md) — Use checkfirst=True in Base.metadata.create_all() to prevent duplicate-index errors when SQLAlchemy metadata is shared across a pytest session
+- [pattern_sse_multi_agent_delegation](pattern_sse_multi_agent_delegation.md) — Broadcast SSE events for inter-agent delegation so dashboards can route conversations to the correct agent's channel
+- [tech_advisor_strategy](tech_advisor_strategy.md) — Claude Platform advisor strategy — Sonnet executor + Opus advisor sharing context, announced April 2026. Applies to Claude Code skills and Claudia agent sessions.
+- [tech_agent_browser](tech_agent_browser.md) — agent-browser (Vercel Labs) — Rust CLI for AI browser automation via CDP, replaces browse CLI as primary browser tool across 10+ skills
+- [tech_agent_credential_proxy](tech_agent_credential_proxy.md) — Egress credential proxy pattern — inject API keys at network/proxy layer, never expose to agent context. Implemented in AgentWave.
+- [tech_agent_sandbox_distrust](tech_agent_sandbox_distrust.md) — Security principle for multi-agent systems — enforce isolation at OS/VM layer, not by trusting agent behavior. NanoClaw + Docker Sandbox as reference implementation.
+- [tech_ai_platform_attack_surface](tech_ai_platform_attack_surface.md) — Attack chain from McKinsey Lilli breach — unauthenticated endpoints + JSON-key SQLi + system prompt write access = full AI platform compromise
+- [tech_anthropic_harness_design](tech_anthropic_harness_design.md) — Planner/generator/evaluator three-agent pattern and structured handoff (no compaction) for long-running agent sessions — from Anthropic engineering post on frontend design
+- [tech_asmr_memory_retrieval](tech_asmr_memory_retrieval.md) — Supermemory ASMR pipeline — 3-agent parallel retrieval (facts/context/temporal) replacing vector DB, ~99% on LongMemEval_s. Open-source ~April 2026.
+- [tech_browse_cli](tech_browse_cli.md) — gstack browse CLI binary installed at ~/.local/bin/browse — zero-MCP-overhead headless Chromium for browser automation across 10 skills
+- [tech_cf_email_send_binding_limitation](tech_cf_email_send_binding_limitation.md) — Cloudflare Workers send_email binding can only deliver to addresses explicitly verified as Email Routing destinations — not a workable outbound path for transactional email to arbitrary recipients
+- [tech_claude_cli_max_plan_openclaw](tech_claude_cli_max_plan_openclaw.md) — How to route OpenClaw agents through Claude Max plan via claude-cli backend — gateway must run as non-root user, config shape, and token-sync requirements
+- [tech_claude_code_routines](tech_claude_code_routines.md) — Claude Code Routines (research preview) — Anthropic-managed server-side scheduled/event/API-triggered agent runs, successor to VPS-based cron scheduling
+- [tech_claude_managed_agents](tech_claude_managed_agents.md) — tech_claude_managed_agents
+- [tech_gbrain_integration](tech_gbrain_integration.md) — GBrain world-knowledge brain integrated into Claudia as Source 5 — separate Postgres DB, 30 MCP tools, compiled truth + timeline pattern
+- [tech_glasswing_vuln_hunting](tech_glasswing_vuln_hunting.md) — Anthropic Project Glasswing — $100M+ AI vulnerability initiative using Claude Mythos Preview (83.1% CyberGym repro rate). Glasswing-style prompting added to /cto security analyst.
+- [tech_hermes_channel_adapters](tech_hermes_channel_adapters.md) — Hermes v0.9.0 iMessage (BlueBubbles) and WeChat/WeCom adapter architecture — integration brief for AgentWave channel expansion
+- [tech_hermes_subconscious_pattern](tech_hermes_subconscious_pattern.md) — Hermes agent patterns implemented in Claudia — periodic nudge, auto-skill generation, session consolidation, skill self-patch policy
+- [tech_hyperskill_skill_tree](tech_hyperskill_skill_tree.md) — HyperSkill auto-generates SKILL.md files from live docs; skill-tree command splits deep docs into navigable index + sub-files to avoid context bloat
+- [tech_insight_free_model_tool_calling](tech_insight_free_model_tool_calling.md) — Free/smaller LLMs describe tool calls in natural language instead of calling them — fix via imperative persona instructions
+- [tech_insight_opus_4_7_best_practices](tech_insight_opus_4_7_best_practices.md) — Official Opus 4.7 best practices from Boris Cherny + Anthropic blog — effort tiers, adaptive thinking, subagent delegation changes
+- [tech_insight_ruff_pin_ci](tech_insight_ruff_pin_ci.md) — Ruff changes linting rules between versions — always pin ruff==x.y.z in CI to prevent random lint failures on version bumps
+- [tech_insight_safari_api_caching](tech_insight_safari_api_caching.md) — Safari aggressively caches API responses, causing stale data — fix with Cache-Control: no-store on all API routes
+- [tech_lightpanda_browser](tech_lightpanda_browser.md) — Lightpanda headless browser (Zig, CDP-compatible) — evaluated as Chrome/Browserless replacement, not ready due to missing PDF/Lighthouse/SPA gaps. Revisit Q3 2026.
+- [tech_managed_agents_test](tech_managed_agents_test.md) — Live test of Anthropic Managed Agents API with Claudia — results, cost, and recommendation to wait before enabling
+- [tech_membase_evaluation](tech_membase_evaluation.md) — Membase.so evaluation — hosted personal memory layer for AI agents, MCP-native, knowledge graph with auto-extraction from Gmail/Slack/Calendar. Assessed for AgentWave integration and Claude setup memory replacement.
+- [tech_mempalace_memory_system](tech_mempalace_memory_system.md) — MemPalace — free local AI memory system, ChromaDB + MCP server, palace hierarchy, 96.6% R@5 LongMemEval, per-agent diaries, temporal KG
+- [tech_multi_agent_patterns_taxonomy](tech_multi_agent_patterns_taxonomy.md) — Anthropic's official 5-pattern multi-agent coordination taxonomy — Generator-Verifier, Orchestrator-Subagent, Agent Teams, Message Bus, Shared State
+- [tech_openclaw_rl](tech_openclaw_rl.md) — OpenClaw-RL — Princeton async RL framework that trains local AI agents from conversations; unlocks Tier 0 local model self-improvement with Qwen 3.5-4B/8B
+- [tech_pluggable_context_engine](tech_pluggable_context_engine.md) — Pluggable context injection strategy for swarm skills — context manifest YAML in frontmatter, parallel gather, role-based slicing — saves 65-80% discovery tokens
+- [tech_prompt_cache_1h_vs_5m](tech_prompt_cache_1h_vs_5m.md) — Claude Code prompt cache TTL — subagents get 5m (intentional), main agent gets 1h (rolling out), telemetry off = 5m
+- [tech_token_efficient_search](tech_token_efficient_search.md) — Web search token efficiency research — Brave LLM Context API has explicit token budget, Exa highlights cut 50-75% tokens, pre-search orchestrator pattern saves 60-70% redundant searches
+- [tech_vault_as_context_pattern](tech_vault_as_context_pattern.md) — CLAUDE.md-as-API-contract pattern for knowledge vaults — bootstrap vault context for Claude Code, pre-compute vault context for subagent spawn prompts

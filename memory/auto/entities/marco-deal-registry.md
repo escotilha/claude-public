@@ -15,7 +15,7 @@ Marco's longitudinal deal database. Every company Marco triages, investigates, o
 
 | Deal        | Date Added | Status   | Sector             | Size (est.) | Memory File                      | Key Takeaway                                                            |
 | ----------- | ---------- | -------- | ------------------ | ----------- | -------------------------------- | ----------------------------------------------------------------------- |
-| [Stripe](#) | 2026-04-11 | prospect | Fintech / Payments | $65B+       | [deal_stripe.md](deal_stripe.md) | Dominant market position; public exit likely before any M&A opportunity |
+| [Stripe](#) | 2026-04-11 | prospect | Fintech / Payments | $65B+       | [deal_stripe.md](entities/deal_stripe.md) | Dominant market position; public exit likely before any M&A opportunity |
 
 ## Closed Deals
 

@@ -18,6 +18,10 @@ Thumbs.db
 *.log
 memory/sessions/
 
+# Derived memory artifacts (rebuilt by mem-compile / mem-search)
+memory/auto/.cache/
+tools/mem-search.db
+
 # Python
 __pycache__/
 *.pyc

@@ -77,7 +77,7 @@ WantedBy=multi-user.target
 
 ## Related
 
-- [VPS connection details](reference_vps_connection.md) — Tailscale IP, SSH user, services
+- [VPS connection details](reference/reference_vps_connection.md) — Tailscale IP, SSH user, services
 - Claude Code Remote Control requires v2.1.51+ (Pro/Max/Team subscription)
 
 ---
