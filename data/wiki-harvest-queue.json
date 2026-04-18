@@ -208,5 +208,11 @@
     "note": "GStack v1.0.0 — Garry Tan's open-source Claude Code skill suite: 23 specialist slash commands (CEO, designer, QA, security, release), sprint workflow, parallel sessions via Conductor, SLOC productivity tracking",
     "addedAt": "2026-04-18T10:30:26Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/garrytan/status/2045447413050363927",
+    "note": "GBrain v0.12 self-wiring knowledge graph — typed links auto-created on put_page, zero LLM calls, graph-query command, 94% recall vs 83% before",
+    "addedAt": "2026-04-18T12:21:56Z",
+    "addedBy": "research-skill"
   }
 ]
