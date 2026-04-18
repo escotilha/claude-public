@@ -137,28 +137,6 @@
           {
             "type": "command",
             "command": "echo '{\"additionalContext\": \"Working directory: '$(pwd)'. Git branch: '$(git branch --show-current 2>/dev/null || echo none)'. Project: '$(basename $(git rev-parse --show-toplevel 2>/dev/null) 2>/dev/null || basename $(pwd))'\"}'"
-          },
-          {
-            "type": "command",
-            "command": "\"$HOME/.claude-setup/hooks/check-careful.sh\""
-          }
-        ]
-      },
-      {
-        "matcher": "Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$HOME/.claude-setup/hooks/check-freeze.sh\""
-          }
-        ]
-      },
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$HOME/.claude-setup/hooks/check-freeze.sh\""
           }
         ]
       }
