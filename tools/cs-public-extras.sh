@@ -262,7 +262,7 @@ build_slack_message() {
 
   # Append "New skills" section if any
   if [[ ${#new_list[@]} -gt 0 ]]; then
-    blocks_json="$(echo "$blocks_json" | jq '. += [{type: "divider"}, {type: "section", text: {type: "mrkdwn", text: "*🆕 Novos skills*"}}]')"
+    blocks_json="$(printf '%s' "$blocks_json" | jq -c '. += [{type: "divider"}, {type: "section", text: {type: "mrkdwn", text: "*🆕 Novos skills*"}}]')"
     for s in "${new_list[@]}"; do
       local summary
       summary="$(extract_pt_summary "$s")"
@@ -270,27 +270,27 @@ build_slack_message() {
       if (( ${#summary} > 400 )); then
         summary="${summary:0:397}..."
       fi
-      blocks_json="$(echo "$blocks_json" | jq --arg name "$s" --arg sum "$summary" \
+      blocks_json="$(printf '%s' "$blocks_json" | jq -c --arg name "$s" --arg sum "$summary" \
         '. += [{type: "section", text: {type: "mrkdwn", text: ("• */" + $name + "*\n_" + $sum + "_")}}]')"
     done
   fi
 
   # Append "Updated skills" section if any
   if [[ ${#updated_list[@]} -gt 0 ]]; then
-    blocks_json="$(echo "$blocks_json" | jq '. += [{type: "divider"}, {type: "section", text: {type: "mrkdwn", text: "*🔧 Atualizados*"}}]')"
+    blocks_json="$(printf '%s' "$blocks_json" | jq -c '. += [{type: "divider"}, {type: "section", text: {type: "mrkdwn", text: "*🔧 Atualizados*"}}]')"
     for s in "${updated_list[@]}"; do
       local summary
       summary="$(extract_pt_summary "$s")"
       if (( ${#summary} > 400 )); then
         summary="${summary:0:397}..."
       fi
-      blocks_json="$(echo "$blocks_json" | jq --arg name "$s" --arg sum "$summary" \
+      blocks_json="$(printf '%s' "$blocks_json" | jq -c --arg name "$s" --arg sum "$summary" \
         '. += [{type: "section", text: {type: "mrkdwn", text: ("• */" + $name + "*\n_" + $sum + "_")}}]')"
     done
   fi
 
   # Footer with repo link
-  blocks_json="$(echo "$blocks_json" | jq \
+  blocks_json="$(printf '%s' "$blocks_json" | jq -c \
     '. += [{type: "divider"}, {type: "context", elements: [{type: "mrkdwn", text: "<https://github.com/escotilha/claude-public|Ver no GitHub →>"}]}]')"
 
   printf '%s|||%s' "$fallback" "$blocks_json"
