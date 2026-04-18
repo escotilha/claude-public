@@ -21,7 +21,7 @@ Mary (OpenClaw) is the multi-channel agent runtime on VPS that replaced Claudia 
 
 **Model routing (2026-04-18, final):**
 
-- mary: `claude-cli/claude-opus-4-6` — Max plan, FREE
+- mary: `claude-cli/claude-opus-4-7` — Max plan, FREE
 - bella: `claude-cli/claude-opus-4-7` — Max plan, FREE (Contably CTO)
 - julia: `claude-cli/claude-sonnet-4-6` — Max plan, FREE (Contably PM; upgrade to sonnet-4-7 when CLI adds it)
 - buzz/marco/arnold/rex/north/swarmy/cris/agentwave: `mlx/mlx-community/Qwen3.5-35B-A3B-4bit` (local Mac Mini)

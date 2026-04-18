@@ -24,7 +24,7 @@ OpenClaw gateway on VPS requires specific configuration to work. These are the h
 **Current working config (2026-04-18):**
 
 - Gateway runs as `mary` system user under `/home/mary/.openclaw/`
-- mary: `claude-cli/claude-opus-4-6` (Max plan, FREE)
+- mary: `claude-cli/claude-opus-4-7` (Max plan, FREE)
 - bella: `claude-cli/claude-opus-4-7` (Max plan, FREE — Contably CTO)
 - julia: `claude-cli/claude-sonnet-4-6` (Max plan, FREE — Contably PM)
 - rex, cris, and the rest: `mlx/mlx-community/Qwen3.5-35B-A3B-4bit` (local Mac Mini)
