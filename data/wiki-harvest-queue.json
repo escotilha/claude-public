@@ -190,5 +190,11 @@
     "note": "Boris Cherny Opus 4.7 tips thread: auto mode, /fewer-permission-prompts skill, recaps, focus mode, adaptive thinking effort levels (xhigh/max)",
     "addedAt": "2026-04-16T19:56:51Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/garrytan/status/2045427057656729985",
+    "note": "GBrain v0.11 Minions — BullMQ-based job queue for reliable subagent execution, replacing timeout-prone ad-hoc spawning",
+    "addedAt": "2026-04-18T09:17:01Z",
+    "addedBy": "research-skill"
   }
 ]
