@@ -234,6 +234,7 @@ user-invocable: true
 
 
 
+
 ## Últimas 3 atualizações
 
 - **2026-04-18** — auto: sync claude-setup
