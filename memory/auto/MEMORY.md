@@ -155,6 +155,7 @@
 - [reference_search_api_keys.md](reference_search_api_keys.md) — API keys for web search tools — Brave Search LLM Context API and Exa.ai neural search, stored in macOS Keychain and settings.json
 - [reference_telnyx_voice.md](reference_telnyx_voice.md) — Telnyx voice infrastructure — API key in Keychain, Claudia's phone number, connection details
 - [reference_vps_connection.md](reference_vps_connection.md) — How to reach the Contabo VPS (Claudia, Paperclip) — Tailscale IP, SSH user, hostname, ports
+- [vps-claude-remote-control.md](vps-claude-remote-control.md) — Claude Code Remote Control on VPS via systemd — connect Claude Desktop/browser to /root/code, service: claude-remote-control.service
 - [mac-mini-identification.md](mac-mini-identification.md) — How to identify when a session is ON the Mac Mini itself (hostname Mac-mini.local, Tailscale 100.66.244.112, hosts MLX on :1235)
 - [julia-searxng-fallback.md](julia-searxng-fallback.md) — SearXNG fallback chain — health checks, error patterns, tool fallback order for web search (Mac Mini :8888 → Brave → Exa → WebSearch)
 - [tech_anthropic_harness_design.md](tech_anthropic_harness_design.md) — Planner/generator/evaluator three-agent pattern and structured handoff (no compaction) for long-running agent sessions — from Anthropic engineering post on frontend design
