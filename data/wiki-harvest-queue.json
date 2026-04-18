@@ -196,5 +196,11 @@
     "note": "GBrain v0.11 Minions — BullMQ-based job queue for reliable subagent execution, replacing timeout-prone ad-hoc spawning",
     "addedAt": "2026-04-18T09:17:01Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/HuggingModels/status/2045337281775718800",
+    "note": "HuggingModels tweet on Lyra-2.0 — misleadingly described as audio; actually NVIDIA's generative 3D world model (single-image 3D scene generation, released 2026-04-15)",
+    "addedAt": "2026-04-18T10:26:39Z",
+    "addedBy": "research-skill"
   }
 ]
