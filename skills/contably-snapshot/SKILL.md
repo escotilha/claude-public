@@ -42,9 +42,25 @@ Referenced by `/Volumes/AI/Code/contably/CLAUDE.md` so it auto-loads every sessi
 
 ## Workflow
 
+### Step 0: Check for Existing Snapshot (Update Mode)
+
+**Before doing any work, check if `/Volumes/AI/Code/contably/CODEBASE-REFERENCE.md` already exists.**
+
+- **If it exists → UPDATE MODE** (default):
+  1. Read the existing file
+  2. Compute diff signal: run `git log --since="{last-generated date from header}" --name-only --pretty=format:` in the contably repo to find files changed since the last snapshot
+  3. If no files changed in the relevant paths (`apps/api/src/`, `apps/*/package.json`, `pyproject.toml`, `.github/workflows/`, `infrastructure/`, `docker-compose.yml`) → **report "snapshot is up-to-date, no regeneration needed"** and exit
+  4. If files did change → run Step 1 scoped ONLY to the changed areas (not a full re-scan), then patch the existing file section-by-section via Edit (not Write)
+  5. Update the date stamp in the header to today
+  6. Report: sections touched, lines changed
+
+- **If it does NOT exist → FULL GENERATE MODE**: run Step 1 through Step 3 as a full first-time build.
+
+- **Force regenerate**: if the user explicitly passes `--force` or says "regenerate from scratch", skip Step 0 and do a full rebuild.
+
 ### Step 1: Gather Raw Data (Parallel)
 
-Launch 4 parallel Explore agents (model: haiku) to collect data simultaneously:
+Launch 4 parallel Explore agents (model: haiku) to collect data simultaneously. **In UPDATE MODE, each agent is scoped to only the changed files from Step 0.**
 
 **Agent 1 — Tech Stack & Dependencies:**
 
@@ -189,7 +205,7 @@ Combine agent outputs into a single `CODEBASE-REFERENCE.md` with these sections:
 4. **Use tables over prose** — scannable > readable for a reference doc
 5. **Include file paths** — every claim should point to the source file
 6. **Date-stamp the header** — so sessions know how fresh the snapshot is
-7. **Overwrite, don't append** — each run produces a complete fresh snapshot
+7. **Update, don't overwrite** — default behavior is incremental section patching via Edit; full Write only on first generation or `--force`
 8. **No infrastructure credentials** — OCIR URLs are fine, OCIDs/tokens are not
 
 ## Subagent Model Tiers
