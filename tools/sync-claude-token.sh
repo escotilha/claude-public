@@ -5,6 +5,7 @@
 # Prereqs:
 #   - Keychain item: "Claude Code-credentials" (created by `claude login`)
 #   - SSH alias "vps" resolves to the Mary host
+#   - Pushes to mary@vps (gateway runs as mary system user since 2026-04-18)
 #
 # Failure modes (logged to /tmp/mary-token-sync.log):
 #   - Keychain locked (reboot + no login) → security errors
@@ -28,12 +29,12 @@ if ! python3 -c "import json,sys,time; d=json.load(open(sys.argv[1])); exp=d['cl
     echo "${LOG_PREFIX} WARN: keychain credential is expired or malformed — pushing anyway so VPS has the refreshToken"
 fi
 
-if ! scp -o ConnectTimeout=10 -o BatchMode=yes "${CRED_TMP}" root@vps:/root/.claude/.credentials.json 2>&1; then
-    echo "${LOG_PREFIX} FAIL: scp to root@vps failed"
+if ! scp -o ConnectTimeout=10 -o BatchMode=yes "${CRED_TMP}" mary@vps:/home/mary/.claude/.credentials.json 2>&1; then
+    echo "${LOG_PREFIX} FAIL: scp to mary@vps failed"
     exit 1
 fi
 
-ssh -o ConnectTimeout=10 -o BatchMode=yes root@vps "chmod 600 /root/.claude/.credentials.json" 2>&1 || {
+ssh -o ConnectTimeout=10 -o BatchMode=yes mary@vps "chmod 600 /home/mary/.claude/.credentials.json" 2>&1 || {
     echo "${LOG_PREFIX} WARN: chmod on VPS failed"
 }
 
