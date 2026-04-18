@@ -7,13 +7,17 @@ model: opus
 effort: high
 allowed-tools:
   - Bash
+  - Read
+  - Write
 tool-annotations:
   Bash: { destructiveHint: false, idempotentHint: false }
 ---
 
 # Claude Setup Sync
 
-**IMPORTANT**: This skill operates ONLY on `~/.claude-setup`. Do NOT explore, read, or search any other directory. Do NOT use Glob, Grep, or Read. Just run the git commands below in sequence using Bash.
+**IMPORTANT**: This skill operates ONLY on `~/.claude-setup`. Do NOT explore, read, or search any other directory outside this path.
+
+You MAY use `Read` and `Write` for the one purpose listed in step 1b (generating README.pt.md for new public skills). Everything else is Bash-only.
 
 ## Targets
 
@@ -31,15 +35,73 @@ tool-annotations:
 cd ~/.claude-setup && git add -A && (git diff --cached --quiet || git commit -m "auto: sync claude-setup")
 ```
 
-### 1b. Generate Portuguese READMEs + refresh root README
+### 1b. Generate Portuguese READMEs for new public skills
 
-Generates `README.pt.md` for any public skill that doesn't have one (via Haiku), then rewrites the root `README.md` with the last 3 update entries from git log. Commits the result.
+**You (Claude) write these directly — no API call, no key, no fallback. Local inference, you are the inference.**
 
-```bash
-~/.claude-setup/tools/cs-public-extras.sh all
-```
+1. **Find public skills missing `README.pt.md`:**
 
-If `ANTHROPIC_API_KEY` is missing or Haiku call fails, the script logs a warning and continues — existing READMEs are never overwritten.
+   ```bash
+   cd ~/.claude-setup && ./tools/cs-public-extras.sh list-missing-pt
+   ```
+
+   If the helper doesn't support `list-missing-pt` yet, use this one-liner instead:
+
+   ```bash
+   cd ~/.claude-setup && comm -23 \
+     <(ls -1 skills/ | sort) \
+     <(bash -c 'source tools/cs-public-extras.sh >/dev/null 2>&1; printf "%s\n" "${EXCLUDED_SKILLS[@]}"' | sort) \
+   | while read s; do
+       [ -f "skills/$s/SKILL.md" ] && [ ! -f "skills/$s/README.pt.md" ] && echo "$s"
+     done
+   ```
+
+2. **For each skill in the list**, read its `SKILL.md` and write a `README.pt.md` in the same folder using this template:
+
+   ```markdown
+   # {Skill Title}
+
+   ## O que faz
+
+   {1-2 parágrafos objetivos em PT-BR — o que o skill faz, como funciona, qual problema resolve}
+
+   ## Como invocar
+
+   ```
+   /{skill-name} [args]
+   ```
+
+   Exemplos:
+   - `/{skill-name} exemplo 1`
+   - `/{skill-name} exemplo 2`
+
+   ## Quando usar
+
+   - {bullet 1}
+   - {bullet 2}
+   - {bullet 3}
+   - {bullet 4 — opcional}
+   ```
+
+   **Rules:**
+   - Máximo 250 palavras por README
+   - Tom técnico e direto, sem marketing
+   - Nunca sobrescrever um `README.pt.md` que já existe
+   - Pular skills excluídas (lista em `EXCLUDED_SKILLS` de `tools/cs-public-extras.sh`)
+
+3. **Refresh the root README** (safe — script only updates the "Últimas 3 atualizações" section):
+
+   ```bash
+   cd ~/.claude-setup && ./tools/cs-public-extras.sh refresh-root
+   ```
+
+4. **Commit the generated READMEs:**
+
+   ```bash
+   cd ~/.claude-setup && git add -A && (git diff --cached --quiet || git commit -m "docs: add Portuguese READMEs for new skills + root summary")
+   ```
+
+If no skills were missing, skip this step entirely.
 
 ### 2. Push to origin
 

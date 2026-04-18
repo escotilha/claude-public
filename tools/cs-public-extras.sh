@@ -213,6 +213,14 @@ build_slack_message() {
 cmd="${1:-all}"
 
 case "$cmd" in
+  list-missing-pt)
+    # Print public skills (one per line) that have SKILL.md but no README.pt.md.
+    # Used by the /cs skill so Claude can write the READMEs directly.
+    for skill in $(public_skills); do
+      [[ -f "skills/$skill/README.pt.md" ]] && continue
+      echo "$skill"
+    done
+    ;;
   backfill-readmes)
     echo "Backfilling README.pt.md for all public skills…"
     for skill in $(public_skills); do
