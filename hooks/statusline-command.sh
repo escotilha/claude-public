@@ -19,10 +19,18 @@ BAR=$(printf "%${FILLED}s" | tr ' ' '█')$(printf "%${EMPTY}s" | tr ' ' '░')
 # Color based on context usage
 if [ "$PCT" -ge 90 ]; then
   CLR='\033[31m'  # red
+elif [ "$PCT" -ge 80 ]; then
+  CLR='\033[35m'  # magenta — /handoff threshold
 elif [ "$PCT" -ge 70 ]; then
   CLR='\033[33m'  # yellow
 else
   CLR='\033[32m'  # green
+fi
+
+# Handoff cue at 80%+
+HANDOFF_CUE=""
+if [ "$PCT" -ge 80 ] 2>/dev/null; then
+  HANDOFF_CUE=" \033[35m⚑/handoff\033[0m"
 fi
 RST='\033[0m'
 DIM='\033[2m'
@@ -98,4 +106,4 @@ if [ -n "$ADDED_DIRS" ]; then
 fi
 
 # Build output
-echo -e "${DIM}${ACCOUNT}${RST} ${DIM}|${RST} ${BOLD}${CYAN}${MODEL}${RST} ${DIM}|${RST} ${CLR}${BAR}${RST} ${PCT}% ${DIM}|${RST} ${MAGENTA}${COST_FMT}${RST} ${DIM}|${RST} ${DIM}${TOK_FMT}tok${RST} ${DIM}|${RST} ${DUR_FMT} ${DIM}|${RST} ${BLUE}${BRANCH}${DIRTY}${RST} ${DIM}|${RST} ${DIR}${ADDED_DIRS_FMT} ${DIM}|${RST} ${DIM}+${ADDED} -${REMOVED}${RST}${RATE_FMT}"
+echo -e "${DIM}${ACCOUNT}${RST} ${DIM}|${RST} ${BOLD}${CYAN}${MODEL}${RST} ${DIM}|${RST} ${CLR}${BAR}${RST} ${PCT}%${HANDOFF_CUE} ${DIM}|${RST} ${MAGENTA}${COST_FMT}${RST} ${DIM}|${RST} ${DIM}${TOK_FMT}tok${RST} ${DIM}|${RST} ${DUR_FMT} ${DIM}|${RST} ${BLUE}${BRANCH}${DIRTY}${RST} ${DIM}|${RST} ${DIR}${ADDED_DIRS_FMT} ${DIM}|${RST} ${DIM}+${ADDED} -${REMOVED}${RST}${RATE_FMT}"
