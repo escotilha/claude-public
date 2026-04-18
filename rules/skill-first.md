@@ -42,6 +42,7 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Split large docs into tree    | `/skill-tree`           | API docs or references too large for subagent context    |
 | Build with Claude API/SDK     | `/claude-api`           | Code imports anthropic SDK or user asks about Claude API |
 | Context recovery              | `/primer`               | After compaction, new session, or "where was I?"         |
+| Checkpoint before /clear      | `/handoff`              | Context 85%+, before /clear/compact — writes resume block to plan doc that /primer consumes |
 | Search memory                 | `mem-search "<query>"`  | Find past decisions, patterns, learnings (CLI tool)      |
 | Advisory board deliberation   | `/vibc`                 | Complex decision needing diverse perspectives            |
 | Office docs (.docx/xlsx/pptx) | `/officecli`            | Create, edit, inspect Word/Excel/PowerPoint documents    |
