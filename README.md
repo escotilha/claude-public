@@ -233,9 +233,10 @@ user-invocable: true
 - Report issues: https://github.com/anthropics/claude-code/issues
 
 
+
 ## Últimas 3 atualizações
 
-- **2026-04-17** — docs: refresh Portuguese READMEs
-- **2026-04-17** — auto: sync claude-setup
-- **2026-04-17** — fix(cs): stash public README before git rm tools/
+- **2026-04-18** — auto: sync claude-setup
+- **2026-04-18** — auto: sync claude-setup
+- **2026-04-18** — auto: sync claude-setup
 
