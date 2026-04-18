@@ -19,6 +19,7 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Run project tests + typecheck | `/verify`               | After making changes, before committing                  |
 | Fix failing tests             | `/test-and-fix`         | Tests are broken, need auto-fix loop                     |
 | Review code before commit     | `/review-changes`       | Uncommitted changes need review                          |
+| Cloud parallel code review    | `/ultrareview`          | Multi-reviewer cloud-based review (Claude Code 2.1.111+). Distinct from `/cto` (local swarm) and `/review-changes` (single-agent). Use for PR-scale review. |
 | Commit + push + PR            | `/cpr`                  | Ready to ship to remote                                  |
 | Start local dev server        | `/run-local`            | Need to run project locally                              |
 | Parallel feature branches     | `/parallel-dev`         | Multiple independent features                            |
