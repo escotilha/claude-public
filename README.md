@@ -240,6 +240,7 @@ user-invocable: true
 
 
 
+
 ## Últimas 3 atualizações
 
 - **2026-04-18** — docs: update Portuguese READMEs + root summary
