@@ -163,6 +163,7 @@
 - [tech_prompt_cache_1h_vs_5m.md](tech_prompt_cache_1h_vs_5m.md) — Prompt cache TTL: subagents = 5m (intentional), main agent = 1h (rolling out), telemetry off = 5m — from Boris Cherny (Anthropic)
 - [tech_claude_code_routines.md](tech_claude_code_routines.md) — Claude Code Routines (research preview 2026-04-14) — server-side scheduled/event/API-triggered agent runs on Anthropic cloud, successor to VPS cron scheduling
 - [tech_insight_opus_4_7_best_practices.md](tech_insight_opus_4_7_best_practices.md) — Opus 4.7 official guidance (2026-04-16) — xhigh default effort, adaptive thinking (no budget_tokens), explicit subagent fan-out required
+- [tech_claude_cli_max_plan_openclaw.md](tech_claude_cli_max_plan_openclaw.md) — How to route OpenClaw agents via Claude Max plan — non-root gateway required, config shape, token-sync pattern, failure modes
 
 # currentDate
 
