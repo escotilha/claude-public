@@ -250,48 +250,35 @@ build_slack_message() {
   [[ ${#new_list[@]} -gt 0 ]] && fallback+=" — 🆕 ${new_list[*]}"
   [[ ${#updated_list[@]} -gt 0 ]] && fallback+=" — 🔧 ${updated_list[*]}"
 
-  # Build one section block per skill: bold name + italic PT summary.
-  # Use jq to safely assemble JSON (handles quoting, emoji, newlines).
+  # Start with a header block
   local blocks_json
-  blocks_json="$(jq -n \
-    --arg header "📦 Nova atualização em *claude-public*" \
-    --arg repo_url "https://github.com/escotilha/claude-public" \
-    '[
-       {type: "section", text: {type: "mrkdwn", text: $header}}
-     ]')"
+  blocks_json='[{"type":"section","text":{"type":"mrkdwn","text":"📦 Nova atualização em *claude-public*"}}]'
 
-  # Append "New skills" section if any
+  # New skills: one section per skill with name + PT summary.
   if [[ ${#new_list[@]} -gt 0 ]]; then
-    blocks_json="$(printf '%s' "$blocks_json" | jq -c '. += [{type: "divider"}, {type: "section", text: {type: "mrkdwn", text: "*🆕 Novos skills*"}}]')"
+    blocks_json="$(printf '%s' "$blocks_json" | jq -c '. += [{type:"divider"},{type:"section",text:{type:"mrkdwn",text:"*🆕 Novos skills*"}}]')"
     for s in "${new_list[@]}"; do
       local summary
       summary="$(extract_pt_summary "$s")"
-      # Trim to ~400 chars to stay within Slack block limits
       if (( ${#summary} > 400 )); then
         summary="${summary:0:397}..."
       fi
+      # Use jq -c to emit compact JSON with properly escaped newlines.
       blocks_json="$(printf '%s' "$blocks_json" | jq -c --arg name "$s" --arg sum "$summary" \
-        '. += [{type: "section", text: {type: "mrkdwn", text: ("• */" + $name + "*\n_" + $sum + "_")}}]')"
+        '. += [{type:"section",text:{type:"mrkdwn",text:("• */" + $name + "*  —  _" + $sum + "_")}}]')"
     done
   fi
 
-  # Append "Updated skills" section if any
+  # Updated skills: single section listing names only.
   if [[ ${#updated_list[@]} -gt 0 ]]; then
-    blocks_json="$(printf '%s' "$blocks_json" | jq -c '. += [{type: "divider"}, {type: "section", text: {type: "mrkdwn", text: "*🔧 Atualizados*"}}]')"
-    for s in "${updated_list[@]}"; do
-      local summary
-      summary="$(extract_pt_summary "$s")"
-      if (( ${#summary} > 400 )); then
-        summary="${summary:0:397}..."
-      fi
-      blocks_json="$(printf '%s' "$blocks_json" | jq -c --arg name "$s" --arg sum "$summary" \
-        '. += [{type: "section", text: {type: "mrkdwn", text: ("• */" + $name + "*\n_" + $sum + "_")}}]')"
-    done
+    local updated_line="*Skills atualizados:* $(IFS=", "; echo "${updated_list[*]}")"
+    blocks_json="$(printf '%s' "$blocks_json" | jq -c --arg line "$updated_line" \
+      '. += [{type:"divider"},{type:"section",text:{type:"mrkdwn",text:$line}}]')"
   fi
 
   # Footer with repo link
   blocks_json="$(printf '%s' "$blocks_json" | jq -c \
-    '. += [{type: "divider"}, {type: "context", elements: [{type: "mrkdwn", text: "<https://github.com/escotilha/claude-public|Ver no GitHub →>"}]}]')"
+    '. += [{type:"context",elements:[{type:"mrkdwn",text:"<https://github.com/escotilha/claude-public|Ver no GitHub →>"}]}]')"
 
   printf '%s|||%s' "$fallback" "$blocks_json"
 }
