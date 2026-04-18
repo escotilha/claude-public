@@ -1,8 +1,8 @@
 # Setup Baseline Inventory
 
-**Last verified:** 2026-04-15
+**Last verified:** 2026-04-18
 **Next review:** Biweekly (Wednesday + Sunday, 6am)
-**Claude Code version at last review:** 2.1.109
+**Claude Code version at last review:** 2.1.114
 
 ---
 
