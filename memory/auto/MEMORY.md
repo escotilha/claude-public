@@ -2,9 +2,9 @@
 
 ## Agent Identity & Operating Memory
 
-- [agent-memory-julia.md](agent-memory-julia.md) — Julia agent identity: Contably operational assistant — email triage preferences, Brazilian compliance domain (eSocial, NF-e), recurring tasks, infrastructure context, cross-agent handoffs
+- [agent-memory-julia.md](agent-memory-julia.md) — Julia agent identity: Product Manager for Contably (roadmap, user research, sprint planning, stakeholder mgmt); keeps eSocial/NF-e expertise as product context; Sonnet-4-6 via Max plan
 - [agent-memory-marco.md](agent-memory-marco.md) — Marco agent identity: Nuvini M&A analyst — investment thesis (micro-SaaS BR, $200K–$5M ARR), research methodology (parallel DD tracks), evidence hierarchy, deal memo format
-- [agent-memory-bella.md](agent-memory-bella.md) — Bella agent identity: tech evaluator + skill indexer — adopt/watch/skip scoring methodology, skill library maintenance rules, content preferences, recurring tasks
+- [agent-memory-bella.md](agent-memory-bella.md) — Bella agent identity: Chief Technology Officer, Contably (dedicated); owns OKE/CI-CD/security/scaling + inherited Julia's ops duties; tech eval + skill library secondary; Opus-4-7 via Max plan
 
 ## Tech Evaluation (Bella)
 
