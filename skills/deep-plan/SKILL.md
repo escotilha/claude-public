@@ -8,6 +8,7 @@ model: opus
 effort: high
 alwaysThinkingEnabled: true
 allowed-tools:
+  - PushNotification
   - Read
   - Write
   - Edit

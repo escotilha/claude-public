@@ -8,6 +8,7 @@ effort: high
 maxTurns: 200
 skills: [qa-fix, qa-verify, fulltest-skill]
 allowed-tools:
+  - PushNotification
   - Agent
   - Skill
   - TaskCreate

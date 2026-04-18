@@ -8,6 +8,7 @@ model: opus # Advisor pattern: Sonnet executor + Opus advisor for sequential; fu
 effort: high
 alwaysThinkingEnabled: true
 allowed-tools:
+  - PushNotification
   - Read
   - Write
   - Edit

@@ -6,6 +6,7 @@ context: fork
 model: opus
 effort: high
 allowed-tools:
+  - PushNotification
   - Read
   - Write
   - Edit

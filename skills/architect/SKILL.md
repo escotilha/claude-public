@@ -6,6 +6,7 @@ context: inline
 model: opus
 effort: high
 allowed-tools:
+  - PushNotification
   - Read
   - Write
   - Edit

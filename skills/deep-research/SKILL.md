@@ -7,6 +7,7 @@ context: fork
 model: opus
 effort: high
 allowed-tools:
+  - PushNotification
   - WebFetch
   - WebSearch
   - Read
