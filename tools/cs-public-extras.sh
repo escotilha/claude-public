@@ -269,9 +269,14 @@ build_slack_message() {
     done
   fi
 
-  # Updated skills: single section listing names only.
+  # Updated skills: single section listing names only, comma-separated.
   if [[ ${#updated_list[@]} -gt 0 ]]; then
-    local updated_line="*Skills atualizados:* $(IFS=", "; echo "${updated_list[*]}")"
+    local updated_joined=""
+    for u in "${updated_list[@]}"; do
+      [[ -n "$updated_joined" ]] && updated_joined+=", "
+      updated_joined+="$u"
+    done
+    local updated_line="*Skills atualizados:* $updated_joined"
     blocks_json="$(printf '%s' "$blocks_json" | jq -c --arg line "$updated_line" \
       '. += [{type:"divider"},{type:"section",text:{type:"mrkdwn",text:$line}}]')"
   fi
