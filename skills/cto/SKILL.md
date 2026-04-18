@@ -598,7 +598,51 @@ Teammate "security-analyst":
   (AI-assisted SAST that traces data flows and catches business logic flaws that
   semgrep/trivy miss — found 500+ vulns in production OSS that survived expert review).
   This is especially relevant for Contably (Supabase RLS) and SourceRank (GitHub API access control).
-  Report: severity | file:line | CWE | issue | recommendation
+
+  NOISE REDUCTION — confidence gate + false-positive exclusions (adapted from gstack /cso):
+
+  Confidence gate: only report findings you rate >=8/10 on:
+  - Exploitability — you can describe a concrete attack path with the inputs an attacker
+    controls and the sensitive sink that is reached (not "could theoretically be abused").
+  - Reproducibility — you can point to specific file:line references and explain how to
+    trigger the unsafe state (not "if misconfigured" or "in some cases").
+  Findings below 8/10 go in a separate "candidates" section, not the main report. If
+  you cannot articulate the attack path clearly, it is a candidate, not a finding.
+
+  Known false-positive classes — do NOT report these unless the context genuinely
+  deviates from the common safe pattern:
+  1. String equality operators on non-secret values (usernames, tenant slugs, enum values) —
+     timing-safe comparison is only required for secrets, tokens, and hashes.
+  2. Non-crypto random (Math.random and equivalents) used for UI jitter, cache key salts,
+     test fixtures, animation timing — flag only when used for tokens, IDs, or crypto.
+  3. Dynamic code evaluation in test files, build scripts, or dev-only tooling.
+  4. HTML sink assignments where the input source is a literal string constant or a
+     server-rendered trusted field (verify the source, don't grep blind).
+  5. Missing rate limiting on routes that are already behind auth + org-scoped (internal
+     admin pages) — rate limit the public edge, not every internal route.
+  6. `process.env.X` without a fallback — standard practice, not a vulnerability.
+  7. JSON.parse on trusted server-side sources (DB rows, internal service calls).
+  8. Wildcard CORS on health check / public API docs / OpenAPI spec endpoints.
+  9. Request-body logging in dev-only code paths guarded by NODE_ENV checks.
+  10. Missing CSRF on pure API endpoints that use Bearer tokens (CSRF is cookie-auth-specific).
+  11. Plain HTTP URLs in code comments, test fixtures, or localhost dev configs.
+  12. Hardcoded credentials in test files that use obvious dummy values
+      (e.g., placeholder-key-123, "password", "changeme") — flag only real-looking secrets.
+  13. Navigation assignments from constants or server-trusted values.
+  14. Missing Content-Security-Policy on endpoints that return JSON (CSP applies to HTML).
+  15. TypeScript `any` / `unknown` types — quality issue, not security.
+  16. File upload where the code already validates content-type + extension + size AND
+      stores outside the web root — don't flag because one layer is missing if others
+      are present; flag only genuine gaps in the defense chain.
+  17. "Use of deprecated X" when X has no known CVE and the deprecation is cosmetic
+      (quality-analyst's domain, not security's).
+
+  Before emitting any finding, verify it independently: re-read the referenced file,
+  confirm the file:line is correct, confirm the attack path is reachable, confirm the
+  finding is not on the false-positive list above. If verification fails at any step,
+  downgrade the finding to a candidate.
+
+  Report: severity | file:line | CWE | confidence (/10) | issue | recommendation
   When SARIF output is available, include the Semgrep rule ID in findings for traceability.
   Message the lead with CRITICAL findings immediately (don't wait for completion).
   Message quality-analyst if you find deprecated/vulnerable dependencies they should flag.
