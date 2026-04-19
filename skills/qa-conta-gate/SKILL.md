@@ -256,11 +256,53 @@ Use a conceptual try/finally structure — treat "release lock" as the final ste
 
    Match each touched file against the `globs` of every feature entry. Collect the union of all matching `journeys[]` paths.
 
-4. **Full-suite fallback:**
+4. **Docs-only short-circuit (run before full-suite fallback):**
 
-   If `--force-full-suite` is passed, OR no touched files matched any feature glob, collect ALL journeys from ALL features in the feature map.
+   If `--force-full-suite` is NOT passed AND every touched file matches one of these patterns, skip the gate entirely and write an auto-approval with `reason: "docs-only"`:
 
-5. **Output:** a deduplicated list of journey spec file paths to run. Log the mapping:
+   - `*.md` (any markdown)
+   - `docs/**`
+   - `scripts/**` (dev helpers, not runtime code)
+   - `.github/**` with no workflow logic changes (comments/docs only)
+   - `CHANGELOG`, `LICENSE`, `NOTICE`, `.gitignore`, `.editorconfig`
+
+   ```bash
+   TOUCHED=$(git show --stat "$SHA" | grep '|' | awk '{print $1}')
+   DOCS_ONLY=true
+   for f in $TOUCHED; do
+     case "$f" in
+       *.md|docs/*|scripts/*|CHANGELOG*|LICENSE*|NOTICE*|.gitignore|.editorconfig) ;;
+       *) DOCS_ONLY=false; break ;;
+     esac
+   done
+   ```
+
+   If `DOCS_ONLY=true`:
+   - Skip Phase 2–6 entirely
+   - Write `.qa-approvals/<sha>.json` with:
+     ```json
+     {
+       "sha": "<full sha>",
+       "approved": true,
+       "approved_at": "<ISO8601>",
+       "approved_by": "qa-conta-gate",
+       "reason": "docs-only",
+       "touched_files": ["<path>", ...],
+       "journeys_tested": [],
+       "journeys_passed": 0,
+       "journeys_failed": 0,
+       "iterations_used": 0
+     }
+     ```
+   - Release lock, commit `chore(qa): UX auto-approved (docs-only) for <short-sha>`, push
+   - Optional Slack post (ℹ️ not ✅): `ℹ️ *UX auto-approved (docs-only):* <short-sha> — no runtime changes to test`
+   - Exit 0
+
+5. **Full-suite fallback:**
+
+   If `--force-full-suite` is passed, OR (no touched files matched any feature glob AND the docs-only short-circuit did not apply), collect ALL journeys from ALL features in the feature map.
+
+6. **Output:** a deduplicated list of journey spec file paths to run. Log the mapping:
 
    ```
    Touched files → matched features:
