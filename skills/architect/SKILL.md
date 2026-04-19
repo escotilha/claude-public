@@ -5,6 +5,7 @@ user-invocable: true
 context: inline
 model: opus
 effort: high
+skills: [verify, review-changes]
 allowed-tools:
   - Monitor
   - PushNotification

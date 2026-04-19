@@ -6,6 +6,7 @@ user-invocable: true
 context: fork
 model: opus
 effort: high
+skills: [get-api-docs]
 allowed-tools:
   - PushNotification
   - WebFetch

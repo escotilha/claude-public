@@ -23,6 +23,9 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Safety guardrails for bash    | `/careful`              | Before prod work / deploys — warns on rm, DROP, force-push, kubectl delete |
 | Restrict edits to a directory | `/freeze`               | While debugging — blocks Edit/Write outside chosen path, prevents scope creep |
 | Cloud parallel code review    | `/ultrareview`          | Multi-reviewer cloud-based review (Claude Code 2.1.111+). Distinct from `/cto` (local swarm) and `/review-changes` (single-agent). Use for PR-scale review. |
+| PR review (GitHub)            | `/review` (built-in)    | Review a specific pull request by number or URL                                                                                                             |
+| Security review (branch)      | `/security-review` (built-in) | Security-focused review of pending changes on current branch                                                                                          |
+| Initialize CLAUDE.md          | `/init` (built-in)      | Bootstrap a new CLAUDE.md file with codebase documentation                                                                                                  |
 | Commit + push + PR            | `/cpr`                  | Ready to ship to remote                                  |
 | Start local dev server        | `/run-local`            | Need to run project locally                              |
 | Parallel feature branches     | `/parallel-dev`         | Multiple independent features                            |

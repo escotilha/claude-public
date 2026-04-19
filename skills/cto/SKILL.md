@@ -7,6 +7,7 @@ context: fork
 model: opus # Advisor pattern: Sonnet executor + Opus advisor for sequential; full Opus for swarm
 effort: high
 alwaysThinkingEnabled: true
+skills: [get-api-docs]
 allowed-tools:
   - PushNotification
   - Read

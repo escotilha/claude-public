@@ -4,9 +4,8 @@ description: "Contably end-of-day autonomous pipeline. Phase 1: full bug hunt + 
 argument-hint: "[--as-routine '<cron>'] [--budget=<usd>] [--no-email] [--max-fix-iterations=N] [--dry-run]"
 user-invocable: true
 context: fork
-model: opus
+model: claude-opus-4-7
 effort: high
-alwaysThinkingEnabled: true
 allowed-tools:
   - Read
   - Write
