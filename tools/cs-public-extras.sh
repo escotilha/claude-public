@@ -12,7 +12,7 @@ cd "$SETUP_DIR"
 
 # Skills excluded from the public repo (kept in sync with /cs step 3).
 EXCLUDED_SKILLS=(
-  qa-conta qa-sourcerank qa-stonegeo virtual-user-testing oci-health
+  qa-conta qa-conta-gate qa-sourcerank qa-stonegeo virtual-user-testing oci-health
   proposal-source chief-geo health-report cs cpr sc slack agentmail tweet
   gws claude-setup-optimizer memory-consolidation meditate test-memory
   deploy-conta-staging deploy-conta-production deploy-conta-full
