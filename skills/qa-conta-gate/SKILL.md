@@ -271,7 +271,31 @@ After loading/generating all specs, persist a run manifest to `docs/qa/runs/<sha
 
 ## Phase 3: Parallel Browser Testing (Swarm)
 
-**CRITICAL: Spawn all journey testers in a single message.** If more than 5 journeys, batch them in groups of up to 5 — spawn the first batch, wait for results, spawn the next batch.
+### Persona matrix
+
+Each feature in `__feature-map__.json` declares a `personas[]` array with `expected_access` values:
+
+| `expected_access` | What the tester must verify |
+|---|---|
+| `full` | Positive test — journey must complete end-to-end |
+| `read-only` | Positive test for allowed journeys; for journeys in `forbidden_actions`: the UI control must be hidden AND the API must return 403 |
+| `none` | Forbidden-route test — `forbidden_routes` must redirect or 403; no admin chrome visible |
+| `scoped` | Reserved for future (e.g. per-department access) |
+
+**Superadmin special-case:** personas with `requires_company_switch: true` get an extra first step in every journey — pick a target company via the UI switcher before any feature interaction. The JWT has `company_id=null` for superadmins.
+
+Build a **test matrix** of `persona × journey` cells:
+- Skip cells where the journey is not in the persona's `journeys` array AND not in `forbidden_actions`/`forbidden_routes`
+- Expand cells: for a forbidden cell, generate a *forbidden-path* test variant (expects hidden UI + 403 API) instead of the positive journey
+
+Example for `bank-connections` with 4 personas × 3 journeys:
+- superadmin × 3 journeys = 3 positive cells (with company-switch)
+- manager × 3 journeys = 3 positive cells
+- analyst × list = 1 positive + analyst × {connect, disconnect} = 2 forbidden-action cells
+- client_portal × / = 1 forbidden-route cell (no journey — just verify redirect)
+- Total: ~10 cells, run in 2 batches of ≤5 parallel haiku agents
+
+**CRITICAL: Spawn all testers for one batch in a single message.** If more than 5 cells, batch them in groups of up to 5 — spawn the first batch, wait for results, spawn the next batch.
 
 For each batch, spawn haiku agents in parallel:
 
@@ -288,16 +312,30 @@ Each tester receives:
 
 ```
 You are a browser tester for Contably staging. Execute the following user journey
-and return a structured JSON result.
+AS A SPECIFIC PERSONA and return a structured JSON result.
 
 ## Target
 - Base URL: https://staging.contably.ai
 - Credentials: read from ~/.claude-setup/secrets/contably-staging.env
   (source it: `source ~/.claude-setup/secrets/contably-staging.env`)
-  Use the credential vars defined there (e.g. $STAGING_ADMIN_EMAIL, $STAGING_ADMIN_PASSWORD).
+  Use the credential block matching this persona's `credentials_ref`:
+    ${<credentials_ref>}_EMAIL, ${<credentials_ref>}_PASSWORD, ${<credentials_ref>}_COMPANY_ID
+  Example: credentials_ref=STAGING_TEST_MANAGER → $STAGING_TEST_MANAGER_EMAIL etc.
+
+## Persona profile
+- id: <persona.id>
+- role: <persona.role>
+- expected_access: <full|read-only|none>
+- test_variant: <positive | forbidden_action:<journey> | forbidden_route:<path>>
+- requires_company_switch: <true|false> — if true, pick target company via UI switcher as step 0
 
 ## Journey Spec
 <paste full journey spec markdown here>
+
+## Test variant rules
+- variant=positive: execute all journey steps; every acceptance criterion must pass
+- variant=forbidden_action: navigate as usual, but verify the gated UI control is NOT present AND a direct API call to the forbidden endpoint returns 403. PASS = UI hidden + API 403. FAIL = UI visible OR API 2xx
+- variant=forbidden_route: navigate to the forbidden route; PASS = redirect to an allowed page OR 403 page rendered. FAIL = admin chrome visible OR 2xx response with feature content
 
 ## Browser Tool
 Use agent-browser (primary). Fallback chain: agent-browser → browse CLI → mcp__chrome-devtools__*
