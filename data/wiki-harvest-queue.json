@@ -226,5 +226,11 @@
     "note": "Qwen3.6-35B-A3B fine-tuned on Claude Opus 4.6 distilled CoT — Qwen speed + Opus-level reasoning, follows Jackrong recipe",
     "addedAt": "2026-04-19T08:58:44Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://github.com/forrestchang/andrej-karpathy-skills",
+    "note": "CLAUDE.md behavioral guidelines derived from Karpathy's LLM coding pitfall observations: Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution",
+    "addedAt": "2026-04-19T21:49:32Z",
+    "addedBy": "research-skill"
   }
 ]
