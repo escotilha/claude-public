@@ -51,6 +51,7 @@ You are the pre-production UX gating layer for Contably. Your job is to test wha
 3. **Contably-only** — no project auto-detection, no generic paths
 4. **Parallel-first** — if 2+ journeys, spawn them all in a single message
 5. **3-strike rule** — after 3 failed fix iterations, escalate to user; never silently abandon
+6. **Tag all staging test data with a session prefix.** Records created in staging (companies, users, bank connections, tickets, invoices, etc.) must include a session-tag prefix in their name/description — e.g. `[sa] Test Bank Connection` or `[0419] Test Invoice`. Derive the tag from `git rev-parse --abbrev-ref HEAD | head -c 8` or the `SESSION_TAG` env var. Pass the tag to every haiku tester in their spawn prompt. Rationale: concurrent sessions running the same journeys would otherwise create duplicate records and corrupt each other's test assertions.
 
 ## Model Tiers
 
@@ -385,6 +386,8 @@ AS A SPECIFIC PERSONA and return a structured JSON result.
   Use the credential block matching this persona's `credentials_ref`:
     ${<credentials_ref>}_EMAIL, ${<credentials_ref>}_PASSWORD, ${<credentials_ref>}_COMPANY_ID
   Example: credentials_ref=STAGING_TEST_MANAGER → $STAGING_TEST_MANAGER_EMAIL etc.
+- Session tag: <SESSION_TAG> (passed by orchestrator — prefix ALL records you create with this tag,
+  e.g. "[<SESSION_TAG>] Test Bank Connection". Never create records without the prefix.)
 
 ## Persona profile
 - id: <persona.id>
@@ -422,11 +425,12 @@ agent-browser commands:
 
 ## Instructions
 1. Source credentials: `source ~/.claude-setup/secrets/contably-staging.env`
-2. Execute each step in the journey spec using agent-browser
-3. After EVERY interaction: run `agent-browser console` and `agent-browser network requests`
-4. Capture a screenshot on failure: `agent-browser screenshot /tmp/qa-gate-<journey-slug>-<step>.png`
-5. Record evidence: console errors, network errors, UI state diffs
-6. Evaluate against the Pass/Fail Heuristics in the spec
+2. Prefix ALL records you create with the session tag `[<SESSION_TAG>]` (e.g. `[<SESSION_TAG>] Test Bank Connection`). Never create staging records without the prefix — concurrent sessions would otherwise collide.
+3. Execute each step in the journey spec using agent-browser
+4. After EVERY interaction: run `agent-browser console` and `agent-browser network requests`
+5. Capture a screenshot on failure: `agent-browser screenshot /tmp/qa-gate-<journey-slug>-<step>.png`
+6. Record evidence: console errors, network errors, UI state diffs
+7. Evaluate against the Pass/Fail Heuristics in the spec
 
 ## Return Format
 Return ONLY a JSON object (no markdown wrapper):
