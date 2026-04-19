@@ -28,6 +28,7 @@ allowed-tools:
   - Monitor
   - EnterWorktree
   - ExitWorktree
+  - Skill
   - AskUserQuestion
 invocation-contexts:
   user-direct:

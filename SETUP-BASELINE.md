@@ -4,6 +4,15 @@
 **Next review:** 2026-05-03 (biweekly Wednesday)
 **Claude Code version at last review:** 2.1.114
 
+**Changes detected at 2026-04-19 review:**
+- Skills on disk: 86 (baseline said 90 — 4 moved to `_archive/`)
+- Agents: 8 active (baseline listed 10 — `fulltesting-agent` missing, `review/code-review-agent` is in subdirectory)
+- alwaysThinkingEnabled field: present in 8 Opus skills (valid field, kept for now)
+- Hook count: 25 (matches baseline)
+- Skills with zero invocations (60d): 35 — see SKILL DRIFT section below
+- `resume=` deprecation warning: confirmed NO actual skill SKILL.md files use `Agent(resume=...)` — only a documentation checklist reference in claude-setup-optimizer (false positive)
+- Cross-skill synergy: `skills:` dependency field used by 5 skills only (deploy-conta-staging, deploy-conta-production, deploy-conta-full, deploy-sourcerank, meditate)
+
 ---
 
 ## MCP Servers (16 in settings + 2 external)
@@ -31,7 +40,7 @@
 
 **Note:** plugin:discord and plugin:swift-lsp moved to `enabledPlugins` system. google-workspace is active but configured outside settings.json (uvx workspace-mcp).
 
-## Skills (90 on-disk)
+## Skills (86 on-disk, 7 in _archive)
 
 ### Developer Workflow (23)
 
@@ -81,9 +90,9 @@ rex
 
 vibc, vault-bootstrap
 
-## Agents (10)
+## Agents (9 active)
 
-backend-agent, database-agent, devops-agent, frontend-agent, oncall-guide, performance-agent, project-orchestrator, security-agent, code-review-agent, fulltesting-agent
+backend-agent, database-agent, devops-agent, frontend-agent, oncall-guide, performance-agent, project-orchestrator, security-agent, code-review-agent (in agents/review/)
 
 ## Plugins (8)
 
@@ -157,4 +166,18 @@ No dedicated finance/M&A skills exist on disk. Core M&A workflows rely on genera
 
 - No dedicated monitoring/alerting skill
 - No load testing / performance benchmarking skill
-- No database migration management skill
+- No database migration management skill (alembic-chain-repair covers emergency repairs only)
+
+## Skill Drift (Zero Invocations Last 60 Days)
+
+35 skills with zero invocations: agent-browser, careful, chief-geo, contably-ci-rescue, contably-eod, contably-snapshot, cpr, demo, firecrawl, freeze, gbrain, get-api-docs, growth, gws, handoff, investigate, last30days, llm-eval, local-inference, maketree, nanoclaw, office-hours, orchestrate, primer, proposal-source, qa-sourcerank, qa-stonegeo, qa-verify, qmd, revert-track, sc, skill-tree, tech-audit, test-and-fix, vault-bootstrap
+
+**Note:** Many of these are contextually useful but rarely triggered (careful, freeze, handoff are session-lifecycle tools). Others may be genuinely unused (vault-bootstrap, qa-stonegeo if StoneGEO is inactive).
+
+## Opportunity: skills: Dependency Field
+
+Only 5 skills use the `skills:` frontmatter to auto-load dependencies into subagents:
+- deploy-conta-staging, deploy-conta-production, deploy-conta-full, deploy-sourcerank, meditate
+
+High-value candidates that spawn subagents but don't declare dependencies:
+- architect, cto, deep-research, parallel-dev, virtual-user-testing, rex, memory-consolidation, last30days

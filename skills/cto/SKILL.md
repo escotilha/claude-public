@@ -30,6 +30,7 @@ allowed-tools:
   - TeamCreate
   - TeamDelete
   - SendMessage
+  - Skill
   - AskUserQuestion
   - mcp__memory__*
 memory: user

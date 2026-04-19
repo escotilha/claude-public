@@ -20,6 +20,7 @@ allowed-tools:
   - TaskList
   - WebSearch
   - WebFetch
+  - Skill
   - AskUserQuestion
 ---
 
