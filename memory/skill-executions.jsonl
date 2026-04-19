@@ -18509,3 +18509,5 @@
 {"timestamp":"2026-04-19T13:27:20Z","date":"2026-04-19","skill":"deploy-conta-full","args":"--sha=fe99c90","sessionId":"3538be53-f06e-4407-9e7d-5e968cf57914","project":"Contably","cwd":"/Volumes/AI/Code/contably","hadError":false}
 {"timestamp":"2026-04-19T14:51:52Z","date":"2026-04-19","skill":"qa-conta","args":"","sessionId":"3538be53-f06e-4407-9e7d-5e968cf57914","project":"Contably","cwd":"/Volumes/AI/Code/contably","hadError":false}
 {"timestamp":"2026-04-19T14:52:00Z","date":"2026-04-19","skill":"qa-cycle","args":"","sessionId":"3538be53-f06e-4407-9e7d-5e968cf57914","project":"Contably","cwd":"/Volumes/AI/Code/contably","hadError":false}
+{"timestamp":"2026-04-19T15:01:33Z","date":"2026-04-19","skill":"qa-conta","args":"--target prod --autonomous","sessionId":"3538be53-f06e-4407-9e7d-5e968cf57914","project":"Contably","cwd":"/Volumes/AI/Code/contably","hadError":false}
+{"timestamp":"2026-04-19T15:01:53Z","date":"2026-04-19","skill":"qa-cycle","args":"--target prod --autonomous","sessionId":"3538be53-f06e-4407-9e7d-5e968cf57914","project":"Contably","cwd":"/Volumes/AI/Code/contably","hadError":false}
