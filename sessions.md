@@ -20,3 +20,4 @@ Two sessions silently picked the same Alembic migration number (`072`) with diff
 - sa | feat/sa-tx-detail-enrichment | contably | transaction detail modal enrichment (Phases A/B/C) | 2026-04-19
 - sb | fix/sb-gha-pr-comment-perm | contably | fix GITHUB_TOKEN pr-comment perm on Deploy to Staging workflow | 2026-04-19
 - sa-phaseb | feat/sa-tx-detail-phase-b | contably | tx detail modal Phase B — inline actions (match/split/ignore/categorize) | 2026-04-19
+- sa-phasec | feat/sa-tx-detail-phase-c | contably | tx detail modal Phase C — attachments (transaction_attachments join table + uploads reuse) + Histórico tab (DataLineage) | 2026-04-19
