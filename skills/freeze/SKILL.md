@@ -9,6 +9,15 @@ allowed-tools:
   - Bash
   - Read
   - AskUserQuestion
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    confirmDestructive: true
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    confirmDestructive: false
+    outputFormat: structured
 ---
 
 # /freeze — Restrict Edits to a Directory

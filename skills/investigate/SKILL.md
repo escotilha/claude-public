@@ -14,6 +14,15 @@ allowed-tools:
   - Glob
   - WebSearch
   - AskUserQuestion
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    confirmDestructive: true
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    confirmDestructive: false
+    outputFormat: structured
 ---
 
 # /investigate — Systematic Root-Cause Debugging

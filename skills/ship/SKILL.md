@@ -847,6 +847,10 @@ Agent(model="sonnet", subagent_type="code-review-agent", prompt="
 
 **Cost:** Both reviewers run as sonnet subagents (~$0.50-1.00 combined). The orchestrator (opus) merges findings and decides which fixes to apply.
 
+#### Optional: `/ultrareview` (PR-scale cloud review)
+
+For PR-scale features (10+ tasks, multi-file architectural changes, or when higher assurance is needed before shipping), invoke `/ultrareview` after the two-stage review to run a cloud-parallel multi-agent review (Claude Code 2.1.111+). Distinct from the local two-stage subagent review above — use as an additional gate, not a replacement. Skip for small features where the two-stage review is sufficient.
+
 ### Phase 4.7: Interactive Evaluation (Evaluator Agent)
 
 After the two-stage code review (Phase 4.5) and before QA (Phase 5), run an **independent evaluator agent** that interacts with the running application and grades the implementation against rubric criteria. This closes the self-evaluation bias gap: generators systematically praise their own work regardless of quality. An independent evaluator tuned toward skepticism catches issues that code review alone misses.

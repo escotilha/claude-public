@@ -1,12 +1,12 @@
 # Setup Baseline Inventory
 
-**Last verified:** 2026-04-18
-**Next review:** Biweekly (Wednesday + Sunday, 6am)
+**Last verified:** 2026-04-19
+**Next review:** 2026-05-03 (biweekly Wednesday)
 **Claude Code version at last review:** 2.1.114
 
 ---
 
-## MCP Servers (18)
+## MCP Servers (16 in settings + 2 external)
 
 | #   | Server              | Purpose                         | Status                                      |
 | --- | ------------------- | ------------------------------- | ------------------------------------------- |
@@ -31,7 +31,7 @@
 
 **Note:** plugin:discord and plugin:swift-lsp moved to `enabledPlugins` system. google-workspace is active but configured outside settings.json (uvx workspace-mcp).
 
-## Skills (82 on-disk)
+## Skills (90 on-disk)
 
 ### Developer Workflow (23)
 
@@ -81,9 +81,9 @@ rex
 
 vibc, vault-bootstrap
 
-## Agents (9)
+## Agents (10)
 
-backend-agent, database-agent, devops-agent, frontend-agent, oncall-guide, performance-agent, project-orchestrator, security-agent, review/ (multi-perspective)
+backend-agent, database-agent, devops-agent, frontend-agent, oncall-guide, performance-agent, project-orchestrator, security-agent, code-review-agent, fulltesting-agent
 
 ## Plugins (8)
 
@@ -91,9 +91,9 @@ discord, codex (OpenAI), frontend-design, typescript-lsp, security-guidance, hoo
 
 **Note:** swift-lsp was replaced by typescript-lsp + pyright-lsp. codex (OpenAI) added via external marketplace. warp added via claude-code-warp marketplace.
 
-## Rules (8)
+## Rules (11)
 
-AGENT-TEAMS-STRATEGY.md, memory-strategy.md, model-tier-strategy.md, nuvini-sync-rules.md, parallel-first.md, skill-first.md, tool-annotations.md, web-search-efficiency.md
+AGENT-TEAMS-STRATEGY.md, handoff-threshold.md, memory-strategy.md, model-tier-strategy.md, nuvini-sync-rules.md, opus-4-7-prompting.md, parallel-first.md, skill-authoring-conventions.md, skill-first.md, tool-annotations.md, web-search-efficiency.md
 
 ## Hooks (Active)
 
@@ -119,10 +119,12 @@ AGENT-TEAMS-STRATEGY.md, memory-strategy.md, model-tier-strategy.md, nuvini-sync
 | PermissionDenied      | Permission denial logging                |
 | Setup                 | Repo setup/maintenance                   |
 
-**Missing hooks:**
+**Hooks adopted since last baseline (2026-04-18 → 2026-04-19):**
 
-- `PermissionRequest` — not yet configured (auto-approve/deny tool permissions)
-- `PreCompact` — available since v2.1.105 (block compaction or inject pre-compact state)
+- `PermissionRequest` — wired (auto-approve/deny tool permissions)
+- `PreCompact` — wired (block compaction or inject pre-compact state)
+
+All prior "missing hooks" are now configured. Hook event count: 25.
 
 **Unreferenced hook scripts** (exist in hooks/ but not wired in settings.json):
 
