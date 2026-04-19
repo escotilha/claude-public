@@ -1,7 +1,7 @@
 ---
 name: deploy-conta-staging
 description: "Deploy Contably to OCI staging. Verify → guardian → push → CI → deploy → health check. Auto-fixes. Triggers on: deploy conta staging, deploy staging, push to staging, staging deploy."
-argument-hint: "[--skip-guardian] [--skip-verify]"
+argument-hint: "[--skip-guardian] [--skip-verify] [--review|--skip-review]"
 user-invocable: true
 context: fork
 model: opus
@@ -48,6 +48,8 @@ To promote staging to production, use `/deploy-conta-production` which triggers 
 
 - `--skip-guardian` — skip the /contably-guardian pre-deploy check
 - `--skip-verify` — skip the /verify type-check/lint/build step
+- `--review` — force /ultrareview multi-reviewer code review (runs regardless of diff size)
+- `--skip-review` — explicitly skip /ultrareview (default when diff is small or docs-only)
 
 ## Infrastructure Context
 
@@ -118,7 +120,15 @@ unset GITHUB_TOKEN && gh run view <RUN_ID> --repo Contably/contably --json jobs 
    - Re-run /verify after fixes
    - If still failing after 3 iterations, ask the user whether to proceed or abort
 
-2. **Run /contably-guardian** (unless `--skip-guardian`):
+2. **Run /ultrareview** (optional, diff-gated):
+   - **Skip** if `--skip-review` is passed, OR if diff is trivial: `git diff origin/main...HEAD --shortstat` shows < 20 lines changed, OR only touches `*.md` / `docs/**`
+   - **Run** if `--review` is passed, OR if the diff is non-trivial (≥20 LOC or touches `apps/api/src/`, `apps/admin/src/`, `apps/client-portal/src/`, `alembic/versions/`, or `infrastructure/`)
+   - Invoke `/ultrareview` via the Skill tool. This spawns parallel cloud reviewers (security, performance, architecture, quality) on the uncommitted + unpushed diff against `origin/main`
+   - If reviewers flag CRITICAL issues: attempt auto-fix with Edit tool, then re-run /ultrareview (max 2 iterations)
+   - If reviewers return only warnings/suggestions: log them in the final report and proceed
+   - If /ultrareview is unavailable in this Claude Code version: skip silently with a log note
+
+3. **Run /contably-guardian** (unless `--skip-guardian`):
    - Invoke the `contably-guardian` skill via the Skill tool
    - If `DEPLOY BLOCKED`: analyze the blocking issues
      - For code-level issues (CHECK 1-5): attempt auto-fix using Edit tool, then re-run guardian
@@ -126,11 +136,11 @@ unset GITHUB_TOKEN && gh run view <RUN_ID> --repo Contably/contably --json jobs 
      - For runtime issues (Layer 3): skip if staging is unreachable (will be checked post-deploy)
    - If `DEPLOY APPROVED` or `DEPLOY APPROVED WITH WARNINGS`: proceed
 
-3. **Run /review-changes** on any auto-fix commits:
+4. **Run /review-changes** on any auto-fix commits:
    - If fixes were applied, invoke `review-changes` skill to validate the fixes don't introduce new issues
    - If review finds CRITICAL issues, fix and re-review (max 2 iterations)
 
-4. After all checks pass, commit any fix changes:
+5. After all checks pass, commit any fix changes:
    ```
    fix(deploy): auto-fix {summary of what was fixed}
    ```
@@ -254,6 +264,7 @@ Output a deployment summary:
 | Stage          | Status   | Duration |
 | -------------- | -------- | -------- |
 | Verify         | PASS     | 45s      |
+| Ultrareview    | PASS/SKIPPED | 3m   |
 | Guardian       | APPROVED | 2m       |
 | Push           | {sha}    | 1s       |
 | CI Pipeline    | PASS     | 8m       |
@@ -279,6 +290,7 @@ To promote to production: `/deploy-conta-production`
 | Failure                     | Action                                | Max Retries |
 | --------------------------- | ------------------------------------- | ----------- |
 | /verify fails               | Invoke /test-and-fix, re-verify       | 3           |
+| /ultrareview CRITICAL       | Auto-fix reviewer issues, re-review   | 2           |
 | /contably-guardian BLOCKED  | Auto-fix code issues, re-run guardian | 2           |
 | /review-changes CRITICAL    | Fix and re-review                     | 2           |
 | CI lint/typecheck fail      | Auto-fix locally, re-push             | 3           |
@@ -305,6 +317,7 @@ To promote to production: `/deploy-conta-production`
 | ----------------------------- | ------ |
 | /verify invocation            | haiku  |
 | /test-and-fix invocation      | sonnet |
+| /ultrareview invocation       | cloud  |
 | /contably-guardian invocation | opus   |
 | /review-changes invocation    | sonnet |
 | /oci-health invocation        | haiku  |
