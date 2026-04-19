@@ -18,3 +18,5 @@ Append one row per active session. Remove (or mark closed) when the session ends
 
 Two sessions silently picked the same Alembic migration number (`072`) with different content. This log + the `concurrent-sessions.md` rule prevent recurrence. See `rules/concurrent-sessions.md` for the full protocol.
 - sa | feat/sa-tx-detail-enrichment | contably | transaction detail modal enrichment (Phases A/B/C) | 2026-04-19
+- sb | fix/sb-gha-pr-comment-perm | contably | fix GITHUB_TOKEN pr-comment perm on Deploy to Staging workflow | 2026-04-19
+- sa-phaseb | feat/sa-tx-detail-phase-b | contably | tx detail modal Phase B — inline actions (match/split/ignore/categorize) | 2026-04-19
