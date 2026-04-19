@@ -1,7 +1,7 @@
 ---
 name: deploy-conta-full
 description: "Full Contably deploy: staging → production in one command. Runs /deploy-conta-staging, and if all green, auto-promotes to production via /deploy-conta-production. Triggers on: deploy conta full, full deploy, staging to production, deploy all."
-argument-hint: "[--skip-guardian] [--skip-verify]"
+argument-hint: "[--skip-guardian] [--skip-verify] [--force-staging-redeploy] [--sha=<7-char-sha>]"
 user-invocable: true
 context: fork
 model: opus
@@ -55,10 +55,56 @@ Runs the complete deployment pipeline: staging deploy followed by automatic prod
 
 - `--skip-guardian` — passed through to `/deploy-conta-staging`
 - `--skip-verify` — passed through to `/deploy-conta-staging`
+- `--force-staging-redeploy` — always run `/deploy-conta-staging` even if staging is already green for the target SHA. Default: skip when staging is already green.
+- `--sha=<7-char-sha>` — promote a specific SHA. Default: `git rev-parse HEAD` (current main).
 
 ## Workflow
 
-### Phase 1: Deploy to Staging
+### Phase 0: Staging Freshness Check (fast-path detection)
+
+Before running staging, check whether staging is already green for the target SHA. If yes, skip Phase 1 entirely and jump to Phase 2.
+
+1. **Resolve the target SHA:**
+
+   ```bash
+   TARGET_SHA="${SHA_ARG:-$(git rev-parse HEAD)}"
+   TARGET_SHORT="${TARGET_SHA:0:7}"
+   ```
+
+2. **Check the most recent `Deploy Staging` run for that SHA:**
+
+   ```bash
+   STAGING_RUN=$(unset GITHUB_TOKEN && gh run list --repo Contably/contably \
+     --workflow "Deploy Staging" --limit 10 \
+     --json databaseId,status,conclusion,headSha \
+     --jq ".[] | select(.headSha | startswith(\"$TARGET_SHORT\")) | select(.status == \"completed\") | .[0]")
+   ```
+
+3. **Decision matrix:**
+
+   | Condition                                                                | Action                              |
+   | ------------------------------------------------------------------------ | ----------------------------------- |
+   | Staging run found, conclusion=success, no `--force-staging-redeploy`     | **SKIP Phase 1**, jump to Phase 2   |
+   | Staging run found, conclusion=success, `--force-staging-redeploy` passed | Run Phase 1 anyway (user override)  |
+   | Staging run found, conclusion=failure/cancelled                          | Run Phase 1 (need to retry staging) |
+   | No staging run found for SHA                                             | Run Phase 1 (first deploy of SHA)   |
+
+4. **When skipping Phase 1, verify staging health is currently up** (the green run could be hours old):
+
+   ```bash
+   curl -fsS https://staging-api.contably.ai/health || { echo "Staging health failing — falling back to Phase 1"; FORCE_PHASE1=1; }
+   ```
+
+   If staging is unhealthy now even though the last run succeeded, fall through to Phase 1.
+
+5. **Announce the decision** to the user before proceeding so they can intercept:
+
+   ```
+   Staging already green for SHA abc1234 (run #12345, completed 8m ago, health OK).
+   Skipping staging redeploy. Promoting to prod in 5s — interrupt to abort.
+   ```
+
+### Phase 1: Deploy to Staging (conditional — only if Phase 0 said so)
 
 1. Invoke the `deploy-conta-staging` skill via the Skill tool, passing through any `--skip-guardian` or `--skip-verify` flags from the user's arguments.
 
@@ -68,14 +114,16 @@ Runs the complete deployment pipeline: staging deploy followed by automatic prod
 
 ### Phase 2: Promote to Production
 
-1. Get the staging image tag from the latest successful staging deploy run:
+1. Use the `TARGET_SHORT` from Phase 0 (or, if Phase 1 ran, re-derive from the just-completed staging run):
 
    ```bash
-   SHA=$(unset GITHUB_TOKEN && gh run list --repo Contably/contably --workflow "Deploy to Staging" --status success --limit 1 --json headSha -q '.[0].headSha' | head -c 7)
-   echo "stg-$SHA"
+   if [ -z "$TARGET_SHORT" ]; then
+     TARGET_SHORT=$(unset GITHUB_TOKEN && gh run list --repo Contably/contably --workflow "Deploy Staging" --status success --limit 1 --json headSha -q '.[0].headSha' | head -c 7)
+   fi
+   echo "Promoting image tag: stg-$TARGET_SHORT"
    ```
 
-   The image tag is `stg-<7-char-sha>`.
+   The image tag is `stg-<7-char-sha>`. Never re-query "latest success" if the user passed `--sha=` — promote what they asked for.
 
 2. Trigger the production deploy via GitHub Actions workflow_dispatch:
 
@@ -142,12 +190,18 @@ Production is live at:
 
 ## Rules
 
-1. **Staging must be fully green before touching production** — any staging failure aborts the entire pipeline
-2. **Pass `--skip-staging-check` to production skill** — staging was just verified, don't waste time re-checking
-3. **Never auto-fix production** — the production skill handles this (always asks the user)
-4. **Forward arguments** — `--skip-guardian` and `--skip-verify` are passed to staging only
-5. **Report combined timing** — show both staging and production phases in the final summary
-6. **Auto-approve production** — the whole point of this skill is hands-off staging→production. No confirmation prompt for the production gate.
+1. **Staging must be fully green before touching production** — Phase 0 verifies this; any staging failure (or unhealthy staging now) aborts the entire pipeline
+2. **Skip staging redeploy when SHA already green** — default behavior. Saves ~10 min per promotion and avoids destabilizing a known-good staging. Use `--force-staging-redeploy` to override.
+3. **Promote what the user asked for** — if `--sha=<x>` was passed, never silently substitute "latest success"
+4. **Pass `--skip-staging-check` to production skill** — staging was just verified by Phase 0 or Phase 1
+5. **Never auto-fix production** — the production skill handles this (always asks the user)
+6. **Forward arguments** — `--skip-guardian` and `--skip-verify` are passed to staging only
+7. **Report combined timing** — show both staging and production phases in the final summary, and note when Phase 1 was skipped
+8. **Auto-approve production** — the whole point of this skill is hands-off staging→production. No confirmation prompt for the production gate.
+
+## Future: UX gate integration (planned)
+
+When `/qa-conta-gate` is operational, Phase 0 should also check for a `ux_approvals` row matching the target SHA before promoting. If absent, prompt the user to run `/qa-conta-gate <sha>` first (or pass `--skip-ux-gate` to bypass). Until then, GitHub Actions green is the only gate.
 
 ## Subagent Model Tiers
 
