@@ -249,9 +249,10 @@ user-invocable: true
 
 
 
+
 ## Últimas 3 atualizações
 
-- **2026-04-19** — auto: sync claude-setup
+- **2026-04-19** — docs: update Portuguese READMEs + root summary
 - **2026-04-19** — auto: sync claude-setup
 - **2026-04-19** — auto: sync claude-setup
 
