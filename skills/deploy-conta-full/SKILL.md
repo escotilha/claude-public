@@ -198,6 +198,7 @@ Production is live at:
 6. **Forward arguments** — `--skip-guardian` and `--skip-verify` are passed to staging only
 7. **Report combined timing** — show both staging and production phases in the final summary, and note when Phase 1 was skipped
 8. **Auto-approve production** — the whole point of this skill is hands-off staging→production. No confirmation prompt for the production gate.
+9. **Deploy only via GitHub Actions — this skill delegates entirely to `/deploy-conta-staging` and `/deploy-conta-production`; it never runs `kubectl set image`, `kubectl rollout restart`, or any direct cluster command itself.** Both sub-skills enforce the same constraint. No cluster mutation ever originates from this session directly.
 
 ## Future: UX gate integration (planned)
 

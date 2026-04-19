@@ -274,7 +274,8 @@ Production is live at:
 
 1. **NEVER auto-fix production** — always report and ask the user
 2. **ALWAYS confirm before pushing** — unless `--auto-approve` is passed (used by `/deploy-conta-full`)
-3. **If `gh` CLI fails** — fall back to push-only mode with manual monitoring at github.com/Contably/contably/actions
+3. **Deploy only via GitHub Actions** — never run `kubectl set image`, `kubectl rollout restart`, or any direct cluster-mutating command from this session. Production deploys go through `deploy-production.yml` workflow_dispatch only — bypassing it races with concurrent sessions and breaks the audit trail. The rollback suggestion (`kubectl rollout undo`) in Phase 3 is a human-executed emergency command, not something this session should run; present it to the user and let them decide.
+4. **If `gh` CLI fails** — fall back to push-only mode with manual monitoring at github.com/Contably/contably/actions
 4. **Log timing for each phase** — report durations in the final summary
 5. **Suggest rollback on any production failure** — `kubectl rollout undo deployment/contably-api -n contably`
 6. **Production requires UX approval** — `/qa-conta-gate` must pass for the staging SHA before this skill will promote. Use `--force` only for hotfixes with a documented reason (e.g. security patch, regulatory deadline).

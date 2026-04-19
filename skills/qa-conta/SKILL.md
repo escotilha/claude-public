@@ -825,3 +825,4 @@ Skill("computer-use", args="Test eSocial portal: navigate to portal.esocial.gov.
 - **Guardian before deploy**: always run `Skill("contably-guardian")` before pushing.
 - **Browse isolation**: set `BROWSE_STATE_FILE` per agent when running parallel browser tests.
 - **Partial runs**: respect `--discover-only`, `--fix-only`, `--verify-only` flags from user input.
+- **Session-tag all staging test data**: any record you create in staging (company, user, bank connection, ticket, invoice, etc.) must be prefixed with a session tag — e.g. `[sa] Test Invoice` or `[0419] Test User`. Derive the tag from `git rev-parse --abbrev-ref HEAD | head -c 8` or the `SESSION_TAG` env var. Rationale: concurrent sessions running the same tests would otherwise create duplicate records and corrupt each other's assertions.

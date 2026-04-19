@@ -167,6 +167,70 @@ Parse arguments from the user's invocation:
 
 ---
 
+## Phase 0.5: Acquire Concurrent-Run Lock
+
+Only one `/qa-conta-gate` run may be active at a time per-repo. The Pluggy
+sandbox and staging test users are shared resources — concurrent runs race on
+them and produce flaky or destructive results (e.g. two sessions trying to
+connect/disconnect the same sandbox CPF simultaneously).
+
+### Lock file
+
+Path: `.qa-approvals/.lock` (gitignored — never committed)
+
+Format: JSON
+```json
+{
+  "sha": "<the SHA this run is testing>",
+  "started_at": "<ISO8601>",
+  "session": "<short session tag, e.g. sa, 0419>",
+  "pid": 12345,
+  "host": "<hostname>"
+}
+```
+
+### Acquire
+
+```bash
+mkdir -p .qa-approvals
+LOCK=".qa-approvals/.lock"
+SESSION=$(git rev-parse --abbrev-ref HEAD 2>/dev/null | grep -oE '[a-z0-9]+' | head -1 || echo "${USER:-unknown}")
+NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+```
+
+1. Check for `.qa-approvals/.lock`:
+   - **Absent** → write the lock with this run's metadata and proceed:
+     ```bash
+     echo "{\"sha\":\"$SHA\",\"started_at\":\"$NOW\",\"session\":\"$SESSION\",\"pid\":$$,\"host\":\"$(hostname)\"}" > "$LOCK"
+     echo "Lock acquired by session=$SESSION for SHA=$SHA"
+     ```
+   - **Present** → read it:
+     - If `started_at` is **older than 30 minutes**: treat as stale, log a warning, overwrite, and proceed.
+     - Otherwise: **ABORT** with a clear message:
+       ```
+       /qa-conta-gate is already running:
+         session: <session>
+         sha:     <sha>
+         started: <started_at> (N minutes ago)
+         host:    <host>
+       Wait for it to finish, or if you know it is stuck, delete
+       .qa-approvals/.lock manually and re-run.
+       ```
+
+### Release
+
+The lock **MUST** be released on every exit path.
+
+#### Lock release checklist
+
+- **Success (Phase 5 all-green):** `rm .qa-approvals/.lock` — include the deletion in the same `git add` + `git commit` that writes the approval signal.
+- **Rejected (fix loop exhausted):** `rm .qa-approvals/.lock` — commit the deletion in the same commit that writes the rejected signal.
+- **Abort (user Ctrl+C, hard crash):** Lock is left behind. The 30-minute staleness check handles recovery automatically on the next run. No manual action is needed unless a run is confirmed dead before 30 minutes elapse (delete the file manually in that case).
+
+Use a conceptual try/finally structure — treat "release lock" as the final step in every termination path listed above. Never exit without checking this list.
+
+---
+
 ## Phase 1: Diff Analysis → Journey List
 
 1. **Get touched files:**
@@ -502,10 +566,12 @@ On all journeys passing (iteration ≤ max_iterations):
    }
    ```
 
-3. Commit and push:
+3. Release lock and commit together:
 
    ```bash
+   rm -f .qa-approvals/.lock
    git add .qa-approvals/<sha>.json
+   # Note: .lock is gitignored — no need to git rm it
    git commit -m "chore(qa): UX approved for <short-sha>"
    git push origin main
    ```
@@ -536,7 +602,16 @@ If fix loop exhausted without all-green:
 }
 ```
 
-Write to `.qa-approvals/<sha>.json` (rejected signal also blocks `/deploy-conta-production`). Commit and push the same way.
+Release lock and commit:
+
+```bash
+rm -f .qa-approvals/.lock
+git add .qa-approvals/<sha>.json
+git commit -m "chore(qa): UX rejected for <short-sha>"
+git push origin main
+```
+
+The rejected signal also blocks `/deploy-conta-production`. Use the same rebase retry loop for push conflicts.
 
 ---
 
@@ -643,6 +718,8 @@ If the Slack post fails (network error, auth issue): log a warning and do NOT fa
 | GHA redeploy run fails            | Abort fix loop, escalate to user                | 0           |
 | Slack post fails                  | Log warning, do not fail gate                   | 0           |
 | CRITICAL UX issue in fix scope    | AskUserQuestion before proceeding               | — (user decides) |
+| Lock held by another run          | ABORT with session/sha/host info (Phase 0.5)    | 0           |
+| Stale lock (> 30 min old)         | Overwrite lock, log warning, continue           | 1           |
 
 ---
 
@@ -670,7 +747,13 @@ If the Slack post fails (network error, auth issue): log a warning and do NOT fa
 
 ```
 docs/qa/runs/
+.qa-approvals/.lock
 ```
+
+**Lock file is gitignored.** Ensure `.qa-approvals/.lock` is in the repo's
+`.gitignore` before the first run. The approval signal files
+(`.qa-approvals/<sha>.json`) ARE committed; only the lock file is ephemeral
+and must never be committed.
 
 ### Committed paths
 

@@ -307,7 +307,7 @@ To promote to production: `/deploy-conta-production`
 3. **Commit fixes with conventional commits** — `fix(deploy): {description}`
 4. **Track all auto-fix commits** — report them in the final summary
 5. **Max 3 full push cycles** — if code still fails CI after 3 rounds, stop and report
-6. **Respect the pipeline chain** — don't bypass GitHub Actions by deploying directly via kubectl
+6. **Deploy only via GitHub Actions** — never run `kubectl set image`, `kubectl rollout restart`, or any direct cluster-mutating command from this session. The `deploy.yml` / `deploy-production.yml` workflows are the single writers to the cluster — bypassing them races with concurrent sessions and breaks the audit trail. If a workflow is stuck, fix it in the workflow file via a PR; don't work around it.
 7. **If `gh` CLI fails** — fall back to push-only mode with manual monitoring at github.com/Contably/contably/actions
 8. **Log timing for each phase** — report durations in the final summary
 

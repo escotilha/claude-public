@@ -844,6 +844,12 @@ Create `virtual-user-testing.config.md` in project root to customize:
 
 ---
 
+## Rules
+
+1. **Tag all staging test data with a session prefix.** Records created in staging (companies, users, bank connections, tickets, invoices, etc.) must include a session-tag prefix in their name/description — e.g. `[sa] Test Bank Connection` or `[0419] Test Invoice`. Derive the tag from the current branch name (`git rev-parse --abbrev-ref HEAD | head -c 8`) or from the `SESSION_TAG` env var if set. Rationale: two sessions running the same journey concurrently would otherwise create duplicate records and corrupt each other's test assertions.
+
+---
+
 ## Version
 
 **Current Version:** 2.2.0
