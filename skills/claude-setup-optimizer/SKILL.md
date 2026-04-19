@@ -150,7 +150,17 @@ cat "$SETUP/settings.json" 2>/dev/null | grep -A1 '"description"' | grep descrip
 
 This single Bash call replaces 3 Explore subagents and runs in seconds instead of minutes.
 
-**Launch 1a and 1b in parallel** (two Bash calls in the same message), then proceed to Step 2 with combined results.
+#### 1c. External Model Watch (MLX/quant releases)
+
+Check HuggingFace for new MLX quants of models tracked in `model-tier-strategy.md` (Tier 0b local inference). Runs as part of the parallel Step 1 batch — costs a few HF API calls, no auth.
+
+```bash
+bash "$SETUP/skills/claude-setup-optimizer/watch-models.sh"
+```
+
+Tracked models live in `skills/claude-setup-optimizer/models.txt` (one HF repo id per line). State cached in `~/.cache/claude-setup-optimizer/mlx-watch.state` so only new quants are reported on subsequent runs. Any findings surface as MEDIUM-priority recommendations in Step 4's "External Models" section (see Step 3d).
+
+**Launch 1a, 1b, and 1c in parallel** (three Bash calls in the same message), then proceed to Step 2 with combined results.
 
 ### Step 2: Compare and Identify Opportunities
 
@@ -372,6 +382,17 @@ Specific steps or code changes needed
 
 **Effort:** Low/Medium/High
 ```
+
+### Step 3d: External Model Findings
+
+If Step 1c (`watch-models.sh`) reported new MLX quants, surface each as a MEDIUM-priority recommendation in the report:
+
+- Title: "New MLX quant available: {variant}"
+- File to update: `~/.claude-setup/rules/model-tier-strategy.md` Candidate section + Mac Mini row in the deployed infrastructure table
+- Rationale: Tier 0b speed/quality upgrade for local inference
+- Effort: Low (update memory + rules file; actual model swap is user-initiated)
+
+If no findings, skip this section entirely — do not add noise to the report.
 
 ### Step 3b: Baseline Diff
 
