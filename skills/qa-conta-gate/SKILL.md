@@ -119,12 +119,32 @@ Parse arguments from the user's invocation:
 
 **Steps:**
 
-1. **Resolve SHA:**
+1. **Resolve SHA and flags from `$ARGUMENTS`:**
+
+   The user's invocation arguments are available as `$ARGUMENTS` (literal token — must appear in this SKILL.md or args vanish silently). Parse the first non-flag positional token as the SHA; treat everything starting with `--` as a flag.
 
    ```bash
-   SHA="${ARG:-$(git rev-parse HEAD)}"
-   echo "Gating SHA: $SHA"
+   ARGS="$ARGUMENTS"
+   SHA=""
+   FORCE_FULL_SUITE=false
+   MAX_ITERATIONS=3
+   SKIP_JOURNEYS=""   # comma-separated list of journey slugs to skip (e.g. "connect-bank")
+   for tok in $ARGS; do
+     case "$tok" in
+       --force-full-suite) FORCE_FULL_SUITE=true ;;
+       --max-iterations=*) MAX_ITERATIONS="${tok#*=}" ;;
+       --skip-journeys=*)  SKIP_JOURNEYS="${tok#*=}" ;;
+       --*) echo "WARN: unknown flag $tok — ignoring" ;;
+       *) [ -z "$SHA" ] && SHA="$tok" ;;
+     esac
+   done
+   SHA="${SHA:-$(git rev-parse HEAD)}"
+   # Expand short SHAs to full length
+   SHA=$(git rev-parse "$SHA" 2>/dev/null) || { echo "ERROR: invalid SHA"; exit 1; }
+   echo "Gating SHA: $SHA (force_full_suite=$FORCE_FULL_SUITE max_iterations=$MAX_ITERATIONS skip=$SKIP_JOURNEYS)"
    ```
+
+   The `--skip-journeys` flag is honored in Phase 3 when building the test matrix: cells whose journey slug matches any entry in the comma list are dropped. Typical use: `--skip-journeys=connect-bank` when the Pluggy sandbox is in use by a concurrent session.
 
 2. **Verify SHA is on origin/main** (skill only runs after a green staging deploy):
 
@@ -393,6 +413,7 @@ Each feature in `__feature-map__.json` declares a `personas[]` array with `expec
 
 Build a **test matrix** of `persona × journey` cells:
 - Skip cells where the journey is not in the persona's `journeys` array AND not in `forbidden_actions`/`forbidden_routes`
+- Skip cells whose journey slug (filename without `.md`) appears in `$SKIP_JOURNEYS` (comma-separated). Log: `Skipping <slug> cells per --skip-journeys flag`.
 - Expand cells: for a forbidden cell, generate a *forbidden-path* test variant (expects hidden UI + 403 API) instead of the positive journey
 
 Example for `bank-connections` with 4 personas × 3 journeys:
