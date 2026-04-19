@@ -185,15 +185,21 @@ When this skill activates, determine the context IN THIS ORDER:
 
 ### Rule for inline args (priority 1)
 
-If the skill caller provided a prompt via `args` (the text after `/cto <text>` or `Skill({skill: "cto", args: "..."})`), that prompt **IS the CTO directive**. The skill must immediately:
+**Args passed to this invocation:**
 
-1. Parse the args to extract: scope (full review / focused), question, specific files/modules to read, deliverable format.
+```
+$ARGUMENTS
+```
+
+If the block above is non-empty, that text **IS the CTO directive**. (If it's literally `$ARGUMENTS` unexpanded or empty, no args were provided — fall through to priority 2-4.) The skill must immediately:
+
+1. Parse the args block to extract: scope (full review / focused), question, specific files/modules to read, deliverable format.
 2. Skip "wait for user input" — the args ARE the input.
 3. If args request swarm mode explicitly or describe multiple concerns (architecture + security + performance + quality), spawn 3-5 parallel analyst subagents via the Agent tool.
 4. If args describe a single focused question, answer sequentially in this session.
 5. Deliver a concrete, opinionated report per the args' format directive (or a default markdown summary with Recommendations section if unspecified).
 
-**Anti-pattern (do NOT do this):** acknowledging that the skill is loaded and then asking "what would you like me to do?" — the args already told you what to do. Execute.
+**Anti-pattern (do NOT do this):** acknowledging that the skill is loaded and then asking "what would you like me to do?" — the args block above already told you what to do. Execute.
 
 **First Action (only when no args):** Check for existing context:
 
