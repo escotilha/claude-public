@@ -1,7 +1,7 @@
 ---
 name: deploy-conta-production
 description: "Promote Contably staging to production on OCI. Verifies, approves gate, monitors, validates. Triggers on: deploy conta production, promote to production, push to production, production deploy, go live."
-argument-hint: "[--skip-staging-check]"
+argument-hint: "[--skip-staging-check] [--require-ux-approval | --force]"
 user-invocable: true
 context: fork
 model: opus
@@ -50,6 +50,7 @@ Promotes Contably from staging to production via GitHub Actions workflow_dispatc
 
 - `--skip-staging-check` — skip the staging health verification (use when you've already manually verified)
 - `--auto-approve` — skip the confirmation prompt and auto-approve the OCI DevOps production gate (used by `/deploy-conta-full` after staging is verified green)
+- `--force` — bypass the UX approval gate (hotfix only — document the reason)
 
 ## Infrastructure Context
 
@@ -98,6 +99,41 @@ unset GITHUB_TOKEN && gh workflow run deploy-production.yml --repo Contably/cont
 2. **Run /oci-health production:**
    - Invoke the `oci-health` skill via the Skill tool with argument `production`
    - If DEGRADED or DOWN: warn the user but allow proceeding (deploy might fix it)
+
+### Phase 1a: UX Approval Gate
+
+1. **If `--force` was passed**, log a `UX_APPROVAL_BYPASSED` warning (include the current timestamp) and skip to Phase 2.
+
+2. **Otherwise**, determine the target staging SHA:
+   - Use the SHA provided by the caller, or extract it from the latest successful staging deploy:
+
+     ```bash
+     unset GITHUB_TOKEN && gh run list --repo Contably/contably --workflow "Deploy to Staging" --status success --limit 1 --json headSha -q '.[0].headSha' | head -c 7
+     ```
+
+   - The image tag being promoted is `stg-<7-char-sha>`.
+
+3. **Check for the UX approval signal file:**
+
+   ```bash
+   cat /Users/ps/code/contably/.qa-approvals/<sha>.json 2>/dev/null
+   ```
+
+4. **If the file is missing:** STOP. Display:
+
+   ```
+   ❌ UX approval required for SHA <sha>
+   Run /qa-conta-gate <sha> to test the feature pages in staging first.
+   Or pass --force to bypass (hotfix only).
+   ```
+
+   Abort with non-zero exit. Do NOT proceed to Phase 2.
+
+5. **If the file exists:** parse the JSON and verify:
+   - `approved_by == "qa-conta-gate"` — if not, STOP with: `❌ .qa-approvals/<sha>.json malformed — unexpected approved_by value. Manual investigation required.`
+   - `sha` field matches the target SHA — if not, STOP with: `❌ .qa-approvals/<sha>.json SHA mismatch. Manual investigation required.`
+   - Log: `✅ UX approval verified — approved by qa-conta-gate at <timestamp>, <journeys_tested> journeys tested.`
+   - Continue to Phase 2.
 
 ### Phase 2: Confirm and Trigger Production Deploy
 
@@ -205,12 +241,13 @@ After a successful production health check (ALL UP), refresh the codebase refere
 ```markdown
 # Production Deploy Complete
 
-| Stage             | Status   | Duration |
-| ----------------- | -------- | -------- |
-| Staging Health    | ALL UP   | 15s      |
-| Approval          | APPROVED | —        |
-| Production Deploy | PASS     | 3m       |
-| Production Health | ALL UP   | 30s      |
+| Stage             | Status                                    | Duration |
+| ----------------- | ----------------------------------------- | -------- |
+| Staging Health    | ALL UP                                    | 15s      |
+| UX Approval       | PASS (sha + date) / BYPASSED / REQUIRED   | instant  |
+| Approval          | APPROVED                                  | —        |
+| Production Deploy | PASS                                      | 3m       |
+| Production Health | ALL UP                                    | 30s      |
 
 **Total time:** ~5m
 **Image tag:** {IMAGE_TAG}
@@ -224,12 +261,14 @@ Production is live at:
 
 ## Error Recovery Summary
 
-| Failure                | Action                                        | Max Retries |
-| ---------------------- | --------------------------------------------- | ----------- |
-| Staging health DOWN    | STOP — tell user to run /deploy-conta-staging | 0           |
-| No pending deployment  | STOP — tell user to run /deploy-conta-staging | 0           |
-| Production deploy fail | Report + suggest rollback                     | 0           |
-| Production health DOWN | Report + suggest rollback (NO auto-fix)       | 0           |
+| Failure                              | Action                                          | Max Retries |
+| ------------------------------------ | ----------------------------------------------- | ----------- |
+| Staging health DOWN                  | STOP — tell user to run /deploy-conta-staging   | 0           |
+| No pending deployment                | STOP — tell user to run /deploy-conta-staging   | 0           |
+| UX approval missing                  | STOP — run /qa-conta-gate first                 | 0           |
+| `.qa-approvals/<sha>.json` malformed | STOP — manual investigation                     | 0           |
+| Production deploy fail               | Report + suggest rollback                       | 0           |
+| Production health DOWN               | Report + suggest rollback (NO auto-fix)         | 0           |
 
 ## Rules
 
@@ -238,6 +277,7 @@ Production is live at:
 3. **If `gh` CLI fails** — fall back to push-only mode with manual monitoring at github.com/Contably/contably/actions
 4. **Log timing for each phase** — report durations in the final summary
 5. **Suggest rollback on any production failure** — `kubectl rollout undo deployment/contably-api -n contably`
+6. **Production requires UX approval** — `/qa-conta-gate` must pass for the staging SHA before this skill will promote. Use `--force` only for hotfixes with a documented reason (e.g. security patch, regulatory deadline).
 
 ## Subagent Model Tiers
 
