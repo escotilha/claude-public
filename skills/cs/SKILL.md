@@ -135,16 +135,6 @@ ssh root@100.77.51.51 "cd ~/.claude-setup && git fetch origin && git reset --har
 
 If VPS unreachable, report "VPS offline" and move on.
 
-### 4b. Post Slack notification
-
-After public is pushed, post a dynamic message to Nuvini Slack (`C0AS64REV4J`) listing new/updated skills diffed against `public/main`.
-
-```bash
-~/.claude-setup/tools/cs-public-extras.sh notify-slack C0AS64REV4J
-```
-
-If `SLACK_BOT_TOKEN` is missing or the post fails, the script logs a warning and continues.
-
 ### 5. Report
 
 One line per target:
@@ -152,4 +142,3 @@ One line per target:
 - origin: pushed / up to date / force-pushed
 - public: force-pushed
 - VPS: synced / offline
-- slack: posted / skipped
