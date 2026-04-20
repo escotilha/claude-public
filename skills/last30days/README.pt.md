@@ -13,7 +13,7 @@ Engine de pesquisa profunda cobrindo os últimos 30 dias em 10+ fontes: Reddit, 
 Exemplos:
 - `/last30days AI video tools`
 - `/last30days best project management tools`
-- `/last30days Contably competitor launches`
+- `/last30days competitor launches`
 
 Requer `SCRAPECREATORS_API_KEY`. Opcionais: `OPENAI_API_KEY`, `XAI_API_KEY`.
 

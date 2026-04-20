@@ -41,7 +41,7 @@ Executa uma máquina de estados de 9 fases: captura de intenção → refinament
 - **Pesquisa + build**: combina `/deep-research` + `/deep-plan` + execução
 - **Rotinas agendadas**: registra como Routine para execução contínua (sem gates interativas; gates críticas usam Slack/Discord)
 
-**Restrições v1:** Contably only, orçamento $10 warn/$50 cap (sobrescritível), senha de aprovação é a palavra literal `go`.
+**Restrições v1:** orçamento $10 warn/$50 cap (sobrescritível), senha de aprovação é a palavra literal `go`.
 
 # O que faz
 

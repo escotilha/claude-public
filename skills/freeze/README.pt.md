@@ -12,7 +12,7 @@ Restringe edições (Edit/Write) a um diretório específico durante a sessão. 
 
 Exemplos:
 - `/freeze src/auth/`
-- `/freeze /Users/ps/code/contably/apps/api`
+- `/freeze /Users/you/code/your-project/apps/api`
 
 Para desligar:
 ```

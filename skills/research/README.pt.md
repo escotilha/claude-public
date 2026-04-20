@@ -2,7 +2,7 @@
 
 ## O que faz
 
-Analisa URLs e imagens (artigos, repositórios, tweets, ferramentas, screenshots, vídeos, podcasts) para identificar oportunidades de melhoria em skills, agentes e projetos. Extrai conteúdo via Firecrawl, Exa, Scrapling ou WebFetch, classifica por tipo (Tool/Pattern/Product/Infrastructure) e pontuação de relevância contra Claude Code, skills existentes, projetos ativos (Contably, SourceRank, AgentWave, OpenClaw) e novas oportunidades.
+Analisa URLs e imagens (artigos, repositórios, tweets, ferramentas, screenshots, vídeos, podcasts) para identificar oportunidades de melhoria em skills, agentes e projetos. Extrai conteúdo via Firecrawl, Exa, Scrapling ou WebFetch, classifica por tipo (Tool/Pattern/Product/Infrastructure) e pontuação de relevância contra Claude Code, skills existentes, seus projetos ativos e novas oportunidades.
 
 ## Como invocar
 
@@ -19,6 +19,6 @@ Analisa URLs e imagens (artigos, repositórios, tweets, ferramentas, screenshots
 ## Quando usar
 
 - Descobrir padrões, ferramentas ou MCPs que possam melhorar a setup Claude Code
-- Avaliar se um repositório, ferramenta ou padrão é útil para Contably, SourceRank, AgentWave ou OpenClaw
+- Avaliar se um repositório, ferramenta ou padrão é útil para seus projetos atuais
 - Extrair insights de artigos, vídeos ou documentação técnica para a base de conhecimento
 - Identificar novas oportunidades de skills reutilizáveis baseadas em conteúdo encontrado

@@ -260,6 +260,12 @@ build_slack_message() {
     for s in "${new_list[@]}"; do
       local summary
       summary="$(extract_pt_summary "$s")"
+      # Defense-in-depth: scrub any leaked project-private tokens before Slack sees them.
+      summary="$(printf '%s' "$summary" | sed -E \
+        -e 's/Contably/ExampleProject/g' \
+        -e 's/contably\.ai/example\.com/g' \
+        -e 's/p@contably\.ai/hello@example\.com/g' \
+        -e 's/contably/example-project/g')"
       if (( ${#summary} > 400 )); then
         summary="${summary:0:397}..."
       fi
@@ -316,6 +322,12 @@ case "$cmd" in
     # Split on "|||" delimiter: first half is plain-text fallback, second is JSON blocks.
     fallback="${raw%%|||*}"
     blocks="${raw#*|||}"
+    # Final safety gate: abort if anything Contably-related survived scrubbing.
+    if printf '%s\n%s' "$fallback" "$blocks" | grep -iq 'contably\|contabo\|p@nuvini\|escotilha@'; then
+      echo "  ABORT: private token survived scrub in Slack payload — refusing to post" >&2
+      printf '%s\n%s\n' "$fallback" "$blocks" | grep -i 'contably\|contabo\|p@nuvini\|escotilha@' >&2
+      exit 1
+    fi
     if post_slack "$channel" "$fallback" "$blocks"; then
       # Advance the baseline tag so next run diffs from here
       git tag -f cs-last-push HEAD > /dev/null 2>&1
