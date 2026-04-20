@@ -2,6 +2,7 @@
 .env
 *.backup
 *.bak
+secrets/
 
 # OS files
 .DS_Store
