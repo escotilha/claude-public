@@ -376,7 +376,7 @@ case "$cmd" in
     git checkout master -- .
 
     git rm -rf --quiet --ignore-unmatch \
-      memory/ tools/ hooks/ rules/ backups/ config/ launchd/ plans/ guides/ \
+      secrets/ memory/ tools/ hooks/ rules/ backups/ config/ launchd/ plans/ guides/ \
       bin/ commands/ mcp-servers/ settings.json .deep-plan-state.json .gstack/ \
       settings.json.backup* plan.md research.md .github/ SETUP-BASELINE.md
 
