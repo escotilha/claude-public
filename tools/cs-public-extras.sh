@@ -265,7 +265,21 @@ build_slack_message() {
         -e 's/Contably/ExampleProject/g' \
         -e 's/contably\.ai/example\.com/g' \
         -e 's/p@contably\.ai/hello@example\.com/g' \
-        -e 's/contably/example-project/g')"
+        -e 's/contably/example-project/g' \
+        -e 's/SourceRank AI/ProjectB/g' \
+        -e 's/SourceRank/ProjectB/g' \
+        -e 's/sourcerank/projectb/g' \
+        -e 's/StoneGEO/ProjectC/g' \
+        -e 's/stonegeo/projectc/g' \
+        -e 's/AgentWave/ProjectD/g' \
+        -e 's/OpenClaw/ProjectE/g' \
+        -e 's/Nuvini/Example/g' \
+        -e 's/nuvini/example/g' \
+        -e 's/Contabo/external VPS/g' \
+        -e 's/100\.77\.51\.51/<VPS_HOST>/g' \
+        -e 's/pluggy/bank-integration/g' \
+        -e 's/escotilha@gmail\.com/user@example\.com/g' \
+        -e 's/p@nuvini\.ai/hello@example\.com/g')"
       if (( ${#summary} > 400 )); then
         summary="${summary:0:397}..."
       fi
@@ -322,10 +336,11 @@ case "$cmd" in
     # Split on "|||" delimiter: first half is plain-text fallback, second is JSON blocks.
     fallback="${raw%%|||*}"
     blocks="${raw#*|||}"
-    # Final safety gate: abort if anything Contably-related survived scrubbing.
-    if printf '%s\n%s' "$fallback" "$blocks" | grep -iq 'contably\|contabo\|p@nuvini\|escotilha@'; then
+    # Final safety gate: abort if any private token survived scrubbing.
+    leak_pattern='contably|sourcerank|stonegeo|agentwave|openclaw|contabo|vmi3065960|pluggy|nuvini|escotilha@|p@contably|p@nuvini|100\.77\.51\.51'
+    if printf '%s\n%s' "$fallback" "$blocks" | grep -iEq "$leak_pattern"; then
       echo "  ABORT: private token survived scrub in Slack payload — refusing to post" >&2
-      printf '%s\n%s\n' "$fallback" "$blocks" | grep -i 'contably\|contabo\|p@nuvini\|escotilha@' >&2
+      printf '%s\n%s\n' "$fallback" "$blocks" | grep -iE "$leak_pattern" >&2
       exit 1
     fi
     if post_slack "$channel" "$fallback" "$blocks"; then
@@ -388,13 +403,14 @@ case "$cmd" in
       fi
     fi
 
-    # Scrub Contably mentions across all remaining text files.
+    # Scrub project-private mentions across all remaining text files.
     for f in $(git ls-files); do
       [[ -f "$f" ]] || continue
       file -b --mime "$f" 2>/dev/null | grep -q "charset=binary" && continue
       sed -i '' -E \
         -e 's/Contably/ExampleProject/g' \
         -e 's/contably\.ai/example\.com/g' \
+        -e 's/p@contably\.ai/hello@example\.com/g' \
         -e 's/contably_test/example_test/g' \
         -e 's/\/contably-ci-rescue/\/ci-rescue/g' \
         -e 's/\/contably-guardian/\/guardian/g' \
@@ -413,15 +429,47 @@ case "$cmd" in
         -e 's/qa-verify//g' \
         -e 's/contably[- ]?ai/example-project/g' \
         -e 's/contably/example-project/g' \
+        -e 's/SourceRank AI/ProjectB/g' \
+        -e 's/SourceRank/ProjectB/g' \
+        -e 's/sourcerankai/projectb/g' \
+        -e 's/sourcerank/projectb/g' \
+        -e 's/StoneGEO/ProjectC/g' \
+        -e 's/stonegeo/projectc/g' \
+        -e 's/AgentWave/ProjectD/g' \
+        -e 's/agentwave/projectd/g' \
+        -e 's/OpenClaw/ProjectE/g' \
+        -e 's/openclaw/projecte/g' \
+        -e 's/Nuvini Group/Example Group/g' \
+        -e 's/nuvini-brand/example-brand/g' \
+        -e 's/nuvini-claude/example-claude/g' \
+        -e 's/share-to-nuvini/share-to-example/g' \
+        -e 's/nuvini\.ai/example\.com/g' \
+        -e 's/Nuvini/Example/g' \
+        -e 's/nuvini/example/g' \
+        -e 's/NVNI, Nasdaq/PUBCO, Nasdaq/g' \
+        -e 's/\(NVNI\)/(PUBCO)/g' \
+        -e 's/Contabo \(`vmi[0-9]+`\)/an external VPS/g' \
+        -e 's/vmi3065960/vps-host/g' \
+        -e 's/Contabo/external VPS/g' \
+        -e 's/contabo/external-vps/g' \
+        -e 's/100\.77\.51\.51/<VPS_HOST>/g' \
+        -e 's/root@<VPS_HOST>/user@<VPS_HOST>/g' \
+        -e 's/pluggy/bank-integration/g' \
+        -e 's/Pluggy/BankIntegration/g' \
+        -e 's/escotilha@gmail\.com/user@example\.com/g' \
+        -e 's/p@nuvini\.ai/hello@example\.com/g' \
+        -e 's/São Paulo/(city)/g' \
         "$f" 2>/dev/null || true
     done
 
     git add -A
     git commit -m "public claude-code skills library" --allow-empty > /dev/null
 
-    if git grep -i -l "contably" > /dev/null 2>&1; then
-      echo "  ABORT: 'contably' still present in public tree after scrub:" >&2
-      git grep -i -l "contably" >&2
+    # Extended safety gate: fail on any private token surviving the scrub.
+    leak_pattern='contably|sourcerank|stonegeo|agentwave|openclaw|contabo|vmi3065960|pluggy|nuvini|escotilha@|p@contably|p@nuvini|100\.77\.51\.51'
+    if git grep -iE -l "$leak_pattern" > /dev/null 2>&1; then
+      echo "  ABORT: private token still present in public tree after scrub:" >&2
+      git grep -iE -n "$leak_pattern" >&2
       git checkout "$prev_branch" > /dev/null 2>&1
       git branch -D nuvini-public-fresh > /dev/null 2>&1
       exit 1
