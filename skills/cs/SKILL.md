@@ -121,6 +121,8 @@ git push origin master --force
 
 Creates a **single-commit orphan branch** from master, applies deletions + Contably sed scrubbing, runs a safety gate (aborts if any "contably" remains), and force-pushes. Always a fresh single commit — no history ever leaks. Exclude list lives in `EXCLUDED_SKILLS` inside the helper.
 
+**Note on Slack notifications:** The `notify-slack` subcommand (invoked separately from push-public) reads PT summaries from on-disk `README.pt.md` files, which live on the PRIVATE master branch. Two defenses prevent leaks: (a) per-summary sed scrub inside `build_slack_message`, (b) a final abort-on-leak grep gate before `post_slack`. If a new public skill's PT README ever mentions a private project name, fix the README itself — the scrub is defense-in-depth, not the primary barrier.
+
 ```bash
 cd ~/.claude-setup && ~/.claude-setup/tools/cs-public-extras.sh push-public
 ```
