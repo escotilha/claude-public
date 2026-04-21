@@ -244,5 +244,11 @@
     "note": "Open-source theoretical reconstruction of Claude Mythos as a Recurrent-Depth Transformer (RDT) with MoE, MLA/GQA attention, LTI-stable looping, and ACT halting — 2.5k stars",
     "addedAt": "2026-04-20T09:38:51Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://github.com/codejunkie99/agentic-stack",
+    "note": "agentic-stack: portable .agent/ folder (memory+skills+protocols) that works across Claude Code, Cursor, Windsurf, OpenClaw, Hermes, OpenCode, Pi Coding Agent, and DIY Python loop",
+    "addedAt": "2026-04-21T09:22:13Z",
+    "addedBy": "research-skill"
   }
 ]
