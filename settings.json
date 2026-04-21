@@ -176,6 +176,14 @@
             "command": "\"$HOME/.claude-setup/hooks/worktree-cleanup.sh\""
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.contably-os/hooks/handoff-snapshot.sh\" session-end"
+          }
+        ]
       }
     ],
     "TeammateIdle": [
@@ -262,6 +270,14 @@
           {
             "type": "command",
             "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Compaction starting in $(pwd)\" >> ~/.claude/logs/compaction.log"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.contably-os/hooks/handoff-snapshot.sh\" pre-compact"
           }
         ]
       }
