@@ -29,3 +29,7 @@ __pycache__/
 
 # Backups
 backups/
+
+
+# Runtime state (local SQLite DBs, queues — never sync)
+data/
