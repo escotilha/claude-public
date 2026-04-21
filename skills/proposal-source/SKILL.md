@@ -3,6 +3,9 @@ name: proposal-source
 description: "Generate diagnostic/research proposals for SourceRank AI clients. PDF output in Portuguese. Triggers on: proposal source, proposta sourcerank, gerar proposta, create proposal, client proposal, diagnostic proposal."
 argument-hint: "<client name or context>"
 user-invocable: true
+paths:
+  - "**/sourcerank/**"
+  - "**/source-rank/**"
 context: fork
 model: opus
 effort: high

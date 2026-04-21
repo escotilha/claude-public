@@ -2,6 +2,9 @@
 name: sourcerank-guardian
 description: "Pre-deploy guardian for SourceRank AI. Multi-layer analysis (code, infra, runtime, diff-aware) before deploy to Render. Parallel subagents. Triggers on: sourcerank guardian, pre-deploy check, guardian sourcerank, sourcerank pre-deploy."
 user-invocable: true
+paths:
+  - "**/sourcerank/**"
+  - "**/source-rank/**"
 context: fork
 model: opus
 effort: high
