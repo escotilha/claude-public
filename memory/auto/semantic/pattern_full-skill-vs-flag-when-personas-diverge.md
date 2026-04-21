@@ -23,6 +23,11 @@ If the new skill requires:
 
 ---
 
+## Related
+
+- Cross-ref: mistake:validate-storage-constraints-before-schema — storage constraints are one of the explicit divergence factors in this checklist (2026-04-21)
+- Cross-ref: pattern:spawn-convention-analyzer-before-new-skill-in-family — once the decision to build a full skill is made, run the convention analyzer before writing files (2026-04-21)
+
 ## Timeline
 
 - **2026-04-21** — [session] Extracted from `/conta-cpo` build session. User chose Option C (full skill) over Option A (fold into /vibc) after A/B/C framing. Decisive reason: /conta-cpo needed Contably OS tracker auto-load, SQLite at ~/.claude-setup/data/, and Contably-specific personas. Source: session — /meditate post conta-cpo build

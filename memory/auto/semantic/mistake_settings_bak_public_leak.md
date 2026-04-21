@@ -41,6 +41,7 @@ Two simultaneous failures:
 
 - `personal/reference_api_keys_keychain.md` — current Keychain-first policy and retrieval commands
 - `tools/cs-public-extras.sh` — the push-public pipeline with the hardened exclude list and secret-pattern gate
+- Cross-ref: mistake:validate-storage-constraints-before-schema — same class of mistake: writing artefacts (schema / keys file) before validating environment constraints (2026-04-21)
 
 ## Timeline
 

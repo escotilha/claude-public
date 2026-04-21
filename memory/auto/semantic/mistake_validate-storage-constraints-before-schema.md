@@ -22,6 +22,11 @@ Before writing any schema or storage layer for a new skill:
 
 ---
 
+## Related
+
+- Cross-ref: mistake_settings_bak_public_leak — same class: writing artefacts before validating constraints (2026-04-21)
+- Cross-ref: pattern:full-skill-vs-flag-when-personas-diverge — storage constraints are one of the key divergence factors in the skill vs flag decision (2026-04-21)
+
 ## Timeline
 
 - **2026-04-21** — [failure] Initially cloned /vibc's Postgres schema for /conta-cpo, then had to port to SQLite after user confirmed skill must run on Mac mini OR VPS (no Postgres). Source: failure — schema rewrite during conta-cpo build session

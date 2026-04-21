@@ -19,6 +19,10 @@ See each tier's `_tier.md` for salience rules, migration notes, and promotion ga
 - [personal/preference_opus_for_coding_logic.md](personal/preference_opus_for_coding_logic.md) — Use Opus for all coding logic, always (2026-04-21). No Sonnet coding exceptions; Haiku/Sonnet only for explore/format/lint
 - [personal/reference_api_keys_keychain.md](personal/reference_api_keys_keychain.md) — All API keys (Resend/Brave/Exa/Turso) live in macOS Keychain only. settings.json uses ${VAR} refs after 2026-04-21 incident
 - [semantic/mistake_settings_bak_public_leak.md](semantic/mistake_settings_bak_public_leak.md) — 2026-04-21 incident: settings.json.bak-* leaked to public GitHub (13 min exposure). Root cause + pipeline hardening
+- [semantic/pattern_full-skill-vs-flag-when-personas-diverge.md](semantic/pattern_full-skill-vs-flag-when-personas-diverge.md) — Full separate skill beats flag on parent when personas, context-loading, or storage constraints diverge (score 7, from /conta-cpo build)
+- [semantic/mistake_validate-storage-constraints-before-schema.md](semantic/mistake_validate-storage-constraints-before-schema.md) — Validate runtime environment (available DBs, portability) before writing schema.sql; default to SQLite for multi-location skills (score 7)
+- [semantic/tech-insight_skill-tool-args-not-forwarded-from-orchestrator.md](semantic/tech-insight_skill-tool-args-not-forwarded-from-orchestrator.md) — Skill tool invocations from orchestrator context silently drop args; inline phases or use fresh user prompts instead (score 8)
+- [semantic/pattern_spawn-convention-analyzer-before-new-skill-in-family.md](semantic/pattern_spawn-convention-analyzer-before-new-skill-in-family.md) — Before writing a new skill in an existing family, spawn a one-shot Opus subagent to extract frontmatter/persona/storage conventions from siblings (score 5)
 
 # currentDate
 Today's date is 2026-04-21.

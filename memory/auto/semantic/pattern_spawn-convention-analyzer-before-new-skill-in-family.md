@@ -29,6 +29,10 @@ Return a compact reference block I can paste into the new skill's frontmatter.
 
 ---
 
+## Related
+
+- Cross-ref: pattern:full-skill-vs-flag-when-personas-diverge — this pattern runs after the "build a full skill" decision is made (2026-04-21)
+
 ## Timeline
 
 - **2026-04-21** — [session] Used during /conta-cpo build to analyze vibc, cto, ship, cpo, qa-cycle for conventions. Prevented several cargo-cult mistakes (stale invocation-contexts format, wrong model tier). Source: session — conta-cpo build 2026-04-21

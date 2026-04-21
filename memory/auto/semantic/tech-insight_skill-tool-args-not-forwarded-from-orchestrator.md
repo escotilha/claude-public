@@ -20,6 +20,10 @@ originSessionId: 83e0ba78-5cea-4191-8d3d-6552e29eaaa5
 
 ---
 
+## Related
+
+- Cross-ref: pattern:full-skill-vs-flag-when-personas-diverge — if invoking child skills from orchestrator is unreliable, standalone user-prompt invocable skills are even more important (2026-04-21)
+
 ## Timeline
 
 - **2026-04-21** — [failure] Smoke test during /conta-cpo build revealed Skill tool args forwarding silently drops args in orchestrator context. Workaround: inline the phases. Source: failure — conta-cpo smoke test, session 2026-04-21
