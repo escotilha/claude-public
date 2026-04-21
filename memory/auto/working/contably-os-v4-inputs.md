@@ -1,11 +1,13 @@
 ---
 name: Contably OS v4 planning inputs
-description: Two design inputs captured 2026-04-21 during v3 Phase 1 E2E sign-off, to feed into v4 planning
+description: Three design inputs captured 2026-04-21 during v3 Phase 1 E2E sign-off, to feed into v4 planning
 type: project
 originSessionId: 0f6ff672-d0fd-4b7e-afc8-a414ba1c2b4c
 ---
-Two explicit inputs from Pierre for v4 planning. Both supersede or extend
-v3 defaults and should be designed in from the start, not bolted on.
+Three explicit inputs from Pierre for v4 planning. All three supersede or extend
+v3 defaults and should be designed in from the start, not bolted on. Full draft
+design doc lives at `docs/contably-os-v4/00-planning-inputs.md` on branch
+`plan/sb-contably-os-v4` (worktree `/Volumes/AI/Code/contably-os-v4-plan`).
 
 **1. Prefer local Anthropic OAuth over API keys.**
 - v3 Phase 1 discovered that SSH dispatch to the mini fails unless
@@ -22,6 +24,18 @@ v3 defaults and should be designed in from the start, not bolted on.
   work through OAuth avoids per-task API costs and keeps billing
   predictable on that plan's rate-limit tier. Also reduces the blast
   radius if a secret leaks.
+
+**3. Auto-run the /handoff → /primer cycle.**
+- Today the cycle is manual: Pierre (or I) notices ~80% context, I run
+  /handoff, user runs /clear, I run /primer. v4 should automate the
+  full loop — SessionAboutToClear hook (or equivalent primitive) fires
+  /handoff without prompting; next session auto-primes if an unread
+  resume block exists for the current branch.
+- Matters doubly for autonomous Routine-style runs and for OAuth-backed
+  Max sessions where rate limits can terminate a session without warning.
+- Invariant: whatever /handoff writes, /primer must fully consume
+  without asking follow-up questions. Today /primer sometimes asks
+  "which plan doc?" — v4 must lock that choice in the handoff itself.
 
 **2. Account for the `/conta-cpo` skill in v4.**
 - `/conta-cpo` is a new 8-seat product/UX/engineering advisory council
