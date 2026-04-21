@@ -19,7 +19,7 @@ EXCLUDED_SKILLS=(
   deploy-sourcerank deploy-claudia contably-guardian sourcerank-guardian
   pr-impact rex mini-remote nanoclaw computer-use office-hours primer
   vibc discord loop schedule verify-conta contably-ci-rescue contably-eod
-  contably-snapshot alembic-chain-repair qa-verify _archive
+  contably-snapshot alembic-chain-repair qa-verify conta-cpo _archive
 )
 
 is_excluded() {
