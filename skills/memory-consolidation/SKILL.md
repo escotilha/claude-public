@@ -271,6 +271,90 @@ function analyzeMemory(entity) {
 
 This logic is used by other skills BEFORE saving to memory. Document here for reference.
 
+### Salience Formula (agentic-stack, 2026-04-21)
+
+Before the detailed relevance score, a **salience score** decides retention and promotion at the tier level:
+
+```
+salience = recency × pain × importance
+```
+
+Each factor is normalized to [0, 1]:
+
+| Factor | Range | Meaning | How to compute |
+| --- | --- | --- | --- |
+| `recency` | 0–1 | How fresh is the signal? | `max(0, 1 - days_since_last_use / tier_decay_threshold)` — tier_decay is 14/60/90/∞ for working/episodic/semantic/personal |
+| `pain` | 0–1 | How costly is this lesson if lost? | 0.1 trivial, 0.4 annoying, 0.7 real-work-lost, 1.0 prod-outage-or-data-loss |
+| `importance` | 0–1 | Generalizability / severity / user-explicit | 0.2 project-only, 0.5 domain-wide, 0.8 cross-project, 1.0 user-declared-rule |
+
+**Tier-specific dominant term** (from `_tier.md` files):
+
+- `working/`: `recency` dominates — a 14-day-old working memory scores near zero regardless of other factors
+- `episodic/`: `pain` dominates — high-pain incidents (outages, data loss) stay salient long after
+- `semantic/`: `pain` + `importance` dominate; recency decays slowly
+- `personal/`: `importance` fixed near 1.0 — user-declared preferences are maximum signal
+
+**Decision thresholds** (applied during `/consolidate`):
+
+| Salience | Action |
+| --- | --- |
+| ≥ 0.7 | Retain, consider promotion to core memory |
+| 0.4 – 0.7 | Retain, no action |
+| 0.15 – 0.4 | Flag for review — contradiction or obsolescence check |
+| < 0.15 | Archive candidate (with source-type overrides: never auto-archive `user-feedback`, retain `failure` longer) |
+
+This replaces ad-hoc "save when high generality, learned from failure" heuristics with a deterministic score. The existing relevance scoring (below) still runs during ingest; salience applies during **retention/decay** decisions.
+
+### Pseudocode
+
+```javascript
+function calculateSalience(memory, tier) {
+  const tierDecay = {
+    working: 14,
+    episodic: 60,
+    semantic: memory.sourceType === 'failure' ? 180
+             : memory.sourceType === 'research' ? 60
+             : 90,
+    personal: Infinity,
+  }[tier];
+
+  const daysSince = daysSinceLastUse(memory);
+  const recency = tierDecay === Infinity ? 1.0
+                : Math.max(0, 1 - daysSince / tierDecay);
+
+  const pain = memory.painScore ?? inferPain(memory);        // 0.1–1.0
+  const importance = memory.importanceScore ?? inferImportance(memory); // 0.2–1.0
+
+  const salience = recency * pain * importance;
+
+  return {
+    salience,
+    factors: { recency, pain, importance },
+    decision: salience >= 0.7 ? 'retain-promote'
+            : salience >= 0.4 ? 'retain'
+            : salience >= 0.15 ? 'review'
+            : 'archive-candidate',
+  };
+}
+
+function inferPain(memory) {
+  // Heuristics from observation text
+  const text = (memory.observations || []).join(' ').toLowerCase();
+  if (/prod|outage|data loss|incident|nuked|destroyed/.test(text)) return 1.0;
+  if (/failed deploy|broke|regression|crash/.test(text)) return 0.7;
+  if (/bug|error|mistake/.test(text)) return 0.4;
+  return 0.1;
+}
+
+function inferImportance(memory) {
+  if (memory.sourceType === 'user-feedback') return 1.0;
+  const appliedIn = (memory.observations || []).filter(o => o.startsWith('Applied in'));
+  if (appliedIn.length >= 3) return 0.8;
+  if (appliedIn.length >= 2) return 0.5;
+  return 0.2;
+}
+```
+
 ### Relevance Score Calculation
 
 ```javascript
@@ -717,6 +801,17 @@ async function generateCrossMemoryInsights(memories, lastConsolidationDate) {
 ---
 
 ## Phase 4: Selective Forgetting
+
+### Step 4.0: Apply Salience Formula (tier-aware)
+
+Before the legacy stale-memory heuristics run, compute `salience = recency × pain × importance` (see Phase 2) for each memory and bucket by decision:
+
+- `retain-promote` → candidates for Phase 3.3 core promotion
+- `retain` → untouched
+- `review` → flag in consolidation report; contradiction check
+- `archive-candidate` → passes to Step 4.1 for final checks
+
+The salience score is **authoritative** — the heuristics in 4.1 are a safety net that prevents archival of `user-feedback` sources and any memory with `critical: true`, even when salience drops below 0.15.
 
 ### Step 4.1: Identify Stale Memories
 

@@ -1,5 +1,45 @@
 # Memory Strategy
 
+## Tier Taxonomy (4 tiers, 2026-04-21)
+
+Memories live in one of four cognitive tiers. Pick the tier based on role, not content type.
+
+| Tier | Path | What goes here | Decay |
+| --- | --- | --- | --- |
+| **Working** | `auto/working/` | Live task state, handoff buffers, next-session intent, in-progress trackers | 14 days |
+| **Episodic** | `auto/episodic/` | Project timeline — what happened, when, deploys, incidents | 60 days base |
+| **Semantic** | `auto/semantic/` | Distilled patterns, mistakes, tech-insights, architecture decisions | 90 days (mistakes 180d, research 60d) |
+| **Personal** | `auto/personal/` | User preferences, credentials, account state, explicit feedback | Never auto-decay |
+
+See each tier's `_tier.md` for full rules. Legacy flat directories (`concepts/`, `entities/`, `feedback/`, `projects/`, `reference/`) remain until naturally touched — new memories write into the tiered structure.
+
+### Routing guidance
+
+| Situation | Tier |
+| --- | --- |
+| User just said "always use pnpm" | `personal/` |
+| Deploy finished — need to log the outcome | `episodic/` |
+| Pattern extracted from a bug we've hit 3 times | `semantic/` |
+| /handoff saving resume block | `working/` |
+| Credentials / API keys reference | `personal/` |
+| Agent identity spec (Marco, Bella, Julia) | `semantic/` (stable domain knowledge) |
+| "where was I" snapshot | `working/` |
+| Project completed — lessons distilled | write the lesson to `semantic/`, archive the project log in `episodic/` |
+
+## Salience Formula
+
+Retention and promotion decisions use:
+
+```
+salience = recency × pain × importance  (each 0–1)
+```
+
+- **recency:** `max(0, 1 - days_since_last_use / tier_decay_threshold)`. `personal/` skips this (always 1.0).
+- **pain:** 0.1 trivial → 1.0 prod-outage/data-loss. Dominates retention for mistakes and incidents.
+- **importance:** 0.2 project-only → 1.0 user-declared rule. Dominates for personal/ entries.
+
+**Thresholds:** ≥0.7 promote, 0.4–0.7 retain, 0.15–0.4 review, <0.15 archive. See `~/.claude-setup/skills/memory-consolidation/SKILL.md` Phase 2 for the pseudocode and Phase 4 for where it runs.
+
 ## Entity Naming: `{type}:{identifier}`
 
 | Prefix             | Purpose                       |
