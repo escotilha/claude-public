@@ -1,0 +1,63 @@
+#!/usr/bin/env awk -f
+# mem-rrf — Reciprocal Rank Fusion helper.
+#
+# Usage:
+#   mem-rrf <fts-tsv> <vec-tsv> <k>
+#
+# Input format (both files, one row per result, TSV):
+#   rank \t file_path \t name \t type \t description \t score \t snippet
+#
+# Output (sorted best-first, TSV):
+#   rrf_score \t file_path \t name \t type \t description \t source \t snippet
+#
+# source = "fts", "vec", or "fts+vec" depending on which sides contributed.
+#
+# RRF formula: score = sum over sides s of 1 / (k + rank_s)
+# k defaults to 60 (industry standard).
+
+BEGIN {
+    if (ARGC < 4) { print "mem-rrf: usage: mem-rrf <fts-tsv> <vec-tsv> <k>" > "/dev/stderr"; exit 2 }
+    k = ARGV[3] + 0
+    if (k <= 0) k = 60
+    ARGV[3] = ""   # don't treat k as a file
+
+    fts_file = ARGV[1]
+    vec_file = ARGV[2]
+
+    while ((getline line < fts_file) > 0) {
+        n = split(line, f, "\t")
+        if (n < 2) continue
+        rank = f[1] + 0
+        fp = f[2]
+        fts_rank[fp] = rank
+        if (!(fp in meta)) meta[fp] = line
+    }
+    close(fts_file)
+
+    while ((getline line < vec_file) > 0) {
+        n = split(line, f, "\t")
+        if (n < 2) continue
+        rank = f[1] + 0
+        fp = f[2]
+        vec_rank[fp] = rank
+        if (!(fp in meta)) meta[fp] = line
+    }
+    close(vec_file)
+
+    for (fp in meta) {
+        score = 0
+        src = ""
+        if (fp in fts_rank) { score += 1.0 / (k + fts_rank[fp]); src = "fts" }
+        if (fp in vec_rank) { score += 1.0 / (k + vec_rank[fp]); src = (src == "") ? "vec" : "fts+vec" }
+        # Rebuild line with source column swapped in (column 6 was "score"; replace with src tag).
+        # Simplest: emit score \t file_path \t name \t type \t description \t source \t snippet.
+        # Pull fields from meta[fp].
+        nn = split(meta[fp], mf, "\t")
+        name = (nn >= 3) ? mf[3] : ""
+        type = (nn >= 4) ? mf[4] : ""
+        desc = (nn >= 5) ? mf[5] : ""
+        snip = (nn >= 7) ? mf[7] : ((nn >= 6) ? mf[6] : "")
+        printf "%.8f\t%s\t%s\t%s\t%s\t%s\t%s\n", score, fp, name, type, desc, src, snip
+    }
+    exit 0
+}
