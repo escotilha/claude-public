@@ -378,7 +378,16 @@ case "$cmd" in
     git rm -rf --quiet --ignore-unmatch \
       secrets/ memory/ tools/ hooks/ rules/ backups/ config/ launchd/ plans/ guides/ \
       bin/ commands/ mcp-servers/ settings.json .deep-plan-state.json .gstack/ \
-      settings.json.backup* plan.md research.md .github/ SETUP-BASELINE.md
+      settings.json.backup* settings.json.bak* settings.local.json \
+      plan.md research.md .github/ SETUP-BASELINE.md
+
+    # Purge any remaining backup/secret/env files anywhere in the tree (defense-in-depth).
+    for pat in '*.bak' '*.backup' '*.bak-*' '*.env' '.env.*' '*.credentials' \
+               '*secret*.json' '*credentials*.json' '*.key' '*.pem' '*.p12'; do
+      while IFS= read -r f; do
+        [[ -n "$f" ]] && git rm -rf --quiet --ignore-unmatch "$f"
+      done < <(git ls-files "$pat" 2>/dev/null)
+    done
 
     for skill in "${EXCLUDED_SKILLS[@]}"; do
       [[ "$skill" == "_archive" ]] && continue
@@ -464,6 +473,19 @@ case "$cmd" in
 
     git add -A
     git commit -m "public claude-code skills library" --allow-empty > /dev/null
+
+    # Secret-pattern gate: abort if anything looks like a live API key or token.
+    # Patterns: Resend (re_), Anthropic (sk-ant-), OpenAI (sk-), GitHub (ghp_/gho_/ghs_/ghr_),
+    # Slack (xoxb-/xoxp-/xoxa-), AWS access key (AKIA...), Turso JWT (eyJhbGci), generic JWT,
+    # and common env assignments with non-placeholder values.
+    secret_pattern='(re_[A-Za-z0-9_]{20,}|sk-ant-[A-Za-z0-9_-]{20,}|sk-proj-[A-Za-z0-9_-]{20,}|\bsk-[A-Za-z0-9]{40,}|gh[pousr]_[A-Za-z0-9]{30,}|xox[baprs]-[A-Za-z0-9-]{20,}|AKIA[0-9A-Z]{16}|eyJhbGciOi[A-Za-z0-9._-]+|BSA[A-Za-z0-9_-]{20,})'
+    if git grep -E -l "$secret_pattern" > /dev/null 2>&1; then
+      echo "  ABORT: likely live secret/API key detected in public tree:" >&2
+      git grep -E -n "$secret_pattern" >&2 || true
+      git checkout "$prev_branch" > /dev/null 2>&1
+      git branch -D nuvini-public-fresh > /dev/null 2>&1
+      exit 1
+    fi
 
     # Extended safety gate: fail on any private token surviving the scrub.
     leak_pattern='contably|sourcerank|stonegeo|agentwave|openclaw|contabo|vmi3065960|pluggy|nuvini|escotilha@|p@contably|p@nuvini|100\.77\.51\.51'
