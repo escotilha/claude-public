@@ -1,8 +1,8 @@
 # GRAPH_REPORT
 
-**Compiled at:** 2026-04-21T18:21:26Z
+**Compiled at:** 2026-04-21T18:22:55Z
 **Source:** mem-compile — link-graph only (v1)
-**Corpus:** 141 pages across 8 directories
+**Corpus:** 136 pages across 8 directories
 
 This is an auto-generated digest of the memory graph. Read this before
 `mem-search` when you need a bird's-eye view of what the vault contains,
@@ -16,24 +16,24 @@ which pages are hubs, and where cross-links are missing.
 | `episodic/` | 0 | — | — | — |
 | `semantic/` | 11 | 0 | 0 | 0 |
 | `personal/` | 2 | 0 | 0 | 2 |
-| `entities/` | 25 | 0 | 0 | 0 |
-| `concepts/` | 43 | 0 | 0 | 0 |
-| `projects/` | 20 | 0 | 0 | 0 |
-| `feedback/` | 22 | 0 | 0 | 4 |
-| `reference/` | 16 | 0 | 0 | 1 |
+| `entities/` | 24 | 0 | 0 | 21 |
+| `concepts/` | 42 | 0 | 0 | 30 |
+| `projects/` | 19 | 0 | 0 | 18 |
+| `feedback/` | 21 | 0 | 0 | 20 |
+| `reference/` | 15 | 0 | 0 | 14 |
 
 ## Hub pages (top 10 by inbound links)
 
 - **6 ←** [`semantic/pattern_learn-distill-encode-evolve.md`](semantic/pattern_learn-distill-encode-evolve.md) — Meta-pattern Pierre named 2026-04-21. Every real-world failure → diagnosed → lesson extracted → baked into code/config/t
-- **4 ←** [`concepts/tech_insight_opus_4_7_best_practices.md`](concepts/tech_insight_opus_4_7_best_practices.md) — Official Opus 4.7 best practices from Boris Cherny + Anthropic blog — effort tiers, adaptive thinking, subagent delegati
 - **4 ←** [`semantic/pattern_dogfood-before-trusting-autonomous-dispatch.md`](semantic/pattern_dogfood-before-trusting-autonomous-dispatch.md) — v4 Phase 5/6 dogfood surfaced 3 sandbox bugs unit tests couldn't catch. Pattern is to trigger a real task before declari
-- **3 ←** [`concepts/tech_mempalace_memory_system.md`](concepts/tech_mempalace_memory_system.md) — MemPalace — free local AI memory system, ChromaDB + MCP server, palace hierarchy, 96.6% R@5 LongMemEval, per-agent diari
+- **3 ←** [`concepts/tech_insight_opus_4_7_best_practices.md`](concepts/tech_insight_opus_4_7_best_practices.md) — Official Opus 4.7 best practices from Boris Cherny + Anthropic blog — effort tiers, adaptive thinking, subagent delegati
 - **3 ←** [`semantic/pattern_full-skill-vs-flag-when-personas-diverge.md`](semantic/pattern_full-skill-vs-flag-when-personas-diverge.md) — When a new skill overlaps with an existing skill but has different personas, context-loading, or council composition — b
 - **3 ←** [`semantic/pattern_spawn-convention-analyzer-before-new-skill-in-family.md`](semantic/pattern_spawn-convention-analyzer-before-new-skill-in-family.md) — When building a new skill that extends an existing family (cto, vibc, cpo, ship), spawn a one-shot Opus subagent to anal
-- **2 ←** [`entities/deal_stripe.md`](entities/deal_stripe.md) — M&A deal intelligence page — Stripe (prospect)
-- **2 ←** [`concepts/pattern_nginx_vite_spa_cache.md`](concepts/pattern_nginx_vite_spa_cache.md) — Vite SPAs need short nginx cache + no-cache meta on index.html to prevent stale bundle references after deploys
-- **2 ←** [`concepts/pattern_oci_staging_prod_promote.md`](concepts/pattern_oci_staging_prod_promote.md) — Push to main builds stg-<sha> image and deploys to staging namespace; promote to production via workflow_dispatch with i
-- **2 ←** [`concepts/tech_advisor_strategy.md`](concepts/tech_advisor_strategy.md) — Claude Platform advisor strategy — Sonnet executor + Opus advisor sharing context, announced April 2026. Applies to Clau
+- **2 ←** [`concepts/tech_mempalace_memory_system.md`](concepts/tech_mempalace_memory_system.md) — MemPalace — free local AI memory system, ChromaDB + MCP server, palace hierarchy, 96.6% R@5 LongMemEval, per-agent diari
+- **2 ←** [`semantic/mistake_settings_bak_public_leak.md`](semantic/mistake_settings_bak_public_leak.md) — 2026-04-21 incident — settings.json.bak-* file with literal API keys force-pushed to public GitHub because its filename 
+- **2 ←** [`semantic/mistake_validate-storage-constraints-before-schema.md`](semantic/mistake_validate-storage-constraints-before-schema.md) — Always confirm runtime environment constraints (which databases are available, where the skill runs) before writing sche
+- **2 ←** [`semantic/pattern_sandbox-exec-allow-default-deny-dangerous.md`](semantic/pattern_sandbox-exec-allow-default-deny-dangerous.md) — Hard lesson from Contably OS v4 Phase 2b — deny-default breaks dyld/Mach on modern macOS. Four iterations to land on a w
+- **2 ←** [`semantic/tech-insight_non-interactive-ssh-path-trap.md`](semantic/tech-insight_non-interactive-ssh-path-trap.md) — Hit 3 times today (Contably OS v3 dispatch.sh, v4 client_factory, hook shim tests). Universal pattern.
 
 ## Recent clusters (last 14 days)
 
@@ -46,7 +46,6 @@ which pages are hubs, and where cross-links are missing.
 - [`feedback/feedback_contably_uses_github_actions.md`](feedback/feedback_contably_uses_github_actions.md) (0d ago) — Contably CI/CD runs on GitHub Actions — Woodpecker decommissioned 2026-04-10
 
 **Unclustered** (recent, no peers)
-- [`entities/_index.md`](entities/_index.md) (0d ago) — 
 - [`entities/agent-memory-bella.md`](entities/agent-memory-bella.md) (0d ago) — Bella agent identity — Chief Technology Officer, Contably (dedicated); owns all Contably engineering
 - [`entities/agent-memory-julia.md`](entities/agent-memory-julia.md) (0d ago) — Julia agent identity — Product Manager for Contably; roadmap, user research, sprint planning, stakeh
 - [`entities/agent-memory-marco.md`](entities/agent-memory-marco.md) (0d ago) — Marco agent identity, operating preferences, investment thesis, and M&A research methodology — Nuvin
@@ -71,7 +70,6 @@ which pages are hubs, and where cross-links are missing.
 - [`entities/rex-mlx-benchmark-spec.md`](entities/rex-mlx-benchmark-spec.md) (0d ago) — Benchmark spec for local MLX models on Rex tasks — test design, metrics, routing recommendations
 - [`entities/swarmy-context-handoff.md`](entities/swarmy-context-handoff.md) (0d ago) — Centralized state file with active priorities, key decisions, and session context for agent calibrat
 - [`entities/vps-claude-remote-control.md`](entities/vps-claude-remote-control.md) (0d ago) — Claude Code Remote Control running on Contabo VPS via systemd — connect from Claude Desktop/browser 
-- [`concepts/_index.md`](concepts/_index.md) (0d ago) — 
 - [`concepts/architecture_k8s_namespace_env_separation.md`](concepts/architecture_k8s_namespace_env_separation.md) (0d ago) — Separate staging and production into distinct K8s namespaces with separate DB URLs, Redis DB slots, 
 - [`concepts/mistake_benchmark_selfdestruct.md`](concepts/mistake_benchmark_selfdestruct.md) (0d ago) — Claudia benchmark safety-refuse-destructive test literally sent rm -rf /opt/claudia to Agent SDK run
 - [`concepts/mistake_cdn_version_not_verified.md`](concepts/mistake_cdn_version_not_verified.md) (0d ago) — Pinning a CDN package version that doesn't exist causes 404 and blocks page load in Safari
@@ -114,7 +112,6 @@ which pages are hubs, and where cross-links are missing.
 - [`concepts/tech_prompt_cache_1h_vs_5m.md`](concepts/tech_prompt_cache_1h_vs_5m.md) (0d ago) — Claude Code prompt cache TTL — subagents get 5m (intentional), main agent gets 1h (rolling out), tel
 - [`concepts/tech_token_efficient_search.md`](concepts/tech_token_efficient_search.md) (0d ago) — Web search token efficiency research — Brave LLM Context API has explicit token budget, Exa highligh
 - [`concepts/tech_vault_as_context_pattern.md`](concepts/tech_vault_as_context_pattern.md) (0d ago) — CLAUDE.md-as-API-contract pattern for knowledge vaults — bootstrap vault context for Claude Code, pr
-- [`projects/_index.md`](projects/_index.md) (0d ago) — 
 - [`projects/project_agentwave_deploy.md`](projects/project_agentwave_deploy.md) (0d ago) — AgentWave deploys to Contabo VPS via SSH, not Railway
 - [`projects/project_benchmark_loop_scaleup.md`](projects/project_benchmark_loop_scaleup.md) (0d ago) — RESOLVED — Benchmark loop removed (2026-04-09). Too dangerous for autonomous execution.
 - [`projects/project_certcontrol_integration.md`](projects/project_certcontrol_integration.md) (0d ago) — Contably CertControl digital certificate integration — plan location, architecture decisions, API sp
@@ -131,7 +128,6 @@ which pages are hubs, and where cross-links are missing.
 - [`projects/project_mfa_activation.md`](projects/project_mfa_activation.md) (0d ago) — Contably MFA was 85% done — backend complete, frontend login flow was the only gap + settings had wr
 - [`projects/project_nuvini_ir_deploy.md`](projects/project_nuvini_ir_deploy.md) (0d ago) — nuvini-ir deploys via Cloudflare Pages (wrangler) — build with eleventy, deploy _site folder, not au
 - [`projects/project_sla_phases_shipped.md`](projects/project_sla_phases_shipped.md) (0d ago) — SLA Phases 1–4a shipped to production 2026-04-15, Phase 4b trigger-gated — unified agenda, scope tog
-- [`feedback/_index.md`](feedback/_index.md) (0d ago) — 
 - [`feedback/feedback_blackbox_vs_code_review.md`](feedback/feedback_blackbox_vs_code_review.md) (0d ago) — Always run code-level review (/cto or /review-changes) in addition to black-box testing (/fulltest-s
 - [`feedback/feedback_claudia_vps_only.md`](feedback/feedback_claudia_vps_only.md) (0d ago) — Any mention of Claudia means VPS — always SSH to /opt/claudia, never check local repo for state
 - [`feedback/feedback_contably_deploy_model.md`](feedback/feedback_contably_deploy_model.md) (0d ago) — Contably deployment model — staging-first, promote-to-prod via workflow only; /deploy-conta-full is 
@@ -152,7 +148,6 @@ which pages are hubs, and where cross-links are missing.
 - [`feedback/feedback_use_browser_tools.md`](feedback/feedback_use_browser_tools.md) (0d ago) — Don't ask the user for screenshots — use available browser/fetch tools to check visual state of depl
 - [`feedback/feedback_use_swarms_for_big_tasks.md`](feedback/feedback_use_swarms_for_big_tasks.md) (0d ago) — Always use parallel swarm agents for large tasks — never single agent for 100+ item workloads
 - [`feedback/feedback_worktree_branch_first.md`](feedback/feedback_worktree_branch_first.md) (0d ago) — Worktree agents must create a feature branch as their FIRST action, never commit on main even inside
-- [`reference/_index.md`](reference/_index.md) (0d ago) — 
 - [`reference/reference_cloudflare.md`](reference/reference_cloudflare.md) (0d ago) — Cloudflare API token with Zone.DNS edit for all zones, account details, zone IDs, and where credenti
 - [`reference/reference_cloudflare_nuvini.md`](reference/reference_cloudflare_nuvini.md) (0d ago) — Cloudflare API token for nuvini.ai domain DNS — separate account (P@nuvini.co) from main (p@nove.co)
 - [`reference/reference_contably_repo.md`](reference/reference_contably_repo.md) (0d ago) — Contably code lives at Contably/contably (org), not escotilha/contably. escotilha is Pierre's person
@@ -186,15 +181,37 @@ which pages are hubs, and where cross-links are missing.
 
 ## Orphans (no inbound + no outbound links)
 
-- `feedback/feedback_contably_deploy_model.md`
-- `feedback/feedback_read_before_write_codebase.md`
-- `feedback/feedback_skill_args_require_arguments_token.md`
-- `feedback/feedback_worktree_branch_first.md`
-- `personal/preference_opus_for_coding_logic.md`
-- `personal/reference_api_keys_keychain.md`
-- `reference/reference_pdf_render_macos.md`
-- `working/contably-os-v4-inputs.md`
-- `working/contably-os-v4-online-2026-04-21.md`
+- `concepts/mistake_benchmark_selfdestruct.md`
+- `concepts/mistake_cdn_version_not_verified.md`
+- `concepts/mistake_fastapi_dep_injection_order.md`
+- `concepts/mistake_nightly_unvalidated_db_columns.md`
+- `concepts/pattern_contably_integration_module_structure.md`
+- `concepts/pattern_karpathy_wiki_github_events.md`
+- `concepts/pattern_sqlalchemy_checkfirst_pytest.md`
+- `concepts/pattern_sse_multi_agent_delegation.md`
+- `concepts/tech_agent_browser.md`
+- `concepts/tech_ai_platform_attack_surface.md`
+- `concepts/tech_anthropic_harness_design.md`
+- `concepts/tech_browse_cli.md`
+- `concepts/tech_cf_email_send_binding_limitation.md`
+- `concepts/tech_claude_cli_max_plan_openclaw.md`
+- `concepts/tech_claude_managed_agents.md`
+- `concepts/tech_gbrain_integration.md`
+- `concepts/tech_glasswing_vuln_hunting.md`
+- `concepts/tech_hermes_channel_adapters.md`
+- `concepts/tech_hermes_subconscious_pattern.md`
+- `concepts/tech_hyperskill_skill_tree.md`
+- `concepts/tech_insight_free_model_tool_calling.md`
+- `concepts/tech_insight_ruff_pin_ci.md`
+- `concepts/tech_lightpanda_browser.md`
+- `concepts/tech_managed_agents_test.md`
+- `concepts/tech_multi_agent_patterns_taxonomy.md`
+- `concepts/tech_openclaw_rl.md`
+- `concepts/tech_pluggable_context_engine.md`
+- `concepts/tech_prompt_cache_1h_vs_5m.md`
+- `concepts/tech_token_efficient_search.md`
+- `concepts/tech_vault_as_context_pattern.md`
+- … and 77 more
 
 ## Stale pages (>90d, top 10 oldest)
 

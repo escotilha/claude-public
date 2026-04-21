@@ -29,7 +29,7 @@ CATS = [
     "entities", "concepts", "projects", "feedback", "reference",
     "working", "episodic", "semantic", "personal",
 ]
-TIER_MARKERS = {"_tier.md"}  # per-tier rule docs, not memories
+TIER_MARKERS = {"_tier.md", "_index.md"}  # per-tier/legacy rule + index docs, not memories
 
 FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n(.*)$", re.DOTALL)
 TIMELINE_RE = re.compile(r"\n\n---\n\n## Timeline", re.DOTALL)

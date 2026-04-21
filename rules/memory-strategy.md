@@ -163,3 +163,7 @@ After writing a new memory file, update 3-5 **existing** memory files that the n
 
 **Save when:** high generality, learned from failure, user explicitly shared, expensive to regenerate, high severity.
 **Skip when:** duplicate exists (>85% similar), project-specific detail, trivial/obvious.
+
+## Hybrid Retrieval (v1, 2026-04-21)
+
+`mem-search` default mode fuses FTS5 BM25 with local vector recall via Reciprocal Rank Fusion (k=60, tunable via `MEM_RRF_K`). Embeddings: `sentence-transformers/all-MiniLM-L6-v2` (384-dim, local Python, no network). Each page chunks as one `truth` + one chunk per timeline bullet. Per-file mtime tracked in `vec_meta`; only changed files re-embed on nightly `mem-consolidate`. Escape hatches: `--fts` (FTS5 only), `--vec` (vector only), `MEM_HYBRID=0` (global FTS5 fallback), `--reindex --vectors-full` (drop + re-embed, use after `MEM_MODEL` change). Observability: `mem-search --vec-status`. A link-graph digest lives at `memory/auto/reports/GRAPH_REPORT.md` — read before `mem-search` for a bird's-eye view.

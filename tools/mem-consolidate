@@ -152,10 +152,16 @@ fi
 
 # --- Step 5: Incremental vector re-embed (hybrid retrieval layer) ---
 # Skips if MEM_HYBRID=0 or mem-embed not installed. Non-fatal if it fails —
-# FTS5 index is still current.
+# FTS5 index is still current. Uses perl alarm as a portable timeout wrapper
+# (macOS base has no `timeout` command; gtimeout via coreutils would be an alternative).
+run_with_timeout() {
+  local secs="$1"; shift
+  perl -e 'alarm shift; exec @ARGV' "$secs" "$@"
+}
+
 if [[ "${MEM_HYBRID:-1}" == "1" && -x "$HOME/.claude-setup/tools/mem-embed" ]]; then
   embed_start=$(date +%s)
-  if timeout 600 "$HOME/.claude-setup/tools/mem-embed" incremental >> "$LOG_FILE" 2>&1; then
+  if run_with_timeout 600 "$HOME/.claude-setup/tools/mem-embed" incremental >> "$LOG_FILE" 2>&1; then
     embed_dur=$(( $(date +%s) - embed_start ))
     log "Vector incremental re-embed completed in ${embed_dur}s"
   else
