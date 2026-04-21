@@ -36,7 +36,15 @@ The last row is the template: a narrow manual fix becomes a permanent system cap
 
 ---
 
+## Related
+
+- [pattern_dogfood-before-trusting-autonomous-dispatch.md](pattern_dogfood-before-trusting-autonomous-dispatch.md) — dogfood IS the "evolve" step of this pattern; real tasks surface what unit tests can't (2026-04-21)
+- [pattern_sandbox-exec-allow-default-deny-dangerous.md](pattern_sandbox-exec-allow-default-deny-dangerous.md) — sandbox EPERM failures that triggered a system fix, textbook application (2026-04-21)
+- [tech-insight_non-interactive-ssh-path-trap.md](tech-insight_non-interactive-ssh-path-trap.md) — PATH trap → narrow fix → encoded in dispatch.sh + memory, another application (2026-04-21)
+- [mistake_settings_bak_public_leak.md](mistake_settings_bak_public_leak.md) — leak incident → diagnosed → encoded as Keychain policy + secret-pattern gate (2026-04-21)
+
 ## Timeline
 
 - **2026-04-21** — [user-feedback] Pierre quote during Contably OS v4.2 build. (Source: user-feedback — direct session quote)
 - **2026-04-21** — [applied] 4+ system evolutions from today's failures: sandbox rewrite, PATH standardization, ship_recovery module from manual-ship pattern, pr_watcher_v3 from manual-DB-update pattern.
+- **2026-04-21** — [consolidation] Cross-linked to 4 sibling memories (dogfood, sandbox, ssh-path, settings-leak). These are all concrete instances of this meta-pattern.
