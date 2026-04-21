@@ -475,10 +475,12 @@ case "$cmd" in
     git commit -m "public claude-code skills library" --allow-empty > /dev/null
 
     # Secret-pattern gate: abort if anything looks like a live API key or token.
-    # Patterns: Resend (re_), Anthropic (sk-ant-), OpenAI (sk-), GitHub (ghp_/gho_/ghs_/ghr_),
-    # Slack (xoxb-/xoxp-/xoxa-), AWS access key (AKIA...), Turso JWT (eyJhbGci), generic JWT,
-    # and common env assignments with non-placeholder values.
-    secret_pattern='(re_[A-Za-z0-9_]{20,}|sk-ant-[A-Za-z0-9_-]{20,}|sk-proj-[A-Za-z0-9_-]{20,}|\bsk-[A-Za-z0-9]{40,}|gh[pousr]_[A-Za-z0-9]{30,}|xox[baprs]-[A-Za-z0-9-]{20,}|AKIA[0-9A-Z]{16}|eyJhbGciOi[A-Za-z0-9._-]+|BSA[A-Za-z0-9_-]{20,})'
+    # Every pattern requires at least one DIGIT in the key body, which filters English
+    # identifiers like re_returns_specific_error while keeping real keys (Resend,
+    # Brave, Anthropic, etc. all have digits).
+    # Real Resend keys: re_{28}chars with digits, e.g. re_SBHeSKNj_AM1wzDrF5eJZ2LKmuyDyNvE2
+    # Real Brave keys: BSA{26}chars with digits, e.g. BSAYdiKG6QoqYPSm9rCGdPlwM_fnzNu
+    secret_pattern='(\bre_[A-Za-z0-9_]*[0-9][A-Za-z0-9_]{18,}|\bsk-ant-[A-Za-z0-9_-]*[0-9][A-Za-z0-9_-]{40,}|\bsk-proj-[A-Za-z0-9_-]*[0-9][A-Za-z0-9_-]{40,}|\bsk-[A-Za-z0-9]*[0-9][A-Za-z0-9]{48,}|\bgh[pousr]_[A-Za-z0-9]{36}|\bxox[baprs]-[0-9]+-[0-9]+-[A-Za-z0-9]+|\bAKIA[0-9A-Z]{16}\b|\beyJhbGciOi[A-Za-z0-9._-]{100,}|\bBSA[A-Za-z0-9_]*[0-9][A-Za-z0-9_]{20,})'
     if git grep -E -l "$secret_pattern" > /dev/null 2>&1; then
       echo "  ABORT: likely live secret/API key detected in public tree:" >&2
       git grep -E -n "$secret_pattern" >&2 || true
