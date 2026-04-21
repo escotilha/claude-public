@@ -23,7 +23,13 @@ from typing import Any
 BASE = Path.home() / ".claude-setup" / "memory" / "auto"
 CACHE = BASE / ".cache"
 REPORTS = BASE / "reports"
-CATS = ["entities", "concepts", "projects", "feedback", "reference"]
+# Legacy flat dirs + new tier taxonomy (working/episodic/semantic/personal).
+# Both are scanned so migration can be touch-and-promote without losing coverage.
+CATS = [
+    "entities", "concepts", "projects", "feedback", "reference",
+    "working", "episodic", "semantic", "personal",
+]
+TIER_MARKERS = {"_tier.md"}  # per-tier rule docs, not memories
 
 FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n(.*)$", re.DOTALL)
 TIMELINE_RE = re.compile(r"\n\n---\n\n## Timeline", re.DOTALL)
@@ -70,6 +76,8 @@ def collect() -> dict[str, Any]:
         if not d.is_dir():
             continue
         for p in sorted(d.glob("*.md")):
+            if p.name in TIER_MARKERS:
+                continue
             files.append((cat, p))
 
     for cat, p in files:
@@ -187,9 +195,10 @@ def main() -> int:
     write_dashboards(data)
     st = data["stats"]
     print(f"[mem-compile] {st['total']} pages compiled")
-    print(f"  entities={st['by_category'].get('entities',0)} concepts={st['by_category'].get('concepts',0)} "
-          f"projects={st['by_category'].get('projects',0)} feedback={st['by_category'].get('feedback',0)} "
-          f"reference={st['by_category'].get('reference',0)}")
+    legacy = " ".join(f"{c}={st['by_category'].get(c,0)}" for c in ["entities","concepts","projects","feedback","reference"])
+    tiers = " ".join(f"{c}={st['by_category'].get(c,0)}" for c in ["working","episodic","semantic","personal"])
+    print(f"  legacy: {legacy}")
+    print(f"  tiers:  {tiers}")
     print(f"  stale={st['stale_count']} orphans={st['orphan_count']} with_related={st['with_related_block']}")
     print(f"  digest: {CACHE/'agent-digest.json'} ({(CACHE/'agent-digest.json').stat().st_size} bytes)")
     return 0

@@ -1,0 +1,4 @@
+# Dependencies for mem-embed and hybrid memory search
+# Install with: /opt/homebrew/bin/python3.11 -m pip install --user -r requirements.txt
+sqlite-vec==0.1.9
+sentence-transformers>=3.3.1
