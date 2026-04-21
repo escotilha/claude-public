@@ -103,6 +103,7 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Task                                                 | Skill              | When                                                  |
 | ---------------------------------------------------- | ------------------ | ----------------------------------------------------- |
 | SourceRank client proposal (GEO diagnostic/research) | `/proposal-source` | Client proposal from conversations, URLs, notes → PDF |
+| Contably product/UX/engineering decision             | `/conta-cpo`       | 8-seat Contably council — deliberates product/UX/eng/pricing-GTM decisions, auto-loads contably-os-v3 context. Use instead of `/vibc` for Contably-specific decisions. |
 
 ### Communication & Utilities
 
