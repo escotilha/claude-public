@@ -17,6 +17,7 @@ See each tier's `_tier.md` for salience rules, migration notes, and promotion ga
 
 - [research-finding-karpathy-coding-guidelines.md](research-finding-karpathy-coding-guidelines.md) — CLAUDE.md behavioral rules from Karpathy's LLM coding pitfall observations — 4 principles addressing silent assumptions, over-engineering, orthogonal edits, and vague success criteria
 - [personal/preference_opus_for_coding_logic.md](personal/preference_opus_for_coding_logic.md) — Use Opus for all coding logic, always (2026-04-21). No Sonnet coding exceptions; Haiku/Sonnet only for explore/format/lint
+- [working/contably-os-v4-inputs.md](working/contably-os-v4-inputs.md) — Two v4 planning inputs (2026-04-21): prefer local OAuth over API keys; route deliberation-class tasks through new /conta-cpo skill before /cto→/ship chain
 - [personal/reference_api_keys_keychain.md](personal/reference_api_keys_keychain.md) — All API keys (Resend/Brave/Exa/Turso) live in macOS Keychain only. settings.json uses ${VAR} refs after 2026-04-21 incident
 - [semantic/mistake_settings_bak_public_leak.md](semantic/mistake_settings_bak_public_leak.md) — 2026-04-21 incident: settings.json.bak-* leaked to public GitHub (13 min exposure). Root cause + pipeline hardening
 - [semantic/pattern_full-skill-vs-flag-when-personas-diverge.md](semantic/pattern_full-skill-vs-flag-when-personas-diverge.md) — Full separate skill beats flag on parent when personas, context-loading, or storage constraints diverge (score 7, from /conta-cpo build)
