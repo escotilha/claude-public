@@ -144,10 +144,25 @@ log "Removed $DUPES duplicates"
 TOTAL=$(find "$MEMORY_DIR" -maxdepth 1 -name "*.md" ! -name "MEMORY.md" | wc -l | xargs)
 log "Rebuilt MEMORY.md index with $TOTAL entries"
 
-# --- Step 4: Reindex search if mem-search exists ---
+# --- Step 4: Reindex search (FTS5) if mem-search exists ---
 if [[ -x "$HOME/.claude-setup/tools/mem-search" ]]; then
-  "$HOME/.claude-setup/tools/mem-search" --reindex >> "$LOG_FILE" 2>&1 || true
-  log "Search index updated"
+  "$HOME/.claude-setup/tools/mem-search" --reindex --fts-only >> "$LOG_FILE" 2>&1 || true
+  log "FTS5 index updated"
+fi
+
+# --- Step 5: Incremental vector re-embed (hybrid retrieval layer) ---
+# Skips if MEM_HYBRID=0 or mem-embed not installed. Non-fatal if it fails —
+# FTS5 index is still current.
+if [[ "${MEM_HYBRID:-1}" == "1" && -x "$HOME/.claude-setup/tools/mem-embed" ]]; then
+  embed_start=$(date +%s)
+  if timeout 600 "$HOME/.claude-setup/tools/mem-embed" incremental >> "$LOG_FILE" 2>&1; then
+    embed_dur=$(( $(date +%s) - embed_start ))
+    log "Vector incremental re-embed completed in ${embed_dur}s"
+  else
+    log "Vector incremental re-embed FAILED (non-fatal; FTS5 index still current)"
+  fi
+else
+  log "Vector embed disabled (MEM_HYBRID=0 or mem-embed binary missing)"
 fi
 
 log "=== Consolidation complete: pruned=$PRUNED, deduped=$DUPES, total=$TOTAL ==="

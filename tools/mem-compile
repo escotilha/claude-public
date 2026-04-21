@@ -140,6 +140,206 @@ def collect() -> dict[str, Any]:
     return {"entries": entries, "index": index, "stats": stats, "stale": stale, "orphans": orphans}
 
 
+TIERS = ["working", "episodic", "semantic", "personal"]
+LEGACY_CATS = ["entities", "concepts", "projects", "feedback", "reference"]
+
+STOPWORDS = {
+    "the", "a", "an", "and", "or", "but", "of", "for", "to", "in", "on", "at", "by",
+    "with", "from", "as", "is", "are", "was", "were", "be", "been", "being",
+    "this", "that", "these", "those", "it", "its", "into", "via", "over",
+    "memory", "file", "page", "per", "use", "using", "used",
+}
+
+TYPE_PREFIXES = ("tech", "pattern", "mistake", "feedback", "reference", "preference", "project", "user", "entity")
+
+
+def _normalize_desc(desc: str) -> set[str]:
+    toks = re.findall(r"[a-zA-Z][a-zA-Z0-9\-]{2,}", desc.lower())
+    return {t for t in toks if t not in STOPWORDS and len(t) > 2}
+
+
+def _page_file(entry: dict[str, Any]) -> Path:
+    return BASE / entry["path"]
+
+
+def write_graph_report(data: dict[str, Any]) -> None:
+    """Emit reports/GRAPH_REPORT.md — link-graph only (v1)."""
+    entries = data["entries"]
+    st = data["stats"]
+    now = time.time()
+    ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now))
+
+    lines: list[str] = [
+        "# GRAPH_REPORT",
+        "",
+        f"**Compiled at:** {ts}",
+        f"**Source:** mem-compile — link-graph only (v1)",
+        f"**Corpus:** {st['total']} pages across {len(st['by_category'])} directories",
+        "",
+        "This is an auto-generated digest of the memory graph. Read this before",
+        "`mem-search` when you need a bird's-eye view of what the vault contains,",
+        "which pages are hubs, and where cross-links are missing.",
+        "",
+    ]
+
+    # 1. Tier coverage table (tier × count × avg age)
+    lines += ["## Tier coverage", "", "| Tier | Count | Avg age (d) | Stale (>90d) | Orphans |", "|---|---:|---:|---:|---:|"]
+    buckets: dict[str, list[dict[str, Any]]] = {}
+    for e in entries:
+        buckets.setdefault(e["category"], []).append(e)
+    # Tiers first, then legacy.
+    for cat in TIERS + LEGACY_CATS:
+        rows = buckets.get(cat, [])
+        if not rows:
+            if cat in TIERS:
+                lines.append(f"| `{cat}/` | 0 | — | — | — |")
+            continue
+        count = len(rows)
+        avg_age = sum(r["age_days"] for r in rows) / count
+        stale_ct = sum(1 for r in rows if r["age_days"] > 90)
+        orph_ct = sum(1 for r in rows if r["inbound_links"] == 0 and r["outbound_links"] == 0)
+        lines.append(f"| `{cat}/` | {count} | {avg_age:.0f} | {stale_ct} | {orph_ct} |")
+    lines += [""]
+
+    # 2. Hub pages — top 10 by inbound links
+    lines += ["## Hub pages (top 10 by inbound links)", ""]
+    hubs = sorted(entries, key=lambda e: (-e["inbound_links"], e["age_days"]))[:10]
+    for h in hubs:
+        if h["inbound_links"] == 0:
+            continue
+        preview = (h["description"] or h["truth_preview"])[:120].replace("|", "\\|")
+        lines.append(f"- **{h['inbound_links']} ←** [`{h['path']}`]({h['path']}) — {preview}")
+    if not any(h["inbound_links"] > 0 for h in hubs):
+        lines.append("_No pages have inbound links yet. Cross-link new memories when writing them._")
+    lines += [""]
+
+    # 3. Recent clusters (last 14 days) — group by shared description tokens.
+    lines += ["## Recent clusters (last 14 days)", ""]
+    recent = [e for e in entries if e["age_days"] <= 14]
+    if not recent:
+        lines.append("_No memories modified in the last 14 days._")
+    else:
+        # Simple clustering: union-find on Jaccard >= 0.3 between description token sets.
+        tokens = {e["path"]: _normalize_desc(e["description"]) for e in recent}
+        parent: dict[str, str] = {p: p for p in tokens}
+
+        def find(x: str) -> str:
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]
+                x = parent[x]
+            return x
+
+        def union(a: str, b: str) -> None:
+            ra, rb = find(a), find(b)
+            if ra != rb:
+                parent[ra] = rb
+
+        paths = list(tokens.keys())
+        for i, a in enumerate(paths):
+            for b in paths[i + 1:]:
+                if not tokens[a] or not tokens[b]:
+                    continue
+                inter = len(tokens[a] & tokens[b])
+                if not inter:
+                    continue
+                union_size = len(tokens[a] | tokens[b])
+                if union_size and inter / union_size >= 0.3:
+                    union(a, b)
+
+        clusters: dict[str, list[dict[str, Any]]] = {}
+        by_path = {e["path"]: e for e in recent}
+        for p in paths:
+            clusters.setdefault(find(p), []).append(by_path[p])
+
+        # Render clusters with >= 2 members first, then singletons.
+        multi = [c for c in clusters.values() if len(c) >= 2]
+        singles = [c[0] for c in clusters.values() if len(c) == 1]
+        for i, cluster in enumerate(sorted(multi, key=lambda c: -len(c)), start=1):
+            shared = set.intersection(*[_normalize_desc(x["description"]) for x in cluster]) if len(cluster) > 1 else set()
+            tag = ", ".join(sorted(shared)[:4]) or "(no shared tokens)"
+            lines.append(f"**Cluster {i}** — {tag}")
+            for m in sorted(cluster, key=lambda x: x["age_days"]):
+                lines.append(f"- [`{m['path']}`]({m['path']}) ({m['age_days']}d ago) — {m['description'][:100]}")
+            lines.append("")
+        if singles:
+            lines.append("**Unclustered** (recent, no peers)")
+            for s in sorted(singles, key=lambda x: x["age_days"]):
+                lines.append(f"- [`{s['path']}`]({s['path']}) ({s['age_days']}d ago) — {s['description'][:100]}")
+            lines.append("")
+
+    # 4. Orphans (inlined)
+    lines += ["## Orphans (no inbound + no outbound links)", ""]
+    if data["orphans"]:
+        for o in sorted(data["orphans"])[:30]:
+            lines.append(f"- `{o}`")
+        if len(data["orphans"]) > 30:
+            lines.append(f"- … and {len(data['orphans']) - 30} more")
+    else:
+        lines.append("_None. The link graph is fully connected._")
+    lines += [""]
+
+    # 5. Stale (inlined — top 10)
+    lines += ["## Stale pages (>90d, top 10 oldest)", ""]
+    stale_sorted = sorted(data["stale"], key=lambda x: -x["age_days"])[:10]
+    if stale_sorted:
+        for s in stale_sorted:
+            lines.append(f"- **{s['age_days']}d** `{s['path']}` — {s['description'][:100]}")
+    else:
+        lines.append("_None. All memories touched within 90 days._")
+    lines += [""]
+
+    # 6. Contradiction candidates — normalized description dedup (v1, no vectors)
+    lines += ["## Contradiction candidates (near-duplicate descriptions)", ""]
+    desc_groups: dict[str, list[dict[str, Any]]] = {}
+    for e in entries:
+        if not e["description"]:
+            continue
+        norm = re.sub(r"[^a-z0-9 ]+", " ", e["description"].lower())
+        norm = re.sub(r"\s+", " ", norm).strip()
+        norm = " ".join(norm.split()[:6])  # first 6 tokens → rough cluster key
+        if not norm:
+            continue
+        desc_groups.setdefault(norm, []).append(e)
+    dups = [(k, v) for k, v in desc_groups.items() if len(v) >= 2]
+    if dups:
+        for key, group in sorted(dups, key=lambda kv: -len(kv[1]))[:15]:
+            lines.append(f"- `{key}` ({len(group)} pages):")
+            for e in group:
+                lines.append(f"    - [`{e['path']}`]({e['path']})")
+    else:
+        lines.append("_No near-duplicate descriptions detected._")
+    lines += [""]
+
+    # 7. Tier-gate suggestions — legacy files that look tier-ready
+    lines += ["## Tier-gate suggestions", "", "_Legacy-dir files whose content looks tier-ready._", ""]
+    suggestions: list[str] = []
+    for e in entries:
+        if e["category"] not in LEGACY_CATS:
+            continue
+        basename = e["basename"]
+        # Heuristic: prefix-based matching on file name.
+        target = None
+        if basename.startswith(("mistake_", "pattern_", "tech_", "tech-insight_", "architecture_")):
+            target = "semantic/"
+        elif basename.startswith("feedback_") or e["type"] in ("feedback", "user"):
+            target = "personal/"
+        elif basename.startswith(("project_",)) and e["age_days"] < 60:
+            target = "episodic/"
+        elif basename.startswith("reference_") or e["type"] == "reference":
+            target = "personal/"
+        if target:
+            suggestions.append(f"- [`{e['path']}`]({e['path']}) → `{target}`")
+    if suggestions:
+        lines += suggestions[:25]
+        if len(suggestions) > 25:
+            lines.append(f"- … and {len(suggestions) - 25} more")
+    else:
+        lines.append("_Nothing flagged. Legacy dirs look settled or already promoted._")
+    lines += [""]
+
+    (REPORTS / "GRAPH_REPORT.md").write_text("\n".join(lines))
+
+
 def write_dashboards(data: dict[str, Any]) -> None:
     REPORTS.mkdir(exist_ok=True)
 
@@ -184,6 +384,9 @@ def write_dashboards(data: dict[str, Any]) -> None:
         f"- **Avg inbound links**: {st['avg_inbound']}",
     ]
     (REPORTS / "stats.md").write_text("\n".join(lines) + "\n")
+
+    # GRAPH_REPORT.md — auto-generated digest (link-graph only in v1)
+    write_graph_report(data)
 
 
 def main() -> int:

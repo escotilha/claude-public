@@ -109,8 +109,21 @@ class Embedder:
     @classmethod
     def get(cls):
         if cls._model is None:
-            from sentence_transformers import SentenceTransformer
-            cls._model = SentenceTransformer(MODEL_NAME)
+            import logging
+            logging.getLogger("sentence_transformers").setLevel(logging.ERROR)
+            logging.getLogger("transformers").setLevel(logging.ERROR)
+            os.environ.setdefault("TRANSFORMERS_VERBOSITY", "error")
+            # Silence the BertModel LOAD REPORT banner by swallowing stderr during load.
+            # Keep real errors visible by re-raising any exception.
+            import contextlib, io
+            buf = io.StringIO()
+            try:
+                with contextlib.redirect_stderr(buf):
+                    from sentence_transformers import SentenceTransformer
+                    cls._model = SentenceTransformer(MODEL_NAME)
+            except Exception:
+                sys.stderr.write(buf.getvalue())
+                raise
         return cls._model
 
     @classmethod

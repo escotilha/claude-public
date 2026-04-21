@@ -1,14 +1,24 @@
 #!/usr/bin/env bash
-# mem-search — FTS5 search over Claude Code auto-memory
-# Uses macOS built-in sqlite3 with FTS5 for full-text search.
-# Indexes .md files from ~/.claude-setup/memory/auto/ (excluding MEMORY.md).
+# mem-search — hybrid FTS5 + vector search over Claude Code auto-memory
+#
+# Default retrieval fuses FTS5 (BM25) and local vector recall via Reciprocal
+# Rank Fusion (RRF, k=60). See `mem-search --help` for flags.
+#
+# FTS5 side uses the system sqlite3 binary (FTS5 built in; no extensions needed).
+# Vector side delegates to `mem-embed` (Python, Homebrew) which loads sqlite-vec.
 set -euo pipefail
 
-MEMORY_DIR="$HOME/.claude-setup/memory/auto"
-DB_PATH="$HOME/.claude-setup/tools/mem-search.db"
-QUERY="${1:-}"
+MEMORY_DIR="${MEM_CORPUS_PATH:-$HOME/.claude-setup/memory/auto}"
+DB_PATH="${MEM_DB_PATH:-$HOME/.claude-setup/tools/mem-search.db}"
+MEM_EMBED="$HOME/.claude-setup/tools/mem-embed"
+MEM_RRF="$HOME/.claude-setup/tools/mem-rrf"
 
-# --- Functions ---
+MEM_HYBRID="${MEM_HYBRID:-1}"
+MEM_RRF_K="${MEM_RRF_K:-60}"
+MEM_RECALL_N="${MEM_RECALL_N:-20}"
+MEM_TOP_N="${MEM_TOP_N:-10}"
+
+# --- Schema ---
 
 init_db() {
   sqlite3 "$DB_PATH" <<'SQL'
@@ -45,10 +55,10 @@ END;
 SQL
 }
 
-reindex() {
-  echo "[mem-search] Reindexing from $MEMORY_DIR ..."
+# --- FTS5 reindex ---
 
-  # Drop and recreate for clean reindex
+reindex_fts() {
+  echo "[mem-search] Reindexing FTS5 from $MEMORY_DIR ..."
   sqlite3 "$DB_PATH" "DELETE FROM memories;"
   sqlite3 "$DB_PATH" "INSERT INTO memories_fts(memories_fts) VALUES('rebuild');"
 
@@ -59,6 +69,8 @@ reindex() {
 
   while IFS= read -r f; do
     [[ "$(basename "$f")" == "MEMORY.md" ]] && continue
+    [[ "$(basename "$f")" == "_tier.md" ]] && continue
+    [[ "$(basename "$f")" == "_index.md" ]] && continue
     [[ ! -f "$f" ]] && continue
 
     local name="" description="" type="" content=""
@@ -84,7 +96,6 @@ reindex() {
       content+="$line"$'\n'
     done < "$f"
 
-    # Strip surrounding quotes from parsed values
     name="${name#\"}" ; name="${name%\"}"
     name="${name#\'}" ; name="${name%\'}"
     description="${description#\"}" ; description="${description%\"}"
@@ -95,8 +106,6 @@ reindex() {
     local mod_date
     mod_date=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M:%S" "$f" 2>/dev/null || stat -c "%y" "$f" 2>/dev/null | cut -d. -f1)
 
-    # Write each field to a temp file, then build SQL with proper escaping
-    # using sed to double single quotes (the only escaping sqlite3 needs)
     local sql_file="$tmpdir/insert.sql"
     {
       printf "INSERT INTO memories (file_path, name, description, type, content, modified_at) VALUES ("
@@ -113,31 +122,15 @@ reindex() {
     count=$((count + 1))
   done < <(find "$MEMORY_DIR" -type f -name '*.md')
 
-  echo "[mem-search] Indexed $count memory files."
+  echo "[mem-search] Indexed $count memory files (FTS5)."
 }
 
-search() {
-  local query="$1"
+# --- FTS5 search helpers ---
 
-  # Check if DB exists and has data
-  if [[ ! -f "$DB_PATH" ]]; then
-    init_db
-    reindex
-  fi
-
-  local count
-  count=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM memories;" 2>/dev/null || echo "0")
-  if [[ "$count" == "0" ]]; then
-    reindex
-  fi
-
-  # Escape single quotes in query for SQL
+# Pretty-print FTS5 top-K (human output).
+fts_search_pretty() {
+  local query="$1" limit="${2:-$MEM_TOP_N}"
   local safe_query="${query//\'/\'\'}"
-
-  # FTS5 search with BM25 ranking
-  # Column weights: name=5, description=3, content=1, type=2
-  # Type boost: feedback 3x, user 2x, reference 1.5x
-  # Recency boost: modified in last 7 days gets 1.5x
   sqlite3 -header -column "$DB_PATH" <<EOSQL
 SELECT
   m.name,
@@ -161,21 +154,210 @@ FROM memories_fts
 JOIN memories m ON m.id = memories_fts.rowid
 WHERE memories_fts MATCH '$safe_query'
 ORDER BY score DESC
-LIMIT 10;
+LIMIT $limit;
 EOSQL
 }
 
+# TSV output for fusion: rank\tfile_path\tname\ttype\tdescription\tscore\tsnippet
+fts_search_tsv() {
+  local query="$1" limit="${2:-$MEM_RECALL_N}"
+  local safe_query="${query//\'/\'\'}"
+  sqlite3 -separator $'\t' "$DB_PATH" <<EOSQL
+SELECT
+  ROW_NUMBER() OVER (ORDER BY score DESC) AS rank,
+  file_path,
+  name,
+  type,
+  description,
+  score,
+  snippet
+FROM (
+  SELECT
+    m.file_path,
+    m.name,
+    m.type,
+    m.description,
+    ROUND(
+      bm25(memories_fts, 5.0, 3.0, 1.0, 2.0) * -1.0
+      * CASE m.type
+          WHEN 'feedback' THEN 3.0
+          WHEN 'user' THEN 2.0
+          WHEN 'reference' THEN 1.5
+          ELSE 1.0
+        END
+      * CASE
+          WHEN julianday('now') - julianday(m.modified_at) <= 7 THEN 1.5
+          ELSE 1.0
+        END
+    , 4) AS score,
+    SUBSTR(snippet(memories_fts, 2, '>>>', '<<<', '...', 40), 1, 200) AS snippet
+  FROM memories_fts
+  JOIN memories m ON m.id = memories_fts.rowid
+  WHERE memories_fts MATCH '$safe_query'
+  ORDER BY score DESC
+  LIMIT $limit
+);
+EOSQL
+}
+
+# --- Vector search ---
+
+# mem-embed query outputs: rank\tfile_path\tchunk_type\tchunk_idx\tdistance\tpreview
+# Reshape to fusion TSV: rank\tfile_path\tname\ttype\tdescription\tscore\tsnippet
+# The name/type/description come from the memories table (JOIN by file_path).
+vec_search_tsv() {
+  local query="$1" limit="${2:-$MEM_RECALL_N}"
+  local raw
+  if ! raw=$("$MEM_EMBED" query "$query" --k "$limit" 2>/dev/null); then
+    return 0  # vector path unavailable; emit empty
+  fi
+  [[ -z "$raw" ]] && return 0
+
+  # Join vec hits with memories table to pick up name/type/description.
+  local tmp_vec tmp_join
+  tmp_vec=$(mktemp)
+  tmp_join=$(mktemp)
+  printf "%s\n" "$raw" > "$tmp_vec"
+
+  sqlite3 "$DB_PATH" ".mode tsv" ".import '$tmp_vec' _vec_hits_tmp" 2>/dev/null <<'SQL' || true
+CREATE TEMP TABLE IF NOT EXISTS _vec_hits_tmp (
+  rank INTEGER, file_path TEXT, chunk_type TEXT, chunk_idx INTEGER, distance REAL, preview TEXT
+);
+SQL
+
+  # Use awk to join against a dump of memories keyed by file_path.
+  local mem_dump
+  mem_dump=$(mktemp)
+  sqlite3 -separator $'\t' "$DB_PATH" \
+    "SELECT file_path, name, type, description FROM memories;" > "$mem_dump"
+
+  awk -F'\t' -v OFS='\t' '
+    FNR == NR {
+      name[$1] = $2
+      type[$1] = $3
+      desc[$1] = $4
+      next
+    }
+    {
+      fp = $2
+      # score column for diagnostic: lower distance = better; emit 1/(1+distance) as a positive score.
+      dist = $5 + 0
+      s = 1.0 / (1.0 + dist)
+      snip = $6
+      printf "%s\t%s\t%s\t%s\t%s\t%.4f\t%s\n", $1, fp, name[fp], type[fp], desc[fp], s, snip
+    }
+  ' "$mem_dump" "$tmp_vec"
+
+  rm -f "$tmp_vec" "$mem_dump" "$tmp_join"
+}
+
+# --- Hybrid search (RRF fusion) ---
+
+hybrid_search() {
+  local query="$1"
+  local tmp_fts tmp_vec
+  tmp_fts=$(mktemp)
+  tmp_vec=$(mktemp)
+
+  fts_search_tsv "$query" "$MEM_RECALL_N" > "$tmp_fts" &
+  local pid_fts=$!
+  vec_search_tsv "$query" "$MEM_RECALL_N" > "$tmp_vec" &
+  local pid_vec=$!
+  wait "$pid_fts" || true
+  wait "$pid_vec" || true
+
+  # If vector side is empty (vec tables missing / mem-embed failed), degrade to FTS5 pretty output.
+  if [[ ! -s "$tmp_vec" ]]; then
+    rm -f "$tmp_fts" "$tmp_vec"
+    fts_search_pretty "$query" "$MEM_TOP_N"
+    return 0
+  fi
+
+  # If FTS5 side is empty, still run RRF (it'll just rank vector side).
+  # Pretty-print the fused top-N.
+  local merged
+  merged=$("$MEM_RRF" "$tmp_fts" "$tmp_vec" "$MEM_RRF_K" | sort -k1,1rn | head -n "$MEM_TOP_N")
+  rm -f "$tmp_fts" "$tmp_vec"
+
+  # Format: rrf_score | name | type | description | source | snippet
+  printf "%-10s  %-40s  %-12s  %-8s  %-6s  %s\n" "RRF_SCORE" "NAME" "TYPE" "SOURCE" "" "DESCRIPTION"
+  printf "%-10s  %-40s  %-12s  %-8s  %-6s  %s\n" "----------" "----" "----" "------" "" "-----------"
+  printf "%s\n" "$merged" | awk -F'\t' -v OFS='  ' '
+    {
+      score = $1 + 0
+      fp = $2; name = $3; type = $4; desc = $5; src = $6
+      # Truncate for display.
+      if (length(name) > 40) name = substr(name, 1, 37) "..."
+      if (length(desc) > 80) desc = substr(desc, 1, 77) "..."
+      printf "%-10.6f  %-40s  %-12s  %-8s  %s\n", score, name, type, src, desc
+    }
+  '
+}
+
+# --- Status ---
+
+vec_status() {
+  if [[ ! -x "$MEM_EMBED" ]]; then
+    echo "Vector layer: mem-embed binary not found at $MEM_EMBED"
+    return 0
+  fi
+  "$MEM_EMBED" status 2>/dev/null || {
+    echo "Vector layer: not initialized (run: mem-search --reindex --vectors-full)"
+    return 0
+  }
+}
+
+stats() {
+  if [[ ! -f "$DB_PATH" ]]; then
+    echo "No database. Run: mem-search --reindex"
+    return
+  fi
+  echo "=== FTS5 Stats ==="
+  sqlite3 -header -column "$DB_PATH" "SELECT type, COUNT(*) as count FROM memories GROUP BY type ORDER BY count DESC;"
+  echo ""
+  sqlite3 "$DB_PATH" "SELECT COUNT(*) || ' total memories indexed' FROM memories;"
+  echo ""
+  echo "=== Vector Stats ==="
+  vec_status
+  echo ""
+  echo "Database: $(du -h "$DB_PATH" | cut -f1) — $DB_PATH"
+}
+
+# --- Reindex orchestration ---
+
+reindex_all() {
+  local vectors_full="${1:-0}" fts_only="${2:-0}"
+  init_db
+  reindex_fts
+
+  if [[ "$fts_only" == "1" || "$MEM_HYBRID" == "0" ]]; then
+    echo "[mem-search] Skipping vector layer (MEM_HYBRID=0 or --fts-only)"
+    return 0
+  fi
+
+  if [[ ! -x "$MEM_EMBED" ]]; then
+    echo "[mem-search] mem-embed not available, skipping vector layer"
+    return 0
+  fi
+
+  if [[ "$vectors_full" == "1" ]]; then
+    echo "[mem-search] Running full vector re-embed..."
+    "$MEM_EMBED" all
+  else
+    echo "[mem-search] Running incremental vector re-embed..."
+    "$MEM_EMBED" incremental
+  fi
+}
+
+# --- Read one file ---
+
 read_match() {
   local query="$1"
-
   if [[ ! -f "$DB_PATH" ]]; then
     echo "No database. Run: mem-search --reindex"
     return 1
   fi
-
   local safe_query="${query//\'/\'\'}"
-
-  # Get the top match file path
   local file_path
   file_path=$(sqlite3 "$DB_PATH" <<EOSQL
 SELECT m.file_path
@@ -186,66 +368,161 @@ ORDER BY bm25(memories_fts, 5.0, 3.0, 1.0, 2.0) ASC
 LIMIT 1;
 EOSQL
   )
-
   if [[ -z "$file_path" ]]; then
     echo "No match found for: $query"
     return 1
   fi
-
   echo "--- $file_path ---"
   cat "$file_path"
 }
 
-stats() {
-  if [[ ! -f "$DB_PATH" ]]; then
-    echo "No database. Run: mem-search --reindex"
-    return
-  fi
-  echo "=== Memory Search Stats ==="
-  echo ""
-  sqlite3 -header -column "$DB_PATH" "SELECT type, COUNT(*) as count FROM memories GROUP BY type ORDER BY count DESC;"
-  echo ""
-  sqlite3 "$DB_PATH" "SELECT COUNT(*) || ' total memories indexed' FROM memories;"
-  echo ""
-  echo "Database: $(du -h "$DB_PATH" | cut -f1)"
-  echo "Location: $DB_PATH"
-  echo "Source:   $MEMORY_DIR"
+# --- Help ---
+
+show_help() {
+  cat <<'HELP'
+mem-search — hybrid FTS5 + vector search over Claude Code auto-memory
+
+USAGE
+  mem-search <query>                    Hybrid (FTS5 + vector, RRF fused). Default.
+  mem-search --fts <query>              FTS5 only (legacy behavior).
+  mem-search --vec <query>              Vector only (semantic recall).
+  mem-search --read <query>             Show full content of top match.
+  mem-search --reindex                  FTS5 rebuild + incremental vector update.
+  mem-search --reindex --vectors-full   Force full re-embed of every file.
+  mem-search --reindex --fts-only       Skip vectors (use if sqlite-vec unavailable).
+  mem-search --vec-status               Show model, dim, files embedded, chunks, timing.
+  mem-search --stats                    FTS5 + vector summary stats.
+  mem-search --help                     This message.
+
+ENV
+  MEM_HYBRID=0                          Force FTS5-only globally.
+  MEM_RRF_K=60                          RRF fusion constant.
+  MEM_RECALL_N=20                       Per-side recall before fusion.
+  MEM_TOP_N=10                          Final result count.
+  MEM_DB_PATH=...                       Override DB path.
+  MEM_CORPUS_PATH=...                   Override corpus root.
+  MEM_MODEL=...                         Override embedding model name (also in mem-embed).
+
+QUERY CAVEAT (FTS5)
+  Bare tokens that match FTS5 column names cause 'no such column' errors because
+  FTS5 interprets '<word>:<value>' as a column filter. Affected: name, description,
+  content, type. Workaround: quote the query or add surrounding words:
+      mem-search '"vec"'
+      mem-search "about vec"
+  Tracked as Future Work (parser-level fix).
+
+TROUBLESHOOTING
+  sqlite-vec .load fails        Set MEM_HYBRID=0 or reinstall: pip install --user sqlite-vec==0.1.9
+  Model download fails          First run pulls ~80MB; check HF_HUB_OFFLINE; pre-cache in ~/.cache/huggingface
+  Dim mismatch on reindex       Run: mem-search --reindex --vectors-full (after changing MEM_MODEL)
+  Partial embed                 Re-run: mem-search --reindex --vectors-full
+  vec_chunks corruption         mem-embed drop && mem-search --reindex --vectors-full
+HELP
 }
 
-# --- Main ---
+# --- Arg parsing ---
 
-case "${QUERY}" in
-  --reindex)
-    init_db
-    reindex
-    ;;
-  --stats)
-    stats
-    ;;
-  --read)
-    if [[ -z "${2:-}" ]]; then
-      echo "Usage: mem-search --read <query>"
-      exit 1
+mode="hybrid"   # hybrid | fts | vec
+do_reindex=0
+vectors_full=0
+fts_only=0
+do_read=0
+do_stats=0
+do_vec_status=0
+do_help=0
+query=""
+
+if [[ $# -eq 0 ]]; then
+  show_help
+  exit 0
+fi
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --help|-h)
+      do_help=1; shift ;;
+    --stats)
+      do_stats=1; shift ;;
+    --vec-status)
+      do_vec_status=1; shift ;;
+    --reindex)
+      do_reindex=1; shift ;;
+    --vectors-full)
+      vectors_full=1; shift ;;
+    --fts-only)
+      fts_only=1; shift ;;
+    --fts)
+      mode="fts"; shift ;;
+    --vec)
+      mode="vec"; shift ;;
+    --read)
+      do_read=1; shift
+      query="${1:-}"; [[ -n "$query" ]] && shift ;;
+    --)
+      shift
+      query="$*"; break ;;
+    -*)
+      echo "mem-search: unknown flag: $1" >&2
+      echo "Try: mem-search --help" >&2
+      exit 2 ;;
+    *)
+      if [[ -z "$query" ]]; then
+        query="$1"
+      else
+        query="$query $1"
+      fi
+      shift ;;
+  esac
+done
+
+# --- Dispatch ---
+
+if [[ $do_help -eq 1 ]]; then
+  show_help; exit 0
+fi
+
+if [[ $do_stats -eq 1 ]]; then
+  stats; exit 0
+fi
+
+if [[ $do_vec_status -eq 1 ]]; then
+  vec_status; exit 0
+fi
+
+if [[ $do_reindex -eq 1 ]]; then
+  reindex_all "$vectors_full" "$fts_only"
+  exit 0
+fi
+
+if [[ $do_read -eq 1 ]]; then
+  [[ -z "$query" ]] && { echo "Usage: mem-search --read <query>" >&2; exit 2; }
+  read_match "$query"
+  exit 0
+fi
+
+if [[ -z "$query" ]]; then
+  show_help; exit 0
+fi
+
+# Ensure DB exists.
+if [[ ! -f "$DB_PATH" ]]; then
+  init_db
+  reindex_fts
+fi
+count=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM memories;" 2>/dev/null || echo "0")
+[[ "$count" == "0" ]] && reindex_fts
+
+case "$mode" in
+  fts)    fts_search_pretty "$query" "$MEM_TOP_N" ;;
+  vec)
+    if [[ ! -x "$MEM_EMBED" ]]; then
+      echo "mem-search: vector mode requires mem-embed" >&2; exit 2
     fi
-    read_match "$2"
-    ;;
-  --help|-h|"")
-    echo "mem-search — FTS5 search over Claude Code auto-memory"
-    echo ""
-    echo "Usage:"
-    echo "  mem-search <query>          Search memories (FTS5 syntax)"
-    echo "  mem-search --read <query>   Show full content of top match"
-    echo "  mem-search --reindex        Rebuild index from .md files"
-    echo "  mem-search --stats          Show memory statistics"
-    echo ""
-    echo "Query examples:"
-    echo "  mem-search security          Simple keyword"
-    echo "  mem-search 'agent OR sandbox' Boolean OR"
-    echo "  mem-search 'browse AND cli'   Boolean AND"
-    echo "  mem-search 'name:resend'      Search specific column"
-    echo "  mem-search 'type:reference'   Filter by type"
-    ;;
-  *)
-    search "$QUERY"
-    ;;
+    "$MEM_EMBED" query "$query" --k "$MEM_TOP_N" ;;
+  hybrid)
+    if [[ "$MEM_HYBRID" == "0" || ! -x "$MEM_EMBED" ]]; then
+      fts_search_pretty "$query" "$MEM_TOP_N"
+    else
+      hybrid_search "$query"
+    fi ;;
 esac
