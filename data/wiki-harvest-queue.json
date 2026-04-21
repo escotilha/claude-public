@@ -250,5 +250,11 @@
     "note": "agentic-stack: portable .agent/ folder (memory+skills+protocols) that works across Claude Code, Cursor, Windsurf, OpenClaw, Hermes, OpenCode, Pi Coding Agent, and DIY Python loop",
     "addedAt": "2026-04-21T09:22:13Z",
     "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/ollama/status/2046475902251639209",
+    "note": "Ollama launches cloud inference for Kimi K2.6 on NVIDIA Blackwell GPUs, accessible via ollama launch with --model kimi-k2.6:cloud; supports OpenClaw, Hermes Agent, and Claude Code",
+    "addedAt": "2026-04-21T10:43:04Z",
+    "addedBy": "research-skill"
   }
 ]

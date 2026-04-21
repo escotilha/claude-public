@@ -58,44 +58,20 @@ ICLOUD_SETUP="$HOME/.claude-setup"
 
 All reads and writes go to the iCloud path directly. Never use symlink paths.
 
+## Scope
+
+This skill evaluates research **only** against two targets:
+
+1. **Claude Code setup** — skills, agents, hooks, MCP servers, memory, subagent patterns, model tiers, CLI features
+2. **Contably** — Brazil accounting/tax compliance SaaS (`~/code/contably`, Next.js + Supabase)
+
+Ignore relevance to any other project (AgentWave, OpenClaw, SourceRank, etc.). If content is unrelated to either target, report "No actionable recommendations" — do not invent recommendations for other projects.
+
 ## Active Projects
 
-| Project    | Path                | Stack                        | Key Needs                                                              |
-| ---------- | ------------------- | ---------------------------- | ---------------------------------------------------------------------- |
-| Contably   | ~/code/contably     | Next.js + Supabase           | Brazil accounting, tax compliance, financial data extraction           |
-| SourceRank | ~/code/sourcerankai | Next.js + GitHub API         | Repository analytics, developer metrics, open source intelligence      |
-| AgentWave  | ~/code/agentwave    | TypeScript + SQLite + Croner | Multi-agent SaaS platform, Visual Agent Builder, Skill Studio, billing |
-| OpenClaw   | ~/code/openclaw-vps | Shell + systemd              | VPS agent deployment, failsafe system, sentinel watchdog               |
-
-## AgentWave Context
-
-AgentWave is an open-core SaaS platform for deploying AI agent teams across communication channels (Telegram, Discord, Slack, WhatsApp). Multi-agent orchestration, 4-strategy knowledge graph search, JWT/OAuth auth, and a Visual Agent Builder.
-
-**On every run, read `~/code/agentwave/prd-definition.md` for current product scope.** If the file is missing, note it in the report and score AgentWave relevance based on the summary above.
-
-## OpenClaw Context
-
-OpenClaw is the VPS-deployed agent gateway on Contabo (`vmi3065960`). Config-driven agent routing with a two-layer failsafe (config rollback + AI watchdog via Claude Code CLI), sentinel monitoring, and systemd service management.
-
-### AgentWave Skill Map (for matching content to AgentWave)
-
-- Multi-agent orchestration/routing → agent router, strategy selection
-- Channel adapters → Telegram, Discord, Slack, WhatsApp integrations
-- Knowledge graph/memory → 4-strategy search (vector, semantic, entity, temporal)
-- Agent personas/identity → custom agent builder, persona config
-- Custom skills/tools → Skill Studio, webhook integrations, Composio bridge
-- Workspace/billing → multi-tenant workspaces, seat management, plan enforcement
-- Agent marketplace → templates, community-published agent packs
-- Auth → JWT/OAuth, workspace-level access control
-- Observability → agent session tracking, active agent-hours metrics
-
-### OpenClaw Skill Map (for matching content to OpenClaw)
-
-- Agent deployment/operations → systemd services, gateway config
-- Self-healing/failsafe → config rollback, crash-loop detection, AI watchdog
-- Monitoring/sentinel → health checks, escalation scripts
-- VPS infrastructure → systemd units, service management
-- Agent config management → openclaw.json, agent identities, workspaces
+| Project  | Path            | Stack              | Key Needs                                                    |
+| -------- | --------------- | ------------------ | ------------------------------------------------------------ |
+| Contably | ~/code/contably | Next.js + Supabase | Brazil accounting, tax compliance, financial data extraction |
 
 ### Claude Code Skill Map (for matching content to Claude Code setup)
 
@@ -200,13 +176,14 @@ Classify content type:
 | **Product/Feature**   | Product launch, feature demo, UX pattern         |
 | **Infrastructure**    | Deployment, CI/CD, monitoring, DevOps            |
 
-Score relevance 0-10 against five targets:
+Score relevance 0-10 against four targets (Claude Code + Contably only — ignore all other projects):
 
 1. **Claude Code setup** — Does it improve skills, agents, hooks, MCP servers, memory, or subagent patterns? Use the Claude Code Skill Map to match.
 2. **Existing skills** — Does it introduce a tool/pattern an existing skill could use? Use the Claude Setup Skill Map to match.
 3. **New skill opportunity** — No existing skill covers this, it's reusable, aligns with our stack (TypeScript, Next.js, Supabase)?
-4. **Active projects** — Would Contably or SourceRank benefit directly?
-5. **AgentWave / OpenClaw** — Does it improve AgentWave's orchestration, channels, knowledge graph, agent builder, skill studio, or marketplace? Or OpenClaw's failsafe, sentinel, deployment, or gateway? Use the AgentWave/OpenClaw Skill Maps to match. Read `~/code/agentwave/prd-definition.md` for current AgentWave scope before scoring.
+4. **Contably** — Would Contably benefit directly (Brazil accounting, tax compliance, Next.js + Supabase improvements)?
+
+If content is not relevant to any of these four, score it low and report "No actionable recommendations". Do not invent recommendations for projects outside this scope.
 
 ### Phase 2: Recommend + Act
 
@@ -232,13 +209,13 @@ Score relevance 0-10 against five targets:
 - **Effort:** Low / Medium / High
 - **Score:** X/10 — [one-line justification]
 
-### AgentWave / OpenClaw Recommendations
+### Contably Recommendations
 
-[Only include this section if AgentWave/OpenClaw relevance score >= 3]
+[Only include this section if Contably relevance score >= 3]
 
-#### 1. [Improve Component / New Integration / Enhance Capability] — Score: X/10
+#### 1. [Improve Feature / New Integration / Enhance Capability] — Score: X/10
 
-- **Target:** [AgentWave: orchestration / channels / knowledge graph / agent builder / skill studio / marketplace] or [OpenClaw: failsafe / sentinel / gateway / deployment]
+- **Target:** [Contably area: accounting engine / tax compliance / data ingestion / UI / Supabase schema / etc.]
 - **What:** [specific change]
 - **Why:** [concrete benefit]
 - **Effort:** Low / Medium / High
