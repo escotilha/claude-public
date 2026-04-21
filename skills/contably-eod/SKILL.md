@@ -1,6 +1,6 @@
 ---
 name: contably-eod
-description: "Contably end-of-day autonomous pipeline. Phase 1: full bug hunt + autofix (verify-conta, qa-conta, fulltest, virtual-user, qa-fix loop). Phase 2: meditate + lessons learned. Phase 3: daily agenda email to p@contably.ai. Schedulable via --as-routine. Triggers on: contably eod, end of day, contably end of day, nightly contably, daily agenda, /contably-eod."
+description: "Contably end-of-day: bug hunt, autofix, lessons learned, daily agenda email. Triggers: contably eod, end of day, nightly contably, daily agenda."
 argument-hint: "[--as-routine '<cron>'] [--budget=<usd>] [--no-email] [--max-fix-iterations=N] [--dry-run]"
 user-invocable: true
 context: fork

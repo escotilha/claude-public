@@ -1,6 +1,6 @@
 ---
 name: vault-bootstrap
-description: "Bootstrap a CLAUDE.md API contract for any local knowledge vault (Obsidian, plain markdown). Generates vault overview, conventions, and agent guardrails from 5 diagnostic questions. Triggers on: vault bootstrap, obsidian setup, second brain, vault claude, bootstrap vault, setup obsidian, knowledge vault."
+description: "Bootstrap CLAUDE.md for a local knowledge vault (Obsidian, markdown). Generates overview, conventions, guardrails. Triggers: vault bootstrap, obsidian setup, second brain, knowledge vault."
 user-invocable: true
 context: inline
 model: sonnet

@@ -1,6 +1,6 @@
 ---
 name: orchestrate
-description: "Meta-orchestrator — refine intent → plan phases → route across the full skill library → execute → verify → commit → deploy. Configurable gates. 'go' is the approval password. Supersedes /project-orchestrator. Triggers on: orchestrate, meta-orchestrate, do this end-to-end, full pipeline, /orchestrate."
+description: "Meta-orchestrator — intent → plan → skill routing → execute → verify → deploy. Triggers: orchestrate, meta-orchestrate, do this end-to-end, full pipeline."
 argument-hint: "<intent> [--gated | --autonomous | --approve-at=<phases>] [--budget=<usd>] [--as-routine '<cron>'] [--resume <run-id>] [--list] [--show <run-id>]"
 user-invocable: true
 context: fork

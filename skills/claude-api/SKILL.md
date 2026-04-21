@@ -1,6 +1,6 @@
 ---
 name: claude-api
-description: "Build apps with the Claude API or Anthropic SDK. Covers Messages API, Managed Agents API, Agent SDK, tool use, streaming, and MCP integration. TRIGGER when: code imports `anthropic`/`@anthropic-ai/sdk`/`claude_agent_sdk`, or user asks to use Claude API, Anthropic SDKs, or Agent SDK. DO NOT TRIGGER when: code imports `openai`/other AI SDK, general coding questions."
+description: "Build/debug Claude API and Anthropic SDK apps — Messages API, Agent SDK, tool use, streaming, MCP, caching. TRIGGER: imports anthropic SDK, asks for Claude API. SKIP: openai/other SDK."
 user-invocable: true
 context: inline
 model: sonnet

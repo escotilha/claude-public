@@ -1,6 +1,6 @@
 ---
 name: agent-browser
-description: "Browser automation via agent-browser CLI (Rust, CDP). Navigate, snapshot, click, fill, screenshot, PDF, batch mode, visual diff, network intercept, session persistence. Replaces browse CLI and PinchTab. Triggers on: agent-browser, browser automation, browse website, page snapshot, element refs, accessibility tree, take screenshot, scrape page, test web app, dogfood, visual diff."
+description: "Browser automation via Rust/CDP CLI. Navigate, click, fill, screenshot, PDF, visual diff. Triggers: agent-browser, browser automation, page snapshot, take screenshot, scrape page."
 user-invocable: true
 context: fork
 model: sonnet

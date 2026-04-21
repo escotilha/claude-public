@@ -1,6 +1,6 @@
 ---
 name: freeze
-description: "Restrict Edit/Write operations to a specific directory. Blocks (not just warns) edits outside the allowed path. Use during debugging to prevent scope creep, or to lock changes to one module. Triggers on: freeze, freeze edits, lock editing scope, restrict edits to, only edit this folder."
+description: "Restrict Edit/Write to one directory. Blocks edits outside allowed path. Triggers: freeze, freeze edits, lock scope, restrict edits to."
 user-invocable: true
 context: inline
 model: haiku

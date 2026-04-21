@@ -1,6 +1,6 @@
 ---
 name: local-inference
-description: "Set up a local multi-model inference gateway with LiteLLM. Routes tasks to local models (MLX, Ollama) with cloud fallback (OpenRouter, Anthropic). Use alongside Claude Max. Triggers on: local inference, setup litellm, model gateway, local models, inference gateway, multi-model setup, run local models"
+description: "Set up LiteLLM multi-model gateway. Routes to local models (MLX, Ollama) with cloud fallback. Triggers: local inference, setup litellm, model gateway, local models."
 user-invocable: true
 context: fork
 model: sonnet

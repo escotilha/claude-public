@@ -1,15 +1,6 @@
 ---
 name: office-hours
-description: |
-  Product office hours — two modes. Startup mode: six forcing questions that expose
-  demand reality, status quo, desperate specificity, narrowest wedge, observation,
-  and future-fit. Builder mode: design thinking brainstorming for side projects,
-  hackathons, learning, and open source. Saves a design doc.
-  Use when asked to "brainstorm this", "I have an idea", "help me think through
-  this", "office hours", or "is this worth building".
-  Proactively suggest when the user describes a new product idea or is exploring
-  whether something is worth building — before any code is written.
-  Use before /deep-plan or /ship.
+description: "Product office hours — startup forcing questions + design-thinking brainstorm. Triggers: office hours, brainstorm this, I have an idea, is this worth building."
 user-invocable: true
 context: fork
 model: opus

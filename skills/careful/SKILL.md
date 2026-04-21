@@ -1,6 +1,6 @@
 ---
 name: careful
-description: "Safety guardrails for destructive bash commands. Warns before rm -rf, DROP TABLE, force-push, git reset --hard, kubectl delete, docker prune, DELETE FROM. Session-scoped — toggle on/off. Triggers on: careful, careful mode, safety mode, prod mode, be careful."
+description: "Safety guardrails — warns before rm -rf, DROP TABLE, force-push, kubectl delete. Toggle on/off. Triggers: careful, careful mode, safety mode, prod mode."
 user-invocable: true
 context: inline
 model: haiku

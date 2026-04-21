@@ -1,6 +1,6 @@
 ---
 name: investigate
-description: "Systematic debugging with root-cause investigation. Iron Law: no fixes without root cause. Four phases — investigate, hypothesize, fix, verify. 3-strike rule forces escalation. Triggers on: debug this, fix this bug, why is this broken, investigate this error, root cause analysis."
+description: "Root-cause debugging. Iron Law: no fix without root cause. 3-strike escalation. Triggers: debug this, fix this bug, why is this broken, investigate, root cause."
 user-invocable: true
 context: inline
 model: opus

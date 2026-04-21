@@ -1,7 +1,9 @@
 ---
 name: qa-stonegeo
-description: "Full QA cycle for StoneGEO platform with code analysis + browser testing. Covers all 6 dashboard pages, tRPC API, Clerk auth, multi-tenancy. Uses typecheck + build verification. Triggers on: qa stonegeo, stonegeo qa, test stonegeo, qa cycle stonegeo."
+description: "QA cycle for StoneGEO — dashboard, tRPC API, Clerk auth, multi-tenancy, typecheck. Triggers: qa stonegeo, stonegeo qa, test stonegeo."
 user-invocable: true
+paths:
+  - "**/nonexistent-test-dir-xyz/**"
 context: fork
 model: opus
 effort: high

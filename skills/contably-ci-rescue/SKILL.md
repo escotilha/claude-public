@@ -1,6 +1,6 @@
 ---
 name: contably-ci-rescue
-description: "Diagnose and fix a failing Contably CI/deploy run. Classifies the failure (alembic / secret / pod-crash / lint / RBAC / docker-cache / kubectl-auth / test-collection) and applies the targeted fix from the 45-commit rescue playbook. Triggers on: ci rescue, ci failing, deploy failing, fix ci, contably ci, /contably-ci-rescue."
+description: "Diagnose and fix failing Contably CI. Classifies failure, applies targeted fix. Triggers: ci rescue, ci failing, deploy failing, fix ci, contably ci."
 argument-hint: "[run-url | --latest | --branch=<name>]"
 user-invocable: true
 context: fork

@@ -1,6 +1,6 @@
 ---
 name: platform-sweep
-description: "Full platform health sweep -- UX audit, code cleanup, security scan, dependency updates, performance review. Parallel agents per track, consolidated report, then autonomous fixes in worktrees. Triggers on: platform sweep, health sweep, full audit, code sweep, platform health, sweep all."
+description: "Platform health sweep — UX, security, perf, deps. Parallel agents, report, autonomous fixes. Triggers: platform sweep, health sweep, full audit, code sweep."
 argument-hint: "[--url <site-url>] [--tracks a]b,c,d,e | all] [--fix-mode auto|manual|report-only]"
 user-invocable: true
 context: fork

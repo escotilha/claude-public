@@ -1,6 +1,6 @@
 ---
 name: rex
-description: "Infra security audit across all machines (Mac, Mini, VPS). Parallel SSH checks, Glasswing-style deep hunting, AI platform attack surface, cross-machine attack chains, effort estimates. Triggers on: rex, security audit, security check, infra security, machine audit, /rex."
+description: "Infra security audit across all machines. Parallel SSH, attack chains, AI platform surface. Triggers: rex, security audit, security check, infra security."
 argument-hint: "[target: all|mac|mini|vps] [--fix]"
 user-invocable: true
 context: fork

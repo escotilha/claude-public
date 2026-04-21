@@ -1,6 +1,6 @@
 ---
 name: verify-conta
-description: "Full Contably verification suite: ruff, mypy, pytest (unit+integration), tsc, eslint, vite/next build, vitest, gitleaks. Parallel execution. Triggers on: verify conta, contably verify, full verify, run all tests, test everything, contably tests."
+description: "Contably verification: ruff, mypy, pytest, tsc, eslint, build, vitest, gitleaks. Triggers: verify conta, contably verify, full verify, run all tests."
 argument-hint: "[layer: lint|types|tests|build|security|all] [--fix]"
 user-invocable: true
 context: fork

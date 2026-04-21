@@ -1,6 +1,6 @@
 ---
 name: wiki
-description: "LLM Wiki — persistent, compounding knowledge base. Ingest sources, query knowledge, think/synthesize, auto-harvest, lint health. Karpathy + Memex pattern. Triggers on: wiki, wiki ingest, wiki query, wiki think, wiki lint, wiki stats, wiki harvest, add to wiki, knowledge base, remember this"
+description: "Persistent knowledge base. Ingest, query, synthesize, harvest, lint. Triggers: wiki, add to wiki, knowledge base, remember this, wiki query."
 user-invocable: true
 context: inline
 model: sonnet

@@ -1,6 +1,6 @@
 ---
 name: meditate
-description: "End-of-session judgment extraction. Captures learnings, patterns, mistakes for the memory pipeline. Triggers on: meditate, reflect on session, extract learnings, /meditate."
+description: "End-of-session judgment extraction — learnings, patterns, mistakes. Triggers: meditate, reflect on session, extract learnings."
 user-invocable: true
 context: fork
 model: sonnet
