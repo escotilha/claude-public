@@ -2,8 +2,8 @@
 name: Anthropic harness design patterns
 description: Planner/generator/evaluator three-agent pattern and structured handoff (no compaction) for long-running agent sessions — from Anthropic engineering post on frontend design
 type: reference
+originSessionId: 3e3020d1-6f2c-4cd1-853f-c81a972e66f7
 ---
-
 Anthropic engineering published a detailed breakdown of their three-agent harness (planner → generator → evaluator) used for frontend design and multi-hour autonomous software engineering.
 
 **Key findings:**
@@ -23,3 +23,5 @@ Anthropic engineering published a detailed breakdown of their three-agent harnes
 
 **Source:** https://anthropic.com/engineering/harness-design-long-running-apps
 **Discovered:** 2026-03-24
+
+Related: [tech-insight:hermes-agent-learning-loop](../semantic/tech-insight_hermes-agent-learning-loop.md) — Hermes Agent's complementary 5-layer harness model (instruction/constraint/feedback/memory/orchestration) + skills-vs-memory distinction (2026-04-21)
