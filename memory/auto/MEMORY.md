@@ -24,6 +24,12 @@ See each tier's `_tier.md` for salience rules, migration notes, and promotion ga
 - [semantic/mistake_validate-storage-constraints-before-schema.md](semantic/mistake_validate-storage-constraints-before-schema.md) — Validate runtime environment (available DBs, portability) before writing schema.sql; default to SQLite for multi-location skills (score 7)
 - [semantic/tech-insight_skill-tool-args-not-forwarded-from-orchestrator.md](semantic/tech-insight_skill-tool-args-not-forwarded-from-orchestrator.md) — Skill tool invocations from orchestrator context silently drop args; inline phases or use fresh user prompts instead (score 8)
 - [semantic/pattern_spawn-convention-analyzer-before-new-skill-in-family.md](semantic/pattern_spawn-convention-analyzer-before-new-skill-in-family.md) — Before writing a new skill in an existing family, spawn a one-shot Opus subagent to extract frontmatter/persona/storage conventions from siblings (score 5)
+- [semantic/pattern_sandbox-exec-allow-default-deny-dangerous.md](semantic/pattern_sandbox-exec-allow-default-deny-dangerous.md) — macOS sandbox-exec: prefer allow-default + narrow denies, never deny-default. 4 iterations learned 2026-04-21 in Contably OS v4
+- [semantic/tech-insight_non-interactive-ssh-path-trap.md](semantic/tech-insight_non-interactive-ssh-path-trap.md) — Non-interactive SSH shells don't source .zshrc → export PATH explicitly in any SSH-invoked remote command
+- [semantic/pattern_dogfood-before-trusting-autonomous-dispatch.md](semantic/pattern_dogfood-before-trusting-autonomous-dispatch.md) — Dogfood real dispatch before marking orchestrator "ready" — sandbox EPERMs don't show in unit tests
+- [semantic/tech-insight_pytest-unborn-head-breaks-branch-tests.md](semantic/tech-insight_pytest-unborn-head-breaks-branch-tests.md) — `git init` in pytest creates unborn HEAD; always seed an initial commit before branch-name tests
+- [semantic/pattern_learn-distill-encode-evolve.md](semantic/pattern_learn-distill-encode-evolve.md) — Meta-pattern: every failure → diagnose → generalize → encode in system → re-test. Pierre directive 2026-04-21
+- [working/contably-os-v4-online-2026-04-21.md](working/contably-os-v4-online-2026-04-21.md) — Contably OS v3+v4 online state + autonomy gap list as of 2026-04-21 end-of-day. Resume block for future sessions
 
 # currentDate
 Today's date is 2026-04-21.
