@@ -1,15 +1,17 @@
 ---
 name: reference_search_api_keys
-description: API keys for web search tools — Brave Search LLM Context API and Exa.ai neural search, stored in macOS Keychain and settings.json
+description: (SUPERSEDED 2026-04-21) Brave + Exa search API keys — now part of the unified Keychain reference. See personal/reference_api_keys_keychain.md for current state.
 type: reference
+originSessionId: 59ebd125-6ade-48a6-b33b-45a4497a1f8d
 ---
+> **SUPERSEDED 2026-04-21:** This page is kept for history only. Current state lives in `personal/reference_api_keys_keychain.md` which covers all four keys (Resend, Brave, Exa, Turso) under the post-incident Keychain-first policy. settings.json no longer stores literal key values — uses `${VAR}` references pulled from Keychain.
 
-## Search API Keys
+## Search API Keys (legacy, pre-incident)
 
-Both keys are stored in:
+Both keys were originally stored in:
 
 1. **macOS Keychain** (syncs across devices via iCloud Keychain) — account: "ps", services: "BRAVE_API_KEY" and "EXA_API_KEY"
-2. **Claude settings.json** at `~/.claude-setup/settings.json` under `env`
+2. **Claude settings.json** at `~/.claude-setup/settings.json` under `env` ← LITERAL VALUES, now removed after 2026-04-21 incident
 
 ### Brave Search API
 
