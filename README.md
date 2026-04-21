@@ -251,9 +251,10 @@ user-invocable: true
 
 
 
+
 ## Últimas 3 atualizações
 
-- **2026-04-20** — auto: sync claude-setup
-- **2026-04-20** — auto: sync claude-setup
-- **2026-04-19** — auto: sync claude-setup
+- **2026-04-21** — auto: sync claude-setup
+- **2026-04-21** — auto: sync claude-setup
+- **2026-04-21** — auto: sync claude-setup
 
