@@ -39,9 +39,10 @@ Two simultaneous failures:
 
 ## Related
 
-- `personal/reference_api_keys_keychain.md` — current Keychain-first policy and retrieval commands
+- [../personal/reference_api_keys_keychain.md](../personal/reference_api_keys_keychain.md) — current Keychain-first policy and retrieval commands; this incident created that policy (2026-04-21)
+- [mistake_validate-storage-constraints-before-schema.md](mistake_validate-storage-constraints-before-schema.md) — same class of mistake: storing artefacts before validating constraints; both led to expensive retrofits (2026-04-21)
+- [pattern_learn-distill-encode-evolve.md](pattern_learn-distill-encode-evolve.md) — this incident is a textbook application: failure diagnosed, Keychain policy encoded, secret-pattern gate prevents recurrence (2026-04-21)
 - `tools/cs-public-extras.sh` — the push-public pipeline with the hardened exclude list and secret-pattern gate
-- Cross-ref: mistake:validate-storage-constraints-before-schema — same class of mistake: writing artefacts (schema / keys file) before validating environment constraints (2026-04-21)
 
 ## Timeline
 

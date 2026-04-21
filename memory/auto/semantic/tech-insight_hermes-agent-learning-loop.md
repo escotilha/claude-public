@@ -20,6 +20,11 @@ Hermes is positioned for long-running autonomous tasks outside any single sessio
 
 ---
 
+## Related
+
+- [pattern_learn-distill-encode-evolve.md](pattern_learn-distill-encode-evolve.md) — Hermes "harness engineering" is the same philosophy as learn→distill→encode; complementary articulation of the same meta-pattern (2026-04-21)
+- [pattern_spawn-convention-analyzer-before-new-skill-in-family.md](pattern_spawn-convention-analyzer-before-new-skill-in-family.md) — Hermes auto-skill generation heuristic (≥3 repeated sequences) aligns with when to extract a skill during /meditate Phase 6 (2026-04-21)
+
 ## Timeline
 
 - **2026-04-21** — [research] Discovered via @KSimback tweet (https://x.com/KSimback/status/2046528526581383643). Source: research — hermesatlas.com/guide/ (18 min read, Apr 2026 edition). Applies to: memory-strategy rule, /meditate skill, skill-first routing table.

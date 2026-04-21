@@ -28,6 +28,13 @@ Autonomous orchestrators that SSH into a sandboxed executor and run shell comman
 
 ---
 
+## Related
+
+- [pattern_learn-distill-encode-evolve.md](pattern_learn-distill-encode-evolve.md) — dogfooding is the "evolve" step of that meta-pattern; this memory is a concrete application (2026-04-21)
+- [pattern_sandbox-exec-allow-default-deny-dangerous.md](pattern_sandbox-exec-allow-default-deny-dangerous.md) — the sandbox EPERMs specifically discovered via dogfood; iterated 4-5 times via real dispatches (2026-04-21)
+- [tech-insight_non-interactive-ssh-path-trap.md](tech-insight_non-interactive-ssh-path-trap.md) — SSH PATH trap (exit 127) also found only during real dispatch, never in unit tests (2026-04-21)
+- [tech-insight_pytest-unborn-head-breaks-branch-tests.md](tech-insight_pytest-unborn-head-breaks-branch-tests.md) — unborn HEAD bug: unit tests themselves had this class of issue that only surfaced during real dogfood (2026-04-21)
+
 ## Timeline
 
 - **2026-04-21** — [success] v4 Phase 5/6 dogfood caught: slack `window_seconds=0` dedup bug, test PYTHONUSERBASE, git-init unborn HEAD, 3 sandbox EPERMs. None of these would have failed a CI test suite. (Source: session — Contably OS v4 Phase 5/6 dogfood logs)

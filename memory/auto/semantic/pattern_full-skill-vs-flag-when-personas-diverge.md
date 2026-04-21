@@ -25,8 +25,9 @@ If the new skill requires:
 
 ## Related
 
-- Cross-ref: mistake:validate-storage-constraints-before-schema — storage constraints are one of the explicit divergence factors in this checklist (2026-04-21)
-- Cross-ref: pattern:spawn-convention-analyzer-before-new-skill-in-family — once the decision to build a full skill is made, run the convention analyzer before writing files (2026-04-21)
+- [mistake_validate-storage-constraints-before-schema.md](mistake_validate-storage-constraints-before-schema.md) — storage constraints are one of the explicit divergence factors in this checklist (2026-04-21)
+- [pattern_spawn-convention-analyzer-before-new-skill-in-family.md](pattern_spawn-convention-analyzer-before-new-skill-in-family.md) — once the decision to build a full skill is made, run the convention analyzer next; sequential workflow (2026-04-21)
+- [tech-insight_skill-tool-args-not-forwarded-from-orchestrator.md](tech-insight_skill-tool-args-not-forwarded-from-orchestrator.md) — companion: child-skill invocation unreliability reinforces why standalone skills beat flags on parent (2026-04-21)
 
 ## Timeline
 

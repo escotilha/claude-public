@@ -31,7 +31,8 @@ Return a compact reference block I can paste into the new skill's frontmatter.
 
 ## Related
 
-- Cross-ref: pattern:full-skill-vs-flag-when-personas-diverge — this pattern runs after the "build a full skill" decision is made (2026-04-21)
+- [pattern_full-skill-vs-flag-when-personas-diverge.md](pattern_full-skill-vs-flag-when-personas-diverge.md) — this pattern runs AFTER the "build a full skill" decision is made; the two form a sequential workflow (2026-04-21)
+- [tech-insight_skill-tool-args-not-forwarded-from-orchestrator.md](tech-insight_skill-tool-args-not-forwarded-from-orchestrator.md) — both emerged from the same /conta-cpo build session; companion skill-authoring insights (2026-04-21)
 
 ## Timeline
 

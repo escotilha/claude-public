@@ -24,8 +24,8 @@ Before writing any schema or storage layer for a new skill:
 
 ## Related
 
-- Cross-ref: mistake_settings_bak_public_leak — same class: writing artefacts before validating constraints (2026-04-21)
-- Cross-ref: pattern:full-skill-vs-flag-when-personas-diverge — storage constraints are one of the key divergence factors in the skill vs flag decision (2026-04-21)
+- [mistake_settings_bak_public_leak.md](mistake_settings_bak_public_leak.md) — same class: writing artefacts (keys file / schema) before validating environment constraints; both led to expensive retrofits (2026-04-21)
+- [pattern_full-skill-vs-flag-when-personas-diverge.md](pattern_full-skill-vs-flag-when-personas-diverge.md) — storage constraints are one of the key divergence factors in the skill vs flag decision (2026-04-21)
 
 ## Timeline
 

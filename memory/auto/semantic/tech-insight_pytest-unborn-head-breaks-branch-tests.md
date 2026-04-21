@@ -32,6 +32,11 @@ This leaves HEAD unborn. On some git versions `checkout -b` on an unborn HEAD su
 
 ---
 
+## Related
+
+- [pattern_dogfood-before-trusting-autonomous-dispatch.md](pattern_dogfood-before-trusting-autonomous-dispatch.md) — unborn HEAD was one of the bugs caught during Phase 5/6 dogfood; noted in that memory's catch list (2026-04-21)
+- [pattern_learn-distill-encode-evolve.md](pattern_learn-distill-encode-evolve.md) — diagnosed, extracted as pattern, encoded into _init_git helper convention so it can't recur (2026-04-21)
+
 ## Timeline
 
 - **2026-04-21** — [failure] 3 tests in `test_hook_script.py` + `test_cli_handoff.py` failed because `rev-parse --abbrev-ref HEAD` returned "HEAD". Wasted ~15 min diagnosing. (Source: failure — v4 Phase 6 test run)

@@ -27,6 +27,11 @@ On macOS (Sequoia/Sonoma), sandbox-exec with `(deny default)` breaks legitimate 
 
 ---
 
+## Related
+
+- [pattern_learn-distill-encode-evolve.md](pattern_learn-distill-encode-evolve.md) — 5 iterations → final working profile is a textbook example of the learn→encode→evolve cycle (2026-04-21)
+- [pattern_dogfood-before-trusting-autonomous-dispatch.md](pattern_dogfood-before-trusting-autonomous-dispatch.md) — sandbox EPERMs were the specific bug class that only real dogfood dispatches could reveal (2026-04-21)
+
 ## Timeline
 
 - **2026-04-21** — [failure] 1st profile (deny-default) killed echo before it ran. Diagnosed via sandbox log / exit 134.

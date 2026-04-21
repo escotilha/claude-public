@@ -27,6 +27,11 @@ Or use absolute paths — but that's fragile across machines with different brew
 
 ---
 
+## Related
+
+- [pattern_learn-distill-encode-evolve.md](pattern_learn-distill-encode-evolve.md) — hit 3× in one day, each time encoded into dispatch.sh / client_factory / tests; classic learn→encode instance (2026-04-21)
+- [pattern_dogfood-before-trusting-autonomous-dispatch.md](pattern_dogfood-before-trusting-autonomous-dispatch.md) — this PATH trap was found during real dispatch; unit tests with mock runners can't catch it (2026-04-21)
+
 ## Timeline
 
 - **2026-04-21** — [failure] First hit in v3 dispatch.sh — dispatched claude exited 127 "command not found". Added PATH export at top of dispatch.sh. (Source: failure — /tmp/claude-t1-4-skeleton-loaders-01.log first run)

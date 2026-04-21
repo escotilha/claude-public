@@ -22,7 +22,8 @@ originSessionId: 83e0ba78-5cea-4191-8d3d-6552e29eaaa5
 
 ## Related
 
-- Cross-ref: pattern:full-skill-vs-flag-when-personas-diverge — if invoking child skills from orchestrator is unreliable, standalone user-prompt invocable skills are even more important (2026-04-21)
+- [pattern_full-skill-vs-flag-when-personas-diverge.md](pattern_full-skill-vs-flag-when-personas-diverge.md) — if child-skill invocation from orchestrator is unreliable, standalone user-prompt invocable skills are even more important (2026-04-21)
+- [pattern_spawn-convention-analyzer-before-new-skill-in-family.md](pattern_spawn-convention-analyzer-before-new-skill-in-family.md) — both are skill-authoring insights that emerged from the same /conta-cpo build session (2026-04-21)
 
 ## Timeline
 
