@@ -1,0 +1,130 @@
+# Claude Code Setup — skills, rules, and tools
+
+> Pierre Schurmann's Claude Code setup: 86 skills, 13 global rules, hybrid memory system. LLM-discoverable via llmstxt.org spec. Use this file to understand what tooling is available before starting work.
+
+Last generated: 2026-04-21T19:18:46Z
+
+## Rules
+
+Global behavioral rules loaded into every Claude session via CLAUDE.md.
+
+- [concurrent-sessions.md](rules/concurrent-sessions.md): Concurrent Session Discipline
+- [handoff-threshold.md](rules/handoff-threshold.md): Handoff at 80% Context
+- [karpathy-guidelines.md](rules/karpathy-guidelines.md): Karpathy Coding Guidelines
+- [memory-strategy.md](rules/memory-strategy.md): Memory Strategy
+- [model-tier-strategy.md](rules/model-tier-strategy.md): Model Tier Strategy for Subagents
+- [nuvini-sync-rules.md](rules/nuvini-sync-rules.md): Nuvini Claude Repo Sync Rules
+- [opus-4-7-prompting.md](rules/opus-4-7-prompting.md): Opus 4.7 Prompting Patterns
+- [parallel-first.md](rules/parallel-first.md): Parallel-First Execution Rule
+- [skill-authoring-conventions.md](rules/skill-authoring-conventions.md): Skill Authoring Conventions
+- [skill-first.md](rules/skill-first.md): Skill-First Rule
+- [tool-annotations.md](rules/tool-annotations.md): Tool Annotations & Invocation Contexts
+- [web-search-efficiency.md](rules/web-search-efficiency.md): Web Search Token Efficiency Rules
+
+## Skills
+
+User-invocable skills. Trigger via `/<skill-name>` or natural-language match.
+
+- [agent-browser](skills/agent-browser/SKILL.md): Browser automation via Rust/CDP CLI. Navigate, click, fill, screenshot, visual diff. Triggers: agent-browser, browser automation, page snapshot.
+- [agentmail](skills/agentmail/SKILL.md): Email inbox management for AI agents using AgentMail API. Create inboxes, send/receive emails, reply, forward, and manage messages. Use when users want to send emails, create agent inboxes, check mess
+- [alembic-chain-repair](skills/alembic-chain-repair/SKILL.md): Repair broken Alembic migration chain — multiple heads, missing parents. Triggers: alembic repair, fix migration, multiple heads.
+- [architect](skills/architect/SKILL.md): Multi-feature architecture pipeline — parallel implement → verify → review → commit. Triggers on: architect, evolve, implement plan, parallel implement, multi-feature.
+- [architecture](skills/architecture/SKILL.md): Generate/maintain architecture docs with Mermaid diagrams, backups, PDF/DOCX export. Auto-detects changes. Triggers on: architecture, architecture doc, software architecture, generate architecture, up
+- [browserless](skills/browserless/SKILL.md): Headless browser via Browserless. PDFs, screenshots, Lighthouse, JS rendering, anti-bot. Triggers on: browserless, headless browser, generate PDF, take screenshot, lighthouse audit, unblock site, brow
+- [careful](skills/careful/SKILL.md): Safety guardrails — warns before rm -rf, DROP TABLE, force-push, kubectl delete. Triggers: careful, careful mode, safety mode.
+- [chief-geo](skills/chief-geo/SKILL.md): Chief GEO Officer for SourceRank AI. Knowledge base, product audit, manual updates, AI visibility testing. Triggers on: chief geo, geo officer, geo audit, geo strategy, geo knowledge, /chief-geo.
+- [claude-api](skills/claude-api/SKILL.md): Build/debug Claude API and Anthropic SDK apps — Messages API, Agent SDK, tool use, streaming, MCP, caching. TRIGGER: imports anthropic SDK, asks for Claude API. SKIP: openai/other SDK.
+- [claude-setup-optimizer](skills/claude-setup-optimizer/SKILL.md): Analyze Claude Code changelog and recommend setup improvements. Triggers on: optimize claude setup, check for claude updates, improve my agents, sync with claude changelog, /optimize-setup.
+- [codebase-cleanup](skills/codebase-cleanup/SKILL.md): Identify and remove unused, redundant, or dead code files in a project. Triggers on: clean up unused files, find unnecessary files, remove dead code, codebase cleanup, reduce project bloat.
+- [computer-use](skills/computer-use/SKILL.md): Desktop automation via Claude computer use. macOS apps, GUI tools, government portals, iOS Simulator. Triggers on: computer use, desktop automation, native app, gui automation, government portal, esoc
+- [conta-cpo](skills/conta-cpo/SKILL.md): Contably advisory council — 8-seat product/UX/engineering deliberation board grounded in Contably OS v3 state. Blind input, scored options, retrospective tracking. Triggers on: conta cpo, contably c
+- [contably-ci-rescue](skills/contably-ci-rescue/SKILL.md): Diagnose and fix failing Contably CI. Classifies failure, targeted fix. Triggers: ci rescue, ci failing, fix ci.
+- [contably-eod](skills/contably-eod/SKILL.md): Contably end-of-day: bug hunt, autofix, lessons, agenda email. Triggers: contably eod, end of day, nightly contably.
+- [contably-guardian](skills/contably-guardian/SKILL.md): Pre-deploy guardian for Contably. Multi-layer analysis (code, infra, runtime, diff-aware) before deploy to staging/production. Parallel subagents. Triggers on: contably guardian, pre-deploy check, gua
+- [contably-snapshot](skills/contably-snapshot/SKILL.md): Generate Contably CODEBASE-REFERENCE.md — tech stack, product modules, API surface, infra, architecture. Triggers on: contably snapshot, stack snapshot, codebase reference, refresh snapshot.
+- [cpo](skills/cpo/SKILL.md): Chief Product Officer AI — full product lifecycle, idea to production. Triggers: build this product, cpo mode, cpo.
+- [cpr](skills/cpr/SKILL.md): Commit, push, and create PR. Full git workflow in one command.
+- [cs](skills/cs/SKILL.md): Sync Claude setup to all remotes (origin, public) + VPS sync via git pull
+- [cto](skills/cto/SKILL.md): Swarm AI CTO advisor. Parallel reviewers (architecture, security, performance, quality) via TeammateTool. Triggers on: CTO advice, architecture review, tech stack, system design, code quality, securit
+- [deep-plan](skills/deep-plan/SKILL.md): Three-phase research→plan→implement workflow with persistent markdown artifacts. Deep-reads codebase, iterates on annotations. Triggers on: deep plan, plan feature, research and plan, plan this.
+- [deep-research](skills/deep-research/SKILL.md): Deep research orchestration. Parallel multi-track investigation with evidence hierarchy, delivers investment-memo-grade reports. Triggers on: deep research, investigate, deep dive into, nuclear resear
+- [demo](skills/demo/SKILL.md): Create reproducible demo documents using Showboat. Produces executable narratives with captured output that can be verified and streamed remotely. Triggers on: demo, showboat, create demo, demo this, 
+- [deploy-conta-full](skills/deploy-conta-full/SKILL.md): Contably deploy: staging → production, auto-promotes if green. Triggers: deploy conta full, full deploy.
+- [deploy-conta-production](skills/deploy-conta-production/SKILL.md): Promote Contably staging to production on OCI. Verifies, approves gate, monitors, validates. Triggers on: deploy conta production, promote to production, push to production, production deploy, go live
+- [deploy-conta-staging](skills/deploy-conta-staging/SKILL.md): Deploy Contably to OCI staging. Verify → guardian → push → CI → deploy → health check. Auto-fixes. Triggers on: deploy conta staging, deploy staging, push to staging, staging deploy.
+- [deploy-sourcerank](skills/deploy-sourcerank/SKILL.md): Deploy SourceRank AI to Render. Verify → guardian → push → monitor → health check. Auto-fixes. Triggers on: deploy sourcerank, deploy source, sourcerank deploy, push sourcerank.
+- [firecrawl](skills/firecrawl/SKILL.md): Web scraping, crawling, and data extraction via Firecrawl. Converts sites to LLM-ready markdown. JS rendering, anti-bot, proxy rotation. Triggers on: scrape, crawl, web data, extract website, site map
+- [first-principles](skills/first-principles/SKILL.md): Break down a problem to its fundamentals before implementing. Use for complex or ambiguous problems.
+- [freeze](skills/freeze/SKILL.md): Restrict Edit/Write to one directory. Blocks edits outside path. Triggers: freeze, freeze edits, lock scope.
+- [fulltest-skill](skills/fulltest-skill/SKILL.md): Swarm-enabled full-spectrum site testing via TeammateTool. Parallel page testers, cross-page pattern detection, auto-fix, reports. Triggers on: fulltest, full test, site test, test all pages.
+- [gbrain](skills/gbrain/SKILL.md): GBrain knowledge brain management — setup, import, query, maintain, ingest. Triggers on: gbrain, knowledge brain, brain query, brain search, brain import, brain setup, brain ingest.
+- [get-api-docs](skills/get-api-docs/SKILL.md): Fetch current API docs for any library/SDK via chub CLI. 1,000+ APIs (Supabase, Anthropic, Clerk, Prisma, Stripe, Playwright). Triggers on: get api docs, fetch docs, chub, api documentation.
+- [growth](skills/growth/SKILL.md): SaaS growth engineering: CRO, pricing, signup, onboarding, SEO/GEO, churn prevention, A/B tests. Triggers on: growth, cro, conversion optimization, pricing strategy, signup flow, onboarding, seo audit
+- [gws](skills/gws/SKILL.md): Google Workspace CLI automation for bulk/complex tasks beyond MCP scope. Drive, Sheets, Gmail, Calendar, Chat, Admin. Triggers on: gws, google workspace automation, bulk drive, sheets pipeline, gmail 
+- [handoff](skills/handoff/SKILL.md): Context handoff before /clear or compaction. Writes progress log to plan doc, commits, outputs a resume block that /primer can consume. Triggers on: handoff, checkpoint context, before clear, pre-clea
+- [health-report](skills/health-report/SKILL.md): Health report for SourceRank AI: API tests, E2E, unit tests, Lighthouse in one HTML/PDF. Triggers on: health report, site health, functional report, prove it works, health-report.
+- [investigate](skills/investigate/SKILL.md): Root-cause debugging. Iron Law: no fix without root cause. 3-strike escalation. Triggers: debug this, fix this bug, why broken.
+- [last30days](skills/last30days/SKILL.md): Deep research engine covering the last 30 days across 10+ sources - Reddit, X/Twitter, YouTube, TikTok, Instagram, Hacker News, Polymarket, and the web. AI synthesizes findings into grounded, cited re
+- [llm-eval](skills/llm-eval/SKILL.md): LLM output evaluation pipeline: audit evals, failure analysis, synthetic data, LLM-as-Judge, RAG eval, annotation design. Triggers on: llm eval, evaluate ai, eval pipeline, judge calibration, rag eval
+- [local-inference](skills/local-inference/SKILL.md): LiteLLM multi-model gateway — local models (MLX, Ollama) + cloud fallback. Triggers: local inference, setup litellm, model gateway, local models.
+- [maketree](skills/maketree/SKILL.md): Create and manage git worktrees via native Claude CLI flag or config-driven bulk setups.
+- [manual](skills/manual/SKILL.md): Build project user manual (MkDocs) with optional Word export
+- [meditate](skills/meditate/SKILL.md): End-of-session judgment extraction — learnings, patterns, mistakes. Triggers: meditate, reflect on session, extract learnings.
+- [memory-consolidation](skills/memory-consolidation/SKILL.md): Memory maintenance: consolidate learnings, prune unused, filter relevance, promote patterns. Triggers on: consolidate memory, memory maintenance, clean up memories, /consolidate, memory health.
+- [mini-remote](skills/mini-remote/SKILL.md): Remote autonomous coding relay via SSH to Mac Mini. Supports single and queued prompts with Slack notifications. Triggers on: /mini, send to mini, queue for mini, run on mini, mini execute, run remote
+- [nanoclaw](skills/nanoclaw/SKILL.md): Lightweight Claude-native agent runtime with Docker Sandbox, memory, scheduling, multi-channel messaging. Triggers on: nanoclaw, nanoclaw setup, agent runtime, docker sandbox agent, nanoclaw configure
+- [oci-health](skills/oci-health/SKILL.md): Check Contably OCI health: API, dashboards, K8s pods, pipelines. Generates diagnostic report if down. Triggers on: oci health, is contably up, check staging, check production, contably status, oci sta
+- [officecli](skills/officecli/SKILL.md): Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check formatting, find issues, add charts, or mo
+- [orchestrate](skills/orchestrate/SKILL.md): Meta-orchestrator: intent → plan → skill routing → execute → verify → deploy. Triggers: orchestrate, do this end-to-end, full pipeline.
+- [parallel-dev](skills/parallel-dev/SKILL.md): Parallel feature development using git worktrees and specialized agents. Orchestrates multiple features in isolation with CI reaction loops, progress monitoring, and progressive merge. Delegates to `a
+- [pinchtab](skills/pinchtab/SKILL.md): Local browser automation via PinchTab. A11y trees, element refs, screenshots, PDFs, JS eval. 5-13x cheaper. Triggers on: pinchtab, browser control, page snapshot, element refs, accessibility tree, pin
+- [platform-sweep](skills/platform-sweep/SKILL.md): Platform health sweep — UX, security, perf, deps. Parallel agents, auto-fixes. Triggers: platform sweep, health sweep, full audit, code sweep.
+- [pr-impact](skills/pr-impact/SKILL.md): PR Impact Optimizer for Nuvini (NVNI). Score, optimize, and backtest press releases for stock impact + SEC compliance. Triggers on: pr impact, press release, optimize pr, score pr, pr analysis, pr opt
+- [primer](skills/primer/SKILL.md): Context recovery after compaction or session start. ~500-token summary of memories, project state, git status, pending work. Triggers on: primer, context recovery, where was I, what was i doing, resum
+- [proposal-source](skills/proposal-source/SKILL.md): Generate diagnostic/research proposals for SourceRank AI clients. PDF output in Portuguese. Triggers on: proposal source, proposta sourcerank, gerar proposta, create proposal, client proposal, diagnos
+- [qa-conta-gate](skills/qa-conta-gate/SKILL.md): Pre-production UX/UI gate for Contably. Tests actual feature pages in staging with parallel browser testers, fix-loops bugs, writes ux_approved signal. Triggers on: qa conta gate, ux gate, pre-prod qa
+- [qa-conta](skills/qa-conta/SKILL.md): Contably QA orchestrator: API tests (curl) + browser tests. Maps 395+ endpoints across 50+ route modules. Triggers on: qa conta, contably qa, qa runner, ship qa.
+- [qa-cycle](skills/qa-cycle/SKILL.md): Master QA orchestrator: project-agnostic, auto-detects project, delegates to /qa-{project} or runs full cycle from scratch. Autonomous, self-managing. Triggers on: qa cycle, full qa, run qa, continuou
+- [qa-fix](skills/qa-fix/SKILL.md): Fix open QA issues: reads from DB, prioritizes by severity, investigates codebase, implements fixes. Triggers on: qa fix, fix bugs, fix qa issues, fix open issues.
+- [qa-sourcerank](skills/qa-sourcerank/SKILL.md): Full QA cycle for SourceRank AI with swarm-parallel persona testing. Discover, fix, verify, regression detect via TeamCreate swarm + Supabase QA DB. Triggers on: qa sourcerank, sourcerank qa, test sou
+- [qa-stonegeo](skills/qa-stonegeo/SKILL.md): QA cycle for StoneGEO — dashboard, tRPC API, Clerk auth, multi-tenancy. Triggers: qa stonegeo, stonegeo qa, test stonegeo.
+- [qa-verify](skills/qa-verify/SKILL.md): Verify QA fixes via browse CLI or Chrome MCP. Updates issue status in DB (VERIFIED or back to IN_PROGRESS). Triggers on: qa verify, verify fixes, verify qa issues, verify bugs, test fixes.
+- [qmd](skills/qmd/SKILL.md): Semantic search over markdown collections via QMD hybrid search (BM25 + vector + LLM rerank). Triggers on: search skills, find pattern, which skill, search notes, search memory, qmd.
+- [research](skills/research/SKILL.md): Analyze any URL or image (article, repo, tweet, tool, screenshot, video, podcast) for skill/agent/project improvements. Triggers on: research this, analyze this link, learn from this, /research.
+- [revert-track](skills/revert-track/SKILL.md): Revert a logical unit of work (feature, phase, track) via related commits. Reads state from /parallel-dev, /deep-plan, /ship. Triggers on: revert track, revert feature, undo feature, revert phase, und
+- [review-changes](skills/review-changes/SKILL.md): Review uncommitted changes for bugs, security issues, and code quality before committing.
+- [rex](skills/rex/SKILL.md): Infra security audit across all machines. Parallel SSH, attack chains, AI surface. Triggers: rex, security audit, infra security.
+- [run-local](skills/run-local/SKILL.md): Start local development environment with automatic dependency installation, service orchestration, and health checks. Use when developers ask to run locally, start dev server, launch the app, or spin 
+- [sc](skills/sc/SKILL.md): Ship commit: verify → review → commit → push → PR. Full pipeline from changes to PR in one command.
+- [schedule](skills/schedule/SKILL.md): Create, update, list, or run scheduled remote agents (triggers) that execute on a cron schedule. Triggers on: schedule, scheduled agent, cron agent, recurring agent, trigger, remote trigger.
+- [scrapling](skills/scrapling/SKILL.md): Web scraping with anti-bot bypass, TLS impersonation, adaptive tracking via Scrapling MCP. Three modes: HTTP, stealth browser, Playwright. Triggers on: scrapling, stealth scrape, bypass cloudflare, an
+- [ship](skills/ship/SKILL.md): End-to-end feature shipping: spec → plan → swarm implement → QA → fix → docs. Resumable. Triggers on: ship, ship feature, build and ship, full cycle, end to end, /ship.
+- [slack](skills/slack/SKILL.md): Automate Slack via browser. Send messages, read channels, search, manage threads. Triggers on: slack, send to slack, post slack, read slack, slack message, slack channel.
+- [sourcerank-guardian](skills/sourcerank-guardian/SKILL.md): Pre-deploy guardian for SourceRank AI. Multi-layer analysis (code, infra, runtime, diff-aware) before deploy to Render. Parallel subagents. Triggers on: sourcerank guardian, pre-deploy check, guardian
+- [tech-audit](skills/tech-audit/SKILL.md): Audit project tech stack against current market — compare versions, find EOL libs, recommend upgrades. Triggers on: tech audit, stack audit, dependency audit, upgrade check, what should we upgrade, 
+- [test-and-fix](skills/test-and-fix/SKILL.md): Run tests and auto-fix failures in a loop. Use when tests are failing and you want them fixed.
+- [tweet](skills/tweet/SKILL.md): Fetch and display any public X/Twitter post using the FixTweet API. Supports single tweets and threads. Triggers on: /tweet <url>
+- [vault-bootstrap](skills/vault-bootstrap/SKILL.md): Bootstrap CLAUDE.md for a local vault (Obsidian, markdown). Triggers: vault bootstrap, obsidian setup, second brain, knowledge vault, bootstrap vault.
+- [verify-conta](skills/verify-conta/SKILL.md): Contably verification: ruff, mypy, pytest, tsc, eslint, vitest, gitleaks. Triggers: verify conta, contably verify.
+- [verify](skills/verify/SKILL.md): Verify project health - type-check, tests, build. Use after making changes or before committing.
+- [vibc](skills/vibc/SKILL.md): 12-seat advisory board of diverse archetypes for structured decision deliberation. Blind input, debates, scored options. Triggers on: vibc, board council, advisory board, decision council, variety boa
+- [virtual-user-testing](skills/virtual-user-testing/SKILL.md): Virtual user testing for Contably with QA DB. Parallel persona agents, bug reports, fix verification, regression detection. Triggers on: virtual user test, persona test, user simulation, test as user,
+- [website-design](skills/website-design/SKILL.md): Professional B2B SaaS websites, dashboards, and landing pages with modern UX/UI. Tailwind CSS, React, conversion optimization. Triggers on: website design, landing page, dashboard design, admin panel,
+- [wiki](skills/wiki/SKILL.md): Persistent knowledge base. Ingest, query, synthesize, harvest, lint. Triggers: wiki, add to wiki, knowledge base, remember this.
+
+## Agents
+
+Specialist subagent definitions spawned by skills or user.
+
+- [backend-agent.md](agents/backend-agent.md): Global backend development agent for Node.js, Python, Go, and serverless architectures
+- [database-agent.md](agents/database-agent.md): Global database agent for schema design, migrations, query optimization, and data modeling
+- [devops-agent.md](agents/devops-agent.md): Global DevOps and infrastructure agent for CI/CD, Docker, cloud deployments, and infrastructure as code
+- [frontend-agent.md](agents/frontend-agent.md): Global frontend development agent for React, Vue, Angular, Next.js, Svelte, and vanilla TypeScript/JavaScript projects
+- [oncall-guide.md](agents/oncall-guide.md): Production incident diagnosis and resolution. Use when debugging production issues, errors, or outages.
+- [performance-agent.md](agents/performance-agent.md): Performance profiling, optimization, and monitoring agent for web applications, APIs, and databases. Use for Lighthouse audits, load testing, query optimization, and bundle analysis.
+- [project-orchestrator.md](agents/project-orchestrator.md): Full project orchestrator that analyzes a codebase, creates an implementation plan, coordinates Frontend/Backend/Database agents to build it, runs fulltesting-agent until all tests pass, then deploys 
+- [security-agent.md](agents/security-agent.md): Global security testing and review agent for vulnerability scanning and security best practices
+
+## Optional
+
+- [llms-full.txt](llms-full.txt): Single-file context with rules + skill descriptions inlined. Fetch this for offline / one-shot agent context.

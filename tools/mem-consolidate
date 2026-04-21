@@ -171,4 +171,15 @@ else
   log "Vector embed disabled (MEM_HYBRID=0 or mem-embed binary missing)"
 fi
 
+# --- Step 6: Regenerate llms.txt + llms-full.txt (LLM-discoverable setup index) ---
+# These reflect the current state of skills/ and rules/. Regenerate whenever
+# consolidation runs so the files never go stale by more than a day.
+if [[ -x "$HOME/.claude-setup/tools/build-llms.sh" ]]; then
+  if "$HOME/.claude-setup/tools/build-llms.sh" >> "$LOG_FILE" 2>&1; then
+    log "Regenerated llms.txt + llms-full.txt"
+  else
+    log "build-llms FAILED (non-fatal)"
+  fi
+fi
+
 log "=== Consolidation complete: pruned=$PRUNED, deduped=$DUPES, total=$TOTAL ==="
