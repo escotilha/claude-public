@@ -1,8 +1,12 @@
 ---
 name: deploy-conta-full
-description: "Full Contably deploy: staging → production. Auto-promotes if green. Triggers: deploy conta full, full deploy, staging to production, deploy all."
+description: "Contably deploy: staging → production. Auto-promotes if green. Triggers: deploy conta full, full deploy, staging to production."
 argument-hint: "[--skip-guardian] [--skip-verify] [--force-staging-redeploy] [--sha=<7-char-sha>]"
 user-invocable: true
+paths:
+  - "**/contably/**"
+  - "**/contably-*/**"
+  - "**/.claude/contably/**"
 context: fork
 model: opus
 effort: high

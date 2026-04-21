@@ -3,6 +3,9 @@ name: deploy-sourcerank
 description: "Deploy SourceRank AI to Render. Verify → guardian → push → monitor → health check. Auto-fixes. Triggers on: deploy sourcerank, deploy source, sourcerank deploy, push sourcerank."
 argument-hint: "[--skip-guardian] [--skip-verify] [--skip-monitoring]"
 user-invocable: true
+paths:
+  - "**/sourcerank/**"
+  - "**/source-rank/**"
 context: fork
 model: opus
 effort: high

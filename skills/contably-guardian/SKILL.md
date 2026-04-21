@@ -2,6 +2,10 @@
 name: contably-guardian
 description: "Pre-deploy guardian for Contably. Multi-layer analysis (code, infra, runtime, diff-aware) before deploy to staging/production. Parallel subagents. Triggers on: contably guardian, pre-deploy check, guardian, contably pre-deploy."
 user-invocable: true
+paths:
+  - "**/contably/**"
+  - "**/contably-*/**"
+  - "**/.claude/contably/**"
 context: fork
 model: opus
 effort: high

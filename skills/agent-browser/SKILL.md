@@ -1,6 +1,6 @@
 ---
 name: agent-browser
-description: "Browser automation via Rust/CDP CLI. Navigate, click, fill, screenshot, PDF, visual diff. Triggers: agent-browser, browser automation, page snapshot, take screenshot, scrape page."
+description: "Browser automation via Rust/CDP CLI. Navigate, click, fill, screenshot, visual diff. Triggers: agent-browser, browser automation, page snapshot."
 user-invocable: true
 context: fork
 model: sonnet

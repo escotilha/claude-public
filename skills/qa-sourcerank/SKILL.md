@@ -2,6 +2,9 @@
 name: qa-sourcerank
 description: "Full QA cycle for SourceRank AI with swarm-parallel persona testing. Discover, fix, verify, regression detect via TeamCreate swarm + Supabase QA DB. Triggers on: qa sourcerank, sourcerank qa, test sourcerank, qa cycle sourcerank."
 user-invocable: true
+paths:
+  - "**/sourcerank/**"
+  - "**/source-rank/**"
 context: fork
 model: opus
 effort: high

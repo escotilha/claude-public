@@ -1,6 +1,6 @@
 ---
 name: qa-stonegeo
-description: "QA cycle for StoneGEO — dashboard, tRPC API, Clerk auth, multi-tenancy, typecheck. Triggers: qa stonegeo, stonegeo qa, test stonegeo."
+description: "QA cycle for StoneGEO — dashboard, tRPC API, Clerk auth, multi-tenancy. Triggers: qa stonegeo, stonegeo qa, test stonegeo."
 user-invocable: true
 paths:
   - "**/nonexistent-test-dir-xyz/**"

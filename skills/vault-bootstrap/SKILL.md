@@ -1,6 +1,6 @@
 ---
 name: vault-bootstrap
-description: "Bootstrap CLAUDE.md for a local knowledge vault (Obsidian, markdown). Generates overview, conventions, guardrails. Triggers: vault bootstrap, obsidian setup, second brain, knowledge vault."
+description: "Bootstrap CLAUDE.md for a local vault (Obsidian, markdown). Triggers: vault bootstrap, obsidian setup, second brain, knowledge vault, bootstrap vault."
 user-invocable: true
 context: inline
 model: sonnet

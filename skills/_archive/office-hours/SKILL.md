@@ -1,6 +1,6 @@
 ---
 name: office-hours
-description: "Product office hours — startup forcing questions + design-thinking brainstorm. Triggers: office hours, brainstorm this, I have an idea, is this worth building."
+description: "Product office hours — forcing questions + design brainstorm. Triggers: office hours, brainstorm this, I have an idea, is this worth building."
 user-invocable: true
 context: fork
 model: opus

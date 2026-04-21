@@ -1,6 +1,6 @@
 ---
 name: alembic-chain-repair
-description: "Repair broken Alembic migration chain — multiple heads, missing parents, idempotent re-runs. Triggers: alembic repair, fix migration, multiple heads, alembic error."
+description: "Repair broken Alembic migration chain — multiple heads, missing parents. Triggers: alembic repair, fix migration, multiple heads."
 argument-hint: "[--env=<staging|production|local>] [--target=<mysql|postgres>] [--dry-run]"
 user-invocable: true
 context: fork

@@ -3,6 +3,10 @@ name: deploy-conta-staging
 description: "Deploy Contably to OCI staging. Verify → guardian → push → CI → deploy → health check. Auto-fixes. Triggers on: deploy conta staging, deploy staging, push to staging, staging deploy."
 argument-hint: "[--skip-guardian] [--skip-verify] [--review|--skip-review]"
 user-invocable: true
+paths:
+  - "**/contably/**"
+  - "**/contably-*/**"
+  - "**/.claude/contably/**"
 context: fork
 model: opus
 effort: high

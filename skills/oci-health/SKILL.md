@@ -3,6 +3,10 @@ name: oci-health
 description: "Check Contably OCI health: API, dashboards, K8s pods, pipelines. Generates diagnostic report if down. Triggers on: oci health, is contably up, check staging, check production, contably status, oci status."
 argument-hint: "[environment: staging|production|both]"
 user-invocable: true
+paths:
+  - "**/contably/**"
+  - "**/contably-*/**"
+  - "**/.claude/contably/**"
 context: fork
 model: haiku
 effort: low

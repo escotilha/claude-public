@@ -1,6 +1,6 @@
 ---
 name: orchestrate
-description: "Meta-orchestrator — intent → plan → skill routing → execute → verify → deploy. Triggers: orchestrate, meta-orchestrate, do this end-to-end, full pipeline."
+description: "Meta-orchestrator: intent → plan → skill routing → execute → verify → deploy. Triggers: orchestrate, do this end-to-end, full pipeline."
 argument-hint: "<intent> [--gated | --autonomous | --approve-at=<phases>] [--budget=<usd>] [--as-routine '<cron>'] [--resume <run-id>] [--list] [--show <run-id>]"
 user-invocable: true
 context: fork

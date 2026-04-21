@@ -1,8 +1,12 @@
 ---
 name: verify-conta
-description: "Contably verification: ruff, mypy, pytest, tsc, eslint, build, vitest, gitleaks. Triggers: verify conta, contably verify, full verify, run all tests."
+description: "Contably verification: ruff, mypy, pytest, tsc, eslint, vitest, gitleaks. Triggers: verify conta, contably verify, full verify."
 argument-hint: "[layer: lint|types|tests|build|security|all] [--fix]"
 user-invocable: true
+paths:
+  - "**/contably/**"
+  - "**/contably-*/**"
+  - "**/.claude/contably/**"
 context: fork
 model: sonnet
 effort: medium

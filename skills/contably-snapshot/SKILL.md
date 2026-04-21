@@ -2,6 +2,10 @@
 name: contably-snapshot
 description: "Generate Contably CODEBASE-REFERENCE.md — tech stack, product modules, API surface, infra, architecture. Triggers on: contably snapshot, stack snapshot, codebase reference, refresh snapshot."
 user-invocable: true
+paths:
+  - "**/contably/**"
+  - "**/contably-*/**"
+  - "**/.claude/contably/**"
 context: fork
 model: haiku
 effort: medium

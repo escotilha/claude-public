@@ -3,6 +3,10 @@ name: deploy-conta-production
 description: "Promote Contably staging to production on OCI. Verifies, approves gate, monitors, validates. Triggers on: deploy conta production, promote to production, push to production, production deploy, go live."
 argument-hint: "[--skip-staging-check] [--require-ux-approval | --force]"
 user-invocable: true
+paths:
+  - "**/contably/**"
+  - "**/contably-*/**"
+  - "**/.claude/contably/**"
 context: fork
 model: opus
 effort: high

@@ -1,6 +1,6 @@
 ---
 name: freeze
-description: "Restrict Edit/Write to one directory. Blocks edits outside allowed path. Triggers: freeze, freeze edits, lock scope, restrict edits to."
+description: "Restrict Edit/Write to one directory. Blocks edits outside path. Triggers: freeze, freeze edits, lock scope."
 user-invocable: true
 context: inline
 model: haiku

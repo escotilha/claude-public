@@ -1,6 +1,6 @@
 ---
 name: investigate
-description: "Root-cause debugging. Iron Law: no fix without root cause. 3-strike escalation. Triggers: debug this, fix this bug, why is this broken, investigate, root cause."
+description: "Root-cause debugging. Iron Law: no fix without root cause. 3-strike escalation. Triggers: debug this, fix this bug, why is this broken."
 user-invocable: true
 context: inline
 model: opus

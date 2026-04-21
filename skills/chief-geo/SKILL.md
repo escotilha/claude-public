@@ -3,6 +3,9 @@ name: chief-geo
 description: "Chief GEO Officer for SourceRank AI. Knowledge base, product audit, manual updates, AI visibility testing. Triggers on: chief geo, geo officer, geo audit, geo strategy, geo knowledge, /chief-geo."
 argument-hint: "<mode: full|knowledge|audit|manual|visibility|daily> [--brand NAME] [--queries FILE]"
 user-invocable: true
+paths:
+  - "**/sourcerank/**"
+  - "**/source-rank/**"
 context: fork
 model: opus
 effort: high

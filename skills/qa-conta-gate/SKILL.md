@@ -3,6 +3,10 @@ name: qa-conta-gate
 description: "Pre-production UX/UI gate for Contably. Tests actual feature pages in staging with parallel browser testers, fix-loops bugs, writes ux_approved signal. Triggers on: qa conta gate, ux gate, pre-prod qa, test staging feature."
 argument-hint: "<commit_sha> [--force-full-suite] [--max-iterations=3]"
 user-invocable: true
+paths:
+  - "**/contably/**"
+  - "**/contably-*/**"
+  - "**/.claude/contably/**"
 context: fork
 model: opus
 effort: high

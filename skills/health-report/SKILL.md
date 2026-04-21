@@ -3,6 +3,9 @@ name: health-report
 description: "Health report for SourceRank AI: API tests, E2E, unit tests, Lighthouse in one HTML/PDF. Triggers on: health report, site health, functional report, prove it works, health-report."
 argument-hint: "[--skip-qa] [--skip-lighthouse] [--pdf-only] [--url URL]"
 user-invocable: true
+paths:
+  - "**/sourcerank/**"
+  - "**/source-rank/**"
 context: fork
 model: opus
 effort: high

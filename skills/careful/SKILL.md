@@ -1,6 +1,6 @@
 ---
 name: careful
-description: "Safety guardrails — warns before rm -rf, DROP TABLE, force-push, kubectl delete. Toggle on/off. Triggers: careful, careful mode, safety mode, prod mode."
+description: "Safety guardrails — warns before rm -rf, DROP TABLE, force-push, kubectl delete. Triggers: careful, careful mode, safety mode."
 user-invocable: true
 context: inline
 model: haiku

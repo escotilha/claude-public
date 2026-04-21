@@ -1,8 +1,12 @@
 ---
 name: contably-eod
-description: "Contably end-of-day: bug hunt, autofix, lessons learned, daily agenda email. Triggers: contably eod, end of day, nightly contably, daily agenda."
+description: "Contably end-of-day: bug hunt, autofix, lessons, agenda email. Triggers: contably eod, end of day, nightly contably."
 argument-hint: "[--as-routine '<cron>'] [--budget=<usd>] [--no-email] [--max-fix-iterations=N] [--dry-run]"
 user-invocable: true
+paths:
+  - "**/contably/**"
+  - "**/contably-*/**"
+  - "**/.claude/contably/**"
 context: fork
 model: claude-opus-4-7
 effort: high

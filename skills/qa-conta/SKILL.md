@@ -2,6 +2,10 @@
 name: qa-conta
 description: "Contably QA orchestrator: API tests (curl) + browser tests. Maps 395+ endpoints across 50+ route modules. Triggers on: qa conta, contably qa, qa runner, ship qa."
 user-invocable: true
+paths:
+  - "**/contably/**"
+  - "**/contably-*/**"
+  - "**/.claude/contably/**"
 context: fork
 model: opus
 effort: high

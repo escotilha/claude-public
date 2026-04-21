@@ -1,6 +1,6 @@
 ---
 name: wiki
-description: "Persistent knowledge base. Ingest, query, synthesize, harvest, lint. Triggers: wiki, add to wiki, knowledge base, remember this, wiki query."
+description: "Persistent knowledge base. Ingest, query, synthesize, harvest, lint. Triggers: wiki, add to wiki, knowledge base, remember this."
 user-invocable: true
 context: inline
 model: sonnet

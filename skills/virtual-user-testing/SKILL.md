@@ -2,6 +2,10 @@
 name: virtual-user-testing
 description: "Virtual user testing for Contably with QA DB. Parallel persona agents, bug reports, fix verification, regression detection. Triggers on: virtual user test, persona test, user simulation, test as user, qa discover."
 user-invocable: true
+paths:
+  - "**/contably/**"
+  - "**/contably-*/**"
+  - "**/.claude/contably/**"
 context: fork
 model: opus
 effort: medium
