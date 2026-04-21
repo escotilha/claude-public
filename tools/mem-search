@@ -388,7 +388,8 @@ USAGE
   mem-search --vec <query>              Vector only (semantic recall).
   mem-search --read <query>             Show full content of top match.
   mem-search --reindex                  FTS5 rebuild + incremental vector update.
-  mem-search --reindex --vectors-full   Force full re-embed of every file.
+  mem-search --reindex --vectors-full   Force full re-embed of every file
+                                        (also re-embeds with current MEM_MODEL).
   mem-search --reindex --fts-only       Skip vectors (use if sqlite-vec unavailable).
   mem-search --vec-status               Show model, dim, files embedded, chunks, timing.
   mem-search --stats                    FTS5 + vector summary stats.
@@ -414,7 +415,8 @@ QUERY CAVEAT (FTS5)
 TROUBLESHOOTING
   sqlite-vec .load fails        Set MEM_HYBRID=0 or reinstall: pip install --user sqlite-vec==0.1.9
   Model download fails          First run pulls ~80MB; check HF_HUB_OFFLINE; pre-cache in ~/.cache/huggingface
-  Dim mismatch on reindex       Run: mem-search --reindex --vectors-full (after changing MEM_MODEL)
+  Dim mismatch on reindex       mem-embed drop && mem-search --reindex --vectors-full
+                                (then export MEM_MODEL=<new-model> first if switching)
   Partial embed                 Re-run: mem-search --reindex --vectors-full
   vec_chunks corruption         mem-embed drop && mem-search --reindex --vectors-full
 HELP
