@@ -205,20 +205,24 @@ class VecDB:
         self.conn.execute("DELETE FROM vec_meta WHERE file_path = ?", (str(file_path),))
 
     def replace_file(self, file_path: Path, chunks: list[Chunk], embeddings: list[list[float]]) -> None:
-        self.delete_file(file_path)
+        # Atomic replace: wrap DELETE + INSERTs in a single transaction so a
+        # crash between delete and insert never leaves the file with zero
+        # vectors and a stale vec_meta row.
         rows = [
             (vec_to_bytes(emb), str(file_path), ch["chunk_type"], ch["chunk_idx"], ch["text"])
             for ch, emb in zip(chunks, embeddings)
         ]
-        self.conn.executemany(
-            "INSERT INTO vec_chunks (embedding, file_path, chunk_type, chunk_idx, text) VALUES (?, ?, ?, ?, ?)",
-            rows,
-        )
-        now = time.time()
-        self.conn.execute(
-            "INSERT OR REPLACE INTO vec_meta (file_path, mtime, embedded_at, chunk_count, model, dim) VALUES (?, ?, ?, ?, ?, ?)",
-            (str(file_path), file_path.stat().st_mtime, now, len(chunks), MODEL_NAME, DIM),
-        )
+        with self.conn:
+            self.conn.execute("DELETE FROM vec_chunks WHERE file_path = ?", (str(file_path),))
+            self.conn.execute("DELETE FROM vec_meta   WHERE file_path = ?", (str(file_path),))
+            self.conn.executemany(
+                "INSERT INTO vec_chunks (embedding, file_path, chunk_type, chunk_idx, text) VALUES (?, ?, ?, ?, ?)",
+                rows,
+            )
+            self.conn.execute(
+                "INSERT OR REPLACE INTO vec_meta (file_path, mtime, embedded_at, chunk_count, model, dim) VALUES (?, ?, ?, ?, ?, ?)",
+                (str(file_path), file_path.stat().st_mtime, time.time(), len(chunks), MODEL_NAME, DIM),
+            )
 
     def query(self, q_emb: list[float], k: int = 20) -> list[tuple[int, str, str, int, float, str]]:
         rows = self.conn.execute(

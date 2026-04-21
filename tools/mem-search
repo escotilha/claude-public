@@ -213,21 +213,12 @@ vec_search_tsv() {
   fi
   [[ -z "$raw" ]] && return 0
 
-  # Join vec hits with memories table to pick up name/type/description.
-  local tmp_vec tmp_join
+  local tmp_vec mem_dump
   tmp_vec=$(mktemp)
-  tmp_join=$(mktemp)
-  printf "%s\n" "$raw" > "$tmp_vec"
-
-  sqlite3 "$DB_PATH" ".mode tsv" ".import '$tmp_vec' _vec_hits_tmp" 2>/dev/null <<'SQL' || true
-CREATE TEMP TABLE IF NOT EXISTS _vec_hits_tmp (
-  rank INTEGER, file_path TEXT, chunk_type TEXT, chunk_idx INTEGER, distance REAL, preview TEXT
-);
-SQL
-
-  # Use awk to join against a dump of memories keyed by file_path.
-  local mem_dump
   mem_dump=$(mktemp)
+  trap 'rm -f "$tmp_vec" "$mem_dump"' RETURN
+
+  printf "%s\n" "$raw" > "$tmp_vec"
   sqlite3 -separator $'\t' "$DB_PATH" \
     "SELECT file_path, name, type, description FROM memories;" > "$mem_dump"
 
@@ -240,15 +231,13 @@ SQL
     }
     {
       fp = $2
-      # score column for diagnostic: lower distance = better; emit 1/(1+distance) as a positive score.
+      # Lower distance = better; emit 1/(1+distance) as a positive score for display.
       dist = $5 + 0
       s = 1.0 / (1.0 + dist)
       snip = $6
       printf "%s\t%s\t%s\t%s\t%s\t%.4f\t%s\n", $1, fp, name[fp], type[fp], desc[fp], s, snip
     }
   ' "$mem_dump" "$tmp_vec"
-
-  rm -f "$tmp_vec" "$mem_dump" "$tmp_join"
 }
 
 # --- Hybrid search (RRF fusion) ---
@@ -259,7 +248,10 @@ hybrid_search() {
   tmp_fts=$(mktemp)
   tmp_vec=$(mktemp)
 
-  fts_search_tsv "$query" "$MEM_RECALL_N" > "$tmp_fts" &
+  # Suppress stderr from FTS5: queries containing characters FTS5 treats as
+  # operators (like '.' or ':') raise "fts5: syntax error" but the hybrid
+  # path degrades to vector-only cleanly. Surface via --fts only.
+  fts_search_tsv "$query" "$MEM_RECALL_N" > "$tmp_fts" 2>/dev/null &
   local pid_fts=$!
   vec_search_tsv "$query" "$MEM_RECALL_N" > "$tmp_vec" &
   local pid_vec=$!
