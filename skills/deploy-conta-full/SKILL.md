@@ -1,6 +1,6 @@
 ---
 name: deploy-conta-full
-description: "Contably deploy: staging → production. Auto-promotes if green. Triggers: deploy conta full, full deploy, staging to production."
+description: "Contably deploy: staging → production, auto-promotes if green. Triggers: deploy conta full, full deploy."
 argument-hint: "[--skip-guardian] [--skip-verify] [--force-staging-redeploy] [--sha=<7-char-sha>]"
 user-invocable: true
 paths:

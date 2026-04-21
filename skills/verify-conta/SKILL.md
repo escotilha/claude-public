@@ -1,6 +1,6 @@
 ---
 name: verify-conta
-description: "Contably verification: ruff, mypy, pytest, tsc, eslint, vitest, gitleaks. Triggers: verify conta, contably verify, full verify."
+description: "Contably verification: ruff, mypy, pytest, tsc, eslint, vitest, gitleaks. Triggers: verify conta, contably verify."
 argument-hint: "[layer: lint|types|tests|build|security|all] [--fix]"
 user-invocable: true
 paths:

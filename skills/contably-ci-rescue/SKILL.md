@@ -1,6 +1,6 @@
 ---
 name: contably-ci-rescue
-description: "Diagnose and fix failing Contably CI. Classifies failure, targeted fix. Triggers: ci rescue, ci failing, deploy failing, fix ci."
+description: "Diagnose and fix failing Contably CI. Classifies failure, targeted fix. Triggers: ci rescue, ci failing, fix ci."
 argument-hint: "[run-url | --latest | --branch=<name>]"
 user-invocable: true
 paths:

@@ -1,6 +1,6 @@
 ---
 name: cpo-ai-skill
-description: "Chief Product Officer AI — full product lifecycle, idea to production. Triggers: build this product, cpo mode, chief product officer."
+description: "Chief Product Officer AI — full product lifecycle, idea to production. Triggers: build this product, cpo mode, cpo."
 user-invocable: true
 context: fork
 allowed-tools:
