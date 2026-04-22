@@ -37,6 +37,23 @@ echo \"FAIL #341 ${summary#FAIL:}\" # breaks — escapes shouldn't be there
 
 Always test the script as a bash one-liner first before wrapping in Monitor.
 
+## 2b. NEVER use `declare -A` (associative arrays)
+
+macOS default bash is 3.2. `declare -A` is bash 4+. Monitors that use it crash immediately with `declare: -A: invalid option` and the script exits before any work happens. Use file-based state in `$(mktemp -d)` instead — works on every shell, persists across the loop, easy to clean up on exit.
+
+```bash
+# Wrong (bash 4+ only)
+declare -A last_state
+last_state[$key]=$value
+
+# Right (portable)
+STATE_DIR=$(mktemp -d -t monitor-XXXXXX)
+echo "$value" > "$STATE_DIR/$key"
+last="$(cat "$STATE_DIR/$key" 2>/dev/null || echo '')"
+```
+
+Hit this 2026-04-22 evening on the T0 auto-learning monitor — first attempt failed, rewrote with mktemp pattern, second attempt worked first try.
+
 ## 3. Stop-on-fail vs stop-on-fatal
 
 Distinguish "this PR is permanently failing — stop" from "transient API hiccup — retry next loop." The default `gh` API can 502 mid-poll; a robust monitor treats `api_error` differently from `FAIL`.
