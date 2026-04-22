@@ -8,6 +8,10 @@
 
 - [auto-merge-monitor-quirks](feedback/auto_merge_monitor_quirks.md) — gh-pr-checks auto-merge: filter `ci /`-prefix only, watch shell quoting, distinguish API hiccups from real fails
 
+## Projects
+
+- [psos-failure-patterns-to-detect](projects/psos_failure_patterns_to_detect.md) — 5 known engine failure modes T2-13 should auto-file once shipped; ground-truth list to validate detection accuracy
+
 ## References
 
 - [research-finding-karpathy-coding-guidelines.md](research-finding-karpathy-coding-guidelines.md) — CLAUDE.md behavioral rules from Karpathy's LLM coding pitfall observations — 4 principles addressing silent assumptions, over-engineering, orthogonal edits, and vague success criteria
