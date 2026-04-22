@@ -14,7 +14,19 @@ At 80% you still have a healthy buffer to run the skill. At 85%+ the skill itsel
 
 ## The announcement
 
-Before invoking, say one sentence: "Context at ~X% with unfinished work — running /handoff to checkpoint before we lose the window." Then invoke. Never silently — the user needs to know you're taking a preservation action.
+Before invoking, say one sentence: "Context at ~X% with unfinished work — running /handoff, then /clear, then /primer." Then invoke. Never silently — the user needs to know you're taking a preservation action.
+
+## The chain — /handoff → /clear → /primer
+
+Added 2026-04-22 per Pierre's explicit instruction: do not stop at `/handoff`. Immediately chain into `/clear` then `/primer` so the next session resumes automatically.
+
+1. Run `/handoff` — writes the resume block and commits the plan doc.
+2. Once the handoff skill completes and the resume block is printed, invoke `/clear` directly.
+3. After `/clear` wipes context, invoke `/primer` so the new session reconstructs state from the handoff doc the previous turn wrote.
+
+Do NOT wait for the user to confirm between steps. The entire chain is autonomous during overnight / long-running work. Exception: if the user has said "stop" or "pause" in the last 3 turns, halt after `/handoff` and ask.
+
+The previous rule said "Don't invoke `/clear` or `/compact` yourself — that's always the user's call." That exception is now lifted for the post-`/handoff` chain only. `/clear` outside that chain is still operator-only.
 
 ## When to skip
 
@@ -29,7 +41,8 @@ If context is 80-85% but the work is **ambiguous** (multiple possible plan docs,
 
 ## What NOT to do
 
-- Don't invoke `/clear` or `/compact` yourself — that's always the user's call
+- Don't invoke `/compact` yourself — that's always the user's call
+- Don't invoke `/clear` EXCEPT as the second step of the `/handoff → /clear → /primer` chain (see "The chain" section above). Standalone `/clear` is still operator-only.
 - Don't run `/handoff` repeatedly within the same session — once the checkpoint exists, subsequent updates should happen via normal edits to the plan doc
 - Don't invoke below 80% "just to be safe" — it's noise
 
