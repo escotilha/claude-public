@@ -1,28 +1,22 @@
 ---
 name: host-macmini-vs-laptop
-description: Pierre works from BOTH the Mac Mini and his MacBook laptop — always confirm which host before assuming deploy paths or scp directionality
+description: Pierre's primary Claude Code host is the Mac Mini — the Mini runs Claude Code sessions AND is the autonomous executor. Default to Mini unless explicitly told otherwise.
 type: personal
 originSessionId: 94d135c3-3bc2-408d-a0b6-51089b31ad95
 ---
-Pierre runs Claude Code sessions from **both** machines:
+**Pierre's primary host is the Mac Mini.** Treat this as the default — not the laptop.
 
-- **MacBook (laptop)** — primary daily-driver, where he reviews code, opens PRs
-- **Mac Mini (`100.66.244.112` on Tailscale)** — the autonomous executor for Contably OS / PSOS dispatches, AND a working environment Pierre uses directly when at home
+- **Mac Mini (`100.66.244.112` on Tailscale)** — this is where Pierre's Claude Code sessions run AND where autonomous Contably OS / PSOS dispatches execute. If a session is open and the user hasn't said "I'm on the laptop," assume Mini.
+- **MacBook (laptop)** — occasional sessions only. Must be explicitly stated.
 
-**Before assuming a deploy path, ask or check.** The same shell command runs in different places with different consequences:
+**Deploy path from Mini:**
+- `psos-deploy` → SSH to VPS → VPS clones from origin → `pip install`. Same flow regardless of which Mac initiated.
+- SSH to Mini itself (e.g. `ssh 100.66.244.112 ...`) FAILS from my local shell because I AM already on the Mini (laptop's SSH key isn't in Mini authorized_keys anyway). Route Mini-targeted commands through the VPS: `ssh root@100.77.51.51 'ssh 100.66.244.112 "..."'`.
 
-- `psos-deploy` from laptop → SSH to VPS → VPS clones from origin → `pip install` (the right path)
-- `psos-deploy` from Mini → also works the same way (SSH to VPS), BUT if Pierre wanted to install the wheel locally for testing, that's `pip install --user` not a VPS deploy
-
-**Quick host detection:**
-```bash
-hostname              # mac-mini-2 = Mini, otherwise laptop
-echo $TAILSCALE_HOST  # Mini ~ 100.66.244.112
-sw_vers -productName  # both say "macOS"; check hostname instead
-```
-
-**How to apply:** when Pierre says "I'm on X" or "this is Y," update internal state and re-evaluate any script-paths that assume laptop. Don't auto-detect silently — confirm in the response so he can correct.
+**When the user corrects host assumption:**
+When Pierre says "I'm on the Mini" or "this is the Mini," update internal state and stop trying to SSH to Mini from the current shell — the current shell IS the Mini.
 
 ## Timeline
 
-- **2026-04-22** — [user-feedback] During the duplicate-PR cascade incident, Pierre was on the Mini, not the laptop, when I started building `~/.local/bin/psos-deploy`. He flagged: "Hang on, I'm not in my laptop. This is the Mac Mini." (Source: user-feedback — explicit correction during the seeder-cooldown work)
+- **2026-04-22** — [user-feedback] During the duplicate-PR cascade incident, Pierre was on the Mini when I started building `~/.local/bin/psos-deploy`. He flagged: "Hang on, I'm not in my laptop. This is the Mac Mini." (Source: user-feedback — explicit correction during the seeder-cooldown work)
+- **2026-04-22 evening** — [user-feedback] Pierre explicitly: "Save this to memory once and for all. You are not on the laptop. You are on the Mac Mini." Rewrote this memory to make Mini the default assumption rather than "both are possible." (Source: user-feedback — engine recovery session after compaction)
