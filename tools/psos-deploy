@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+# psos-deploy — deploy PSOS to the production VPS by cloning origin/main
+# on the VPS itself (via gh CLI, never via local checkout). Eliminates the
+# "stale local clone scp'd as if it were latest" class of bug observed
+# 2026-04-22.
+#
+# Lives in ~/.claude-setup/tools/ so it syncs across the laptop and the
+# Mac Mini via /cs. A symlink at ~/.local/bin/psos-deploy makes it a
+# first-class command on both machines.
+#
+# Usage:
+#   psos-deploy                  # deploys origin/main (latest)
+#   psos-deploy <sha-or-tag>     # deploys a specific ref
+#   psos-deploy --check          # show what would deploy, no install
+#   psos-deploy --restart-only   # restart long-lived services without reinstall
+#
+# Exit codes:
+#   0 — deployed + verified
+#   1 — install failed
+#   2 — verification failed (file landed but server isn't serving new code)
+#   3 — VPS unreachable
+
+set -euo pipefail
+
+VPS="${PSOS_DEPLOY_VPS:-root@100.77.51.51}"
+REPO="${PSOS_DEPLOY_REPO:-escotilha/psos}"
+VENV="${PSOS_DEPLOY_VENV:-/opt/contably-os/venv}"
+DASHBOARD_URL="${PSOS_DEPLOY_DASHBOARD_URL:-http://100.77.51.51:8765/}"
+
+REF="${1:-main}"
+ACTION="install"
+
+case "${1:-}" in
+    --check)        ACTION="check"; REF="main" ;;
+    --restart-only) ACTION="restart"; REF="" ;;
+esac
+
+ssh_run() {
+    ssh -o ConnectTimeout=5 -o BatchMode=yes "$VPS" "$@"
+}
+
+# --- preflight: VPS reachable? ---
+if ! ssh_run "echo OK" >/dev/null 2>&1; then
+    echo "ERROR: VPS unreachable at $VPS" >&2
+    exit 3
+fi
+
+# --- check mode: show what would deploy ---
+if [[ "$ACTION" == "check" ]]; then
+    echo "=== currently deployed on $VPS ==="
+    ssh_run "$VENV/bin/pip show psos-core 2>/dev/null | grep -E '^(Name|Version):'"
+    echo
+    echo "=== origin/main on github.com/$REPO ==="
+    sha=$(gh api "repos/$REPO/commits/main" --jq '.sha[0:12]' 2>/dev/null || echo "unknown")
+    msg=$(gh api "repos/$REPO/commits/main" --jq '.commit.message' 2>/dev/null | head -1 || echo "")
+    echo "  sha: $sha"
+    echo "  msg: $msg"
+    exit 0
+fi
+
+# --- restart-only mode ---
+if [[ "$ACTION" == "restart" ]]; then
+    echo "Restarting psos-v3-dashboard-server.service..."
+    ssh_run "systemctl restart psos-v3-dashboard-server.service"
+    sleep 2
+    state=$(ssh_run "systemctl is-active psos-v3-dashboard-server.service")
+    echo "dashboard service: $state"
+    [[ "$state" == "active" ]] || exit 1
+    exit 0
+fi
+
+# --- install mode (default) ---
+echo "Deploying PSOS @ $REF to $VPS..."
+echo
+
+before=$(ssh_run "$VENV/bin/pip show psos-core 2>/dev/null | awk -F': ' '/^Version:/ {print \$2}'" || echo "(none)")
+echo "before: psos-core $before"
+
+# Clone via gh on the VPS — uses the VPS's gh auth, no SSH-key dance,
+# no risk of a global gitconfig URL rewrite shooting us in the foot.
+ssh_run "set -euo pipefail
+    cd /tmp
+    rm -rf psos-deploy
+    gh repo clone '$REPO' psos-deploy -- --depth 1 --branch '$REF' >/dev/null 2>&1
+    deployed_sha=\$(cd psos-deploy && git rev-parse HEAD)
+    echo \"deploying sha: \$deployed_sha\"
+    $VENV/bin/pip install --quiet --force-reinstall ./psos-deploy/psos-core
+    rm -rf psos-deploy
+    systemctl restart psos-v3-dashboard-server.service
+    sleep 2
+    systemctl is-active psos-v3-dashboard-server.service >/dev/null
+    echo 'service: active'
+"
+
+# --- verification ---
+echo
+echo "=== verification ==="
+
+http_code=$(curl -sS --max-time 10 -o /dev/null -w "%{http_code}" "$DASHBOARD_URL" || echo "000")
+if [[ "$http_code" != "200" ]]; then
+    echo "ERROR: dashboard returned HTTP $http_code" >&2
+    exit 2
+fi
+echo "dashboard HTTP: $http_code"
+
+after=$(ssh_run "$VENV/bin/pip show psos-core 2>/dev/null | awk -F': ' '/^Version:/ {print \$2}'")
+echo "after:  psos-core $after"
+
+echo
+echo "✓ deployed @ $REF"
