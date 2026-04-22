@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+# ppr — pre-PR worktree bootstrap. Always start PR work from a fresh
+# worktree off origin/main, never from a possibly-stale local checkout.
+#
+# Solves the "local clone is stale" class of bug observed 2026-04-22:
+# editing in the main checkout dir means whatever was last fetched —
+# missed PR #335 (T2-10..T2-13) until I caught it manually.
+#
+# Lives in ~/.claude-setup/tools/ so it syncs across Mini + laptop via /cs.
+# Symlinked from ~/.local/bin/ppr.
+#
+# Usage:
+#   ppr feat/sa-my-feature           # creates worktree + branch from origin/main
+#   ppr fix/sa-bug-x ../my-path      # custom worktree path
+#   ppr feat/sa-foo --base origin/some-branch   # base off something else
+#
+# Behavior:
+#   1. git fetch origin --quiet
+#   2. git worktree add -b <branch> <path> <base>
+#   3. cd into the new worktree (printed for shell-eval, see footer)
+#
+# Exit codes:
+#   0 — worktree created, ready to cd
+#   1 — bad args / not in a git repo
+#   2 — fetch failed
+#   3 — worktree add failed (likely branch/path conflict)
+
+set -euo pipefail
+
+print_usage() {
+    cat <<EOF
+ppr — pre-PR worktree bootstrap
+
+Usage:
+  ppr <branch>                     create worktree off origin/main
+  ppr <branch> <worktree-path>     custom path (default: ../<repo>-<branch-tail>)
+  ppr <branch> --base <ref>        base off a different ref
+  ppr <branch> <path> --base <ref>
+
+Branch naming convention (per concurrent-sessions rules):
+  feat/sa-<topic>     new feature
+  fix/sa-<topic>      bug fix
+  chore/sa-<topic>    refactor / cleanup
+
+Eval-friendly: ppr prints 'cd <path>' to stdout. Use:
+  eval "\$(ppr feat/sa-my-feature)"
+EOF
+}
+
+# --- arg parsing ---
+if [[ $# -lt 1 || "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    print_usage
+    exit 1
+fi
+
+branch="$1"
+shift
+
+worktree_path=""
+base="origin/main"
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --base)
+            shift
+            base="${1:?--base needs a ref}"
+            shift
+            ;;
+        --base=*)
+            base="${1#--base=}"
+            shift
+            ;;
+        *)
+            worktree_path="$1"
+            shift
+            ;;
+    esac
+done
+
+# --- sanity checks ---
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "ERROR: not in a git repository" >&2
+    exit 1
+fi
+
+# Move to the repo's main toplevel (handles being called from inside another worktree)
+git_top=$(git rev-parse --show-toplevel)
+# If we're in a linked worktree, get the main worktree's path
+main_top=$(git worktree list --porcelain | awk '/^worktree / {print $2; exit}')
+cd "$main_top"
+
+repo_name=$(basename "$main_top")
+branch_tail="${branch##*/}"
+
+if [[ -z "$worktree_path" ]]; then
+    worktree_path="../${repo_name}-${branch_tail}"
+fi
+
+# --- fetch ---
+echo "==> fetching origin..." >&2
+if ! git fetch origin --quiet 2>&1; then
+    echo "ERROR: git fetch failed" >&2
+    exit 2
+fi
+
+# --- verify base exists ---
+if ! git rev-parse --verify --quiet "$base" >/dev/null; then
+    echo "ERROR: base ref '$base' does not exist after fetch" >&2
+    exit 1
+fi
+
+base_sha=$(git rev-parse --short "$base")
+echo "==> creating worktree: $worktree_path" >&2
+echo "    branch: $branch" >&2
+echo "    base:   $base ($base_sha)" >&2
+
+# --- create worktree ---
+if ! git worktree add -b "$branch" "$worktree_path" "$base" >&2; then
+    echo "ERROR: worktree creation failed (branch or path may already exist)" >&2
+    echo "  hint: 'git worktree list' to inspect, 'git worktree remove $worktree_path' to clean" >&2
+    exit 3
+fi
+
+# Resolve the absolute path so the cd works from anywhere
+abs_path=$(cd "$worktree_path" && pwd)
+
+echo "==> ready" >&2
+echo "    cd $abs_path" >&2
+echo "" >&2
+
+# stdout: shell-eval-safe cd command
+echo "cd $abs_path"
