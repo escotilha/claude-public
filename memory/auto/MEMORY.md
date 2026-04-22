@@ -19,3 +19,7 @@
 
 # currentDate
 Today's date is 2026-04-22.
+
+## Working (session state)
+
+- [resume-2026-04-22-overnight](working/resume_2026-04-22_overnight.md) — active engine overnight run, rate-limited at 22:40, wake scheduled 01:47
