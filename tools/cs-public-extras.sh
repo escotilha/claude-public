@@ -506,11 +506,19 @@ case "$cmd" in
     # Work around global url.git@github.com:.insteadOf=https://github.com/ rewrite:
     # the rewrite forces HTTPS URLs to SSH at push time, but the SSH key isn't
     # authorized. Temporarily remove the rewrite, push, restore it.
+    # Trap ensures restore happens even on non-zero exit, SIGINT, or SIGTERM.
     rewrite=$(git config --global --get url.git@github.com:.insteadOf || true)
+    restore_rewrite() {
+      if [ -n "$rewrite" ] && ! git config --global --get url.git@github.com:.insteadOf >/dev/null 2>&1; then
+        git config --global url.git@github.com:.insteadOf "$rewrite"
+      fi
+    }
+    trap restore_rewrite EXIT INT TERM
     [ -n "$rewrite" ] && git config --global --unset-all url.git@github.com:.insteadOf
     git push public nuvini-public-fresh:main --force
     push_exit=$?
-    [ -n "$rewrite" ] && git config --global url.git@github.com:.insteadOf "$rewrite"
+    restore_rewrite
+    trap - EXIT INT TERM
 
     git checkout "$prev_branch" > /dev/null 2>&1
     git branch -D nuvini-public-fresh > /dev/null 2>&1

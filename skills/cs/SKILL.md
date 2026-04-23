@@ -110,14 +110,18 @@ Remotes use HTTPS with gh keyring auth. Two gotchas this step must handle:
 1. **`GITHUB_TOKEN` env var** — known invalid, overrides the valid keyring. Always `unset` it.
 2. **Global `url.git@github.com:.insteadOf=https://github.com/` rewrite** — forces HTTPS URLs back to SSH at push time. SSH key is not authorized, so push fails. Temporarily remove the rewrite for the push, then restore it.
 
+Use a trap so the rewrite is restored even if the push is interrupted (Ctrl-C) or the shell dies mid-push. Without the trap, a SIGINT between `--unset-all` and the restore line permanently wipes the user's global `insteadOf` rewrite.
+
 ```bash
 cd ~/.claude-setup && unset GITHUB_TOKEN && \
   REWRITE=$(git config --global --get url.git@github.com:.insteadOf || true); \
+  restore() { [ -n "$REWRITE" ] && ! git config --global --get url.git@github.com:.insteadOf >/dev/null 2>&1 && git config --global url.git@github.com:.insteadOf "$REWRITE"; }; \
+  trap restore EXIT INT TERM; \
   [ -n "$REWRITE" ] && git config --global --unset-all url.git@github.com:.insteadOf; \
   git remote set-url origin https://github.com/escotilha/claude.git && \
   git push origin master; \
   PUSH_EXIT=$?; \
-  [ -n "$REWRITE" ] && git config --global url.git@github.com:.insteadOf "$REWRITE"; \
+  restore; trap - EXIT INT TERM; \
   exit $PUSH_EXIT
 ```
 
@@ -126,10 +130,12 @@ If rejected (diverged), force push — local is always source of truth. Wrap the
 ```bash
 cd ~/.claude-setup && unset GITHUB_TOKEN && \
   REWRITE=$(git config --global --get url.git@github.com:.insteadOf || true); \
+  restore() { [ -n "$REWRITE" ] && ! git config --global --get url.git@github.com:.insteadOf >/dev/null 2>&1 && git config --global url.git@github.com:.insteadOf "$REWRITE"; }; \
+  trap restore EXIT INT TERM; \
   [ -n "$REWRITE" ] && git config --global --unset-all url.git@github.com:.insteadOf; \
   git push origin master --force; \
   PUSH_EXIT=$?; \
-  [ -n "$REWRITE" ] && git config --global url.git@github.com:.insteadOf "$REWRITE"; \
+  restore; trap - EXIT INT TERM; \
   exit $PUSH_EXIT
 ```
 
