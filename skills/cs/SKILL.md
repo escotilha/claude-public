@@ -105,16 +105,32 @@ If no skills were missing, skip this step entirely.
 
 ### 2. Push to origin
 
-Remotes use HTTPS. Always `unset GITHUB_TOKEN` first (known invalid env var that overrides valid keyring).
+Remotes use HTTPS with gh keyring auth. Two gotchas this step must handle:
+
+1. **`GITHUB_TOKEN` env var** — known invalid, overrides the valid keyring. Always `unset` it.
+2. **Global `url.git@github.com:.insteadOf=https://github.com/` rewrite** — forces HTTPS URLs back to SSH at push time. SSH key is not authorized, so push fails. Temporarily remove the rewrite for the push, then restore it.
 
 ```bash
-cd ~/.claude-setup && unset GITHUB_TOKEN && git remote set-url origin https://github.com/escotilha/claude.git && git push origin master
+cd ~/.claude-setup && unset GITHUB_TOKEN && \
+  REWRITE=$(git config --global --get url.git@github.com:.insteadOf || true); \
+  [ -n "$REWRITE" ] && git config --global --unset-all url.git@github.com:.insteadOf; \
+  git remote set-url origin https://github.com/escotilha/claude.git && \
+  git push origin master; \
+  PUSH_EXIT=$?; \
+  [ -n "$REWRITE" ] && git config --global url.git@github.com:.insteadOf "$REWRITE"; \
+  exit $PUSH_EXIT
 ```
 
-If rejected (diverged), force push — local is always source of truth:
+If rejected (diverged), force push — local is always source of truth. Wrap the same way:
 
 ```bash
-git push origin master --force
+cd ~/.claude-setup && unset GITHUB_TOKEN && \
+  REWRITE=$(git config --global --get url.git@github.com:.insteadOf || true); \
+  [ -n "$REWRITE" ] && git config --global --unset-all url.git@github.com:.insteadOf; \
+  git push origin master --force; \
+  PUSH_EXIT=$?; \
+  [ -n "$REWRITE" ] && git config --global url.git@github.com:.insteadOf "$REWRITE"; \
+  exit $PUSH_EXIT
 ```
 
 ### 3. Orphan-push to public
