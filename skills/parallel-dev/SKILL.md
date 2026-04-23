@@ -5,6 +5,10 @@ user-invocable: true
 context: fork
 model: opus
 effort: high
+skills:
+  - verify
+  - review-changes
+  - test-and-fix
 allowed-tools:
   - PushNotification
   - Read

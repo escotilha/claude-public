@@ -1,8 +1,12 @@
 ---
 name: cpo-ai-skill
 description: "Chief Product Officer AI — full product lifecycle, idea to production. Triggers: build this product, cpo mode, cpo."
+model: opus
 user-invocable: true
 context: fork
+effort: high
+disable-model-invocation: false
+memory: user
 allowed-tools:
   - Agent
   - mcp__firecrawl__*
@@ -14,10 +18,6 @@ allowed-tools:
   - TaskList
   - TaskGet
   - mcp__memory__*
-model: opus
-effort: high
-disable-model-invocation: false
-memory: user
 tool-annotations:
   mcp__memory__delete_entities: { destructiveHint: true, idempotentHint: true }
   mcp__memory__create_entities: { readOnlyHint: false, idempotentHint: false }
