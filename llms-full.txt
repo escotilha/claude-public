@@ -1,0 +1,2549 @@
+# Claude Code Setup — skills, rules, and tools
+
+> Pierre Schurmann's Claude Code setup: 86 skills, 13 global rules, hybrid memory system. LLM-discoverable via llmstxt.org spec. Use this file to understand what tooling is available before starting work.
+
+Generated: 2026-04-23T06:30:09Z
+
+---
+
+This file inlines the content of every rule + the frontmatter/description/preview of every skill so that an agent can load the entire setup context in a single fetch.
+
+# Rules
+
+## rules/concurrent-sessions.md
+
+# Concurrent Session Discipline
+
+Multiple Claude Code sessions running simultaneously against the same repo is normal. What's not acceptable is two sessions silently picking the same sequential resource — a migration number, a route ID, a flag key — and diverging. The canonical incident: sessions `sa` and `sb` both generated Alembic migration `072` with different content, neither knowing about the other. This rule exists to prevent that class of collision entirely.
+
+## The core rule: branch per session, always
+
+- **Never edit files directly in the `main` working directory.** Always work in a worktree on a named branch.
+- Every new session starts with `/maketree` or:
+  ```bash
+  git fetch origin && git worktree add -b <branch> <path> origin/main
+  ```
+- Always branch from `origin/main` after `git fetch origin` — never from local `main`, which may be stale by hours or days.
+
+## Branch naming convention
+
+Pattern: `<type>/<session-tag>-<short-topic>`
+
+| Type | Session tag | Example branch |
+|---|---|---|
+| `feat` | `sa` | `feat/sa-bank-integration-rbac` |
+| `fix` | `sb` | `fix/sb-migration-072` |
+| `chore` | `0419` (date) | `chore/0419-cleanup` |
+| `feat` | `sc` | `feat/sc-qa-gate-infra` |
+
+Use 2-letter alphabetic tags (`sa`, `sb`, `sc`…) for concurrent sessions in the same day. Use date-based tags (`0419-rbac`) when sessions span multiple days or you want a timestamp in the branch name. Pick one convention per session and keep it.
+
+## Before starting work checklist
+
+1. `git fetch origin`
+2. `git worktree add -b <branch> ../example-project-<tag> origin/main`
+3. Append a row to `~/.claude-setup/sessions.md` with session tag, branch, project, and focus
+4. State aloud (first assistant message): "Working on branch `<branch>` in worktree `<path>`"
+
+## Sequential-resource collision zones
+
+These are the places two sessions can pick the same name or number and corrupt each other's work.
+
+| Zone | Risk | Mitigation |
+|---|---|---|
+| **Alembic migration numbers** | Both sessions run `alembic revision` and get the same sequential ID | Use UUID-based revisions (see upcoming `alembic-uuid-revisions.md` rule); never use `--autogenerate` without checking `origin/main` first |
+| **Kubernetes resource names** | Two sessions apply manifests with the same name to staging | Only GitHub Actions deploys to staging — see "Shared live state" below |
+| **Feature flag / env var keys** | Both sessions add a new flag with the same name to `.env.example` | Check `git diff origin/main -- .env.example` before adding new keys |
+| **Shared test data (staging DB)** | Sessions create rows that collide on unique constraints | Prefix all staging test data with session tag, e.g. `[sa] Test Bank Connection` |
+| **BankIntegration sandbox accounts** | Both sessions create/delete the same sandbox item | Coordinate via sessions.md; one session at a time touches BankIntegration sandbox items |
+| **Slack / notification channel posts** | Duplicate notifications | Only send from one session; check sessions.md for who owns that channel |
+
+## Shared live state (staging)
+
+- **Never `kubectl rollout` from a session terminal.** Staging deploys happen only via GitHub Actions (`push to main` triggers the pipeline). Manual `kubectl` commands to staging require explicit user instruction.
+- Staging test data rows must be prefixed with the session tag: `[sa] Test Company`, `[sb] Test Bank`.
+- Only one session at a time runs `/qa-cycle-gate` — it uses a lock file (upcoming). Check sessions.md before starting.
+- When a session ends, delete or clean up any staging rows it created that aren't needed for regression testing.
+
+## Collision detection one-liner
+
+Before editing any shared file (alembic `versions/`, route registrations, shared config, `.env.example`):
+
+```bash
+git fetch origin && git diff origin/main -- <file>
+```
+
+This reveals whether another session already modified the same file on `origin/main`, so you can rebase before touching it rather than discovering the conflict at merge time.
+
+## When something slips through
+
+- **Another session merged conflicting work:** rebase onto `origin/main`, resolve conflicts, push. Do not fast-forward merge over the conflict.
+- **Collision discovered mid-work:** `git stash`, `git fetch origin`, inspect `git diff origin/main`, decide merge strategy before unstashing.
+- **Never `--force` push to shared branches** — including `main`, `staging`, and any branch another session may be tracking.
+- **Another session's in-progress branch conflicts with your plan** (e.g. both plan to touch the same migration chain): check sessions.md for status, or `SendMessage` that session directly before proceeding. If the session is gone, inspect the branch on `origin` and decide whether to rebase on top of it or coordinate a merge.
+
+## How this rule applies
+
+This rule is global — it applies to every project, not just ExampleProject. When a skill's documented behavior conflicts with this rule (e.g. a skill that writes migrations without checking for conflicts), this rule takes precedence and the skill should be invoked from inside a properly-initialized worktree.
+
+---
+
+## rules/handoff-threshold.md
+
+# Handoff at 80% Context
+
+Proactively invoke `/handoff` when context usage crosses **80%** and there is unfinished work that would be lost after `/clear` or auto-compaction.
+
+## The rule
+
+If all three are true at the end of a response, invoke `/handoff` in the next response **before the user has to ask**:
+
+1. **Context ≥ 80%** — check the system-reminder context indicator or your internal sense of the conversation length
+2. **Task is not complete** — there is a plan, a feature, a deploy, or a debug session that the next session will need to resume
+3. **State is not yet durably captured** — the plan doc either doesn't exist, or doesn't reflect the current progress
+
+At 80% you still have a healthy buffer to run the skill. At 85%+ the skill itself consumes context you needed for the checkpoint. Don't wait.
+
+## The announcement
+
+Before invoking, say one sentence: "Context at ~X% with unfinished work — running /handoff, then /clear, then /primer." Then invoke. Never silently — the user needs to know you're taking a preservation action.
+
+## The chain — /handoff → /clear → /primer
+
+Added 2026-04-22 per Pierre's explicit instruction: do not stop at `/handoff`. Immediately chain into `/clear` then `/primer` so the next session resumes automatically.
+
+1. Run `/handoff` — writes the resume block and commits the plan doc.
+2. Once the handoff skill completes and the resume block is printed, invoke `/clear` directly.
+3. After `/clear` wipes context, invoke `/primer` so the new session reconstructs state from the handoff doc the previous turn wrote.
+
+Do NOT wait for the user to confirm between steps. The entire chain is autonomous during overnight / long-running work. Exception: if the user has said "stop" or "pause" in the last 3 turns, halt after `/handoff` and ask.
+
+The previous rule said "Don't invoke `/clear` or `/compact` yourself — that's always the user's call." That exception is now lifted for the post-`/handoff` chain only. `/clear` outside that chain is still operator-only.
+
+## When to skip
+
+- Task is complete and committed — nothing to save
+- Conversation is exploratory (asking questions, not executing) — no state to preserve
+- User is actively mid-command and a checkpoint would interrupt the flow — finish the current turn first
+- User said "don't handoff" or "skip handoff" earlier in the session — respect it
+
+## When to ask instead of auto-invoke
+
+If context is 80-85% but the work is **ambiguous** (multiple possible plan docs, unclear which branch to checkpoint, mid-refactor with dirty state across several files), ask: "Context at ~X%. Want me to run /handoff? If yes, which plan doc should I append to?"
+
+## What NOT to do
+
+- Don't invoke `/compact` yourself — that's always the user's call
+- Don't invoke `/clear` EXCEPT as the second step of the `/handoff → /clear → /primer` chain (see "The chain" section above). Standalone `/clear` is still operator-only.
+- Don't run `/handoff` repeatedly within the same session — once the checkpoint exists, subsequent updates should happen via normal edits to the plan doc
+- Don't invoke below 80% "just to be safe" — it's noise
+
+## Why this rule exists
+
+The pattern was manually executed at 85% in a long ExampleProject infra session (screenshot 2026-04-18): plan updated, commit pushed, resume block written, then `/clear`. The `/handoff` skill formalizes that pattern. This rule says: do it at 80%, not 85%, and do it without being asked.
+
+## Signal the user looks for
+
+The statusline shows `⚑/handoff` in magenta when context crosses 80%. That cue is for the user; this rule is for you. Both trigger the same action — you just get there first.
+
+---
+
+## rules/karpathy-guidelines.md
+
+# Karpathy Coding Guidelines
+
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+
+Source: https://github.com/forrestchang/andrej-karpathy-skills (imported 2026-04-19)
+
+**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+
+## 1. Think Before Coding
+
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
+
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
+
+## 2. Simplicity First
+
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+## 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+## 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
+
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+---
+
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+
+---
+
+## rules/memory-strategy.md
+
+# Memory Strategy
+
+## Tier Taxonomy (4 tiers, 2026-04-21)
+
+Memories live in one of four cognitive tiers. Pick the tier based on role, not content type.
+
+| Tier | Path | What goes here | Decay |
+| --- | --- | --- | --- |
+| **Working** | `auto/working/` | Live task state, handoff buffers, next-session intent, in-progress trackers | 14 days |
+| **Episodic** | `auto/episodic/` | Project timeline — what happened, when, deploys, incidents | 60 days base |
+| **Semantic** | `auto/semantic/` | Distilled patterns, mistakes, tech-insights, architecture decisions | 90 days (mistakes 180d, research 60d) |
+| **Personal** | `auto/personal/` | User preferences, credentials, account state, explicit feedback | Never auto-decay |
+
+See each tier's `_tier.md` for full rules. Legacy flat directories (`concepts/`, `entities/`, `feedback/`, `projects/`, `reference/`) remain until naturally touched — new memories write into the tiered structure.
+
+### Routing guidance
+
+| Situation | Tier |
+| --- | --- |
+| User just said "always use pnpm" | `personal/` |
+| Deploy finished — need to log the outcome | `episodic/` |
+| Pattern extracted from a bug we've hit 3 times | `semantic/` |
+| /handoff saving resume block | `working/` |
+| Credentials / API keys reference | `personal/` |
+| Agent identity spec (Marco, Bella, Julia) | `semantic/` (stable domain knowledge) |
+| "where was I" snapshot | `working/` |
+| Project completed — lessons distilled | write the lesson to `semantic/`, archive the project log in `episodic/` |
+
+## Salience Formula
+
+Retention and promotion decisions use:
+
+```
+salience = recency × pain × importance  (each 0–1)
+```
+
+- **recency:** `max(0, 1 - days_since_last_use / tier_decay_threshold)`. `personal/` skips this (always 1.0).
+- **pain:** 0.1 trivial → 1.0 prod-outage/data-loss. Dominates retention for mistakes and incidents.
+- **importance:** 0.2 project-only → 1.0 user-declared rule. Dominates for personal/ entries.
+
+**Thresholds:** ≥0.7 promote, 0.4–0.7 retain, 0.15–0.4 review, <0.15 archive. See `~/.claude-setup/skills/memory-consolidation/SKILL.md` Phase 2 for the pseudocode and Phase 4 for where it runs.
+
+## Entity Naming: `{type}:{identifier}`
+
+| Prefix             | Purpose                       |
+| ------------------ | ----------------------------- |
+| `pattern:`         | Reusable code/design patterns |
+| `mistake:`         | Errors to avoid               |
+| `tech-insight:`    | Technology-specific learnings |
+| `preference:`      | User/project preferences      |
+| `design-decision:` | Design choices made           |
+| `test-pattern:`    | Reusable test sequences       |
+| `common-bug:`      | Frequently found issues       |
+| `architecture:`    | Architecture decisions        |
+
+Use lowercase with hyphens. Include project name when project-specific.
+
+## Page Format: Compiled Truth + Timeline
+
+Every memory entity follows the **compiled truth + timeline** pattern (adapted from GBrain):
+
+```markdown
+---
+name: { entity-name }
+description: { one-line — used for relevance scoring }
+type: { user, feedback, project, reference }
+---
+
+{Compiled truth — your CURRENT BEST UNDERSTANDING of this entity.
+Rewrite this section when evidence changes. This is NOT append-only.
+Keep it concise: 3-10 lines covering the actionable state.}
+
+---
+
+## Timeline
+
+- **{YYYY-MM-DD}** — [{source-type}] {what happened} (Source: {detail})
+- **{YYYY-MM-DD}** — [{source-type}] {what happened} (Source: {detail})
+```
+
+**Key rules:**
+
+- Compiled truth gets **rewritten** (not appended) when the current understanding changes
+- Timeline is **append-only** and reverse-chronological — the evidence trail never gets edited
+- Compiled truth answers "what do we currently know?" — timeline answers "how did we get here?"
+- When compiled truth and timeline contradict, flag the contradiction explicitly
+
+## Required Observations (Timeline Entries)
+
+Every entity's timeline must include entries with:
+
+- `"Discovered: {date}"`
+- `"Source: {type} — {detail}"` (see Source Types below)
+- `"Applied in: {project} - {date} - {HELPFUL|NOT HELPFUL|MODIFIED}"`
+- `"Use count: {N}"`
+
+### Source Types
+
+Use a typed `Source:` format to enable source-based filtering and pruning during consolidation:
+
+| Type             | Format                                        | Example                                                    |
+| ---------------- | --------------------------------------------- | ---------------------------------------------------------- |
+| `implementation` | `Source: implementation — {file or feature}`  | `Source: implementation — src/auth/jwt.ts`                 |
+| `failure`        | `Source: failure — {what went wrong}`         | `Source: failure — forgot RLS on profiles table`           |
+| `user-feedback`  | `Source: user-feedback — {context}`           | `Source: user-feedback — always use pnpm`                  |
+| `research`       | `Source: research — {url or paper}`           | `Source: research — github.com/kbanc85/claudia`            |
+| `code-review`    | `Source: code-review — {PR or session}`       | `Source: code-review — PR #42 security findings`           |
+| `git-history`    | `Source: git-history — {repo}`                | `Source: git-history — example-project commit patterns`           |
+| `session`        | `Source: session — {skill or context}`        | `Source: session — /ship feature auth`                     |
+| `consolidation`  | `Source: consolidation — merged from {names}` | `Source: consolidation — merged from pattern:a, pattern:b` |
+
+During consolidation, source types enable targeted pruning:
+
+- `research` sources decay faster (60 days) — market data goes stale
+- `failure` sources are retained longer (180 days) — mistakes are expensive to relearn
+- `user-feedback` sources never auto-decay — explicit user preferences are stable
+
+## Dedup Before Write
+
+Before creating any new memory file, check for duplicates using `mem-search`:
+
+```bash
+~/.claude-setup/tools/mem-search "<key terms from the memory>"
+```
+
+- If a high-relevance match exists → UPDATE the existing file instead of creating a new one
+- If partial match (related but different) → consider merging into the existing file
+- If no match → create new file as normal
+- After writing → run `~/.claude-setup/tools/mem-search --reindex` to update the search index
+
+## Cross-Link on Write
+
+After writing a new memory file, update 3-5 **existing** memory files that the new information touches. This turns isolated memories into a connected knowledge graph at ingest time (Karpathy wiki pattern).
+
+### Process
+
+1. **Search for related memories** — run `mem-search` with 2-3 keyword queries from the new memory's content
+2. **Select 3-5 most relevant** existing files, prioritizing:
+   - Memories the new one **contradicts** (add contradiction note to both)
+   - Memories the new one **extends** (add "Related:" back-reference)
+   - Memories the new one **validates** (add confirmation note)
+   - Memories in a different type that share the same domain
+3. **Update each related file** — append a `Related:` line or update an existing one:
+   ```
+   Related: [new-memory-title](new-memory-file.md) — one-line why ({date})
+   ```
+4. **Update MEMORY.md** — if the related file's one-liner in the index should mention the new connection, update it
+5. **Reindex** — run `~/.claude-setup/tools/mem-search --reindex` after all writes
+
+### Budget
+
+- Max 5 related files updated per new memory
+- Max 2 `mem-search` calls per new memory
+- Skip cross-linking if the new memory is trivial (score < 5) or a minor update to an existing file
+
+### When to Skip Cross-Linking
+
+- Simple observation additions to existing memories (e.g., "Applied in: project - date - HELPFUL")
+- Updating a single field in an existing memory
+- When the `mem-search` returns no results with score >= 3.0
+
+## Save vs Skip
+
+**Save when:** high generality, learned from failure, user explicitly shared, expensive to regenerate, high severity.
+**Skip when:** duplicate exists (>85% similar), project-specific detail, trivial/obvious.
+
+## Hybrid Retrieval (v1, 2026-04-21)
+
+`mem-search` default mode fuses FTS5 BM25 with local vector recall via Reciprocal Rank Fusion (k=60, tunable via `MEM_RRF_K`). Embeddings: `sentence-transformers/all-MiniLM-L6-v2` (384-dim, local Python, no network). Each page chunks as one `truth` + one chunk per timeline bullet. Per-file mtime tracked in `vec_meta`; only changed files re-embed on nightly `mem-consolidate`. Escape hatches: `--fts` (FTS5 only), `--vec` (vector only), `MEM_HYBRID=0` (global FTS5 fallback), `mem-embed drop && mem-search --reindex --vectors-full` (after switching `MEM_MODEL`). Observability: `mem-search --vec-status`. A link-graph digest lives at `memory/auto/reports/GRAPH_REPORT.md` — read before `mem-search` for a bird's-eye view.
+
+---
+
+## rules/model-tier-strategy.md
+
+# Model Tier Strategy for Subagents
+
+Route subagent tasks to the cheapest model that can handle the work. This saves tokens without sacrificing quality.
+
+## Tier Definitions
+
+| Tier       | Model      | Cost   | Use For                                                                     |
+| ---------- | ---------- | ------ | --------------------------------------------------------------------------- |
+| **Tier 1** | Haiku      | Low    | Deterministic execution, template-driven, report formatting, scaffolding    |
+| **Tier 2** | Sonnet     | Medium | Nuanced judgment, code review, investigation, moderate complexity           |
+| **Tier 3** | Opus       | High   | Architecture decisions, security audits, complex reasoning, production code |
+| **Tier R** | Opus 4.7   | High   | **Routines** — autonomous scheduled/event-triggered runs, judgment under ambiguity, self-verifying outputs |
+
+### Opus 4.7 Behavior (per Boris Cherny, 2026-04-16)
+
+Opus 4.7 changes three things that affect this setup:
+
+- **Default effort is `xhigh`** (auto-upgraded from 4.6's `high`). Tiers: `low` / `high` / `xhigh` (recommended) / `max` (evals only — overthinks). Don't use `max` in production routines.
+- **Adaptive thinking replaces `budget_tokens`** — no more fixed thinking budget. Steer with prompts instead (see `opus-4-7-prompting.md`).
+- **More judicious subagent delegation** — 4.7 won't auto-fan-out the way 4.6 did. Skills that rely on parallel subagents (`/cto` swarm, `/parallel-dev`, `/qa-cycle`) must include an explicit fan-out instruction:
+  > "Do not spawn a subagent for work you can complete directly in a single response. Spawn multiple subagents in the same turn when fanning out across items or reading multiple files."
+
+Interactive (multi-turn) mode reasons more per turn than autonomous (single-turn) mode — front-load full intent + constraints + acceptance criteria in the first message, then batch follow-ups.
+
+### Vault / CIMD Credentials for Routines (per Anthropic MCP blog, 2026-04-22)
+
+Scheduled Routines (Opus 4.7, autonomous) that connect to external services via MCP should register OAuth tokens in **Managed Agent Vaults**. The platform auto-injects and refreshes credentials into MCP connections — no manual token passing via env vars or spawn prompts.
+
+- Never pass long-lived tokens through `CronCreate` payloads or routine spawn prompts.
+- Register the credential once in the Vault; reference it by name in the MCP connection config.
+- Refresh is handled by Anthropic's CIMD (Credentials + Identity Management) layer — routines don't need to re-authenticate.
+- Applies to: example-project-eod, chief-geo daily, any `/schedule`-created agent that hits Supabase/GitHub/BankIntegration/Slack via MCP.
+
+Fallback (pre-Vault or non-Claude-Code hosts like Claudia): encrypt tokens at rest (1Password CLI, macOS Keychain) and load via a startup hook; never hardcode in routine config files.
+
+## Decision Matrix
+
+| Task Type                        | Model  | Rationale                                   |
+| -------------------------------- | ------ | ------------------------------------------- |
+| Run typecheck / lint / tests     | haiku  | Pure execution, no judgment needed          |
+| Format or generate reports       | haiku  | Template-driven output                      |
+| Explore codebase (Explore agent) | haiku  | File discovery, grep, glob — deterministic  |
+| Page testing / smoke testing     | haiku  | Navigate + check console — mechanical       |
+| Fix lint/type errors             | sonnet | Needs understanding of code context         |
+| Code review (single file)        | sonnet | Nuanced but bounded scope                   |
+| Implement a feature in worktree  | sonnet | Judgment + code writing, bounded by spec    |
+| Investigate a bug                | sonnet | Requires reasoning about code behavior      |
+| Security audit                   | opus   | Critical findings require deep reasoning    |
+| Architecture review              | opus   | Cross-system reasoning, trade-off analysis  |
+| Full CTO review (orchestrator)   | opus   | Synthesizes across multiple domains         |
+| Product spec / PRD generation    | opus   | Requires product thinking + technical depth |
+| Claude Code Routine (scheduled)  | opus-4.7 | Autonomous background run — needs judgment under ambiguity + self-verification (per Anthropic PM, 2026-04-16) |
+
+## Per-Skill Recommendations
+
+| Skill              | Orchestrator | Subagent Tasks                                   | Recommended Model |
+| ------------------ | ------------ | ------------------------------------------------ | ----------------- |
+| **parallel-dev**   | opus         | Feature implementation in worktree               | sonnet            |
+| **parallel-dev**   | opus         | CI fix agent                                     | sonnet            |
+| **cto**            | opus         | Explore agent (codebase discovery)               | haiku             |
+| **cto**            | opus         | Security analyst (swarm)                         | sonnet            |
+| **cto**            | opus         | Architecture/performance/quality analyst (swarm) | sonnet            |
+| **deep-plan**      | opus         | Explore agent (scope identification)             | haiku             |
+| **deep-research**  | opus         | Research track investigators                     | sonnet            |
+| **fulltest-skill** | sonnet       | Page testers (navigate + check)                  | haiku             |
+| **fulltest-skill** | sonnet       | CSS/JS fixers                                    | sonnet            |
+| **qa-cycle**       | opus         | Discovery (Explore)                              | haiku             |
+| **qa-cycle**       | opus         | Persona testers                                  | haiku             |
+| **qa-cycle**       | opus         | Fix agents                                       | sonnet            |
+| **qa-fix**         | sonnet       | Investigation + fix                              | sonnet            |
+| ****      | sonnet       | Verification testing                             | haiku             |
+| **qa-projectb**  | opus         | Persona testers (currently sonnet — downgrade)   | haiku             |
+| **chief-geo**      | opus         | Knowledge researchers (×2)                       | sonnet            |
+| **chief-geo**      | opus         | Knowledge indexer                                | haiku             |
+| **chief-geo**      | opus         | Product audit specialists (×3)                   | sonnet            |
+| **chief-geo**      | opus         | Visibility testers (×4)                          | haiku             |
+
+## How to Apply
+
+When spawning a subagent via the Agent tool, always include the `model` parameter:
+
+```
+Agent(subagent_type="general-purpose", model="haiku", prompt="...")
+Agent(subagent_type="Explore", model="haiku", prompt="...")
+Agent(subagent_type="general-purpose", model="sonnet", prompt="...")
+```
+
+When spawning teammates via Agent Teams, include model guidance in the spawn prompt:
+"Use model: sonnet for this teammate" (Agent Teams inherits from parent by default).
+
+## Model Delegation Pattern (ProjectE-Inspired)
+
+Beyond routing subagents to cheaper Claude tiers, a more aggressive cost optimization is **model delegation**: use an expensive model (Opus) strictly for orchestration and reasoning, while delegating text generation to a cheap or free model.
+
+### How It Works
+
+```
+Orchestrator (Opus/Sonnet) → decides WHAT to do
+  ↓
+Generator (Haiku / local model) → does the mechanical work
+```
+
+The orchestrator handles planning, tool selection, and judgment calls. The generator handles scaffolding, formatting, template expansion, and deterministic output. This mirrors the ProjectE pattern where Claude Opus orchestrates while a local model handles generation, cutting API costs ~10x.
+
+### Where This Applies Today
+
+Within the current Claude API ecosystem, this is already partially implemented via the tier strategy (Opus orchestrates, Haiku executes). The key insight is to be **more aggressive** about pushing work down:
+
+| Current Pattern                                   | Delegation Pattern                                           |
+| ------------------------------------------------- | ------------------------------------------------------------ |
+| Opus orchestrator reads files itself              | Opus delegates file reading to Haiku Explore agent           |
+| Sonnet subagent formats its own report            | Sonnet produces findings, Haiku formats the report           |
+| Each subagent explores the codebase independently | Orchestrator pre-computes context, passes it in spawn prompt |
+
+## Advisor Strategy (Platform-Native)
+
+Announced April 9, 2026 by Anthropic. The platform now supports a first-party advisor pattern where two models share a single context window with distinct roles.
+
+### How It Works
+
+```
+Executor (Sonnet) ← runs every turn, owns tool calls
+  ↓ (on-demand tool call)
+Advisor (Opus) ← reviews shared context, sends advice back
+  ↑
+Shared context: conversation + tools + history
+```
+
+Sonnet runs the agentic loop every turn (executor), handling file reads, code writes, tool orchestration, and report generation. When a judgment call is needed — architecture trade-off, security severity assessment, technology recommendation — Sonnet invokes Opus via a tool call. Opus reviews the full shared context and returns its advice. The executor then acts on that advice.
+
+### When to Use
+
+- **Long-running agentic sessions** where most turns are mechanical (read, edit, run tests) but a few turns require deep reasoning
+- **Skills currently running all-Opus** that only need Opus judgment at key decision points — the rest is Sonnet-capable work
+- **Cost-sensitive workflows** that currently avoid Opus entirely but would benefit from occasional Opus judgment
+
+### Cost Benefit
+
+Near-Opus intelligence at Sonnet cost. In a typical 50-turn agentic session, Opus might activate at 5-8 decision points. The other 42-45 turns run at Sonnet pricing. Estimated ~70% cost reduction vs all-Opus for sessions with sparse judgment needs.
+
+### Which Skills Benefit
+
+| Skill            | Pattern                                                                                 |
+| ---------------- | --------------------------------------------------------------------------------------- |
+| **cto**          | Sequential mode: Sonnet explores codebase, Opus advises on severity and recommendations |
+| **deep-plan**    | Phase 2 (planning): Sonnet synthesizes research, Opus advises at decision gates         |
+| **parallel-dev** | CI fix escalation: Sonnet fixes, Opus advisor after 2 failed attempts                   |
+
+Skills that require Opus on every turn (swarm orchestration, full architecture reviews) should remain all-Opus.
+
+### Relationship to Model Delegation
+
+The advisor strategy is the **platform-native, first-party version** of what the Model Delegation Pattern (below) describes as a DIY approach. Key differences:
+
+- **Shared context window** — no information loss between executor and advisor
+- **No custom routing logic** — the platform handles the model switching
+- **First-party API support** — stable, maintained by Anthropic
+
+Prefer the advisor strategy when available. Fall back to DIY model delegation only for non-Claude-Code environments (Claudia, Paperclip) where the platform API is not accessible.
+
+### Local Model Tier (Tier 0) — Claudia Infrastructure
+
+Tier 0 is **production-deployed** via Claudia's 3-tier inference chain. These models handle message routing, text generation, and lightweight agentic tasks outside of Claude Code.
+
+**Note:** Claude Code subagents can only route to Anthropic models (Haiku/Sonnet/Opus). Tier 0 applies to Claudia and other systems that can call local/cloud endpoints directly.
+
+#### Deployed Infrastructure
+
+| Location                    | Model                                  | Runtime        | Endpoint           | Speed           |
+| --------------------------- | -------------------------------------- | -------------- | ------------------ | --------------- |
+| **Mac Mini M4 Pro (48 GB)** | Qwen3.5-35B-A3B-4bit (MoE, 3B active)  | MLX LM v0.31.1 | `mini:1235`        | ~103 tok/s      |
+| **Mac Mini**                | Qwen3.5-9B-4bit                        | MLX LM         | `mini:1235` (swap) | ~46-52 tok/s    |
+| **Mac Mini**                | nanoLLaVA-1.5-8bit (vision)            | MLX VLM        | `mini:8001`        | —               |
+| **Mac Mini**                | nomic-embed-text-v1.5 (embeddings)     | LM Studio      | `mini:1234`        | —               |
+| **VPS (external VPS)**           | Nemotron 3 Super 120B MoE (12B active) | Ollama         | `vps:11434`        | CPU-bound, slow |
+| **VPS**                     | Qwen3:8B, Qwen2.5:14B                  | Ollama         | `vps:11434`        | CPU-bound, slow |
+| **Cloud**                   | Qwen 3.6 Plus                          | OpenRouter     | API                | Fast            |
+
+#### Claudia's Fallback Chain
+
+```
+Tier 1: Claude Max (Agent SDK) — primary for all reasoning
+  ↓ fallback
+Tier 2: Mac Mini MLX — Qwen3.5-35B-A3B (via Tailscale)
+  ↓ fallback
+Tier 3: VPS Ollama — Nemotron 3 Super
+  ↓ fallback
+Tier 0R: OpenRouter — Qwen 3.6 Plus (cloud, free while preview lasts)
+```
+
+#### Combined Tier Table
+
+| Tier        | Model                                                  | Cost   | Where Used                      |
+| ----------- | ------------------------------------------------------ | ------ | ------------------------------- |
+| **Tier 0a** | Qwen 3.6 Plus via OpenRouter (1M ctx, native tool use) | Free\* | Claudia fallback                |
+| **Tier 0b** | Qwen3.5-35B-A3B-4bit via MLX (Mac Mini)                | Free   | Claudia Tier 2, text generation |
+| **Tier 0c** | Nemotron 3 Super via Ollama (VPS)                      | Free   | Claudia Tier 3, CEO agents      |
+| **Tier 1**  | Haiku                                                  | Low    | Claude Code subagents           |
+| **Tier 2**  | Sonnet                                                 | Medium | Claude Code subagents           |
+| **Tier 3**  | Opus                                                   | High   | Claude Code orchestration       |
+
+\* Qwen 3.6 Plus Preview is free on OpenRouter as of March 2026. Previous gen went to $0.1/$0.3 after preview ended — expect similar.
+
+#### Candidate: Qwen3.5-27B-Claude-Opus-Distilled
+
+`Jackrong/Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled` — SFT+LoRA fine-tune on Claude 4.6 Opus reasoning traces. Q4_K_M at ~16.5 GB, 29-35 tok/s on RTX 3090, 262K context. Native tool-calling, thinking mode, self-correction. Validated in Claude Code agentic loops (9+ min autonomous, 353K+ HF downloads). MLX 4-bit variant available. **Not yet deployed** — the Qwen3.5-35B-A3B already running on Mini is faster (103 vs ~30 tok/s) though lacks the reasoning distillation. Worth A/B testing for agentic quality vs speed tradeoff.
+
+### Practical Takeaway
+
+Even without local models, apply the delegation mindset now:
+
+1. **Pre-compute context** in the orchestrator instead of letting each subagent rediscover it
+2. **Split reasoning from generation** — if a subagent needs to analyze AND format, consider two passes
+3. **Push formatting to Haiku** — any subagent whose final step is "format findings as markdown table" could delegate that step
+
+## Prompt Cache TTL (Subagents vs Orchestrator)
+
+Subagents run on **5m prompt cache TTL** — this is Anthropic's intentional design, not a bug (confirmed by Boris Cherny, Claude Code team, April 2026). Subagents are rarely resumed, so 1h cache would be a net overcharge. The main orchestrator session is getting **1h cache** rolled out selectively.
+
+**Cost implications for subagent-heavy patterns:**
+
+- Don't assume 1h cache benefits when estimating subagent token costs
+- Swarm patterns (3-5 reviewers) pay full cache-write cost per subagent at 5m TTL
+- The ScheduleWakeup "sleep under 270s to stay in cache" rule remains correct for subagents
+- Orchestrator sessions may benefit from longer intervals once 1h is confirmed active
+- Env vars to force 1h or 5m are coming (not yet available as of April 2026)
+
+**Note:** Disabling telemetry disables experiment gates client-side, forcing everything back to 5m — including the main session.
+
+## Context Window Considerations
+
+As of v2.1.75, Opus 4.6 defaults to **1M context** for Max/Team/Enterprise. This changes the cost calculus:
+
+- Orchestrator skills (cto, ship, parallel-dev) can hold more codebase context without aggressive compaction
+- Spawn prompts can include richer pre-computed context (Section 3.5) without crowding the window
+- Subagents inheriting Opus also get 1M, reducing the need for aggressive scope-limiting in spawn prompts
+
+## Rule of Thumb
+
+**If the subagent only reads files and reports results → haiku.**
+**If the subagent writes code or makes judgment calls → sonnet.**
+**If the subagent makes architectural or security decisions → opus.**
+**If the task runs as a Claude Code Routine (scheduled, autonomous, no human oversight) → opus-4.7.** Noah Zweben (Claude Code PM) explicitly positioned Routines + Opus 4.7 as "the real unlock" (2026-04-16). Default all Routines to 4.7 — background agents need self-verification and strong judgment under ambiguity.
+**If a skill runs all-Opus but only needs Opus reasoning at decision points → advisor pattern (Sonnet executor + Opus advisor).**
+**If the task runs via Claudia (not Claude Code) → Tier 0b (Qwen3.5-35B-A3B on Mac Mini) or Tier 0a (OpenRouter).**
+
+---
+
+## rules/example-sync-rules.md
+
+# Example Claude Repo Sync Rules
+
+Rules for what to include/exclude when pushing to `escotilha/claude-public`.
+
+## Purpose
+
+The `escotilha/claude-public` repo is a **public-facing showcase** of reusable Claude Code skills and agents. It should contain only generic, portable skills — not project-specific, infrastructure-specific, or internal tooling.
+
+## EXCLUDE from escotilha/claude-public
+
+### Project-Specific Skills (tied to a single project)
+
+- `qa-conta` — ExampleProject-specific QA
+- `qa-projectb` — ProjectB-specific QA
+- `qa-projectc` — ProjectC-specific QA
+- `virtual-user-testing` — ExampleProject-specific persona testing
+- `verify-conta` — ExampleProject-specific verification suite (ruff, mypy, tsc, vitest)
+- `example-project-ci-rescue` — ExampleProject-specific CI failure diagnosis and fix playbook
+- `example-project-eod` — ExampleProject end-of-day autonomous pipeline
+- `example-project-snapshot` — Generate ExampleProject CODEBASE-REFERENCE.md
+- `oci-health` — ExampleProject OCI infrastructure health check
+- `proposal-source` — ProjectB client proposals
+- `chief-geo` — ProjectB GEO officer (daily autonomous)
+- `health-report` — ProjectB-specific health report
+
+### Deployment Skills (project-specific pipelines)
+
+- `deploy-conta-staging` — ExampleProject OCI staging deployment
+- `deploy-conta-production` — ExampleProject OCI production promotion
+- `deploy-conta-full` — ExampleProject staging → production pipeline
+- `deploy-projectb` — ProjectB Render deployment
+- `deploy-claudia` — Claudia VPS deployment
+- `example-project-guardian` — ExampleProject pre-deploy checks
+- `projectb-guardian` — ProjectB pre-deploy checks
+
+### Internal Tooling (personal workflow, not reusable)
+
+- `cs` — syncs escotilha/claude personal repo
+- `cpr` — personal commit+push+PR shortcut
+- `sc` — personal ship commit shortcut
+- `paperclip` — Paperclip control plane (internal orchestration)
+- `paperclip-create-agent` — Paperclip agent creation
+- `slack` — personal Slack automation
+- `agentmail` — personal email automation
+- `tweet` — personal tweet fetching
+- `gws` — personal Google Workspace automation
+- `mini-remote` — SSH relay to Mac Mini
+- `computer-use` — macOS/iOS desktop automation
+- `nanoclaw` — personal agent runtime setup
+
+### Personal Decision/Context Tools
+
+- `pr-impact` — Example (PUBCO) press release optimizer
+- `rex` — infrastructure security audit across personal machines
+- `office-hours` — product office hours (internal brainstorming)
+- `primer` — personal session context recovery
+- `vibc` — advisory board deliberation simulator
+
+### Infrastructure References (sensitive)
+
+Never push content containing:
+
+- external VPS VPS details (IPs, hostnames, SSH ports)
+- Tailscale IPs or network topology
+- Supabase project URLs or keys
+- API endpoints for staging/production (e.g., api.example.com)
+- Personal email addresses or agent mailboxes
+- GitHub tokens or auth details
+
+### Meta/Setup Skills
+
+- `claude-setup-optimizer` — only useful for this specific setup
+- `memory-consolidation` — tied to personal memory pipeline
+- `meditate` — tied to personal memory pipeline
+- `test-memory` — debug skill
+
+## INCLUDE in escotilha/claude-public
+
+### Generic, Reusable Skills
+
+- `cto` — architecture/security/performance review (any project)
+- `ship` — end-to-end feature shipping (any project)
+- `deep-plan` — research + plan + implement (any project)
+- `deep-research` — multi-track research (any topic)
+- `qmd` — semantic search over markdown collections (any project)
+- `parallel-dev` — parallel feature development (any project)
+- `first-principles` — problem decomposition (any problem)
+- `qa-cycle` — master QA orchestrator (any project)
+- `qa-fix` — fix QA issues (any project)
+- `` — verify fixes (any project)
+- `fulltest-skill` — full-spectrum testing (any site)
+- `website-design` — B2B SaaS design (any project)
+- `codebase-cleanup` — find unused files (any project)
+- `project-orchestrator` — full project lifecycle (any project)
+- `review-changes` — code review (any project)
+- `test-and-fix` — auto-fix tests (any project)
+- `verify` — typecheck + tests + build (any project)
+- `skill-tree` — split large docs into navigable hierarchies (any project)
+- `run-local` — start dev server (any project)
+- `research` — analyze URLs/tools (any topic)
+- `firecrawl` — web scraping (any site)
+- `get-api-docs` — fetch current API docs via chub (any library)
+- `scrapling` — stealth scraping (any site)
+- `browserless` — headless browser (any site)
+- `pinchtab` — local browser automation, token-efficient (any site)
+- `maketree` — git worktree management (any project)
+- `revert-track` — revert features (any project)
+- `manual` — build user manual (any project)
+- `officecli` — create/edit Office documents via CLI (any project)
+- `demo` — reproducible demo documents (any project)
+- `cpo` — product lifecycle (any project)
+- `llm-eval` — LLM output evaluation pipeline (any AI feature)
+- `growth` — SaaS growth engineering (any SaaS product)
+
+### Generic Agents
+
+All agents in `~/.claude-setup/agents/` are generic and safe to share.
+
+### LLM-Discoverable Index Files (auto-generated)
+
+These are generated by `tools/build-llms.sh` and regenerated nightly by `mem-consolidate`. They inline skill + rule content and are safe to share — the generator already excludes `_*` (private/archived) skills and any rule files listed in `RULE_EXCLUDES`:
+
+- `llms.txt` — llmstxt.org-spec index with links to rules and skills
+- `llms-full.txt` — single-file context (rules inlined, skill frontmatter + preview per skill)
+
+These are published per the llmstxt.org convention so any LLM agent can fetch a single URL to understand the full setup.
+
+## Decision Rule
+
+**Before sharing a skill to escotilha/claude-public, ask:**
+
+1. Does it reference a specific project name (ExampleProject, ProjectB, ProjectC)? -> EXCLUDE
+2. Does it contain hardcoded IPs, URLs, or credentials? -> EXCLUDE
+3. Does it only work with personal accounts/services (Slack, email, GitHub)? -> EXCLUDE
+4. Could a stranger clone the repo and use this skill on their own project? -> INCLUDE
+
+---
+
+## rules/opus-4-7-prompting.md
+
+# Opus 4.7 Prompting Patterns
+
+Canonical prompt snippets for Claude Opus 4.7. Source: Boris Cherny + Anthropic blog, 2026-04-16 (https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code).
+
+## Thinking Control (replaces `budget_tokens`)
+
+Opus 4.7 uses adaptive thinking — it decides per-step whether to think. Fixed thinking budgets are no longer supported. Steer via prompt:
+
+**Increase thinking** (hard problems, ambiguous debugging, architecture):
+> "Think carefully and step-by-step before responding; this problem is harder than it looks."
+
+**Decrease thinking** (simple lookups, cost-sensitive steps, interactive chat):
+> "Prioritize responding quickly rather than thinking deeply. When in doubt, respond directly."
+
+## Subagent Fan-Out (4.7 is more judicious than 4.6)
+
+4.7 won't auto-delegate to subagents the way 4.6 did. If the skill needs parallel execution, say so explicitly:
+
+> "Do not spawn a subagent for work you can complete directly in a single response (e.g., refactoring a function you can already see). Spawn multiple subagents in the same turn when fanning out across items or reading multiple files."
+
+Apply this to: `/cto` swarm mode, `/parallel-dev`, `/qa-cycle`, `/deep-research`, any skill that expects 3+ parallel agents.
+
+## Response Length & Style
+
+4.7 is less verbose by default — shorter on simple queries, longer on open-ended analysis. If you need a specific length or style:
+
+- State it explicitly ("respond in under 150 words", "produce a checklist")
+- Prefer positive instructions over negative ones ("be concise" > "don't be verbose")
+
+## Tool Use
+
+4.7 calls tools less often and reasons more before doing so. If aggressive search/file reading is needed during agentic work, describe when and why:
+
+> "Before answering, read all files in `src/auth/` and grep for `authenticate` across the repo."
+
+Do not assume 4.7 will self-discover the need to explore.
+
+## Interactive vs Autonomous Mode
+
+- **Autonomous/async** (single-turn, fire-and-forget): lower reasoning overhead. Best for Routines and scheduled tasks.
+- **Interactive/sync** (multi-turn): more reasoning per user turn. Front-load the full task in turn 1 — intent, constraints, acceptance criteria, file locations. Batch follow-up questions rather than asking one at a time; each turn adds reasoning overhead.
+
+## Effort Tiers (when configurable)
+
+| Tier    | When to use                                                     |
+| ------- | --------------------------------------------------------------- |
+| `low`   | Cost/latency-sensitive, tightly scoped. Still beats 4.6 at same level. |
+| `high`  | Concurrent sessions, balanced intelligence/cost                 |
+| `xhigh` | **Default.** Most coding and agentic work. Best autonomy-to-cost ratio. |
+| `max`   | Evals/ceiling testing only. Diminishing returns, prone to overthinking. |
+
+---
+
+## rules/parallel-first.md
+
+# Parallel-First Execution Rule
+
+## Default Behavior
+
+Always prefer parallel execution over sequential when tasks are independent. This applies to:
+
+1. **Subagent spawning** — launch all independent agents simultaneously, never sequentially
+2. **Tool calls** — batch all independent reads, greps, globs, and web fetches into a single message
+3. **Skill execution** — when a skill supports swarm mode (e.g., `/cto`, `/fulltest-skill`, `/qa-cycle`, `/qa-projectb`), always use swarm mode unless the user explicitly asks for sequential
+4. **Research** — spawn parallel research tracks instead of sequential lookups
+5. **Testing** — run page testers, persona testers, and fixers in parallel batches
+
+## When to Parallelize
+
+| Scenario                      | Action                                                 |
+| ----------------------------- | ------------------------------------------------------ |
+| Multiple files to read        | Parallel Read calls in one message                     |
+| Multiple searches needed      | Parallel Grep/Glob calls in one message                |
+| Independent features to build | Parallel agents in worktrees (`isolation: "worktree"`) |
+| Multiple reviewers needed     | Parallel review agents (security, perf, architecture)  |
+| Multiple pages to test        | Batch 3-5 pages per parallel agent                     |
+| Research with multiple angles | Parallel research agents per track                     |
+| Independent API calls         | Parallel tool calls in one message                     |
+
+## When NOT to Parallelize
+
+- Tasks with data dependencies (B needs A's output)
+- File edits to the same file (sequential to avoid conflicts)
+- Git operations (sequential — shared state)
+- Database migrations (sequential — order matters)
+
+## Agent Spawning Patterns
+
+### For investigation/research (read-only):
+
+```
+Agent(model="haiku", subagent_type="Explore", ...)  # Cheapest for read-only
+```
+
+### For implementation (writes code):
+
+```
+Agent(model="sonnet", isolation="worktree", ...)  # Isolated, mid-tier
+```
+
+### For architecture/security decisions:
+
+```
+Agent(model="opus", ...)  # Full reasoning for critical decisions
+```
+
+### Swarm pattern (3-5 parallel specialists):
+
+```
+# Launch all in a single message:
+Agent(name="security", model="sonnet", ...)
+Agent(name="performance", model="sonnet", ...)
+Agent(name="architecture", model="sonnet", ...)
+Agent(name="quality", model="sonnet", ...)
+```
+
+## Maximizing Parallelism in Practice
+
+1. **Pre-compute shared context** — gather codebase info once, pass to all agents in spawn prompts
+2. **Batch tool calls aggressively** — if you need 5 file reads, do all 5 in one message
+3. **Use background agents** — for long-running tasks, use `run_in_background: true` and continue other work
+4. **Shut down finished agents immediately** — idle agents waste tokens on every broadcast
+5. **Never poll** — use hooks (TeammateIdle, TaskCompleted) instead of sleep loops
+
+## Token Budget Awareness
+
+Parallel execution multiplies context windows. Apply the model tier strategy:
+
+- Haiku for mechanical tasks (explore, test, format)
+- Sonnet for judgment tasks (review, implement, fix)
+- Opus only for orchestration and critical decisions
+
+The sweet spot is 3-5 parallel agents. Below 3, overhead exceeds benefit. Above 5, token costs explode and coordination degrades.
+
+---
+
+## rules/skill-authoring-conventions.md
+
+# Skill Authoring Conventions
+
+Rules for creating, updating, and maintaining SKILL.md files across the skills system.
+
+## Patch Over Rewrite
+
+**When updating an existing skill file, always prefer `Edit` (patch with minimal old/new strings) over full file rewrites.**
+
+Why:
+
+- Preserves surrounding context that wasn't part of the change
+- Reduces token cost (sending a 3-line diff vs a 300-line rewrite)
+- Makes review easier — the diff shows exactly what changed
+- Prevents accidental deletion of sections not related to the update
+- Matches the Hermes agent's documented best practice for skill self-modification
+
+When to use full rewrite (Write tool):
+
+- Creating a brand-new skill file
+- Restructuring the entire skill (rare — discuss with user first)
+- File is < 20 lines
+
+## Auto-Generated Skills
+
+Skills generated by `/meditate` Phase 6 or Claudia's `maybeGenerateSkill` are **drafts**:
+
+1. Always include `— auto-generated from session on {date}` in the description
+2. Set `model: sonnet` (not opus — auto-skills should be cheap to invoke)
+3. Include a `## Notes` section with "Review and refine before relying on this skill"
+4. Do not add to the skill-first routing table until manually verified
+
+## Naming Conventions
+
+- Skill directory: kebab-case (`deploy-oci-staging/`)
+- Skill file: always `SKILL.md` inside the directory
+- Name field in frontmatter: matches directory name
+- Tags: lowercase, singular (`deployment` not `deployments`)
+
+## Frontmatter Required Fields
+
+Every SKILL.md must have at minimum:
+
+```yaml
+---
+name: { kebab-case }
+description: "{one-line with trigger phrases}"
+user-invocable: true/false
+context: fork/inline
+model: haiku/sonnet/opus
+effort: low/medium/high
+allowed-tools: [list]
+---
+```
+
+## Invocation Context Discrimination
+
+Skills that can be called both by users and by other agents should include:
+
+```yaml
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    confirmDestructive: true
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    confirmDestructive: false
+    outputFormat: structured
+```
+
+## Tool Annotations
+
+Declare safety hints for non-obvious tools:
+
+```yaml
+tool-annotations:
+  Bash: { destructiveHint: true }
+  mcp__memory__create_entities: { readOnlyHint: false, idempotentHint: false }
+```
+
+## Skill Lifecycle
+
+1. **Draft** — auto-generated or manually created, untested
+2. **Active** — manually verified, in the skill-first routing table
+3. **Deprecated** — superseded by another skill, kept for reference
+4. **Archived** — moved out of skills/ (or deleted if no longer useful)
+
+Mark lifecycle in the description: `"(DRAFT) ..."` or `"(DEPRECATED) ..."`.
+
+---
+
+## rules/skill-first.md
+
+# Skill-First Rule
+
+## Mandatory Pre-Flight Check
+
+**BEFORE starting ANY task, scan the available skills list in the system reminder and check if a skill covers it.** Never do ad-hoc what a skill already handles. Skills use optimized pipelines, swarms, and established patterns — they are faster and more thorough than improvising.
+
+When you identify a matching skill, tell the user which skill you're invoking and why, then call it via the Skill tool.
+
+## Routing Table
+
+### Development Workflow
+
+| Task                          | Skill                   | When                                                     |
+| ----------------------------- | ----------------------- | -------------------------------------------------------- |
+| Build a feature end-to-end    | `/ship`                 | Feature requires spec → implement → test                 |
+| Plan complex implementation   | `/deep-plan`            | Need research → plan → implement phases                  |
+| Quick architecture advice     | `/cto`                  | Technical decision, swarm analysis                       |
+| Break down hard problem       | `/first-principles`     | Ambiguous or complex problem                             |
+| Run project tests + typecheck | `/verify`               | After making changes, before committing                  |
+| Fix failing tests             | `/test-and-fix`         | Tests are broken, need auto-fix loop                     |
+| Review code before commit     | `/review-changes`       | Uncommitted changes need review                          |
+| Debug a bug (Iron Law)        | `/investigate`          | Bug, 500, regression — enforces root-cause before fix, 3-strike escalation |
+| Safety guardrails for bash    | `/careful`              | Before prod work / deploys — warns on rm, DROP, force-push, kubectl delete |
+| Restrict edits to a directory | `/freeze`               | While debugging — blocks Edit/Write outside chosen path, prevents scope creep |
+| Cloud parallel code review    | `/ultrareview`          | Multi-reviewer cloud-based review (Claude Code 2.1.111+). Distinct from `/cto` (local swarm) and `/review-changes` (single-agent). Use for PR-scale review. |
+| PR review (GitHub)            | `/review` (built-in)    | Review a specific pull request by number or URL                                                                                                             |
+| Security review (branch)      | `/security-review` (built-in) | Security-focused review of pending changes on current branch                                                                                          |
+| Initialize CLAUDE.md          | `/init` (built-in)      | Bootstrap a new CLAUDE.md file with codebase documentation                                                                                                  |
+| Commit + push + PR            | `/cpr`                  | Ready to ship to remote                                  |
+| Start local dev server        | `/run-local`            | Need to run project locally                              |
+| Parallel feature branches     | `/parallel-dev`         | Multiple independent features                            |
+| Clean unused files            | `/codebase-cleanup`     | Project has cruft                                        |
+| Design website/landing page   | `/website-design`       | Any web UI design task                                   |
+| Meta-orchestration (any task) | `/orchestrate`          | Refine intent → plan → execute → verify → ship → deploy, with configurable gates. Supersedes `/project-orchestrator`. |
+| End-of-session reflection     | `/meditate`             | After /ship, /cto, /parallel-dev, long work              |
+| Full product from idea        | `/cpo`                  | Product lifecycle: discovery → spec → build              |
+| Git worktree management       | `/maketree`             | Create/manage isolated worktrees                         |
+| Refactor for clarity          | `/simplify` (built-in)  | Clean up code after long session or PR                   |
+| Parallel codebase migration   | `/batch` (built-in)     | Repetitive changes across many files                     |
+| Revert a feature/track        | `/revert-track`         | Undo a feature, phase, or commit range                   |
+| Reproducible demo document    | `/demo`                 | Executable narrative with captured output                |
+| Recurring interval task       | `/loop` (built-in)      | Poll status, repeat a command on a schedule              |
+| Schedule a remote agent       | `/schedule`             | Cron-based triggers, remote agents (Routines when GA)    |
+| Fetch API docs for a library  | `/get-api-docs`         | Before writing code that uses external APIs              |
+| Split large docs into tree    | `/skill-tree`           | API docs or references too large for subagent context    |
+| Build with Claude API/SDK     | `/claude-api`           | Code imports anthropic SDK or user asks about Claude API |
+| Context recovery              | `/primer`               | After compaction, new session, or "where was I?"         |
+| Checkpoint before /clear      | `/handoff`              | Context 85%+, before /clear/compact — writes resume block to plan doc that /primer consumes |
+| Search memory                 | `mem-search "<query>"`  | Find past decisions, patterns, learnings (CLI tool)      |
+| Advisory board deliberation   | `/vibc`                 | Complex decision needing diverse perspectives            |
+| Office docs (.docx/xlsx/pptx) | `/officecli`            | Create, edit, inspect Word/Excel/PowerPoint documents    |
+| Tech stack audit              | `/tech-audit`           | Compare versions, find EOL libs, recommend upgrades      |
+| Knowledge base / wiki         | `/wiki`                 | Ingest sources, query knowledge, persistent KB           |
+| Local inference gateway       | `/local-inference`      | Set up LiteLLM multi-model gateway, local models         |
+| Bootstrap vault CLAUDE.md     | `/vault-bootstrap`      | Obsidian/markdown vault setup with API contract          |
+
+### QA & Testing
+
+| Task                        | Skill                   | When                                                                |
+| --------------------------- | ----------------------- | ------------------------------------------------------------------- |
+| Full QA cycle (any project) | `/qa-cycle`             | Master orchestrator — auto-detects project                          |
+| ExampleProject verification suite | `/verify`         | Full ruff + mypy + pytest + tsc + eslint + build + vitest + gitleaks |
+| ExampleProject QA specifically    | `/qa-cycle`             | ExampleProject-specific testing                                           |
+| ProjectB QA specifically  | `/qa-projectb`        | ProjectB-specific testing                                         |
+| ProjectB GEO strategy     | `/chief-geo`            | GEO knowledge base, product audit, visibility testing, daily runs   |
+| Fix issues from QA DB       | `/qa-fix`               | Open QA issues need fixing                                          |
+| Verify fixed issues         | ``            | Issues in TESTING status                                            |
+| Full-spectrum site testing  | `/fulltest-skill`       | Sub-skill called by qa-cycle; or direct for standalone site testing |
+| Persona-based user testing  | `/virtual-user-testing` | Simulate real user journeys                                         |
+| Check ExampleProject on OCI       | `/oci-health`           | Is ExampleProject up?                                                     |
+
+### Research & Analysis
+
+| Task                         | Skill            | When                                              |
+| ---------------------------- | ---------------- | ------------------------------------------------- |
+| Semantic search over notes   | `/qmd`           | Find skills, patterns, decisions, past research   |
+| Deep multi-track research    | `/deep-research` | Any research question                             |
+| Social + web research (30d)  | `/last30days`    | Reddit/X/YouTube/HN/TikTok trends in last 30 days |
+| Analyze URL/image/tool       | `/research`      | Evaluate a specific resource                      |
+| Web scraping                 | `/firecrawl`     | Extract data from websites                        |
+| Anti-bot / Cloudflare scrape | `/scrapling`     | Stealth scraping, TLS impersonation, anti-bot     |
+| Headless browser automation  | `/browserless`   | PDFs, screenshots, Lighthouse                     |
+| Local browser automation     | `/agent-browser` | Primary: Rust CDP CLI, batch, visual diff, native |
+| Local browser (fallback)     | `/pinchtab`      | Token-efficient a11y tree, element refs, local    |
+
+### AI Quality & Growth
+
+| Task                        | Skill       | When                                         |
+| --------------------------- | ----------- | -------------------------------------------- |
+| Evaluate LLM output quality | `/llm-eval` | Any AI-powered feature needs quality metrics |
+| Audit eval pipeline         | `/llm-eval` | Check existing evals for gaps                |
+| RAG evaluation              | `/llm-eval` | Retrieval + generation quality               |
+| Landing page CRO            | `/growth`   | Optimize conversion on any page              |
+| Pricing strategy            | `/growth`   | Analyze/optimize SaaS pricing                |
+| Signup/onboarding flow      | `/growth`   | Reduce friction in user acquisition          |
+| SEO / AI SEO (GEO) audit    | `/growth`   | Improve organic + AI search visibility       |
+| Churn prevention            | `/growth`   | Identify and reduce user churn               |
+| Competitor comparison page  | `/growth`   | Build vs-competitor content                  |
+| Email lifecycle sequences   | `/growth`   | Design activation/retention emails           |
+
+### Client & Business
+
+| Task                                                 | Skill              | When                                                  |
+| ---------------------------------------------------- | ------------------ | ----------------------------------------------------- |
+| ProjectB client proposal (GEO diagnostic/research) | `/proposal-source` | Client proposal from conversations, URLs, notes → PDF |
+| ExampleProject product/UX/engineering decision             | `/conta-cpo`       | 8-seat ExampleProject council — deliberates product/UX/eng/pricing-GTM decisions, auto-loads example-project-os-v3 context. Use instead of `/vibc` for ExampleProject-specific decisions. |
+
+### Communication & Utilities
+
+| Task                           | Skill                     |
+| ------------------------------ | ------------------------- |
+| Send/manage email              | `/agentmail`              |
+| Slack messages / channels      | `/slack`                  |
+| Fetch tweet                    | `/tweet`                  |
+| Memory maintenance (Turso/MCP) | `/memory-consolidation`   |
+| Manage auto-memory (built-in)  | `/memory`                 |
+| Optimize claude setup          | `/claude-setup-optimizer` |
+| Sync setup repo                | `/cs`                     |
+| Build user manual              | `/manual`                 |
+
+## When to Go Ad-Hoc
+
+Only skip skills when:
+
+1. The task is a **single small edit** (fix a typo, change a value)
+2. The user explicitly asks for a specific manual approach
+3. No skill covers the task at all
+4. The task is pure conversation/explanation (no implementation)
+
+> **Tip:** Run `claude agents` in the terminal to list all configured agents (specialist, project, and NuvinOS agents).
+
+## Remote Monitoring (Remote Control)
+
+Long-running skills like `/parallel-dev`, `/cto` (swarm), `/qa-cycle`, and `/fulltest-skill` can be monitored from any browser or mobile device using Claude Code Remote Control (Pro/Max/Team, v2.1.51+).
+
+- **From within a session:** type `/remote-control` or `/rc` — attaches to current conversation with full history
+- **From CLI:** `claude remote-control` — starts server mode (persistent, multi-session)
+- **Interactive + remote:** `claude --remote-control` — normal interactive session with remote access enabled
+
+### Server Mode Flags
+
+| Flag                         | Description                                                                                                                                                                                                       |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--spawn worktree`           | Each concurrent remote session gets its own git worktree. **Recommended for `/parallel-dev` and `/qa-cycle`** — matches their existing worktree isolation model. Default: `same-dir`. Toggle at runtime with `w`. |
+| `--capacity <N>`             | Max concurrent sessions (default: 32). Useful for `/fulltest-skill` with many parallel testers.                                                                                                                   |
+| `--name "My Project"`        | Custom session title in the session list.                                                                                                                                                                         |
+| `--verbose`                  | Detailed connection/session logs.                                                                                                                                                                                 |
+| `--sandbox` / `--no-sandbox` | Filesystem/network isolation (off by default).                                                                                                                                                                    |
+
+### Security Model
+
+- Traffic routes through Anthropic API over TLS with short-lived scoped credentials
+- No inbound ports opened — outbound HTTPS only
+- Sessions reconnect automatically after network drops
+
+### Access
+
+Connect from another device via the session URL displayed in terminal, the QR code (press spacebar in server mode), or by finding the session in the claude.ai/code session list.
+
+Useful for fire-and-forget workflows: launch the skill locally, then monitor/approve from phone.
+
+## Composing Skills
+
+Many tasks benefit from chaining skills:
+
+- Feature work: `/deep-plan` → `/ship` → `/verify` → `/cpr`
+- QA cycle: `/qa-cycle` → `/qa-fix` → ``
+- Release: `/review-changes` → `/verify` → `/cpr`
+
+---
+
+## rules/tool-annotations.md
+
+# Tool Annotations & Invocation Contexts
+
+## Annotations (declared in skill YAML frontmatter)
+
+| Hint                    | Behavior                                                   |
+| ----------------------- | ---------------------------------------------------------- |
+| `destructiveHint: true` | Prefer safer alternatives first. Confirm when user-direct. |
+| `readOnlyHint: true`    | Safe to call freely and retry.                             |
+| `idempotentHint: true`  | Safe to retry on failure.                                  |
+| `idempotentHint: false` | Call once, verify before retrying.                         |
+| `openWorldHint: true`   | Cache when possible, handle timeouts.                      |
+
+## Invocation Contexts
+
+- **user-direct** (user typed `/skill`): verbose output, confirm destructive actions, markdown format.
+- **agent-spawned** (invoked via Task/SendMessage): minimal output, no confirmation, structured format.
+
+---
+
+## rules/web-search-efficiency.md
+
+# Web Search Token Efficiency Rules
+
+## Tool Selection Priority
+
+When performing web search, use the most token-efficient tool available:
+
+| Need                  | Best Tool                                                                        | Token Budget        | Fallback  |
+| --------------------- | -------------------------------------------------------------------------------- | ------------------- | --------- |
+| Quick factual lookup  | Brave Search (`mcp__brave-search__*`) with `count=5`                             | ~1,500-2,000 tokens | WebSearch |
+| Content research      | Exa highlights (`mcp__exa__search`) with `highlights=true`, `maxCharacters=1500` | ~500-1,500 tokens   | Firecrawl |
+| Discovery (URLs only) | WebSearch (built-in)                                                             | ~150-400 tokens     | Brave     |
+| Full page extraction  | Firecrawl scrape with `onlyMainContent=true`                                     | ~3,400 tokens       | WebFetch  |
+| High-volume / free    | SearXNG on VPS (localhost:8888 via Tailscale)                                    | ~300-800 tokens     | WebSearch |
+| Anti-bot / blocked    | Scrapling → browse CLI                                                           | Variable            | WebFetch  |
+
+## Mandatory Patterns
+
+1. **Always set token limits** when the tool supports it:
+   - Brave: `count=5` (discovery) or `count=10` (deep research)
+   - Exa: `maxCharacters=1500` (highlights) or `maxCharacters=3000` (deep content)
+   - Firecrawl: `onlyMainContent=true` always
+
+2. **Prefer highlights over full text** — Exa highlights return 50-75% fewer tokens with higher accuracy
+
+3. **Search once, fetch selectively** — get URLs first, then fetch only 2-3 most relevant
+
+4. **Pre-search in orchestrator** — when spawning subagents, do broad search first, pass URL pool to subagents to avoid redundant searches
+
+## Fallback Chain
+
+```
+Search: Brave → Exa → WebSearch → SearXNG (VPS)
+Content: Exa highlights → Firecrawl scrape → WebFetch → Scrapling → browse CLI
+Always works: WebSearch + WebFetch (built-in)
+```
+
+---
+
+# Skills
+
+Each entry shows frontmatter + description + first paragraph. For full content, read skills/<name>/SKILL.md directly.
+
+## skills/agent-browser
+
+- **name:** agent-browser
+- **description:** Browser automation via Rust/CDP CLI. Navigate, click, fill, screenshot, visual diff. Triggers: agent-browser, browser automation, page snapshot.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** low
+
+# agent-browser
+
+Native Rust CLI for browser automation via CDP. Replaces `browse` CLI and PinchTab.
+
+**Binary:** `/opt/homebrew/bin/agent-browser` (v0.25.4+)
+**Chrome:** `~/.agent-browser/browsers/`
+
+---
+
+## skills/agentmail
+
+- **name:** agentmail
+- **description:** Email inbox management for AI agents using AgentMail API. Create inboxes, send/receive emails, reply, forward, and manage messages. Use when users want to send emails, create agent inboxes, check messages, or set up email automations.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** low
+
+# AgentMail - Email Inbox Manager for AI Agents
+
+Give any project or agent its own email inbox with AgentMail. Create, send, receive, reply, forward, and manage emails autonomously.
+
+---
+
+## skills
+
+- **name:** 
+- **description:** Repair broken Alembic migration chain — multiple heads, missing parents. Triggers: alembic repair, fix migration, multiple heads.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# `` — Fix Broken Alembic Migration Chains
+
+Built from the 8+ migration chain repair commits in the last 17 days. Handles the recurring ExampleProject failure modes:
+- multiple head revisions
+- missing parent references
+- PostgreSQL-only syntax on MySQL targets
+- stale `alembic_version` entries
+- branch conflicts after merge
+
+**Scope**: ExampleProject's Alembic setup at `apps/api/alembic/`. MySQL 8 production target, flexible for staging (usually MySQL). PostgreSQL only used for speci
+
+---
+
+## skills/architect
+
+- **name:** architect
+- **description:** Multi-feature architecture pipeline — parallel implement → verify → review → commit. Triggers on: architect, evolve, implement plan, parallel implement, multi-feature.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+## Purpose
+
+Orchestrate multi-feature architectural changes using parallel worktree agents. Designed for plans with N independent features that can be implemented simultaneously, then verified, reviewed, and shipped as a coherent batch.
+
+---
+
+## skills/architecture
+
+- **name:** architecture
+- **description:** Generate/maintain architecture docs with Mermaid diagrams, backups, PDF/DOCX export. Auto-detects changes. Triggers on: architecture, architecture doc, software architecture, generate architecture, update architecture.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# Architecture — Software Architecture Document Generator
+
+Generate, maintain, and export a comprehensive software architecture document for any project. Uses Mermaid diagrams for visual schemas. Keeps versioned backups and exports to PDF or DOCX via pandoc.
+
+---
+
+## skills/browserless
+
+- **name:** browserless
+- **description:** Headless browser via Browserless. PDFs, screenshots, Lighthouse, JS rendering, anti-bot. Triggers on: browserless, headless browser, generate PDF, take screenshot, lighthouse audit, unblock site, browser automation.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# Browserless - Headless Browser Automation
+
+Self-hosted headless Chrome automation via Browserless on the VPS. Generates PDFs, captures screenshots, extracts JS-rendered content, runs Lighthouse audits, and bypasses anti-bot protections.
+
+---
+
+## skills/careful
+
+- **name:** careful
+- **description:** Safety guardrails — warns before rm -rf, DROP TABLE, force-push, kubectl delete. Triggers: careful, careful mode, safety mode.
+- **user-invocable:** true
+- **model:** haiku
+- **effort:** low
+
+# /careful — Destructive Command Guardrails
+
+Activates a PreToolUse hook that warns before destructive Bash commands. The hook is
+always loaded by the harness but no-ops unless this skill has set the activation flag.
+
+---
+
+## skills/chief-geo
+
+- **name:** chief-geo
+- **description:** Chief GEO Officer for ProjectB. Knowledge base, product audit, manual updates, AI visibility testing. Triggers on: chief geo, geo officer, geo audit, geo strategy, geo knowledge, /chief-geo.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# Chief GEO — Generative Engine Optimization Officer for ProjectB
+
+You are the Chief GEO (Generative Engine Optimization Officer) for ProjectB. Your mission: ensure ProjectB is the most authoritative, cited, and recommended AI visibility platform across all generative AI engines.
+
+---
+
+## skills/claude-api
+
+- **name:** claude-api
+- **description:** Build/debug Claude API and Anthropic SDK apps — Messages API, Agent SDK, tool use, streaming, MCP, caching. TRIGGER: imports anthropic SDK, asks for Claude API. SKIP: openai/other SDK.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# Claude API Skill
+
+Help users build applications with the Claude API and Anthropic SDKs. This skill covers two primary integration paths:
+
+1. **Messages API** — Direct model prompting with fine-grained control
+2. **Claude Managed Agents** — Pre-built agent harness with managed cloud infrastructure
+
+---
+
+## skills/claude-setup-optimizer
+
+- **name:** claude-setup-optimizer
+- **description:** Analyze Claude Code changelog and recommend setup improvements. Triggers on: optimize claude setup, check for claude updates, improve my agents, sync with claude changelog, /optimize-setup.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# Claude Setup Optimizer
+
+Automatically analyzes the Claude Code changelog and recommends improvements to your agents, skills, plugins, and configuration based on new features.
+
+---
+
+## skills/codebase-cleanup
+
+- **name:** codebase-cleanup
+- **description:** Identify and remove unused, redundant, or dead code files in a project. Triggers on: clean up unused files, find unnecessary files, remove dead code, codebase cleanup, reduce project bloat.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** low
+
+# Codebase Cleanup
+
+This skill analyzes codebases to identify unused or unnecessary files, generates detailed reports, and safely removes files with user permission.
+
+---
+
+## skills/computer-use
+
+- **name:** computer-use
+- **description:** Desktop automation via Claude computer use. macOS apps, GUI tools, government portals, iOS Simulator. Triggers on: computer use, desktop automation, native app, gui automation, government portal, esocial, receita federal, ios simulator.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** medium
+
+# Computer Use — Desktop Automation Skill
+
+You are a desktop automation orchestrator. Your job is to control native macOS applications and GUI-only interfaces that cannot be reached by CLI tools, browser automation, or APIs.
+
+---
+
+## skills/conta-cpo
+
+- **name:** conta-cpo
+- **description:** ExampleProject advisory council — 8-seat product/UX/engineering deliberation board grounded in ExampleProject OS v3 state. Blind input, scored options, retrospective tracking. Triggers on: conta cpo, example-project council, product council, example-project advisory.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# /conta-cpo — ExampleProject Advisory Council
+
+An 8-seat advisory council of ExampleProject-domain experts (product, UX, engineering, data/integrations, QA, LGPD, accountant-in-residence, comedian) that deliberates on product / UX / engineering / pricing-GTM decisions using the /vibc deliberation engine adapted for ExampleProject.
+
+This is the ExampleProject-scoped counterpart to the generic `/vibc`. Use `/conta-cpo` when the decision is specific to the ExampleProject product, codebase, or GTM. Use `/vibc` for anything el
+
+---
+
+## skills/ci-rescue
+
+- **name:** example-project-ci-rescue
+- **description:** Diagnose and fix failing ExampleProject CI. Classifies failure, targeted fix. Triggers: ci rescue, ci failing, fix ci.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# `/ci-rescue` — Triage + Fix a Failing ExampleProject CI Run
+
+Built from the 45 `fix(ci)` + 10 `fix(deploy)` + 3 `fix(migration)` commits in the last 17 days. Classifies the failure, applies the known fix, re-triggers CI.
+
+**Scope**: ExampleProject repo only. GitHub Actions pipeline (`ci.yml`, `deploy-staging.yml`, `deploy-production.yml`). OKE + MySQL 8 production, staging MySQL.
+
+**Approval password**: `go` (same as `/orchestrate`).
+
+---
+
+---
+
+## skills/example-project-eod
+
+- **name:** example-project-eod
+- **description:** ExampleProject end-of-day: bug hunt, autofix, lessons, agenda email. Triggers: example-project eod, end of day, nightly example-project.
+- **user-invocable:** true
+- **model:** claude-opus-4-7
+- **effort:** high
+
+# `/example-project-eod` — ExampleProject End-of-Day Autonomous Pipeline
+
+Runs three phases nightly:
+1. **Bug hunt + autofix** (parallel QA + fix loop)
+2. **Lessons learned** (meditate + memory + skill proposals)
+3. **Daily agenda** (what shipped today → email to p@example.com)
+
+**Scope:** ExampleProject repo only. MUST be run from within the ExampleProject working directory or it aborts.
+
+**Safety floors (always on, mode-independent):**
+- Never merges to `main` automatically
+- Never deploys to production
+- Never fo
+
+---
+
+## skills/guardian
+
+- **name:** example-project-guardian
+- **description:** Pre-deploy guardian for ExampleProject. Multi-layer analysis (code, infra, runtime, diff-aware) before deploy to staging/production. Parallel subagents. Triggers on: example-project guardian, pre-deploy check, guardian, example-project pre-deploy.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# ExampleProject Guardian - Pre-Deploy Safety Gate
+
+Last line of defense before broken code reaches staging or production. This skill performs a comprehensive multi-layer analysis of the ExampleProject codebase, infrastructure, and runtime environment to catch architectural problems that surface-level testing misses.
+
+---
+
+## skills/example-project-snapshot
+
+- **name:** example-project-snapshot
+- **description:** Generate ExampleProject CODEBASE-REFERENCE.md — tech stack, product modules, API surface, infra, architecture. Triggers on: example-project snapshot, stack snapshot, codebase reference, refresh snapshot.
+- **user-invocable:** true
+- **model:** haiku
+- **effort:** medium
+
+# ExampleProject Codebase Snapshot
+
+Generates a `CODEBASE-REFERENCE.md` in the ExampleProject repo root that serves as a pre-computed context snapshot for all future Claude Code sessions. This eliminates repeated codebase discovery and gives subagents instant context.
+
+---
+
+## skills/cpo
+
+- **name:** cpo-ai-skill
+- **description:** Chief Product Officer AI — full product lifecycle, idea to production. Triggers: build this product, cpo mode, cpo.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# Chief Product Officer AI Skill
+
+---
+
+## skills/cpr
+
+- **name:** cpr
+- **description:** Commit, push, and create PR. Full git workflow in one command.
+- **user-invocable:** true
+- **model:** haiku
+- **effort:** low
+
+# CPR - Commit, Push, PR
+
+Full git workflow: commit all changes, push to remote, and create a pull request.
+
+---
+
+## skills/cs
+
+- **name:** cs
+- **description:** Sync Claude setup to all remotes (origin, public) + VPS sync via git pull
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# Claude Setup Sync
+
+**IMPORTANT**: This skill operates ONLY on `~/.claude-setup`. Do NOT explore, read, or search any other directory outside this path.
+
+You MAY use `Read` and `Write` for the one purpose listed in step 1b (generating README.pt.md for new public skills). Everything else is Bash-only.
+
+---
+
+## skills/cto
+
+- **name:** cto
+- **description:** AI CTO advisor. Sequential focused reviews or parallel swarm audits (security, architecture, performance, quality). Triggers on: CTO advice, architecture review, tech stack, system design, code quality, security audit, performance review, plan review, incident diagnosis.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# /cto — AI Technical Advisor
+
+A production gate and diagnostic tool. Two modes: **sequential** (focused question, one area) and **swarm** (parallel specialist analysts for full review or incident diagnosis).
+
+Every invocation produces a durable artifact at `.cto/review-{YYYY-MM-DD}-{slug}.md`. Downstream skills (`/architect`, `/ship`, future `/cto` sessions) consume that file — the chat summary is secondary.
+
+---
+
+---
+
+## skills/deep-plan
+
+- **name:** deep-plan
+- **description:** Three-phase research→plan→implement workflow with persistent markdown artifacts. Deep-reads codebase, iterates on annotations. Triggers on: deep plan, plan feature, research and plan, plan this.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# Deep Plan — Research → Plan → Implement
+
+A disciplined three-phase workflow that produces persistent markdown artifacts. Never write code until the user has reviewed and approved a written plan.
+
+---
+
+## skills/deep-research
+
+- **name:** deep-research
+- **description:** Deep research orchestration. Parallel multi-track investigation with evidence hierarchy, delivers investment-memo-grade reports. Triggers on: deep research, investigate, deep dive into, nuclear research, thorough analysis.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+> **Fast Mode:** This skill uses Claude Opus 4.6. Use `/fast` to toggle faster responses when speed is critical.
+
+---
+
+## skills/demo
+
+- **name:** demo
+- **description:** Create reproducible demo documents using Showboat. Produces executable narratives with captured output that can be verified and streamed remotely. Triggers on: demo, showboat, create demo, demo this, /demo.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** low
+
+# Demo — Reproducible Demo Documents with Showboat
+
+Create executable narrative documents that combine commentary, code blocks with captured output, and images. Documents are human-readable markdown AND verifiable — `showboat verify` re-runs all code and diffs output.
+
+---
+
+---
+
+## skills/deploy-full
+
+- **name:** deploy-conta-full
+- **description:** ExampleProject deploy: staging → production, auto-promotes if green. Triggers: deploy conta full, full deploy.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# Full Deploy — ExampleProject OCI (Staging → Production)
+
+Runs the complete deployment pipeline: staging deploy followed by automatic production promotion. Chains `/deploy-staging` and `/deploy-production` into a single command.
+
+**If staging fails at any point, production is never touched.**
+
+---
+
+## skills/deploy-production
+
+- **name:** deploy-conta-production
+- **description:** Promote ExampleProject staging to production on OCI. Verifies, approves gate, monitors, validates. Triggers on: deploy conta production, promote to production, push to production, production deploy, go live.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# Deploy Production — ExampleProject OCI
+
+Promotes ExampleProject from staging to production via GitHub Actions workflow_dispatch.
+
+**Flow:** Push to main deploys to STAGING (example-project-staging namespace). This skill triggers `deploy-production.yml` workflow_dispatch to promote a tested staging image to PRODUCTION (example-project namespace).
+
+**Requires:** A staging image tag (e.g., `stg-abc1234`) from a successful staging deploy. Use `/deploy-staging` first.
+
+---
+
+## skills/deploy-staging
+
+- **name:** deploy-conta-staging
+- **description:** Deploy ExampleProject to OCI staging. Verify → guardian → push → CI → deploy → health check. Auto-fixes. Triggers on: deploy conta staging, deploy staging, push to staging, staging deploy.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# Deploy Staging — ExampleProject OCI
+
+Deploys ExampleProject to the staging environment via GitHub Actions. Push to main triggers GHA deploy to the `example-project-staging` namespace. Staging serves at staging.example.com.
+
+To promote staging to production, use `/deploy-production` which triggers the `deploy-production.yml` workflow_dispatch with the staging image tag.
+
+---
+
+## skills/deploy-projectb
+
+- **name:** deploy-projectb
+- **description:** Deploy ProjectB to Render. Verify → guardian → push → monitor → health check. Auto-fixes. Triggers on: deploy projectb, deploy source, projectb deploy, push projectb.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# Deploy — ProjectB Render Deployment Pipeline
+
+End-to-end deployment skill that takes code from current state to production on Render. Runs pre-flight checks, auto-fixes issues, pushes to trigger Render auto-deploy, monitors the deploy, runs health checks, and optionally triggers brand monitoring.
+
+---
+
+## skills/firecrawl
+
+- **name:** firecrawl
+- **description:** Web scraping, crawling, and data extraction via Firecrawl. Converts sites to LLM-ready markdown. JS rendering, anti-bot, proxy rotation. Triggers on: scrape, crawl, web data, extract website, site map, web research, firecrawl.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** low
+
+# Firecrawl - Web Data Extraction Skill
+
+Extract, crawl, search, and gather data from any website using the Firecrawl MCP server.
+
+---
+
+## skills/first-principles
+
+- **name:** first-principles
+- **description:** Break down a problem to its fundamentals before implementing. Use for complex or ambiguous problems.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# First Principles Analysis
+
+Structured problem decomposition before jumping into implementation. Forces clarity of thought.
+
+---
+
+## skills/freeze
+
+- **name:** freeze
+- **description:** Restrict Edit/Write to one directory. Blocks edits outside path. Triggers: freeze, freeze edits, lock scope.
+- **user-invocable:** true
+- **model:** haiku
+- **effort:** low
+
+# /freeze — Restrict Edits to a Directory
+
+Activates a PreToolUse hook that blocks Edit/Write operations outside a chosen
+directory. The hook is always loaded by the harness but no-ops unless a freeze
+directory has been set by this skill.
+
+---
+
+## skills/fulltest-skill
+
+- **name:** fulltest-skill
+- **description:** Swarm-enabled full-spectrum site testing via TeammateTool. Parallel page testers, cross-page pattern detection, auto-fix, reports. Triggers on: fulltest, full test, site test, test all pages.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# Full-Spectrum Testing Skill (v4.0 - Swarm Mode)
+
+Comprehensive website testing with **true parallel execution** via TeammateTool, real-time failure sharing, and cross-page pattern detection.
+
+---
+
+## skills/gbrain
+
+- **name:** gbrain
+- **description:** GBrain knowledge brain management — setup, import, query, maintain, ingest. Triggers on: gbrain, knowledge brain, brain query, brain search, brain import, brain setup, brain ingest.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# GBrain — Personal Knowledge Brain
+
+Manage GBrain, a Postgres-native personal knowledge brain with hybrid RAG search.
+GBrain stores world knowledge (people, companies, concepts, meetings) as pages with
+compiled truth + append-only timelines, cross-linked via a typed graph.
+
+---
+
+## skills/get-api-docs
+
+- **name:** get-api-docs
+- **description:** Fetch current API docs for any library/SDK via chub CLI. 1,000+ APIs (Supabase, Anthropic, Clerk, Prisma, Stripe, Playwright). Triggers on: get api docs, fetch docs, chub, api documentation.
+- **user-invocable:** true
+- **model:** haiku
+- **effort:** low
+
+# Get API Docs via chub
+
+When you need documentation for a library or API, fetch it with the `chub` CLI
+rather than guessing from training data. This gives you the current, correct API.
+
+---
+
+## skills/growth
+
+- **name:** growth
+- **description:** SaaS growth engineering: CRO, pricing, signup, onboarding, SEO/GEO, churn prevention, A/B tests. Triggers on: growth, cro, conversion optimization, pricing strategy, signup flow, onboarding, seo audit, churn, /growth.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# Growth — SaaS Growth Engineering
+
+Structured frameworks for optimizing SaaS conversion funnels, pricing, retention, and acquisition. Each mode produces an actionable report with specific code/copy changes.
+
+> **Browser tool:** `browse` CLI (`~/.local/bin/browse`) is the primary tool for all page analysis — zero MCP overhead, ~100ms per call. For visual/CSS/layout issues that headless screenshots can't diagnose, escalate to `/open-gstack-browser` (headed mode with Claude Code sidebar). Chro
+
+---
+
+## skills/gws
+
+- **name:** gws
+- **description:** Google Workspace CLI automation for bulk/complex tasks beyond MCP scope. Drive, Sheets, Gmail, Calendar, Chat, Admin. Triggers on: gws, google workspace automation, bulk drive, sheets pipeline, gmail batch, workspace admin.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** low
+
+# gws — Google Workspace CLI Automation
+
+Complex, multi-step Workspace automations using the `gws` CLI. For simple CRUD (read a file, send one email), use the `google-workspace` MCP instead. Use `/gws` when the task involves bulk operations, paginated datasets, multi-service pipelines, or requires dry-run preview.
+
+---
+
+## skills/handoff
+
+- **name:** handoff
+- **description:** Context handoff before /clear or compaction. Writes progress log to plan doc, commits, outputs a resume block that /primer can consume. Triggers on: handoff, checkpoint context, before clear, pre-clear, resume block, save context.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** low
+
+# Handoff — Context Checkpoint Before `/clear`
+
+Produce a durable checkpoint so the next session can resume with one read + three commands. This skill is the **producer**; `/primer` is the consumer.
+
+---
+
+## skills/health-report
+
+- **name:** health-report
+- **description:** Health report for ProjectB: API tests, E2E, unit tests, Lighthouse in one HTML/PDF. Triggers on: health report, site health, functional report, prove it works, health-report.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# Health Report Skill — ProjectB
+
+Generate a comprehensive, evidence-backed health report proving ProjectB is fully functional. Produces a shareable HTML file (with optional PDF export) containing API coverage, browser verification, unit test results, and Lighthouse scores.
+
+---
+
+## skills/investigate
+
+- **name:** investigate
+- **description:** Root-cause debugging. Iron Law: no fix without root cause. 3-strike escalation. Triggers: debug this, fix this bug, why broken.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# /investigate — Systematic Root-Cause Debugging
+
+---
+
+## skills/last30days
+
+- **name:** last30days
+- **description:** Deep research engine covering the last 30 days across 10+ sources - Reddit, X/Twitter, YouTube, TikTok, Instagram, Hacker News, Polymarket, and the web. AI synthesizes findings into grounded, cited reports.
+- **user-invocable:** true
+- **model:** sonnet
+
+# last30days v2.9.5: Research Any Topic from the Last 30 Days
+
+> **Permissions overview:** Reads public web/platform data and optionally saves research briefings to `~/Documents/Last30Days/`. X/Twitter search uses optional user-provided tokens (AUTH_TOKEN/CT0 env vars). Bluesky search uses optional app password (BSKY_HANDLE/BSKY_APP_PASSWORD env vars - create at bsky.app/settings/app-passwords). All credential usage and data writes are documented in the [Security & Permissions](#security--permis
+
+---
+
+## skills/llm-eval
+
+- **name:** llm-eval
+- **description:** LLM output evaluation pipeline: audit evals, failure analysis, synthetic data, LLM-as-Judge, RAG eval, annotation design. Triggers on: llm eval, evaluate ai, eval pipeline, judge calibration, rag eval, ai quality, /llm-eval.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# LLM Eval — AI Output Quality Pipeline
+
+Structured evaluation framework for LLM-powered features. Based on Hamel Husain's eval methodology: start with failure analysis, build judges that correlate with human judgment, then automate.
+
+---
+
+## skills/local-inference
+
+- **name:** local-inference
+- **description:** LiteLLM multi-model gateway — local models (MLX, Ollama) + cloud fallback. Triggers: local inference, setup litellm, model gateway, local models.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# Local Inference Gateway
+
+Set up a unified, multi-model inference gateway using [LiteLLM](https://github.com/BerriAI/litellm). Run local models on your Mac (MLX, Ollama) with automatic cloud fallback (OpenRouter, Anthropic) — all behind a single OpenAI-compatible API at `http://localhost:4000/v1`.
+
+Use this alongside your Claude Max plan. Claude handles orchestration and complex reasoning. Local models handle the cheap stuff — summarization, formatting, classification, text generation — f
+
+---
+
+## skills/maketree
+
+- **name:** maketree
+- **description:** Create and manage git worktrees via native Claude CLI flag or config-driven bulk setups.
+- **user-invocable:** true
+- **model:** haiku
+- **effort:** low
+
+# Maketree - Worktree Manager
+
+Create git worktrees for parallel development. Use the native `claude --worktree` flag for most cases, or this skill for batch/config-driven setups.
+
+---
+
+## skills/manual
+
+- **name:** manual
+- **description:** Build project user manual (MkDocs) with optional Word export
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** low
+
+## Argument Syntax
+
+- `$0` - First argument
+- `$1` - Second argument
+- `$ARGUMENTS` - Full argument string
+- `$ARGUMENTS[0]` - Indexed access
+
+Build the user manual for the current project.
+
+---
+
+## skills/meditate
+
+- **name:** meditate
+- **description:** End-of-session judgment extraction — learnings, patterns, mistakes. Triggers: meditate, reflect on session, extract learnings.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# Meditate Skill
+
+End-of-session judgment extraction. Runs after completing substantial work (`/ship`, `/cto`, `/parallel-dev`, `/deep-plan`, or any long session) to capture learnings before context is lost.
+
+This is the **intake step** for the memory pipeline. `/consolidate` is the **maintenance step**. Together they form the full memory lifecycle: meditate captures, consolidate prunes and promotes.
+
+---
+
+## skills/memory-consolidation
+
+- **name:** memory-consolidation
+- **description:** Memory maintenance: consolidate learnings, prune unused, filter relevance, promote patterns. Triggers on: consolidate memory, memory maintenance, clean up memories, /consolidate, memory health.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# Memory Consolidation Skill
+
+A human-inspired memory maintenance system that implements the cognitive processes of consolidation, forgetting, and metacognition for AI agents.
+
+Based on: [Towards Human-like Memory for AI Agents](https://manthanguptaa.in/posts/towards_human_like_memory_for_ai_agents/)
+
+---
+
+## skills/mini-remote
+
+- **name:** mini-remote
+- **description:** Remote autonomous coding relay via SSH to Mac Mini. Supports single and queued prompts with Slack notifications. Triggers on: /mini, send to mini, queue for mini, run on mini, mini execute, run remotely on mac mini.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** low
+
+# Mini Remote — Fire & Forget Autonomous Coding Relay
+
+---
+
+## skills/nanoclaw
+
+- **name:** nanoclaw
+- **description:** Lightweight Claude-native agent runtime with Docker Sandbox, memory, scheduling, multi-channel messaging. Triggers on: nanoclaw, nanoclaw setup, agent runtime, docker sandbox agent, nanoclaw configure.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** low
+
+# NanoClaw — Claude-Native Agent Runtime
+
+Lightweight open-source AI agent runtime built on Claude Code + Anthropic Agents SDK. ~15 source files, ~3,900 lines. 100x smaller than ProjectE. Docker Sandbox micro-VM isolation out of the box.
+
+**Repo:** https://github.com/qwibitai/nanoclaw
+**Docs:** https://nanoclaw.dev
+
+---
+
+## skills/oci-health
+
+- **name:** oci-health
+- **description:** Check ExampleProject OCI health: API, dashboards, K8s pods, pipelines. Generates diagnostic report if down. Triggers on: oci health, is example-project up, check staging, check production, example-project status, oci status.
+- **user-invocable:** true
+- **model:** haiku
+- **effort:** low
+
+# OCI Health — ExampleProject Infrastructure Health Check
+
+Check whether ExampleProject is up on OCI (staging and/or production). If anything is down, produce a diagnostic report with root cause analysis and remediation steps.
+
+---
+
+## skills/officecli
+
+- **name:** officecli
+- **description:** Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check formatting, find issues, add charts, or modify Office documents.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# officecli
+
+AI-friendly CLI for .docx, .xlsx, .pptx. Single binary, no dependencies, no Office installation needed.
+
+---
+
+## skills/orchestrate
+
+- **name:** orchestrate
+- **description:** Meta-orchestrator: intent → plan → skill routing → execute → verify → deploy. Triggers: orchestrate, do this end-to-end, full pipeline.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# `/orchestrate` — Meta-Orchestrator
+
+`/orchestrate` composes the existing 83-skill library into end-to-end runs. It never reimplements a skill. Its only new logic is: intent refinement, dynamic routing, approval gating, per-phase state, budget enforcement, and final reporting.
+
+**v1 scope (locked 2026-04-17):**
+- ExampleProject single-repo only
+- Budget $10 warn / $50 hard cap per run
+- Approval password: the literal word `go`
+- Sequential fan-out in `--gated`, parallel fan-out in `--autonomous`
+- 
+
+---
+
+## skills/parallel-dev
+
+- **name:** parallel-dev
+- **description:** Parallel feature development using git worktrees and specialized agents. Orchestrates multiple features in isolation with CI reaction loops, progress monitoring, and progressive merge. Delegates to `ao` CLI when available.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# Parallel Feature Development Skill
+
+Orchestrates parallel feature development using git worktrees and specialized agents. Can work standalone or integrate with CPO-AI-Skill as the planning brain.
+
+---
+
+## skills/pinchtab
+
+- **name:** pinchtab
+- **description:** Local browser automation via PinchTab. A11y trees, element refs, screenshots, PDFs, JS eval. 5-13x cheaper. Triggers on: pinchtab, browser control, page snapshot, element refs, accessibility tree, pinch.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** low
+
+# PinchTab - Local Browser Automation
+
+> **Note:** `agent-browser` is now the **primary** browser automation tool. Use `/agent-browser` for new work. PinchTab remains available for its unique strengths: profile management with persistent sessions, tab locking for multi-agent safety, stealth mode, and the HTTP API for non-Bash contexts.
+
+Lightweight HTTP server + CLI for AI-controlled Chrome. Uses accessibility tree snapshots with stable element refs instead of screenshots — **5-13x cheaper in 
+
+---
+
+## skills/platform-sweep
+
+- **name:** platform-sweep
+- **description:** Platform health sweep — UX, security, perf, deps. Parallel agents, auto-fixes. Triggers: platform sweep, health sweep, full audit, code sweep.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# Platform Sweep -- Full Platform Health Audit + Fix Pipeline
+
+A meta-orchestrator that runs 5 parallel audit tracks, consolidates findings into a single prioritized report, and after user approval, autonomously fixes all issues in parallel git worktrees.
+
+---
+
+## skills/pr-impact
+
+- **name:** pr-impact
+- **description:** PR Impact Optimizer for Example (PUBCO). Score, optimize, and backtest press releases for stock impact + SEC compliance. Triggers on: pr impact, press release, optimize pr, score pr, pr analysis, pr optimizer, /pr-impact.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# PR Impact Optimizer
+
+Analyzes, scores, and optimizes press releases for maximum positive stock price impact while ensuring SEC compliance. Built on empirical data from 111 Nasdaq small-cap press releases that drove 50%+ stock moves with next-day follow-through (Jan 2025 - Mar 2026).
+
+---
+
+## skills/primer
+
+- **name:** primer
+- **description:** Context recovery after compaction or session start. ~500-token summary of memories, project state, git status, pending work. Triggers on: primer, context recovery, where was I, what was i doing, resume context.
+- **user-invocable:** true
+- **model:** haiku
+- **effort:** low
+
+# Primer — Context Recovery
+
+Generate a ~500-token structured summary to recover context after compaction or at session start. Output ONLY the formatted summary block — no preamble, no "here's your context", no commentary.
+
+---
+
+## skills/proposal-source
+
+- **name:** proposal-source
+- **description:** Generate diagnostic/research proposals for ProjectB clients. PDF output in Portuguese. Triggers on: proposal source, proposta projectb, gerar proposta, create proposal, client proposal, diagnostic proposal.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# Proposal Generator — ProjectB Diagnostic & Research Proposals
+
+You are a proposal generation system for **ProjectB**, a B2B SaaS platform for Generative Engine Optimization (GEO). ProjectB helps brands be recommended by AI systems — monitoring, analyzing, and improving visibility in AI-generated responses from ChatGPT, Perplexity, Google SGE, and Claude.
+
+You take raw client inputs and produce professional PDF proposals for diagnostic and research engagements related to AI visi
+
+---
+
+## skills/qa-cycle-gate
+
+- **name:** qa-conta-gate
+- **description:** Pre-production UX/UI gate for ExampleProject. Tests actual feature pages in staging with parallel browser testers, fix-loops bugs, writes ux_approved signal. Triggers on: qa conta gate, ux gate, pre-prod qa, test staging feature.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# QA Conta Gate — Pre-Production UX/UI Gate for ExampleProject
+
+You are the pre-production UX gating layer for ExampleProject. Your job is to test what was actually changed in a commit, run parallel browser journeys against staging, loop on failures, and write a cryptographically-pinned approval signal that `/deploy-production` checks before promoting.
+
+**Hard rules:**
+
+1. **NEVER promote to production** — this skill only gates; `/deploy-production` does the promotion
+2. **NEVER auto-fix CRI
+
+---
+
+## skills/qa-cycle
+
+- **name:** qa-conta
+- **description:** ExampleProject QA orchestrator: API tests (curl) + browser tests. Maps 395+ endpoints across 50+ route modules. Triggers on: qa conta, example-project qa, qa runner, ship qa.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# QA Conta — Autonomous ExampleProject QA Orchestrator (v2.0)
+
+You are an autonomous QA orchestrator for ExampleProject. Your job is to deliver a **fully working app** by running API tests locally via curl, browser tests via browse CLI / Chrome MCP, investigating failures, fixing code, deploying, and retesting — in a loop — until every test passes.
+
+---
+
+## skills/qa-cycle
+
+- **name:** qa-cycle
+- **description:** Master QA orchestrator: project-agnostic, auto-detects project, delegates to /qa-{project} or runs full cycle from scratch. Autonomous, self-managing. Triggers on: qa cycle, full qa, run qa, continuous qa, qa pipeline.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# QA Cycle — Autonomous Master Orchestrator (v3.0)
+
+Opus-powered project-agnostic QA commander. Runs the entire QA lifecycle autonomously from detection to delivery. Manages its own task list, coordinates sub-agents, and loops until the app is fully working. Only pauses for destructive operations that could cause data loss.
+
+---
+
+## skills/qa-fix
+
+- **name:** qa-fix
+- **description:** Fix open QA issues: reads from DB, prioritizes by severity, investigates codebase, implements fixes. Triggers on: qa fix, fix bugs, fix qa issues, fix open issues.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# QA Fix Skill (v1.0)
+
+Reads open issues from the QA database, prioritizes by severity, investigates root causes in the codebase, and creates fixes. Updates issue status throughout the fix lifecycle.
+
+---
+
+## skills/qa-projectb
+
+- **name:** qa-projectb
+- **description:** Full QA cycle for ProjectB with swarm-parallel persona testing. Discover, fix, verify, regression detect via TeamCreate swarm + Supabase QA DB. Triggers on: qa projectb, projectb qa, test projectb, qa cycle projectb.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# QA ProjectB Skill (v4.1 - browse CLI Primary + Self-Healing Autonomous)
+
+Full QA lifecycle for ProjectB with **self-healing autonomous operation**. Runs end-to-end without stopping — discovers bugs, fixes them, deploys, verifies, and loops until **100% coverage**. Learns from every repair via MCP memory so repeated issues get fixed faster. The orchestrator (opus) **NEVER aborts** — even if 100% of features are broken, it proceeds to fix them.
+
+---
+
+## skills/qa-projectc
+
+- **name:** qa-projectc
+- **description:** QA cycle for ProjectC — dashboard, tRPC API, Clerk auth, multi-tenancy. Triggers: qa projectc, projectc qa, test projectc.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# QA ProjectC Skill (v1.0)
+
+Full QA lifecycle for ProjectC -- a B2B GEO (Generative Engine Optimization) monitoring platform. Autonomous cycle that analyzes code, runs typecheck + build, tests via browser when available, fixes issues, and verifies. Loops until clean.
+
+---
+
+## skills
+
+- **name:** 
+- **description:** Verify QA fixes via browse CLI or Chrome MCP. Updates issue status in DB (VERIFIED or back to IN_PROGRESS). Triggers on: qa verify, verify fixes, verify qa issues, verify bugs, test fixes.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# QA Verify Skill (v1.0)
+
+Loads issues in TESTING status from the QA database and verifies fixes by running the reproduction steps via `agent-browser` (primary). Records results in DB and updates issue status.
+
+---
+
+## skills/qmd
+
+- **name:** qmd
+- **description:** Semantic search over markdown collections via QMD hybrid search (BM25 + vector + LLM rerank). Triggers on: search skills, find pattern, which skill, search notes, search memory, qmd.
+- **user-invocable:** true
+- **model:** haiku
+- **effort:** low
+
+# QMD — Semantic Search Over Your Knowledge Base
+
+Search across your claude-setup collections (skills, agents, rules, memory) and any project docs using QMD's hybrid search engine.
+
+---
+
+## skills/research
+
+- **name:** research
+- **description:** Analyze any URL or image (article, repo, tweet, tool, screenshot, video, podcast) for skill/agent/project improvements. Triggers on: research this, analyze this link, learn from this, /research.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# Research — URL & Image-to-Action Intelligence
+
+Analyze any URL or image and turn it into actionable improvements for your Claude Code setup or projects.
+
+---
+
+## skills/revert-track
+
+- **name:** revert-track
+- **description:** Revert a logical unit of work (feature, phase, track) via related commits. Reads state from /parallel-dev, /deep-plan, /ship. Triggers on: revert track, revert feature, undo feature, revert phase, undo last deep-plan.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# Revert Track
+
+Revert a logical unit of work — a feature branch, a deep-plan implementation phase, or a manual commit range — as a single clean operation.
+
+Inspired by Conductor's track-based revert pattern: instead of reverting arbitrary individual commits, this skill identifies all commits belonging to a logical track and reverts them as a unit.
+
+---
+
+## skills/review-changes
+
+- **name:** review-changes
+- **description:** Review uncommitted changes for bugs, security issues, and code quality before committing.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# Review Changes
+
+Pre-commit quality review of staged or unstaged changes.
+
+---
+
+## skills/rex
+
+- **name:** rex
+- **description:** Infra security audit across all machines. Parallel SSH, attack chains, AI surface. Triggers: rex, security audit, infra security.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** high
+
+# Rex — Infrastructure Security Audit
+
+Run parallel security audits across all managed machines. Named after the guard dog — Rex watches your infrastructure.
+
+---
+
+## skills/run-local
+
+- **name:** run-local
+- **description:** Start local development environment with automatic dependency installation, service orchestration, and health checks. Use when developers ask to run locally, start dev server, launch the app, or spin up the development environment.
+- **user-invocable:** true
+- **model:** haiku
+- **effort:** low
+
+# Run Local - Development Environment Manager
+
+Automatically detect, configure, and start local development environments for any project.
+
+---
+
+## skills/sc
+
+- **name:** sc
+- **description:** Ship commit: verify → review → commit → push → PR. Full pipeline from changes to PR in one command.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# SC — Ship Commit
+
+Full pipeline: verify project health → review changes → commit → push → create PR.
+
+Auto-proceeds through all stages. Critical review findings are reported but do NOT block — the user chose speed.
+
+---
+
+## skills/schedule
+
+- **name:** schedule
+- **description:** Create, update, list, or run scheduled remote agents (triggers) that execute on a cron schedule. Triggers on: schedule, scheduled agent, cron agent, recurring agent, trigger, remote trigger.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** low
+
+# Schedule Skill
+
+Create, update, list, or run scheduled remote agents (triggers) on a cron schedule.
+
+---
+
+## skills/scrapling
+
+- **name:** scrapling
+- **description:** Web scraping with anti-bot bypass, TLS impersonation, adaptive tracking via Scrapling MCP. Three modes: HTTP, stealth browser, Playwright. Triggers on: scrapling, stealth scrape, bypass cloudflare, anti-bot scrape.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** low
+
+# Scrapling — Stealth Web Scraping Skill
+
+High-performance web scraping with anti-bot bypass, adaptive element tracking, and three fetching modes via Scrapling's MCP server.
+
+---
+
+## skills/ship
+
+- **name:** ship
+- **description:** End-to-end feature shipping: spec → plan → swarm implement → QA → fix → docs. Resumable. Triggers on: ship, ship feature, build and ship, full cycle, end to end, /ship.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# Ship — End-to-End Feature Shipping
+
+A disciplined 7-phase skill that takes a feature from idea to production. Each phase produces persistent artifacts. Resumable across context clears via state file.
+
+---
+
+---
+
+## skills/slack
+
+- **name:** slack
+- **description:** Automate Slack via browser. Send messages, read channels, search, manage threads. Triggers on: slack, send to slack, post slack, read slack, slack message, slack channel.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** low
+
+# Slack — Browser Automation via agent-browser
+
+Automate Slack in the browser using the `agent-browser` CLI (16.8k stars, Vercel Labs). Supports sending messages, reading channels, searching conversations, and managing threads without requiring API tokens.
+
+---
+
+## skills/projectb-guardian
+
+- **name:** projectb-guardian
+- **description:** Pre-deploy guardian for ProjectB. Multi-layer analysis (code, infra, runtime, diff-aware) before deploy to Render. Parallel subagents. Triggers on: projectb guardian, pre-deploy check, guardian projectb, projectb pre-deploy.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# ProjectB Guardian - Pre-Deploy Safety Gate
+
+Last line of defense before broken code reaches staging or production. This skill performs a comprehensive multi-layer analysis of the ProjectB codebase, Render infrastructure, and runtime environment to catch architectural problems that surface-level testing misses.
+
+---
+
+## skills/tech-audit
+
+- **name:** tech-audit
+- **description:** Audit project tech stack against current market — compare versions, find EOL libs, recommend upgrades. Triggers on: tech audit, stack audit, dependency audit, upgrade check, what should we upgrade, outdated dependencies
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# Tech Stack Audit
+
+Comprehensive audit of a project's tech stack against current market state. Identifies EOL libraries, security risks, version drift, and upgrade opportunities with prioritized recommendations.
+
+---
+
+## skills/test-and-fix
+
+- **name:** test-and-fix
+- **description:** Run tests and auto-fix failures in a loop. Use when tests are failing and you want them fixed.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# Test and Fix
+
+Run the project's test suite and automatically fix failures, iterating until all tests pass.
+
+---
+
+## skills/tweet
+
+- **name:** tweet
+- **description:** Fetch and display any public X/Twitter post using the FixTweet API. Supports single tweets and threads. Triggers on: /tweet <url>
+- **user-invocable:** true
+- **model:** haiku
+- **effort:** low
+
+# Tweet — Fetch Public X/Twitter Posts
+
+Fetch and display any public tweet using the free FixTweet API (`api.fxtwitter.com`).
+
+---
+
+## skills/vault-bootstrap
+
+- **name:** vault-bootstrap
+- **description:** Bootstrap CLAUDE.md for a local vault (Obsidian, markdown). Triggers: vault bootstrap, obsidian setup, second brain, knowledge vault, bootstrap vault.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** low
+
+# Vault Bootstrap
+
+Generate a `CLAUDE.md` API contract for a local knowledge vault so Claude Code treats the vault as structured, persistent context.
+
+The contract defines: what the vault is, how it's organized, naming conventions, what Claude should and should NOT do, and how to update it.
+
+---
+
+---
+
+## skills/verify
+
+- **name:** verify-conta
+- **description:** ExampleProject verification: ruff, mypy, pytest, tsc, eslint, vitest, gitleaks. Triggers: verify conta, example-project verify.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# Verify Conta — Full ExampleProject Verification Suite
+
+Run every verification layer available in the ExampleProject monorepo. Parallel where possible, sequential where dependencies exist.
+
+---
+
+## skills/verify
+
+- **name:** verify
+- **description:** Verify project health - type-check, tests, build. Use after making changes or before committing.
+- **user-invocable:** true
+- **model:** haiku
+- **effort:** low
+
+# Verify Project Health
+
+Quick verification that the codebase is healthy after changes.
+
+---
+
+## skills/vibc
+
+- **name:** vibc
+- **description:** 12-seat advisory board of diverse archetypes for structured decision deliberation. Blind input, debates, scored options. Triggers on: vibc, board council, advisory board, decision council, variety board.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# VIBC — Variety Independent Board Council
+
+A 12-seat advisory board of maximally diverse human archetypes that deliberates on any decision through structured phases: blind input, collision mapping, adversarial steelman debates, scored option generation, and retrospective tracking.
+
+---
+
+## skills/virtual-user-testing
+
+- **name:** virtual-user-testing
+- **description:** Virtual user testing for ExampleProject with QA DB. Parallel persona agents, bug reports, fix verification, regression detection. Triggers on: virtual user test, persona test, user simulation, test as user, qa discover.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** medium
+
+# Virtual User Testing Skill (v2.1 - browse CLI + DB-Backed QA Cycle)
+
+Spawns parallel virtual user personas that simulate real ExampleProject users navigating the app, testing workflows, reporting bugs to the QA database, and verifying previously fixed issues.
+
+---
+
+## skills/website-design
+
+- **name:** website-design
+- **description:** Professional B2B SaaS websites, dashboards, and landing pages with modern UX/UI. Tailwind CSS, React, conversion optimization. Triggers on: website design, landing page, dashboard design, admin panel, web interface, B2B website.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# Website Design Skill
+
+Create professional, conversion-optimized B2B SaaS websites and dashboards with modern UX/UI best practices.
+
+---
+
+## skills/wiki
+
+- **name:** wiki
+- **description:** Persistent knowledge base. Ingest, query, synthesize, harvest, lint. Triggers: wiki, add to wiki, knowledge base, remember this.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** medium
+
+# LLM Wiki
+
+Persistent, compounding knowledge base using the Karpathy LLM Wiki pattern.
+The wiki lives at `agents/claudia/wiki/` on the VPS (`/opt/claudia/agents/claudia/wiki/`).
+
+---
+
+# End of context
+
+For full skill content, read `skills/<name>/SKILL.md` directly. For memory state, see `memory/auto/MEMORY.md`. For graph digest, see `memory/auto/reports/GRAPH_REPORT.md`.
