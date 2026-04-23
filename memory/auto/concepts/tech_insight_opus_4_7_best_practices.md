@@ -22,7 +22,7 @@ Canonical references in this setup:
 - Prompting patterns: `~/.claude-setup/rules/opus-4-7-prompting.md`
 - Tier R definition: `~/.claude-setup/rules/model-tier-strategy.md` ("Opus 4.7 Behavior" section)
 
-Related: [advisor-strategy](concepts/tech_advisor_strategy.md) — Sonnet executor + Opus 4.7 advisor pattern still applies; [claude-code-routines](concepts/tech_claude_code_routines.md) — Routines default to 4.7 per Anthropic PM; [opus-for-investigation](feedback/feedback_opus_for_investigation.md) — now means 4.7 with xhigh default.
+Related: [advisor-strategy](concepts/tech_advisor_strategy.md) — Sonnet executor + Opus 4.7 advisor pattern still applies; [claude-code-routines](concepts/tech_claude_code_routines.md) — Routines default to 4.7 per Anthropic PM; [opus-for-investigation](feedback/feedback_opus_for_investigation.md) — now means 4.7 with xhigh default; [pattern-reasoning-sandwich](../semantic/pattern_reasoning_sandwich.md) — per-phase effort allocation applying this guidance to multi-phase skills (2026-04-23).
 
 ---
 

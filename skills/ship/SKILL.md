@@ -109,6 +109,22 @@ A disciplined 7-phase skill that takes a feature from idea to production. Each p
 
 ---
 
+## Reasoning Sandwich (Opus 4.7 effort allocation per phase)
+
+Adaptive thinking steers per-step. Apply these directives at the top of each phase — not max everywhere. LangChain benchmarked this pattern at +13.7pp vs uniform-max.
+
+- **Phase -1 / 0 (Intake, Spec):** "Think carefully and step-by-step before responding; the spec you write now determines cost of every later phase."
+- **Phase 1 (Plan):** "Think carefully. Surface the hard trade-offs explicitly before picking an approach."
+- **Phase 2 (Dispatch / Implement):** "Prioritize responding quickly rather than thinking deeply. The plan is already decided — execute it. When in doubt, match an existing pattern in the codebase."
+- **Phase 3 (QA):** "Prioritize responding quickly. Navigate + check — mechanical."
+- **Phase 4 (Fix loop):** "Think carefully about the root cause before changing code. Do not patch symptoms."
+- **Phase 4.7 (Evaluator / Verify):** "Think carefully and verify each artifact. This is the last gate before shipping — false pass is expensive."
+- **Phase 5+ (Docs, Commit, Deploy):** "Prioritize responding quickly. Mechanical."
+
+Propagate the matching directive into every subagent spawn prompt for that phase — do not assume inheritance.
+
+---
+
 ## Architecture
 
 ```

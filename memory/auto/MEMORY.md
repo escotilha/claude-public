@@ -17,6 +17,7 @@
 ## Semantic
 
 - [pattern-db-path-defaults-match-data-location](semantic/pattern_db_path_defaults_match_data_location.md) — After any version/install cutover, CLI defaults must open the same DB as systemd `--db` flags — else interactive commands silently hit a stub DB.
+- [pattern-reasoning-sandwich](semantic/pattern_reasoning_sandwich.md) — Per-phase reasoning directives (plan=high, execute=low, verify=high) beat uniform-max on Opus 4.7 — applied to /ship, /parallel-dev, /cto.
 - [mistake-hardcoded-legacy-fallback-in-code](semantic/mistake_hardcoded_legacy_fallback_in_code.md) — Rename refactors leak through hardcoded path literals inside source — grep the full codebase for the legacy name after the rename.
 - [pattern-venv-rebuild-on-install-move](semantic/pattern_venv_rebuild_on_install_move.md) — Moving a Python install dir requires rebuilding the venv — pip entrypoints have absolute shebangs.
 - [tech-insight-psos-plan-tier-20x](semantic/tech-insight_psos_plan_tier_20x.md) — Pierre's Claude account is Max 20x (900 msgs / 5h), not 5x. Default all plan-tier configs to `20x`.

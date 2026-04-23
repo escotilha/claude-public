@@ -95,6 +95,19 @@ invocation-contexts:
 
 Orchestrates parallel feature development using git worktrees and specialized agents. Can work standalone or integrate with CPO-AI-Skill as the planning brain.
 
+## Reasoning Sandwich (Opus 4.7 effort allocation per phase)
+
+Adaptive thinking steers per-step. Apply these directives at the top of each phase and propagate the matching directive into every feature agent's spawn prompt.
+
+- **Phase 1 (Parse features / plan dispatch):** "Think carefully about dependency ordering and cross-feature contracts before spawning. Mistakes here multiply across N worktrees."
+- **Phase 2 (Worktree setup):** "Prioritize responding quickly — mechanical."
+- **Phase 3 (Feature agent dispatch):** Each feature agent: "Prioritize responding quickly rather than thinking deeply inside the worktree. The plan defines what to build; match existing patterns in the codebase. Escalate to the lead with a message if you hit a blocker — do not overthink alone."
+- **Phase 4 (Monitor / coordinate):** "Prioritize responding quickly. Route messages, update state."
+- **Phase 4.65 (Evaluate / CI reaction):** "Think carefully. Root-cause CI failures before dispatching fix agents. A wrong diagnosis wastes a full fix cycle."
+- **Phase 5 (Progressive merge):** "Think carefully. Resolve conflicts by understanding intent on both sides, not by picking a winner."
+
+Do not set max reasoning for all phases — LangChain benchmarked uniform-max as the worst-performing config.
+
 ## Trigger Patterns
 
 - `/parallel-dev` - Start with inline feature definitions

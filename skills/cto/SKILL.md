@@ -56,6 +56,23 @@ A production gate and diagnostic tool. Two modes: **sequential** (focused questi
 
 Every invocation produces a durable artifact at `.cto/review-{YYYY-MM-DD}-{slug}.md`. Downstream skills (`/architect`, `/ship`, future `/cto` sessions) consume that file — the chat summary is secondary.
 
+## Reasoning Sandwich (Opus 4.7 effort allocation per phase)
+
+Adaptive thinking steers per-step. Do not set max reasoning everywhere — LangChain benchmarked that as the worst-performing configuration.
+
+**Sequential mode:**
+- **Step 1-3 (Load, mode, scope):** "Prioritize responding quickly. Mechanical."
+- **Step 4 (Analyze):** "Think carefully and step-by-step. This is the reasoning core of the skill — severity calls and recommendations compound downstream."
+- **Step 5-6 (Write artifact, report):** "Prioritize responding quickly. The analysis is done — format it."
+
+**Swarm mode:**
+- **Step 1-3 (Load, mode, scope, spawn):** "Think carefully about scope decomposition before spawning. Pre-compute shared context to avoid N analysts re-discovering the same facts."
+- **Analyst spawn prompts:** "Think carefully within your lens — severity and cross-concern calls compound. But do not spawn subagents from inside your analyst session; complete your lens in one response."
+- **Step 5 (Synthesize):** "Think carefully. Reconcile analyst findings, de-duplicate, resolve severity disagreements."
+- **Step 6+ (Write artifact, report):** "Prioritize responding quickly. Mechanical."
+
+Propagate the matching directive into every analyst spawn prompt — do not assume inheritance.
+
 ---
 
 ## When to use which mode
