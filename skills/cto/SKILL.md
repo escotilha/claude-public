@@ -403,6 +403,11 @@ Pre-computed context to include in each spawn prompt:
 - **Scope boundaries:** Each analyst has FILE OWNERSHIP (below). Do not read or analyze files outside your ownership. This prevents N analysts from reading the same files, wasting N context windows.
 - **Early termination:** If an analyst finds 0 issues in their first 10 files, they should message the lead immediately rather than exhaustively scanning every file. Code with no issues doesn't need a full audit.
 
+**MCP token efficiency (per Anthropic MCP blog, 2026-04-22):**
+
+- **Tool Search (defer tool loading):** Each analyst's spawn prompt MUST include: _"Do NOT load full MCP tool definitions up-front. When you need a tool, call `tool_search` (or `ToolSearch`) with a keyword query and load only the specific tool schemas you'll use this turn. Anthropic measured 85% reduction in tool-definition tokens with no loss of selection accuracy."_ This multiplies in swarm mode — 4 analysts × deferred loading saves dramatically more than any single session.
+- **Code Orchestration (sandbox over discrete tool calls):** For services with large API surfaces (Supabase, GitHub API, Pluggy, cloud consoles, anything with >20 endpoints), instruct the analyst: _"Prefer writing a single Bash script or Python snippet that composes multiple API calls and returns only the distilled result, instead of calling 10+ individual MCP tools and ingesting raw output. Cloudflare's pattern: 2 MCP tools can front 2,500 endpoints via code orchestration. ~37% token reduction on complex workflows."_
+
 Spawn each analyst with these constraints:
 
 ```

@@ -739,6 +739,11 @@ b. **Each agent gets a fresh, self-contained context (no conversation history):*
 
 > **Fresh Context Rule:** NEVER pass the orchestrator's conversation history or prior agent outputs to executor agents. Each agent starts with a clean context containing only its task prompt. This prevents context rot — output quality degrades as context fills with irrelevant prior conversation. The orchestrator's job is to distill, not forward.
 
+> **MCP Token Efficiency (per Anthropic MCP blog, 2026-04-22):** Every executor spawn prompt must include:
+>
+> - **Tool Search (defer tool loading):** _"Do NOT load full MCP tool definitions up-front. When you need a tool, call `tool_search` (or `ToolSearch`) with a keyword query and load only the specific tool schemas you'll use this turn. ~85% reduction in tool-definition tokens."_
+> - **Code Orchestration (sandbox over discrete tool calls):** _"For services with large API surfaces (Supabase, GitHub API, Pluggy, cloud consoles, anything with >20 endpoints), prefer writing a single Bash/Python script that composes multiple API calls and returns only the distilled result, instead of calling 10+ individual MCP tools and ingesting raw output. ~37% token reduction on complex workflows."_
+
 c. **After each group completes — verify triple + mini spec check:**
 
 - Run `{project.commands.typecheck}` (skip if not available) — fix inline before proceeding

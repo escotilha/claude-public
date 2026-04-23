@@ -722,6 +722,13 @@ This serves as a compressed context checkpoint if the agent's window fills up.
 
 **Distraction prevention:** Each agent prompt should include explicit scope boundaries: "You are ONLY responsible for {feature}. Do NOT modify files outside {worktree-path}. If you encounter issues in shared code, report them to the lead instead of fixing them."
 
+**MCP token efficiency (per Anthropic MCP blog, 2026-04-22):** Every feature-agent spawn prompt must include:
+
+- **Tool Search (defer tool loading):** _"Do NOT load full MCP tool definitions up-front. When you need a tool, call `tool_search` (or `ToolSearch`) with a keyword query and load only the specific tool schemas you'll use this turn. This cuts tool-definition tokens by ~85% per Anthropic measurements."_
+- **Code Orchestration (sandbox over discrete tool calls):** _"For services with large API surfaces (Supabase, GitHub API, Pluggy, deployment consoles), prefer writing a single Bash/Python script that composes multiple API calls and returns only the distilled result, instead of calling 10+ individual MCP tools and ingesting raw output into context. ~37% token reduction on complex workflows."_
+
+These matter most in `parallel-dev` because N feature agents run concurrently — per-agent savings multiply across the fan-out.
+
 ### Phase 3: Agent Dispatch
 
 #### Execution Mode Selection

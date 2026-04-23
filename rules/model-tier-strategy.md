@@ -22,6 +22,17 @@ Opus 4.7 changes three things that affect this setup:
 
 Interactive (multi-turn) mode reasons more per turn than autonomous (single-turn) mode — front-load full intent + constraints + acceptance criteria in the first message, then batch follow-ups.
 
+### Vault / CIMD Credentials for Routines (per Anthropic MCP blog, 2026-04-22)
+
+Scheduled Routines (Opus 4.7, autonomous) that connect to external services via MCP should register OAuth tokens in **Managed Agent Vaults**. The platform auto-injects and refreshes credentials into MCP connections — no manual token passing via env vars or spawn prompts.
+
+- Never pass long-lived tokens through `CronCreate` payloads or routine spawn prompts.
+- Register the credential once in the Vault; reference it by name in the MCP connection config.
+- Refresh is handled by Anthropic's CIMD (Credentials + Identity Management) layer — routines don't need to re-authenticate.
+- Applies to: contably-eod, chief-geo daily, any `/schedule`-created agent that hits Supabase/GitHub/Pluggy/Slack via MCP.
+
+Fallback (pre-Vault or non-Claude-Code hosts like Claudia): encrypt tokens at rest (1Password CLI, macOS Keychain) and load via a startup hook; never hardcode in routine config files.
+
 ## Decision Matrix
 
 | Task Type                        | Model  | Rationale                                   |

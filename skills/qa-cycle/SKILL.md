@@ -474,6 +474,12 @@ Network calls:   agent-browser network requests
 Page text:       agent-browser get text
 
 Fallback chain: agent-browser → browse CLI (~/.local/bin/browse) → mcp__chrome-devtools__*
+
+MCP token efficiency (per Anthropic MCP blog, 2026-04-22):
+- Do NOT load full MCP tool definitions up-front. When you need a tool beyond agent-browser,
+  call `tool_search` (or `ToolSearch`) with a keyword query and load only the specific
+  tool schemas you'll use this turn. Anthropic measured ~85% reduction in tool-definition
+  tokens — multiplies across N parallel personas.
 ```
 
 Each persona:
