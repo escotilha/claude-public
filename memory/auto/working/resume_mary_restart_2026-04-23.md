@@ -1,34 +1,49 @@
 ---
 name: resume-mary-restart-2026-04-23
-description: Working state for Mary restart/audit — overnight prep done 2026-04-23 03:00, morning execution pending
+description: Mary restart COMPLETED 2026-04-23 03:40 — Discord verified end-to-end on Max plan via claude-cli
 type: project
 originSessionId: 8b063cf6-6ed4-43d3-937a-d793abba6893
 ---
-**Status:** Prep done overnight. Plan ready. Morning execution pending.
+**Status:** ✅ RESOLVED. Mary responds on Discord via Max plan (claude-opus-4-7) at zero paid-API cost. Verified 2026-04-23 03:40 local.
 
-**Plan doc:** `/Volumes/AI/Code/mary-restart-plan-2026-04-23.md`
+**For the full operational-fixes writeup (10-step recipe + diagnostic one-liner + signals to confirm Max plan routing):** see `projects/project_mary_openclaw_fixes.md` — the 2026-04-23 section.
 
-**What's already been done (2026-04-23, ~03:00 local, from Mac Mini session):**
+**Plan doc:** `/Volumes/AI/Code/mary-restart-plan-2026-04-23.md` (superseded by operational-fixes update; retain for timeline).
 
-1. Created `~/.ssh/config` on Mac Mini (was entirely missing) with `vps` and `vps-root` aliases → unblocks `sync-claude-token.sh`.
-2. Ran `sync-claude-token.sh` → pushed fresh Max plan OAuth credential from Mac keychain to VPS (`/home/mary/.claude/.credentials.json`). Previous cred had expired (401 on `claude models list`).
-3. Verified `ssh mary@vps "claude auth status"` returns `loggedIn: true, subscriptionType: max`.
-4. Verified `openclaw agent --agent mary` returns live responses (routing through claude-cli is functional).
-5. No `openclaw.json` or systemd changes made. VPS config untouched.
+## What the morning session actually did (2026-04-23 02:00 → 03:40 local)
 
-**Open gaps for morning session:**
+Root cause turned out NOT to be any of the anticipated gaps. Was Passo 9 of the guide at a path I missed: per-agent `sessions.json` (not top-level) had Discord channel pinned to dead `openrouter/qwen/qwen3.6-plus-preview:free`.
 
-- `openclaw models list` tags `claude-cli/claude-opus-4-7` and `haiku-4-5` as `configured,missing` even though routing works. Cosmetic OpenClaw probe issue, not functional. Investigate in Phase 1.5.
-- `anthropic/claude-sonnet-4-6` still in `fallback#1`. Guide says strip; plan has a decision gate — don't strip until Gap 1b is understood.
-- `+5511945661111` (Pierre's WhatsApp) pinned to `anthropic/claude-opus-4-7` (PAID API) in openclaw.json — bypasses Max plan. Fix in new step 1.9.
-- Phase 2: MLX stack audit from THIS Mini (localhost commands, no SSH — it IS the Mini).
-- Phase 3: reconcile two stale memory entries (`project_claudia_migration_complete.md` and `project:claudia-router`) that still claim Claudia replaced OpenClaw.
+Sequence that worked:
 
-**Context discovered overnight (write into long-term):**
+1. Confirmed auth profile clean (no apiKey/key) → `providersWithOAuth = ["claude-cli (1)"]`
+2. Stripped dead qwen from `defaults.fallbacks` + allowlist
+3. Disabled ANTHROPIC_API_KEY + OPENROUTER_API_KEY + ANTHROPIC_BASE_URL in `/opt/openclaw/.env`
+4. Disabled systemd drop-in `resilience.conf` (was re-injecting ANTHROPIC_API_KEY)
+5. Removed `openrouter:default` from auth-profiles.json
+6. **Wiped per-agent sessions.json for mary (1.9 MB) and julia (had 2 qwen refs)** ← THE FIX
+7. Restart → Discord `hi` got response in 3.8s from `claude-opus-4-7`, log confirmed `cli exec: provider=claude-cli` + `cleared=ANTHROPIC_API_KEY` + `rate_limit_event.five_hour`
 
-- Mac Mini is `Mac-mini.local` / user `psm2` / Tailscale `100.66.244.112`. Saved as PERMANENT in `personal/host_this_is_mac_mini.md` per Pierre's explicit instruction.
-- VPS alias map: `vps` = mary@100.77.51.51, `vps-root` = root@100.77.51.51 (Tailscale peer `vmi3065960`).
+## Open items (not blockers, do after sleeping)
+
+- Upgrade OpenClaw 2026.4.16 → 2026.4.20 (4 versions behind; upstream has directly relevant fixes including `#70187 fix: clear embedded runs before lifecycle end`)
+- Opus-4-7 shows `configured,missing` cosmetically in `openclaw models list` — investigate after upgrade
+- Remove debug env flags (`OPENCLAW_CLI_BACKEND_LOG_OUTPUT`, `OPENCLAW_CLAUDE_CLI_LOG_OUTPUT`) once stable for 1-2 days
+- Delete `resilience.conf.DISABLED-20260423-*` after 1 week of stable operation
+- MLX stack audit (Phase 2 of original plan) — never executed, still pending
+- Memory reconciliation (stale `project_claudia_migration_complete.md` + `project:claudia-router`) — still pending
+
+## Key learning for future
+
+**There are TWO sessions.json registries in OpenClaw.** The guide mentions "sessions.json" generically. In practice:
+
+- `/home/mary/.openclaw/agents/main/sessions/sessions.json` — top-level, often small/empty
+- `/home/mary/.openclaw/agents/<agentId>/sessions/sessions.json` — PER-AGENT, ~2 MB, this is where channel→model pins live
+
+When sticky fallbacks strike (Discord works on cli path but not on channel path, for example), you MUST wipe the per-agent file. Wiping only the top-level one does nothing.
 
 ## Timeline
 
-- **2026-04-23 ~03:00** — [implementation] SSH config + token sync + functional test from Mac Mini. VPS credential refreshed, Mary agent confirmed routing via claude-cli on Max plan. Plan doc updated with overnight findings. (Source: session — overnight prep before morning audit)
+- **2026-04-23 03:00** — [implementation] SSH config + token sync + functional test from Mac Mini. VPS credential refreshed. (Source: session — overnight prep)
+- **2026-04-23 03:05** — [failure] User reported Discord still returning "Agent couldn't generate a response" after prep. Gateway active, direct CLI path working, but Discord-triggered turns failing with `[agent/embedded] incomplete turn detected: stopReason=stop payloads=0`.
+- **2026-04-23 03:05-03:40** — [investigation→fix] ~35 min debug. Inspected session jsonl files, found `"provider":"openrouter","model":"qwen/qwen3.6-plus-preview:free"` was being used despite config saying `claude-cli/claude-opus-4-6`. Located per-agent sessions.json with pinned dead model. Full 10-step fix applied. Verified end-to-end via Discord: `"model":"claude-opus-4-7"`, `rate_limit_event.five_hour`, `cleared=ANTHROPIC_API_KEY`. Mary responded "Hey Pierre. What's up?" in 3.8s. (Source: failure — Discord screenshots + log capture + session file grep)
