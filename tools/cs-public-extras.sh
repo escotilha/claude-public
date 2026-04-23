@@ -502,10 +502,23 @@ case "$cmd" in
     unset GITHUB_TOKEN
     git remote set-url public https://github.com/escotilha/claude-public.git 2>/dev/null \
       || git remote add public https://github.com/escotilha/claude-public.git
+
+    # Work around global url.git@github.com:.insteadOf=https://github.com/ rewrite:
+    # the rewrite forces HTTPS URLs to SSH at push time, but the SSH key isn't
+    # authorized. Temporarily remove the rewrite, push, restore it.
+    rewrite=$(git config --global --get url.git@github.com:.insteadOf || true)
+    [ -n "$rewrite" ] && git config --global --unset-all url.git@github.com:.insteadOf
     git push public nuvini-public-fresh:main --force
+    push_exit=$?
+    [ -n "$rewrite" ] && git config --global url.git@github.com:.insteadOf "$rewrite"
 
     git checkout "$prev_branch" > /dev/null 2>&1
     git branch -D nuvini-public-fresh > /dev/null 2>&1
+
+    if [ "$push_exit" -ne 0 ]; then
+      echo "  public: push FAILED (exit $push_exit)" >&2
+      exit "$push_exit"
+    fi
 
     echo "  public: orphan-pushed (single commit, no history)"
     ;;
