@@ -21,3 +21,4 @@ Two sessions silently picked the same Alembic migration number (`072`) with diff
 - sb | fix/sb-gha-pr-comment-perm | contably | fix GITHUB_TOKEN pr-comment perm on Deploy to Staging workflow | 2026-04-19
 - sa-phaseb | feat/sa-tx-detail-phase-b | contably | tx detail modal Phase B — inline actions (match/split/ignore/categorize) | 2026-04-19
 - sa-phasec | feat/sa-tx-detail-phase-c | contably | tx detail modal Phase C — attachments (transaction_attachments join table + uploads reuse) + Histórico tab (DataLineage) | 2026-04-19
+- cto-p1 | chore/cto-p1-restructure | claude-setup | /cto SKILL.md restructure: split 1854-line monolith into orchestrator ≤300 lines + references/ | 2026-04-23
