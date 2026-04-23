@@ -8,6 +8,7 @@
 
 - [auto-merge-monitor-quirks](feedback/auto_merge_monitor_quirks.md) — gh-pr-checks auto-merge: filter `ci /`-prefix only, watch shell quoting, distinguish API hiccups from real fails
 - [never-work-in-main-checkout](feedback/never_work_in_main_checkout.md) — every concrete action (file edits, gh pr commands, scp) happens from a worktree, never from the main checkout dir
+- [cs-skill-insteadof-rewrite](feedback/cs_skill_insteadof_rewrite.md) — /cs push fails silently unless it temp-unsets the global url.git@github.com:.insteadOf rewrite
 
 ## Projects
 
