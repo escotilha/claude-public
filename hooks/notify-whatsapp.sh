@@ -34,7 +34,7 @@ else
 
   # Extract a summary: first 300 chars of the last assistant message
   if [ -n "$LAST_MSG" ] && [ "$LAST_MSG" != "null" ]; then
-    SUMMARY=$(echo "$LAST_MSG" | head -c 300 | tr '\n' ' ' | sed 's/  */ /g')
+    SUMMARY=$(echo "$LAST_MSG" | head -c 300 | LC_ALL=C tr '\n' ' ' | sed 's/  */ /g')
     # Trim trailing incomplete word
     SUMMARY=$(echo "$SUMMARY" | sed 's/ [^ ]*$/…/')
   else
