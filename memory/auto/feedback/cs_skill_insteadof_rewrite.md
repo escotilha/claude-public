@@ -14,20 +14,25 @@ This rewrites every HTTPS GitHub URL to SSH at push time. The SSH key on this ho
 
 **Why:** the rewrite is global, applies at URL resolution (not storage), and can't be overridden per-command with `-c url.https://github.com/.insteadOf=` (git merges values rather than replacing).
 
-**How to apply:** any skill that pushes over HTTPS must temp-unset and restore the rewrite:
+**How to apply:** any skill that pushes over HTTPS must temp-unset and restore the rewrite — and the restore must be trap-guarded, or a Ctrl-C / non-zero exit between unset and restore will permanently wipe the user's global rewrite:
 
 ```bash
 REWRITE=$(git config --global --get url.git@github.com:.insteadOf || true)
+restore() { [ -n "$REWRITE" ] && ! git config --global --get url.git@github.com:.insteadOf >/dev/null 2>&1 && git config --global url.git@github.com:.insteadOf "$REWRITE"; }
+trap restore EXIT INT TERM
 [ -n "$REWRITE" ] && git config --global --unset-all url.git@github.com:.insteadOf
 git push ...
 PUSH_EXIT=$?
-[ -n "$REWRITE" ] && git config --global url.git@github.com:.insteadOf "$REWRITE"
+restore; trap - EXIT INT TERM
 ```
 
-Already patched in: `~/.claude-setup/skills/cs/SKILL.md` step 2, `~/.claude-setup/tools/cs-public-extras.sh` push-public block. If you write a new skill that pushes to GitHub via HTTPS, use the same pattern.
+The inner `! ... >/dev/null` guard makes restore idempotent — safe to call manually first and again from the EXIT trap without double-setting.
+
+Already patched in: `~/.claude-setup/skills/cs/SKILL.md` step 2 (both push and force-push blocks), `~/.claude-setup/tools/cs-public-extras.sh` push-public block. If you write a new skill that pushes to GitHub via HTTPS, use the same pattern.
 
 Do NOT silently delete the global rewrite without asking — it's presumably there for some workflow that uses SSH push elsewhere.
 
 ## Timeline
 
+- **2026-04-23** — [session] Hardened the workaround with a trap (EXIT INT TERM) + idempotent restore guard. Previous version would permanently wipe the global rewrite if push was interrupted between unset and restore. Applied to skill step 2 (both blocks) and helper push-public block. (Source: failure — previous non-trap version could lose user's global config on Ctrl-C)
 - **2026-04-23** — [session] Debugged `/cs` failing on every push with `Permission denied (publickey)`. Root cause: global insteadOf. Fixed skill + helper to temp-remove the rewrite around push. (Source: failure — /cs skill broken for weeks presumably, user just ran it)
