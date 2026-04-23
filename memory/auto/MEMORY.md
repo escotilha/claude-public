@@ -14,6 +14,13 @@
 
 - [resume-mary-restart-2026-04-23](working/resume_mary_restart_2026-04-23.md) — Mary restart COMPLETED 2026-04-23 03:40. Discord verified on Max plan opus-4-7. Open items: OpenClaw 4.16→4.20 upgrade, MLX audit pending, memory reconciliation pending.
 
+## Semantic
+
+- [pattern-db-path-defaults-match-data-location](semantic/pattern_db_path_defaults_match_data_location.md) — After any version/install cutover, CLI defaults must open the same DB as systemd `--db` flags — else interactive commands silently hit a stub DB.
+- [mistake-hardcoded-legacy-fallback-in-code](semantic/mistake_hardcoded_legacy_fallback_in_code.md) — Rename refactors leak through hardcoded path literals inside source — grep the full codebase for the legacy name after the rename.
+- [pattern-venv-rebuild-on-install-move](semantic/pattern_venv_rebuild_on_install_move.md) — Moving a Python install dir requires rebuilding the venv — pip entrypoints have absolute shebangs.
+- [tech-insight-psos-plan-tier-20x](semantic/tech-insight_psos_plan_tier_20x.md) — Pierre's Claude account is Max 20x (900 msgs / 5h), not 5x. Default all plan-tier configs to `20x`.
+
 ## References
 
 - [research-finding-karpathy-coding-guidelines.md](research-finding-karpathy-coding-guidelines.md) — CLAUDE.md behavioral rules from Karpathy's LLM coding pitfall observations — 4 principles addressing silent assumptions, over-engineering, orthogonal edits, and vague success criteria
