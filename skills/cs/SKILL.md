@@ -1,14 +1,12 @@
 ---
 name: cs
-description: Sync Claude setup to all remotes (origin, public) + VPS sync via git pull
+description: Sync Claude setup to the private origin repo + VPS via git pull
 user-invocable: true
 context: inline
 model: opus
-effort: high
+effort: medium
 allowed-tools:
   - Bash
-  - Read
-  - Write
 tool-annotations:
   Bash: { destructiveHint: false, idempotentHint: false }
 ---
@@ -17,15 +15,16 @@ tool-annotations:
 
 **IMPORTANT**: This skill operates ONLY on `~/.claude-setup`. Do NOT explore, read, or search any other directory outside this path.
 
-You MAY use `Read` and `Write` for the one purpose listed in step 1b (generating README.pt.md for new public skills). Everything else is Bash-only.
+Bash-only.
 
 ## Targets
 
-| Target     | Repo                             | Method                   |
-| ---------- | -------------------------------- | ------------------------ |
-| **origin** | escotilha/claude (private)       | `git push origin master` |
-| **public** | escotilha/claude-public (public) | Filtered force-push      |
-| **VPS**    | VPS ~/.claude-setup/             | `git pull` via SSH       |
+| Target     | Repo                       | Method                   |
+| ---------- | -------------------------- | ------------------------ |
+| **origin** | escotilha/claude (private) | `git push origin master` |
+| **VPS**    | VPS ~/.claude-setup/       | `git reset --hard` via SSH |
+
+The public repo (escotilha/claude-public) is **intentionally not synced by this skill**. If you need to publish, run `~/.claude-setup/tools/cs-public-extras.sh push-public` manually.
 
 ## Steps
 
@@ -34,74 +33,6 @@ You MAY use `Read` and `Write` for the one purpose listed in step 1b (generating
 ```bash
 cd ~/.claude-setup && git add -A && (git diff --cached --quiet || git commit -m "auto: sync claude-setup")
 ```
-
-### 1b. Generate Portuguese READMEs for new public skills
-
-**You (Claude) write these directly — no API call, no key, no fallback. Local inference, you are the inference.**
-
-1. **Find public skills missing `README.pt.md`:**
-
-   ```bash
-   cd ~/.claude-setup && ./tools/cs-public-extras.sh list-missing-pt
-   ```
-
-   If the helper doesn't support `list-missing-pt` yet, use this one-liner instead:
-
-   ```bash
-   cd ~/.claude-setup && comm -23 \
-     <(ls -1 skills/ | sort) \
-     <(bash -c 'source tools/cs-public-extras.sh >/dev/null 2>&1; printf "%s\n" "${EXCLUDED_SKILLS[@]}"' | sort) \
-   | while read s; do
-       [ -f "skills/$s/SKILL.md" ] && [ ! -f "skills/$s/README.pt.md" ] && echo "$s"
-     done
-   ```
-
-2. **For each skill in the list**, read its `SKILL.md` and write a `README.pt.md` in the same folder using this template:
-
-   ```markdown
-   # {Skill Title}
-
-   ## O que faz
-
-   {1-2 parágrafos objetivos em PT-BR — o que o skill faz, como funciona, qual problema resolve}
-
-   ## Como invocar
-
-   ```
-   /{skill-name} [args]
-   ```
-
-   Exemplos:
-   - `/{skill-name} exemplo 1`
-   - `/{skill-name} exemplo 2`
-
-   ## Quando usar
-
-   - {bullet 1}
-   - {bullet 2}
-   - {bullet 3}
-   - {bullet 4 — opcional}
-   ```
-
-   **Rules:**
-   - Máximo 250 palavras por README
-   - Tom técnico e direto, sem marketing
-   - Nunca sobrescrever um `README.pt.md` que já existe
-   - Pular skills excluídas (lista em `EXCLUDED_SKILLS` de `tools/cs-public-extras.sh`)
-
-3. **Refresh the root README** (safe — script only updates the "Últimas 3 atualizações" section):
-
-   ```bash
-   cd ~/.claude-setup && ./tools/cs-public-extras.sh refresh-root
-   ```
-
-4. **Commit the generated READMEs:**
-
-   ```bash
-   cd ~/.claude-setup && git add -A && (git diff --cached --quiet || git commit -m "docs: add Portuguese READMEs for new skills + root summary")
-   ```
-
-If no skills were missing, skip this step entirely.
 
 ### 2. Push to origin
 
@@ -139,19 +70,7 @@ cd ~/.claude-setup && unset GITHUB_TOKEN && \
   exit $PUSH_EXIT
 ```
 
-### 3. Orphan-push to public
-
-Creates a **single-commit orphan branch** from master, applies deletions + Contably sed scrubbing, runs a safety gate (aborts if any "contably" remains), and force-pushes. Always a fresh single commit — no history ever leaks. Exclude list lives in `EXCLUDED_SKILLS` inside the helper.
-
-**Note on Slack notifications:** The `notify-slack` subcommand (invoked separately from push-public) reads PT summaries from on-disk `README.pt.md` files, which live on the PRIVATE master branch. Two defenses prevent leaks: (a) per-summary sed scrub inside `build_slack_message`, (b) a final abort-on-leak grep gate before `post_slack`. If a new public skill's PT README ever mentions a private project name, fix the README itself — the scrub is defense-in-depth, not the primary barrier.
-
-```bash
-cd ~/.claude-setup && ~/.claude-setup/tools/cs-public-extras.sh push-public
-```
-
-If the safety gate aborts, fix the sed rules in `tools/cs-public-extras.sh` (push-public block), then retry.
-
-### 4. Sync VPS
+### 3. Sync VPS
 
 ```bash
 ssh root@100.77.51.51 "cd ~/.claude-setup && git fetch origin && git reset --hard origin/master"
@@ -159,10 +78,9 @@ ssh root@100.77.51.51 "cd ~/.claude-setup && git fetch origin && git reset --har
 
 If VPS unreachable, report "VPS offline" and move on.
 
-### 5. Report
+### 4. Report
 
 One line per target:
 
 - origin: pushed / up to date / force-pushed
-- public: force-pushed
 - VPS: synced / offline
