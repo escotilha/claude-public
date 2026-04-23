@@ -25,3 +25,4 @@ Today's date is 2026-04-22.
 ## Working (session state)
 
 - [resume-2026-04-22-overnight](working/resume_2026-04-22_overnight.md) — active engine overnight run, rate-limited at 22:40, wake scheduled 01:47
+- [resume-mary-restart-2026-04-23](working/resume_mary_restart_2026-04-23.md) — Mary audit overnight prep done (SSH alias + token refresh); morning execution pending per plan in /Volumes/AI/Code/
