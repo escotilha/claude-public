@@ -3,6 +3,7 @@
 ## Personal
 
 - [host-macmini-vs-laptop](personal/host_macmini_vs_laptop.md) — Pierre works from both Mini and laptop; always confirm which host before assuming deploy paths
+- [this-session-is-on-the-mac-mini](personal/host_this_is_mac_mini.md) — **PERMANENT** — hostname=Mac-mini.local + user=psm2 + tailscale 100.66.244.112 means THIS session IS the Mini; never SSH to self
 
 ## Feedback
 
