@@ -1,8 +1,8 @@
 # GRAPH_REPORT
 
-**Compiled at:** 2026-04-22T06:30:18Z
+**Compiled at:** 2026-04-23T06:30:11Z
 **Source:** mem-compile — link-graph only (v1)
-**Corpus:** 136 pages across 8 directories
+**Corpus:** 146 pages across 8 directories
 
 This is an auto-generated digest of the memory graph. Read this before
 `mem-search` when you need a bird's-eye view of what the vault contains,
@@ -12,14 +12,14 @@ which pages are hubs, and where cross-links are missing.
 
 | Tier | Count | Avg age (d) | Stale (>90d) | Orphans |
 |---|---:|---:|---:|---:|
-| `working/` | 2 | 0 | 0 | 2 |
+| `working/` | 4 | 0 | 0 | 4 |
 | `episodic/` | 0 | — | — | — |
-| `semantic/` | 11 | 0 | 0 | 0 |
-| `personal/` | 2 | 0 | 0 | 2 |
+| `semantic/` | 13 | 0 | 0 | 2 |
+| `personal/` | 4 | 0 | 0 | 4 |
 | `entities/` | 24 | 0 | 0 | 21 |
 | `concepts/` | 42 | 0 | 0 | 30 |
-| `projects/` | 19 | 0 | 0 | 18 |
-| `feedback/` | 21 | 0 | 0 | 20 |
+| `projects/` | 20 | 0 | 0 | 19 |
+| `feedback/` | 24 | 0 | 0 | 23 |
 | `reference/` | 15 | 0 | 0 | 14 |
 
 ## Hub pages (top 10 by inbound links)
@@ -128,6 +128,9 @@ which pages are hubs, and where cross-links are missing.
 - [`projects/project_mfa_activation.md`](projects/project_mfa_activation.md) (0d ago) — Contably MFA was 85% done — backend complete, frontend login flow was the only gap + settings had wr
 - [`projects/project_nuvini_ir_deploy.md`](projects/project_nuvini_ir_deploy.md) (0d ago) — nuvini-ir deploys via Cloudflare Pages (wrangler) — build with eleventy, deploy _site folder, not au
 - [`projects/project_sla_phases_shipped.md`](projects/project_sla_phases_shipped.md) (0d ago) — SLA Phases 1–4a shipped to production 2026-04-15, Phase 4b trigger-gated — unified agenda, scope tog
+- [`projects/psos_failure_patterns_to_detect.md`](projects/psos_failure_patterns_to_detect.md) (0d ago) — Engine failure modes that today required operator cleanup — these are the ones T2-13 (ledger pattern
+- [`feedback/auto_merge_monitor_quirks.md`](feedback/auto_merge_monitor_quirks.md) (0d ago) — Three recurring bugs in the gh-pr-checks → auto-merge monitor pattern; each one cost real time on 20
+- [`feedback/cs_skill_insteadof_rewrite.md`](feedback/cs_skill_insteadof_rewrite.md) (0d ago) — /cs push fails silently unless it unsets global url.git@github.com:.insteadOf rewrite — fixed in ski
 - [`feedback/feedback_blackbox_vs_code_review.md`](feedback/feedback_blackbox_vs_code_review.md) (0d ago) — Always run code-level review (/cto or /review-changes) in addition to black-box testing (/fulltest-s
 - [`feedback/feedback_claudia_vps_only.md`](feedback/feedback_claudia_vps_only.md) (0d ago) — Any mention of Claudia means VPS — always SSH to /opt/claudia, never check local repo for state
 - [`feedback/feedback_contably_deploy_model.md`](feedback/feedback_contably_deploy_model.md) (0d ago) — Contably deployment model — staging-first, promote-to-prod via workflow only; /deploy-conta-full is 
@@ -148,6 +151,7 @@ which pages are hubs, and where cross-links are missing.
 - [`feedback/feedback_use_browser_tools.md`](feedback/feedback_use_browser_tools.md) (0d ago) — Don't ask the user for screenshots — use available browser/fetch tools to check visual state of depl
 - [`feedback/feedback_use_swarms_for_big_tasks.md`](feedback/feedback_use_swarms_for_big_tasks.md) (0d ago) — Always use parallel swarm agents for large tasks — never single agent for 100+ item workloads
 - [`feedback/feedback_worktree_branch_first.md`](feedback/feedback_worktree_branch_first.md) (0d ago) — Worktree agents must create a feature branch as their FIRST action, never commit on main even inside
+- [`feedback/never_work_in_main_checkout.md`](feedback/never_work_in_main_checkout.md) (0d ago) — Every action in a session — file edits, gh pr commands, scp deploys — must happen from a worktree, n
 - [`reference/reference_cloudflare.md`](reference/reference_cloudflare.md) (0d ago) — Cloudflare API token with Zone.DNS edit for all zones, account details, zone IDs, and where credenti
 - [`reference/reference_cloudflare_nuvini.md`](reference/reference_cloudflare_nuvini.md) (0d ago) — Cloudflare API token for nuvini.ai domain DNS — separate account (P@nuvini.co) from main (p@nove.co)
 - [`reference/reference_contably_repo.md`](reference/reference_contably_repo.md) (0d ago) — Contably code lives at Contably/contably (org), not escotilha/contably. escotilha is Pierre's person
@@ -165,6 +169,8 @@ which pages are hubs, and where cross-links are missing.
 - [`reference/reference_vps_connection.md`](reference/reference_vps_connection.md) (0d ago) — How to reach the Contabo VPS (Claudia, Paperclip) — Tailscale IP, SSH user, hostname, ports
 - [`working/contably-os-v4-inputs.md`](working/contably-os-v4-inputs.md) (0d ago) — Three design inputs captured 2026-04-21 during v3 Phase 1 E2E sign-off, to feed into v4 planning
 - [`working/contably-os-v4-online-2026-04-21.md`](working/contably-os-v4-online-2026-04-21.md) (0d ago) — What's running in production as of 2026-04-21 end-of-day. Resume block for future sessions.
+- [`working/resume_2026-04-22_overnight.md`](working/resume_2026-04-22_overnight.md) (0d ago) — Resume pointer for the Contably overnight engine session that was rate-limited at 22:40 local. Any n
+- [`working/resume_mary_restart_2026-04-23.md`](working/resume_mary_restart_2026-04-23.md) (0d ago) — Working state for Mary restart/audit — overnight prep done 2026-04-23 03:00, morning execution pendi
 - [`semantic/mistake_settings_bak_public_leak.md`](semantic/mistake_settings_bak_public_leak.md) (0d ago) — 2026-04-21 incident — settings.json.bak-* file with literal API keys force-pushed to public GitHub b
 - [`semantic/mistake_validate-storage-constraints-before-schema.md`](semantic/mistake_validate-storage-constraints-before-schema.md) (0d ago) — Always confirm runtime environment constraints (which databases are available, where the skill runs)
 - [`semantic/pattern_dogfood-before-trusting-autonomous-dispatch.md`](semantic/pattern_dogfood-before-trusting-autonomous-dispatch.md) (0d ago) — v4 Phase 5/6 dogfood surfaced 3 sandbox bugs unit tests couldn't catch. Pattern is to trigger a real
@@ -172,10 +178,14 @@ which pages are hubs, and where cross-links are missing.
 - [`semantic/pattern_learn-distill-encode-evolve.md`](semantic/pattern_learn-distill-encode-evolve.md) (0d ago) — Meta-pattern Pierre named 2026-04-21. Every real-world failure → diagnosed → lesson extracted → bake
 - [`semantic/pattern_sandbox-exec-allow-default-deny-dangerous.md`](semantic/pattern_sandbox-exec-allow-default-deny-dangerous.md) (0d ago) — Hard lesson from Contably OS v4 Phase 2b — deny-default breaks dyld/Mach on modern macOS. Four itera
 - [`semantic/pattern_spawn-convention-analyzer-before-new-skill-in-family.md`](semantic/pattern_spawn-convention-analyzer-before-new-skill-in-family.md) (0d ago) — When building a new skill that extends an existing family (cto, vibc, cpo, ship), spawn a one-shot O
+- [`semantic/research-finding-ultrareview-claude-code.md`](semantic/research-finding-ultrareview-claude-code.md) (0d ago) — Claude Code /ultrareview research preview — cloud fleet of bug-hunting agents for pre-merge code rev
+- [`semantic/tech-insight:mcp-agent-production-patterns.md`](semantic/tech-insight:mcp-agent-production-patterns.md) (0d ago) — Anthropic guide on MCP vs direct API vs CLI for production agents — server design, context-efficient
 - [`semantic/tech-insight_hermes-agent-learning-loop.md`](semantic/tech-insight_hermes-agent-learning-loop.md) (0d ago) — Hermes Agent learning loop patterns — 5-layer harness model, skills-vs-memory distinction, auto-skil
 - [`semantic/tech-insight_non-interactive-ssh-path-trap.md`](semantic/tech-insight_non-interactive-ssh-path-trap.md) (0d ago) — Hit 3 times today (Contably OS v3 dispatch.sh, v4 client_factory, hook shim tests). Universal patter
 - [`semantic/tech-insight_pytest-unborn-head-breaks-branch-tests.md`](semantic/tech-insight_pytest-unborn-head-breaks-branch-tests.md) (0d ago) — Subtle git quirk that broke 3 hook-script tests in Contably OS v4 Phase 6. Always seed an initial co
 - [`semantic/tech-insight_skill-tool-args-not-forwarded-from-orchestrator.md`](semantic/tech-insight_skill-tool-args-not-forwarded-from-orchestrator.md) (0d ago) — Invoking a skill via the Skill tool from inside an orchestrator context does NOT forward args to the
+- [`personal/host_macmini_vs_laptop.md`](personal/host_macmini_vs_laptop.md) (0d ago) — Pierre's primary Claude Code host is the Mac Mini — the Mini runs Claude Code sessions AND is the au
+- [`personal/host_this_is_mac_mini.md`](personal/host_this_is_mac_mini.md) (0d ago) — PERMANENT — when Claude Code runs with hostname Mac-mini.local and user psm2, this session IS the Ma
 - [`personal/preference_opus_for_coding_logic.md`](personal/preference_opus_for_coding_logic.md) (0d ago) — Explicit user preference (2026-04-21) — any subagent or session doing real coding logic must run on 
 - [`personal/reference_api_keys_keychain.md`](personal/reference_api_keys_keychain.md) (0d ago) — All API keys (Resend, Brave, Exa, Turso) stored in macOS Keychain — settings.json uses ${VAR} refere
 
@@ -211,7 +221,7 @@ which pages are hubs, and where cross-links are missing.
 - `concepts/tech_prompt_cache_1h_vs_5m.md`
 - `concepts/tech_token_efficient_search.md`
 - `concepts/tech_vault_as_context_pattern.md`
-- … and 77 more
+- … and 87 more
 
 ## Stale pages (>90d, top 10 oldest)
 
@@ -250,4 +260,4 @@ _Legacy-dir files whose content looks tier-ready._
 - [`concepts/mistake_fastapi_dep_injection_order.md`](concepts/mistake_fastapi_dep_injection_order.md) → `semantic/`
 - [`concepts/mistake_nightly_unvalidated_db_columns.md`](concepts/mistake_nightly_unvalidated_db_columns.md) → `semantic/`
 - [`concepts/pattern_contably_integration_module_structure.md`](concepts/pattern_contably_integration_module_structure.md) → `semantic/`
-- … and 91 more
+- … and 94 more

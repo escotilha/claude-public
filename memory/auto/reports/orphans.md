@@ -1,6 +1,6 @@
 # Orphan Pages
 
-Pages with zero inbound and zero outbound markdown links. Generated at 2026-04-22 03:30.
+Pages with zero inbound and zero outbound markdown links. Generated at 2026-04-23 03:30.
 
 - [concepts/mistake_benchmark_selfdestruct.md](concepts/mistake_benchmark_selfdestruct.md)
 - [concepts/mistake_cdn_version_not_verified.md](concepts/mistake_cdn_version_not_verified.md)
@@ -53,6 +53,8 @@ Pages with zero inbound and zero outbound markdown links. Generated at 2026-04-2
 - [entities/north-competitive-watchlist.md](entities/north-competitive-watchlist.md)
 - [entities/rex-mlx-benchmark-spec.md](entities/rex-mlx-benchmark-spec.md)
 - [entities/swarmy-context-handoff.md](entities/swarmy-context-handoff.md)
+- [feedback/auto_merge_monitor_quirks.md](feedback/auto_merge_monitor_quirks.md)
+- [feedback/cs_skill_insteadof_rewrite.md](feedback/cs_skill_insteadof_rewrite.md)
 - [feedback/feedback_blackbox_vs_code_review.md](feedback/feedback_blackbox_vs_code_review.md)
 - [feedback/feedback_claudia_vps_only.md](feedback/feedback_claudia_vps_only.md)
 - [feedback/feedback_contably_deploy_model.md](feedback/feedback_contably_deploy_model.md)
@@ -73,6 +75,9 @@ Pages with zero inbound and zero outbound markdown links. Generated at 2026-04-2
 - [feedback/feedback_use_browser_tools.md](feedback/feedback_use_browser_tools.md)
 - [feedback/feedback_use_swarms_for_big_tasks.md](feedback/feedback_use_swarms_for_big_tasks.md)
 - [feedback/feedback_worktree_branch_first.md](feedback/feedback_worktree_branch_first.md)
+- [feedback/never_work_in_main_checkout.md](feedback/never_work_in_main_checkout.md)
+- [personal/host_macmini_vs_laptop.md](personal/host_macmini_vs_laptop.md)
+- [personal/host_this_is_mac_mini.md](personal/host_this_is_mac_mini.md)
 - [personal/preference_opus_for_coding_logic.md](personal/preference_opus_for_coding_logic.md)
 - [personal/reference_api_keys_keychain.md](personal/reference_api_keys_keychain.md)
 - [projects/project_agentwave_deploy.md](projects/project_agentwave_deploy.md)
@@ -93,6 +98,7 @@ Pages with zero inbound and zero outbound markdown links. Generated at 2026-04-2
 - [projects/project_nuvini_ir_deploy.md](projects/project_nuvini_ir_deploy.md)
 - [projects/project_sla_phases_shipped.md](projects/project_sla_phases_shipped.md)
 - [projects/project_woodpecker_ci.md](projects/project_woodpecker_ci.md)
+- [projects/psos_failure_patterns_to_detect.md](projects/psos_failure_patterns_to_detect.md)
 - [reference/reference_cloudflare.md](reference/reference_cloudflare.md)
 - [reference/reference_cloudflare_nuvini.md](reference/reference_cloudflare_nuvini.md)
 - [reference/reference_contably_repo.md](reference/reference_contably_repo.md)
@@ -107,5 +113,9 @@ Pages with zero inbound and zero outbound markdown links. Generated at 2026-04-2
 - [reference/reference_resend_cli.md](reference/reference_resend_cli.md)
 - [reference/reference_search_api_keys.md](reference/reference_search_api_keys.md)
 - [reference/reference_telnyx_voice.md](reference/reference_telnyx_voice.md)
+- [semantic/research-finding-ultrareview-claude-code.md](semantic/research-finding-ultrareview-claude-code.md)
+- [semantic/tech-insight:mcp-agent-production-patterns.md](semantic/tech-insight:mcp-agent-production-patterns.md)
 - [working/contably-os-v4-inputs.md](working/contably-os-v4-inputs.md)
 - [working/contably-os-v4-online-2026-04-21.md](working/contably-os-v4-online-2026-04-21.md)
+- [working/resume_2026-04-22_overnight.md](working/resume_2026-04-22_overnight.md)
+- [working/resume_mary_restart_2026-04-23.md](working/resume_mary_restart_2026-04-23.md)

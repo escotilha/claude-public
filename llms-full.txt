@@ -2,7 +2,7 @@
 
 > Pierre Schurmann's Claude Code setup: 86 skills, 13 global rules, hybrid memory system. LLM-discoverable via llmstxt.org spec. Use this file to understand what tooling is available before starting work.
 
-Generated: 2026-04-22T06:30:15Z
+Generated: 2026-04-23T06:30:09Z
 
 ---
 
@@ -106,7 +106,19 @@ At 80% you still have a healthy buffer to run the skill. At 85%+ the skill itsel
 
 ## The announcement
 
-Before invoking, say one sentence: "Context at ~X% with unfinished work — running /handoff to checkpoint before we lose the window." Then invoke. Never silently — the user needs to know you're taking a preservation action.
+Before invoking, say one sentence: "Context at ~X% with unfinished work — running /handoff, then /clear, then /primer." Then invoke. Never silently — the user needs to know you're taking a preservation action.
+
+## The chain — /handoff → /clear → /primer
+
+Added 2026-04-22 per Pierre's explicit instruction: do not stop at `/handoff`. Immediately chain into `/clear` then `/primer` so the next session resumes automatically.
+
+1. Run `/handoff` — writes the resume block and commits the plan doc.
+2. Once the handoff skill completes and the resume block is printed, invoke `/clear` directly.
+3. After `/clear` wipes context, invoke `/primer` so the new session reconstructs state from the handoff doc the previous turn wrote.
+
+Do NOT wait for the user to confirm between steps. The entire chain is autonomous during overnight / long-running work. Exception: if the user has said "stop" or "pause" in the last 3 turns, halt after `/handoff` and ask.
+
+The previous rule said "Don't invoke `/clear` or `/compact` yourself — that's always the user's call." That exception is now lifted for the post-`/handoff` chain only. `/clear` outside that chain is still operator-only.
 
 ## When to skip
 
@@ -121,7 +133,8 @@ If context is 80-85% but the work is **ambiguous** (multiple possible plan docs,
 
 ## What NOT to do
 
-- Don't invoke `/clear` or `/compact` yourself — that's always the user's call
+- Don't invoke `/compact` yourself — that's always the user's call
+- Don't invoke `/clear` EXCEPT as the second step of the `/handoff → /clear → /primer` chain (see "The chain" section above). Standalone `/clear` is still operator-only.
 - Don't run `/handoff` repeatedly within the same session — once the checkpoint exists, subsequent updates should happen via normal edits to the plan doc
 - Don't invoke below 80% "just to be safe" — it's noise
 
@@ -406,6 +419,17 @@ Opus 4.7 changes three things that affect this setup:
   > "Do not spawn a subagent for work you can complete directly in a single response. Spawn multiple subagents in the same turn when fanning out across items or reading multiple files."
 
 Interactive (multi-turn) mode reasons more per turn than autonomous (single-turn) mode — front-load full intent + constraints + acceptance criteria in the first message, then batch follow-ups.
+
+### Vault / CIMD Credentials for Routines (per Anthropic MCP blog, 2026-04-22)
+
+Scheduled Routines (Opus 4.7, autonomous) that connect to external services via MCP should register OAuth tokens in **Managed Agent Vaults**. The platform auto-injects and refreshes credentials into MCP connections — no manual token passing via env vars or spawn prompts.
+
+- Never pass long-lived tokens through `CronCreate` payloads or routine spawn prompts.
+- Register the credential once in the Vault; reference it by name in the MCP connection config.
+- Refresh is handled by Anthropic's CIMD (Credentials + Identity Management) layer — routines don't need to re-authenticate.
+- Applies to: contably-eod, chief-geo daily, any `/schedule`-created agent that hits Supabase/GitHub/Pluggy/Slack via MCP.
+
+Fallback (pre-Vault or non-Claude-Code hosts like Claudia): encrypt tokens at rest (1Password CLI, macOS Keychain) and load via a startup hook; never hardcode in routine config files.
 
 ## Decision Matrix
 
@@ -1544,12 +1568,18 @@ You MAY use `Read` and `Write` for the one purpose listed in step 1b (generating
 ## skills/cto
 
 - **name:** cto
-- **description:** Swarm AI CTO advisor. Parallel reviewers (architecture, security, performance, quality) via TeammateTool. Triggers on: CTO advice, architecture review, tech stack, system design, code quality, security audit, performance review.
+- **description:** AI CTO advisor. Sequential focused reviews or parallel swarm audits (security, architecture, performance, quality). Triggers on: CTO advice, architecture review, tech stack, system design, code quality, security audit, performance review, plan review, incident diagnosis.
 - **user-invocable:** true
 - **model:** opus
 - **effort:** high
 
-> **Fast Mode:** This skill uses Claude Opus 4.6. Use `/fast` to toggle faster responses when speed is critical.
+# /cto — AI Technical Advisor
+
+A production gate and diagnostic tool. Two modes: **sequential** (focused question, one area) and **swarm** (parallel specialist analysts for full review or incident diagnosis).
+
+Every invocation produces a durable artifact at `.cto/review-{YYYY-MM-DD}-{slug}.md`. Downstream skills (`/architect`, `/ship`, future `/cto` sessions) consume that file — the chat summary is secondary.
+
+---
 
 ---
 
