@@ -8,6 +8,7 @@
     "EXA_API_KEY": "${EXA_API_KEY}",
     "ENABLE_PROMPT_CACHING_1H": "1"
   },
+  "attribution": {},
   "modelOverrides": {
     "claude-opus-4-6": "claude-opus-4-6",
     "claude-sonnet-4-6": "claude-sonnet-4-6",
@@ -15,10 +16,6 @@
     "claude-sonnet-4-7": "claude-sonnet-4-7",
     "claude-haiku-4-5-20251001": "claude-haiku-4-5-20251001",
     "claude-haiku-4-7": "claude-haiku-4-7"
-  },
-  "attribution": {
-    "enabled": true,
-    "footer": "🤖 Generated with Claude Code"
   },
   "hooks": {
     "SessionStart": [
@@ -405,6 +402,18 @@
       }
     }
   },
+  "sandbox": {
+    "network": {
+      "deniedDomains": [
+        "169.254.169.254",
+        "metadata.google.internal",
+        "metadata.azure.com",
+        "metadata.aws.amazon.com",
+        "fd00:ec2::254",
+        "100.100.100.200"
+      ]
+    }
+  },
   "spinnerVerbs": {
     "mode": "append",
     "verbs": [
@@ -429,18 +438,6 @@
   },
   "alwaysThinkingEnabled": false,
   "effortLevel": "xhigh",
-  "sandbox": {
-    "network": {
-      "deniedDomains": [
-        "169.254.169.254",
-        "metadata.google.internal",
-        "metadata.azure.com",
-        "metadata.aws.amazon.com",
-        "fd00:ec2::254",
-        "100.100.100.200"
-      ]
-    }
-  },
   "plansDirectory": "~/.claude/plans",
   "autoMemoryDirectory": "~/.claude-setup/memory/auto",
   "skipDangerousModePermissionPrompt": true,
