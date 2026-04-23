@@ -38,9 +38,10 @@ Automatically analyzes the Claude Code changelog and recommends improvements to 
 3. **Diffs Against Baseline** - Compares current state to `~/.claude-setup/SETUP-BASELINE.md` to detect drift
 4. **Role-Based Gap Analysis** - Evaluates coverage for both Developer and M&A Analyst roles
 5. **Identifies Opportunities** - Finds ways your setup could benefit from new Claude features
-6. **Generates Health Report** - Structured report with health score, updates, gaps, action items
-7. **Recommends Improvements** - Provides specific, actionable recommendations
-8. **Implements Changes** - Optionally applies improvements automatically
+6. **Cross-Skill Synergy Audit** - Finds older skills that could adopt newer skills, tools, or patterns (Step 2c)
+7. **Generates Health Report** - Structured report with health score, updates, gaps, action items
+8. **Recommends Improvements** - Provides specific, actionable recommendations
+9. **Implements Changes** - Optionally applies improvements automatically
 
 ## Paths
 
@@ -298,58 +299,124 @@ Check if recent codebase changes broke assumptions in the skill.
 
 ### Step 2c: Cross-Skill Synergy Analysis
 
-After changelog-based analysis, scan all skills for **cross-skill improvement opportunities** — ways newer or existing skills can enhance other skills.
+After changelog-based analysis, scan all skills for **cross-skill improvement opportunities** — ways newer skills, tools, or patterns could enhance older skills.
 
-#### Process
+This is a **first-class pipeline**, not a single pass. It runs in four stages: identify newer units, build the synergy matrix, detect pattern synergies, then score and classify.
 
-1. **Identify "newer" skills** — skills added or significantly updated in the last 90 days (check git log on SKILL.md files):
+#### 2c.1 Identify "newer" units (three sources)
+
+A synergy candidate is any skill, tool, or rule added/materially updated recently. Pull all three in parallel:
 
 ```bash
 SETUP="$HOME/.claude-setup"
-# Skills modified in last 90 days
-git -C "$SETUP" log --since="90 days ago" --name-only --pretty=format: -- "skills/*/SKILL.md" | sort -u | grep -v '^$'
+CUTOFF_DAYS="${SYNERGY_NEWER_DAYS:-90}"
+
+# a) Skills modified within cutoff
+git -C "$SETUP" log --since="${CUTOFF_DAYS} days ago" --name-only --pretty=format: -- "skills/*/SKILL.md" \
+  | awk -F/ '/SKILL.md$/ {print $2}' | sort -u > /tmp/newer-skills.txt
+
+# b) Rules modified within cutoff (new patterns worth propagating)
+git -C "$SETUP" log --since="${CUTOFF_DAYS} days ago" --name-only --pretty=format: -- "rules/*.md" \
+  | awk -F/ '/\.md$/ {print $2}' | sort -u > /tmp/newer-rules.txt
+
+# c) Tools/features from the changelog analysis in Step 1a
+# (e.g. Monitor, Agent Teams, isolation=worktree, SendMessage, PostCompact hook)
+# These come from Step 1a's parsed changelog — pass them as the NEW_TOOLS list.
 ```
 
-2. **For each newer skill, check if it can improve existing skills.** Consider:
-   - Can it be composed into another skill's workflow? (e.g., `/get-api-docs` before API implementation in `/ship`)
-   - Does it replace a manual step in another skill? (e.g., `/pinchtab` replacing raw Chrome MCP calls)
-   - Does it provide better tooling for a subtask? (e.g., `/firecrawl` replacing `WebFetch` for scraping)
-   - Can it be added as a `skills` dependency in another skill's frontmatter?
-   - Does it offer a pattern that other skills should adopt?
+Also respect the canonical routing table in `~/.claude-setup/rules/skill-first.md` — skills promoted there count as "known new" even if git says otherwise.
 
-3. **Score each potential improvement (1-10):**
+#### 2c.2 Build the synergy matrix
 
-| Score | Meaning                                                                   |
-| ----- | ------------------------------------------------------------------------- |
-| 1-3   | Minor convenience, not worth the integration effort                       |
-| 4-5   | Moderate improvement, but adds complexity                                 |
-| 6-7   | Clear improvement, worth noting but not urgent                            |
-| 8-9   | Significant improvement — reduces tokens, time, or errors substantially   |
-| 10    | Critical — the existing skill is broken or severely degraded without this |
+For every (older skill × newer unit) pair, answer these questions. Each "yes" adds the listed points; **sum = synergy score, clamped to [0, 10]**.
 
-**Scoring criteria:**
+| Signal | Points |
+| --- | ---: |
+| Older skill manually does what the newer skill now encapsulates (e.g. raw `gh pr create` when `/cpr` exists) | +3 |
+| Older skill uses a tool the newer skill/tool replaces more efficiently (`WebFetch` → `/firecrawl`, Chrome MCP → `/pinchtab`) | +2 |
+| Newer skill could be chained before/after older skill's workflow (`/get-api-docs` before impl in `/ship`) | +2 |
+| Older skill polls (`sleep` loops) when newer tool provides event-driven notifications (Monitor, TeammateIdle hook) | +3 |
+| Older skill's `allowed-tools` omits a tool the newer skill adds value with | +1 |
+| Adding the synergy is measurably token-reducing (>30%) | +2 |
+| Older skill reads the same files across subagents — newer pattern pre-computes context in orchestrator | +2 |
+| Integration adds significant complexity (new deps, fragile chains, coordination overhead) | −2 |
+| Newer unit is explicitly out of scope for older skill (per triggers/description) | −3 |
+| Older skill is marked `(DEPRECATED)` or lives in `_archive/` | skip (score = 0) |
 
-- **Token savings** — does it reduce context usage? (+2 if >30% reduction)
-- **Reliability** — does it fix a known failure mode? (+2 if yes)
-- **Speed** — does it parallelize or eliminate steps? (+1 per step eliminated)
-- **Quality** — does it improve output quality? (+1 if measurably better)
-- **Complexity cost** — does the integration add significant complexity? (-1 to -3)
+**Also flag pattern synergies** — issues where a newer *rule* or *tool* could retrofit many older skills at once:
 
-4. **Auto-implement improvements scoring ≥ 8.** These are high-value, clear wins. Apply them directly following the same parallel agent pattern in Step 5.
+| Pattern issue | Source of truth | What to do |
+| --- | --- | --- |
+| Spawns subagents without `model:` hint | `rules/model-tier-strategy.md` | Add `model: haiku/sonnet/opus` per decision matrix |
+| Uses deprecated `Task` tool where `Agent` is canonical | changelog | Swap `Task` → `Agent` in allowed-tools + usage |
+| Uses `Agent(..., resume=...)` (removed v2.1.77) | changelog | Swap to `SendMessage({to: agentId})` |
+| Polls with `sleep 30` / `sleep 60` loops | Monitor tool (v2.1.x) | Replace with Monitor + event-driven flow |
+| Broadcasts to all teammates when direct message suffices | `rules/AGENT-TEAMS-STRATEGY.md` §3.2 | Convert to direct-message pattern |
+| Subagents each re-read the vault / `CLAUDE.md` | `AGENT-TEAMS-STRATEGY.md` §3.6 | Pre-compute context in orchestrator, inject into spawn prompts |
+| Uses `Write` to patch existing skill files | `rules/skill-authoring-conventions.md` | Switch to `Edit` for diffs |
+| No `invocation-contexts` block, but skill is both user-invocable and agent-spawned | `rules/tool-annotations.md` | Add `user-direct` / `agent-spawned` variants |
+| Missing `context: fork` on orchestrator skills that spawn 3+ subagents | Skill authoring conventions | Add `context: fork` to protect main context |
+| Orchestrator hardcodes Opus for mechanical subagent work | `rules/model-tier-strategy.md` | Downgrade read-only/formatter subagents to Haiku |
+| No `SessionStart` / `PostCompact` hook in long-running skill | changelog (v2.1.76) | Add hook to re-inject critical state after compaction |
 
-5. **List improvements scoring < 8** in the report under a dedicated section:
+Pattern synergies are scored the same way but almost always apply to **multiple skills at once** — surface them separately in the report so a single edit-pass fixes all offenders.
+
+#### 2c.3 Score bands and auto-apply threshold
+
+| Score | Classification | Action |
+| --- | --- | --- |
+| 8–10 | High-value synergy | **Auto-apply** (group with Step 5's parallel agents) |
+| 5–7 | Worth noting | List in report, no auto-apply |
+| 1–4 | Marginal | Report under "Marginal" (collapsed) |
+| 0 | No synergy | Skip |
+
+Before auto-applying a score-8+ item, apply these guardrails:
+
+1. **Mechanical edit only** — if the change requires workflow rewrites or judgment calls, demote to 7 and surface for manual review.
+2. **Preserve frontmatter style** — YAML list for `allowed-tools`, existing key ordering.
+3. **One synergy per edit** — do not bundle unrelated changes in the same `Edit` call.
+4. **Use `Edit` (patch), not `Write` (rewrite)** — per `skill-authoring-conventions.md`.
+
+Override the auto-apply threshold via `SYNERGY_APPLY_THRESHOLD=7` (more aggressive) or `SYNERGY_APPLY_THRESHOLD=9` (more conservative).
+
+#### 2c.4 Emit synergy report section
+
+Include this block in Step 4's report. Skip entirely if no synergies (score ≥1) were found — do not emit noise.
 
 ```markdown
-## Cross-Skill Synergy Opportunities (Not Auto-Applied)
+## Cross-Skill Synergies
 
-| Existing Skill | Newer Skill   | Improvement                                       | Score | Notes                                        |
-| -------------- | ------------- | ------------------------------------------------- | ----- | -------------------------------------------- |
-| /ship          | /get-api-docs | Auto-fetch API docs before implementation phase   | 6     | Adds a step but improves code quality        |
-| /qa-cycle      | /pinchtab     | Replace Chrome MCP with PinchTab for page testing | 7     | 5-13x cheaper, but requires PinchTab running |
-| ...            | ...           | ...                                               | ...   | ...                                          |
+Scanned: {N} skills ({M} newer, modified within {cutoff}d) × {T} tools/rules
+Found: {H} high (≥8) / {M} medium (5-7) / {L} marginal (1-4)
+
+### High-Value Synergies (auto-apply candidates)
+
+| Older Skill | Newer Unit | Change | Score |
+| --- | --- | --- | ---: |
+| /ship | /get-api-docs | Chain before implementation phase | 9 |
+| /parallel-dev | Monitor tool | Replace 30s polling loop in Phase 4 | 9 |
+| /cto | model-tier-strategy | Route Explore subagents to haiku | 8 |
+
+### Worth Considering (5-7)
+
+| Older Skill | Newer Unit | Change | Score | Notes |
+| --- | --- | --- | ---: | --- |
+| /qa-cycle | /pinchtab | Replace Chrome MCP for page testing | 7 | 5-13× cheaper; requires pinchtab running |
+
+### Pattern Issues (affects multiple skills)
+
+| Pattern | Offending Skills | Fix | Score |
+| --- | --- | --- | ---: |
+| Subagents spawned without `model:` | /foo, /bar, /baz | Add `model: haiku` for read-only | 8 |
+| `sleep 30` polling loops | /foo, /qux | Replace with Monitor | 9 |
+| Uses deprecated `Task` tool | /legacy | Swap to `Agent` | 8 |
+
+### Marginal (1-4)
+
+{collapsed list}
 ```
 
-**Important:** Only evaluate genuine improvements. Do not force synergies where none exist. If no cross-skill improvements are found, skip this section entirely.
+**Important:** Only evaluate genuine improvements. If no synergies are found, skip this section entirely.
 
 ### Step 3: Generate Recommendations
 
