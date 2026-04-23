@@ -181,7 +181,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/.contably-os/hooks/handoff-snapshot.sh\" session-end"
+            "command": "test -x \"$HOME/.contably-os/hooks/handoff-snapshot.sh\" && \"$HOME/.contably-os/hooks/handoff-snapshot.sh\" session-end || true"
           }
         ]
       }
@@ -277,7 +277,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/.contably-os/hooks/handoff-snapshot.sh\" pre-compact"
+            "command": "test -x \"$HOME/.contably-os/hooks/handoff-snapshot.sh\" && \"$HOME/.contably-os/hooks/handoff-snapshot.sh\" pre-compact || true"
           }
         ]
       }
