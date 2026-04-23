@@ -80,8 +80,11 @@ Don't inline checklists here. The orchestrator loads only what the current mode 
 - **`references/security.md`** — security-analyst lens (OWASP + Glasswing archaeology + fail-open + AI-platform surface + FP exclusions).
 - **`references/performance.md`** — performance-analyst lens (DB, Next.js RSC, bundle, scaling tiers).
 - **`references/architecture-quality.md`** — architecture + quality analyst lenses + tech-stack matrix.
+- **`references/archaeology-analyst.md`** — fifth analyst spec (code archaeology). NOT wired into Step 4 yet — gated on eval harness being populated (see file for status).
 - **`references/report-templates.md`** — artifact schema, verdict / severity / effort definitions, completion-signal JSON, `cto-requirements.md` template.
 - **`references/synthesis.md`** — confidence gate, severity-ranker / cross-concern-detector / effort-estimator agents, merge rules.
+- **`references/measurement.md`** — baseline metrics for swarm mode (per-run token cost, findings, cross-concerns). Data-driven gate for migration decisions (P5 Agent Teams, future analyst additions).
+- **`references/dispatch-policy.md`** — trust boundary for P3 skill-dispatch: allowlist + SHA-256 manifest pinning + drift detection + tool-capability whitelist. Design doc; not yet implemented.
 
 ---
 
@@ -150,15 +153,13 @@ find . -type d -maxdepth 3 \
 ls -la tsconfig.json .eslintrc* .prettierrc* jest.config* vitest.config* playwright.config* 2>/dev/null
 ```
 
-If the project is indexed in QMD, pre-compute file lists per analyst domain:
+If the project is indexed in QMD, pre-compute file lists per analyst domain (one search per analyst — security/performance/architecture/quality/archaeology — with role-relevant keywords):
 
 ```bash
 qmd collection list 2>/dev/null | grep -i "$(basename $(pwd))"
-# If matched:
+# Example (security lens):
 qmd search "auth middleware jwt token session password" -c <collection> --files -n 20
-qmd search "database query ORM prisma cache connection pool" -c <collection> --files -n 20
-qmd search "routes API components layout services" -c <collection> --files -n 20
-qmd search "test spec coverage lint config CI" -c <collection> --files -n 20
+# Repeat per analyst domain with appropriate keywords.
 ```
 
 Pre-computed file lists go into each analyst's spawn prompt — avoids N analysts each running `find` / `grep` for discovery.
@@ -171,7 +172,7 @@ Answer the scoped question directly in this session. Load ONLY the relevant refe
 
 #### Swarm mode
 
-Spawn **4 specialist analysts in parallel** via the `Agent` tool with `run_in_background: true`. Each gets:
+Spawn **4 specialist analysts in parallel** via the `Agent` tool with `run_in_background: true` (5 if archaeology-analyst is enabled — see below). Each gets:
 
 - A pre-computed codebase context block (tech stack, key directories, file list from QMD if available, memory findings).
 - File ownership boundaries (see each analyst's reference file). Do NOT read files outside ownership.
@@ -180,6 +181,10 @@ Spawn **4 specialist analysts in parallel** via the `Agent` tool with `run_in_ba
 - Tool Search instruction: _"Do NOT load full MCP tool definitions up-front. Use ToolSearch with keyword queries to load only schemas you'll use this turn."_
 
 Use `model: sonnet` for each analyst — matches `model-tier-strategy.md` guidance for bounded code review.
+
+**Archaeology analyst (5th, opt-in):** add `archaeology-analyst` IFF scope is `full`, `plan`, `incident`, OR `security` AND `references/archaeology-analyst.md` status reads "Evaluation harness: populated". Skip on `performance` / `architecture` / `quality` focused reviews — archaeology adds little there and costs ~25% extra tokens. See `references/archaeology-analyst.md` for file ownership and full spec.
+
+**Dispatch (future, P3):** before spawning each analyst, consult `references/dispatch-policy.md` allowlist — if an approved published skill matches the analyst role AND its manifest hash hasn't drifted, dispatch to it instead of running the inline reference-file version. Record provenance in the artifact. Default today: run inline (dispatch layer not yet implemented).
 
 ```
 Spawn Agent (subagent_type: general-purpose, model: sonnet, run_in_background: true):
@@ -282,6 +287,12 @@ Before spawning analysts, `mem-search` for prior findings (see Step 1). After sy
 ---
 
 ## Version
+
+**3.1.0** (P2-P5 self-review action — 2026-04-23):
+- Added `references/measurement.md` — baseline protocol for data-driven migration decisions (P5 Agent Teams, future analysts).
+- Added `references/archaeology-analyst.md` — 5th analyst spec. Opt-in per scope. Merge gated on ≥10 eval-harness fixtures + regression check.
+- Added `references/dispatch-policy.md` — P3 trust boundary: allowlist + SHA-256 pinning + drift detection + tool-capability whitelist. Design doc; P4 blocked on implementation.
+- Updated Step 4 swarm spawn to describe archaeology opt-in and dispatch tie-break.
 
 **3.0.0** (P1 restructure — 2026-04-23):
 - Split 1854-line monolith into thin orchestrator ≤300 lines + `references/*.md`.
