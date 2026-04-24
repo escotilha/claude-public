@@ -2,7 +2,7 @@
 
 > Pierre Schurmann's Claude Code setup: 86 skills, 13 global rules, hybrid memory system. LLM-discoverable via llmstxt.org spec. Use this file to understand what tooling is available before starting work.
 
-Generated: 2026-04-23T06:30:09Z
+Generated: 2026-04-24T02:00:07Z
 
 ---
 
@@ -1552,16 +1552,16 @@ Full git workflow: commit all changes, push to remote, and create a pull request
 ## skills/cs
 
 - **name:** cs
-- **description:** Sync Claude setup to all remotes (origin, public) + VPS sync via git pull
+- **description:** Sync Claude setup to the private origin repo + VPS via git pull
 - **user-invocable:** true
 - **model:** opus
-- **effort:** high
+- **effort:** medium
 
 # Claude Setup Sync
 
 **IMPORTANT**: This skill operates ONLY on `~/.claude-setup`. Do NOT explore, read, or search any other directory outside this path.
 
-You MAY use `Read` and `Write` for the one purpose listed in step 1b (generating README.pt.md for new public skills). Everything else is Bash-only.
+Bash-only.
 
 ---
 
@@ -1578,8 +1578,6 @@ You MAY use `Read` and `Write` for the one purpose listed in step 1b (generating
 A production gate and diagnostic tool. Two modes: **sequential** (focused question, one area) and **swarm** (parallel specialist analysts for full review or incident diagnosis).
 
 Every invocation produces a durable artifact at `.cto/review-{YYYY-MM-DD}-{slug}.md`. Downstream skills (`/architect`, `/ship`, future `/cto` sessions) consume that file — the chat summary is secondary.
-
----
 
 ---
 
@@ -2368,6 +2366,20 @@ High-performance web scraping with anti-bot bypass, adaptive element tracking, a
 A disciplined 7-phase skill that takes a feature from idea to production. Each phase produces persistent artifacts. Resumable across context clears via state file.
 
 ---
+
+---
+
+## skills/skill-audit
+
+- **name:** skill-audit
+- **description:** Audit and improve the skills library. Inventories every SKILL.md, scores usage from transcripts + routing-table references, reviews top-ranked skills against a fixed rubric, flags low-usage skills for deprecate-or-fix. Triggers on: skill audit, audit skills, improve skills, review skills, skill health, /skill-audit.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# skill-audit
+
+Systematic audit of the skills library. Produces a prioritized improvement plan — not auto-fixes — because SKILL.md changes are consequential and deserve human sign-off.
 
 ---
 

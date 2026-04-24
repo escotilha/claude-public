@@ -2,7 +2,7 @@
 
 > Pierre Schurmann's Claude Code setup: 86 skills, 13 global rules, hybrid memory system. LLM-discoverable via llmstxt.org spec. Use this file to understand what tooling is available before starting work.
 
-Last generated: 2026-04-23T06:30:08Z
+Last generated: 2026-04-24T02:00:06Z
 
 ## Rules
 
@@ -44,7 +44,7 @@ User-invocable skills. Trigger via `/<skill-name>` or natural-language match.
 - [contably-snapshot](skills/contably-snapshot/SKILL.md): Generate Contably CODEBASE-REFERENCE.md — tech stack, product modules, API surface, infra, architecture. Triggers on: contably snapshot, stack snapshot, codebase reference, refresh snapshot.
 - [cpo](skills/cpo/SKILL.md): Chief Product Officer AI — full product lifecycle, idea to production. Triggers: build this product, cpo mode, cpo.
 - [cpr](skills/cpr/SKILL.md): Commit, push, and create PR. Full git workflow in one command.
-- [cs](skills/cs/SKILL.md): Sync Claude setup to all remotes (origin, public) + VPS sync via git pull
+- [cs](skills/cs/SKILL.md): Sync Claude setup to the private origin repo + VPS via git pull
 - [cto](skills/cto/SKILL.md): AI CTO advisor. Sequential focused reviews or parallel swarm audits (security, architecture, performance, quality). Triggers on: CTO advice, architecture review, tech stack, system design, code qualit
 - [deep-plan](skills/deep-plan/SKILL.md): Three-phase research→plan→implement workflow with persistent markdown artifacts. Deep-reads codebase, iterates on annotations. Triggers on: deep plan, plan feature, research and plan, plan this.
 - [deep-research](skills/deep-research/SKILL.md): Deep research orchestration. Parallel multi-track investigation with evidence hierarchy, delivers investment-memo-grade reports. Triggers on: deep research, investigate, deep dive into, nuclear resear
@@ -99,6 +99,7 @@ User-invocable skills. Trigger via `/<skill-name>` or natural-language match.
 - [schedule](skills/schedule/SKILL.md): Create, update, list, or run scheduled remote agents (triggers) that execute on a cron schedule. Triggers on: schedule, scheduled agent, cron agent, recurring agent, trigger, remote trigger.
 - [scrapling](skills/scrapling/SKILL.md): Web scraping with anti-bot bypass, TLS impersonation, adaptive tracking via Scrapling MCP. Three modes: HTTP, stealth browser, Playwright. Triggers on: scrapling, stealth scrape, bypass cloudflare, an
 - [ship](skills/ship/SKILL.md): End-to-end feature shipping: spec → plan → swarm implement → QA → fix → docs. Resumable. Triggers on: ship, ship feature, build and ship, full cycle, end to end, /ship.
+- [skill-audit](skills/skill-audit/SKILL.md): Audit and improve the skills library. Inventories every SKILL.md, scores usage from transcripts + routing-table references, reviews top-ranked skills against a fixed rubric, flags low-usage skills for
 - [slack](skills/slack/SKILL.md): Automate Slack via browser. Send messages, read channels, search, manage threads. Triggers on: slack, send to slack, post slack, read slack, slack message, slack channel.
 - [sourcerank-guardian](skills/sourcerank-guardian/SKILL.md): Pre-deploy guardian for SourceRank AI. Multi-layer analysis (code, infra, runtime, diff-aware) before deploy to Render. Parallel subagents. Triggers on: sourcerank guardian, pre-deploy check, guardian
 - [tech-audit](skills/tech-audit/SKILL.md): Audit project tech stack against current market — compare versions, find EOL libs, recommend upgrades. Triggers on: tech audit, stack audit, dependency audit, upgrade check, what should we upgrade, 
