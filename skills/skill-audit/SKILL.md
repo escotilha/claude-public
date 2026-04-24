@@ -46,7 +46,25 @@ Systematic audit of the skills library. Produces a prioritized improvement plan 
 
 ## What it does
 
-Four phases. Each phase writes a durable artifact under `~/.claude-setup/skills/_audit/<YYYY-MM-DD>/`.
+Five phases. Each phase writes a durable artifact under `~/.claude-setup/skills/_audit/<YYYY-MM-DD>/`.
+
+### Phase 0 — Routing eval
+
+Run the routing evaluation harness to detect drift between the seed corpus (`~/.claude-setup/skills/_audit/routing-eval/cases.yaml`) and the actual routing table + SKILL.md files. This catches:
+
+- **Misrouted skills** — a phrase the user would type doesn't overlap any trigger in the expected skill
+- **Shadow skills** — multiple skills' triggers match the same phrase, creating ambiguous routing
+- **Broken routing-table entries** — `/foo` appears in `skill-first.md` but no `foo/SKILL.md` exists (and it's not in the built-in allowlist)
+- **Missing routing-table entries** — a skill exists but is not referenced in `skill-first.md`
+
+```bash
+~/.claude-setup/tools/routing-eval --json > ~/.claude-setup/skills/_audit/<date>/routing.json
+~/.claude-setup/tools/routing-eval    # also print pretty report to session
+```
+
+Feed the `routed_but_missing_skill`, `skills_not_in_routing_table`, and shadow-heavy phrases into Phase 4's report. If `--strict` and failures exist, flag as P0 in the final report.
+
+To add a new case after shipping a skill: append to `cases.yaml` with a 3-5 word phrase that represents the user's intent, the expected skill name, and a one-line rationale. Run `routing-eval` to verify.
 
 ### Phase 1 — Inventory
 
@@ -149,11 +167,14 @@ Print the report path. Do **not** auto-apply fixes — the report is the artifac
 
 All under `~/.claude-setup/skills/_audit/<YYYY-MM-DD>/`:
 
+- `routing.json` — Phase 0 routing-eval output
 - `inventory.json`
 - `usage.json`
 - `reviews.json`
 - `REPORT.md`
 - `raw/` — raw grep counts, transcript hits (for debugging)
+
+The routing-eval seed corpus lives at `~/.claude-setup/skills/_audit/routing-eval/cases.yaml` — edit it whenever a skill is added, renamed, or deprecated.
 
 ## Follow-up skills (not part of this skill)
 
