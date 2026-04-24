@@ -189,6 +189,8 @@ If content is not relevant to any of these four, score it low and report "No act
 
 #### 2a. Present Report
 
+**Output format is a NUMBERED LIST, not a table.** Each recommendation gets its own numbered `#### N.` heading so the user can reference them as "1, 3" when choosing what to apply. Do not collapse recommendations into a markdown table — tables make it harder to pick items by number.
+
 ```markdown
 ## Research: [Title]
 
@@ -209,11 +211,15 @@ If content is not relevant to any of these four, score it low and report "No act
 - **Effort:** Low / Medium / High
 - **Score:** X/10 — [one-line justification]
 
+#### 2. [...] — Score: X/10
+
+[...]
+
 ### Contably Recommendations
 
-[Only include this section if Contably relevance score >= 3]
+[Only include this section if Contably relevance score >= 3. Number continues from the last Claude Setup recommendation — if Claude Setup had 3 items, Contably starts at #### 4.]
 
-#### 1. [Improve Feature / New Integration / Enhance Capability] — Score: X/10
+#### 4. [Improve Feature / New Integration / Enhance Capability] — Score: X/10
 
 - **Target:** [Contably area: accounting engine / tax compliance / data ingestion / UI / Supabase schema / etc.]
 - **What:** [specific change]
@@ -229,6 +235,12 @@ If content is not relevant to any of these four, score it low and report "No act
 
 [Only if max relevance score >= 5: insight worth saving]
 ```
+
+**Rules for numbering:**
+- Number sequentially across sections (1, 2, 3, 4...) — do NOT restart numbering per section
+- Sort recommendations by score descending within the full list
+- Every recommendation is its own `#### N.` heading with bullets beneath — never a table row
+- Minimum one recommendation per section that applies; if neither target has any, report "No actionable recommendations"
 
 #### 2b. Ask User What to Apply
 
