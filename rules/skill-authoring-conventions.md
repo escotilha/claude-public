@@ -86,3 +86,137 @@ tool-annotations:
 4. **Archived** — moved out of skills/ (or deleted if no longer useful)
 
 Mark lifecycle in the description: `"(DRAFT) ..."` or `"(DEPRECATED) ..."`.
+
+---
+
+## Description Writing (adapted from anthropics/skills `skill-creator`, 2026-04-24)
+
+The `description` field is the **primary triggering mechanism** — it's the only part of the skill that's always in context for routing decisions. Everything else lives behind progressive disclosure. Treat it as a routing prompt, not a label.
+
+### Be pushy
+
+Claude defaults to **undertriggering** skills (skipping them when they'd be useful). Counteract this by writing descriptions that explicitly tell Claude when to use the skill, including adjacent contexts where the user *doesn't* name the skill or file type.
+
+- **Weak:** `"Build a fast dashboard for Anthropic data."`
+- **Pushy:** `"Build a fast dashboard for Anthropic data. Use this skill whenever the user mentions dashboards, data visualization, internal metrics, or wants to display any kind of company data — even if they don't explicitly say 'dashboard'."`
+
+### Bake "when to use" into the description, not the body
+
+Anthropic's spec puts all triggering context in the description — the body is for execution detail only. If you find yourself writing "use this skill when…" inside the body, move it to the description.
+
+### How triggering actually works
+
+Claude only consults skills for tasks it **can't easily handle on its own**. Simple one-step queries ("read this PDF") may not trigger a skill even with a perfect description, because Claude routes them directly. Substantive, multi-step, or specialized queries trigger reliably when the description matches.
+
+This means: don't waste eval queries on trivial prompts. Test the skill with realistic, substantive requests.
+
+## Progressive Disclosure
+
+Skills load in three tiers — minimize what lives in higher tiers:
+
+1. **Metadata** (name + description) — always in context, ~100 words
+2. **SKILL.md body** — loaded when the skill triggers, **target < 500 lines**
+3. **Bundled resources** (`scripts/`, `references/`, `assets/`) — loaded on demand, unlimited
+
+When SKILL.md crosses 500 lines, split off references with explicit pointers:
+
+```
+my-skill/
+├── SKILL.md          (workflow + decision tree, < 500 lines)
+└── references/
+    ├── aws.md        (loaded only if user picks AWS)
+    ├── gcp.md
+    └── azure.md
+```
+
+The body should say "if the user picks AWS, read `references/aws.md`" rather than inlining all three.
+
+## Writing Style: Why over MUST
+
+Modern Claude has strong theory of mind. Heavy-handed `MUST`/`NEVER`/`ALWAYS` directives often degrade behavior compared to explaining the *reasoning*.
+
+- **Yellow flag:** writing all-caps imperatives or rigid step-by-step structures
+- **Better:** explain *why* a step matters, then trust the model to apply judgment to edge cases
+
+Use imperatives for genuinely non-negotiable invariants (e.g., "never commit secrets"). For everything else, explain the constraint and let the model adapt.
+
+## Eval Pipeline (production skills)
+
+For skills with **objectively verifiable outputs** (file transforms, code generation, fixed-format reports), set up an eval loop. Skip for purely subjective skills (writing style, design aesthetic).
+
+### Layout
+
+Each skill that gets evaluated has a sibling workspace:
+
+```
+my-skill/                     ← the skill
+my-skill-workspace/           ← evals + results, sibling
+├── evals/
+│   └── evals.json            ← test prompts + assertions
+├── iteration-1/
+│   ├── eval-<descriptive-name>/
+│   │   ├── with_skill/outputs/
+│   │   ├── without_skill/outputs/   ← baseline
+│   │   ├── eval_metadata.json
+│   │   ├── timing.json              ← total_tokens, duration_ms
+│   │   └── grading.json             ← {text, passed, evidence}
+│   └── benchmark.json + benchmark.md
+└── iteration-2/
+    └── ...
+```
+
+### Loop
+
+1. **Draft skill + 2-3 realistic test prompts** (the kind a real user would type, not abstract requests)
+2. **Spawn with-skill and baseline runs in parallel, in the same turn** — never sequential
+3. **While runs execute**, draft assertions for `evals.json` (objective, descriptive names like `"output_contains_axis_labels"`, not `"check1"`)
+4. **Capture timing data** from each subagent completion notification (`total_tokens`, `duration_ms`) into `timing.json` — this is the only chance to capture it
+5. **Grade** each run with `{text, passed, evidence}` fields (viewer depends on these exact names)
+6. **Aggregate** into `benchmark.json` with mean ± stddev across configurations
+7. **Review with the user**, then improve the skill — generalize from feedback rather than overfitting to the specific test cases
+8. **Iterate** into `iteration-N+1/`
+
+When 3+ test runs all write the same helper script independently, that's a signal to bundle it into the skill's `scripts/` directory. Write it once, save every future invocation from reinventing the wheel.
+
+### Improvement principles
+
+- **Generalize, don't overfit.** A skill that works only for the test cases is useless. If a fix feels fiddly, try a different metaphor or pattern instead.
+- **Read transcripts, not just outputs.** If the skill makes Claude waste tokens on unproductive detours, cut the part of the prompt causing it.
+- **Keep the prompt lean.** Remove anything not pulling its weight.
+
+## Description Optimization (separate from eval loop)
+
+After a skill is functionally good, optimize the description for **triggering accuracy** — does it fire when needed and stay quiet when not?
+
+### Build a 20-query trigger eval
+
+10 should-trigger + 10 should-not-trigger queries. The valuable ones are **near-misses** — queries that share keywords with the skill but actually need something else. Adjacent domains, ambiguous phrasing, contexts where another tool fits better.
+
+Bad negative test (too easy): `"Write a fibonacci function"` for a PDF skill — doesn't test anything.
+Good negative test: `"extract the table from this scanned receipt for my expense report"` for a PDF-text-extraction skill, when OCR is actually needed.
+
+Queries should be **realistic and concrete** — file paths, column names, company context, casual speech, typos. Not `"Format this data"` but `"ok so my boss sent me a Q4 sales xlsx (something like 'Q4 sales final FINAL v2.xlsx' in my downloads) and wants a profit margin column…"`.
+
+### Run optimization in a loop
+
+Split eval set 60/40 train/test. Evaluate current description (3 runs per query for stable trigger rate). Propose improvements based on failures. Re-evaluate on both splits, iterate up to 5 times. **Pick the winner by test score**, not train score, to avoid overfitting.
+
+### Apply
+
+Take the best description from the optimization output and patch the SKILL.md frontmatter via `Edit` (per the Patch Over Rewrite rule above). Show the user before/after with scores.
+
+## Auto-Generated Skills (updated)
+
+Auto-generated drafts (from `/meditate`, Claudia's `maybeGenerateSkill`) skip the eval pipeline by default — they're sketches, not production skills. Promote a draft to Active by:
+
+1. Running the eval loop with at least 2-3 realistic test cases
+2. Optimizing the description (if triggering accuracy matters)
+3. Adding to the skill-first routing table
+
+Until promoted, drafts stay out of the routing table and keep their `(DRAFT)` description prefix.
+
+## References
+
+- `anthropics/skills` repo — official spec, reference implementations
+- `skills/skill-creator/` in that repo — eval pipeline scripts (`scripts/aggregate_benchmark`, `eval-viewer/generate_review.py`, `scripts/run_loop`)
+- Install via `/plugin install skill-creator@anthropic-agent-skills` (marketplace registered in `~/.claude/settings.json`)

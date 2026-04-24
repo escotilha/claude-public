@@ -373,7 +373,8 @@
     "hookify@claude-plugins-official": true,
     "pyright-lsp@claude-plugins-official": true,
     "warp@claude-code-warp": true,
-    "claude-code-setup@claude-plugins-official": true
+    "claude-code-setup@claude-plugins-official": true,
+    "example-skills@anthropic-agent-skills": true
   },
   "extraKnownMarketplaces": {
     "openai-codex": {
