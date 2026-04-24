@@ -218,5 +218,10 @@ Until promoted, drafts stay out of the routing table and keep their `(DRAFT)` de
 ## References
 
 - `anthropics/skills` repo — official spec, reference implementations
-- `skills/skill-creator/` in that repo — eval pipeline scripts (`scripts/aggregate_benchmark`, `eval-viewer/generate_review.py`, `scripts/run_loop`)
-- Install via `/plugin install skill-creator@anthropic-agent-skills` (marketplace registered in `~/.claude/settings.json`)
+- Marketplace registered as `anthropic-agent-skills` in `~/.claude/settings.json`. Three bundled plugins: `example-skills` (skill-creator + 11 others), `document-skills` (xlsx/docx/pptx/pdf), `claude-api`.
+- Installed locally via `claude plugin install example-skills@anthropic-agent-skills` — scripts live at `~/.claude/plugins/cache/anthropic-agent-skills/example-skills/<sha>/skills/skill-creator/`:
+  - `scripts/aggregate_benchmark.py` — produces `benchmark.json` + `benchmark.md`
+  - `scripts/run_loop.py` — description-optimization loop (60/40 train/test)
+  - `scripts/improve_description.py` — single-pass description improver
+  - `scripts/run_eval.py` — single-eval runner
+  - `eval-viewer/generate_review.py` — HTML viewer for qualitative + quantitative review
