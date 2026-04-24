@@ -387,6 +387,12 @@
         "source": "github",
         "repo": "warpdotdev/claude-code-warp"
       }
+    },
+    "anthropic-agent-skills": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/skills"
+      }
     }
   },
   "sandbox": {
