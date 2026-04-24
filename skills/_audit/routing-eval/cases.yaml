@@ -1,0 +1,169 @@
+# Routing eval — seed corpus
+#
+# Each case is a natural-language phrase a user might type, paired with the
+# skill that should handle it. The eval checks two things:
+#
+#   1. STATIC — the expected skill exists in both skill-first.md routing table
+#      and as a SKILL.md file, and its description contains trigger-phrase
+#      keywords that overlap with the case phrase.
+#
+#   2. SHADOW — are there OTHER skills whose triggers also match the phrase?
+#      More than one match = shadow risk (ambiguous routing).
+#
+# Add new cases when:
+#   - A new skill is added (add 1-3 phrases that should route to it)
+#   - A user routing mistake happened (add the phrase that misrouted)
+#   - A new user-facing feature ships in an existing skill
+#
+# Drop cases when the skill is deprecated.
+#
+# NOTE: rationale is optional but recommended — it's shown in failure reports.
+
+cases:
+  # Development workflow
+  - phrase: "ship this feature end to end"
+    expected: ship
+    rationale: "full spec → implement → test → docs pipeline"
+
+  - phrase: "plan out this complex implementation"
+    expected: deep-plan
+    rationale: "research → plan → implement with artifacts"
+
+  - phrase: "review the architecture of this project"
+    expected: cto
+    rationale: "architecture review is a core CTO trigger"
+
+  - phrase: "break down this hard problem"
+    expected: first-principles
+    rationale: "fundamentals decomposition"
+
+  - phrase: "run the tests and typecheck"
+    expected: verify
+    rationale: "project health check before committing"
+
+  - phrase: "tests are failing, fix them"
+    expected: test-and-fix
+    rationale: "auto-fix loop for broken tests"
+
+  - phrase: "review my uncommitted changes"
+    expected: review-changes
+    rationale: "pre-commit review of current diff"
+
+  - phrase: "debug this 500 error"
+    expected: investigate
+    rationale: "root-cause debugging with Iron Law"
+
+  - phrase: "commit and push and open a PR"
+    expected: cpr
+    rationale: "git workflow shortcut"
+
+  - phrase: "start the dev server locally"
+    expected: run-local
+    rationale: "local dev orchestration"
+
+  - phrase: "clean up unused files in this codebase"
+    expected: codebase-cleanup
+    rationale: "dead code / bloat removal"
+
+  - phrase: "design a landing page for this product"
+    expected: website-design
+    rationale: "B2B landing page / design UI"
+
+  - phrase: "schedule a daily recurring agent"
+    expected: schedule
+    rationale: "cron-based remote trigger"
+
+  - phrase: "keep checking the deploy every 5 minutes"
+    expected: loop
+    rationale: "recurring interval task"
+
+  - phrase: "fetch the API docs for Supabase"
+    expected: get-api-docs
+    rationale: "chub CLI for library docs"
+
+  - phrase: "checkpoint context before clear"
+    expected: handoff
+    rationale: "pre-/clear state preservation"
+
+  - phrase: "where was I last session"
+    expected: primer
+    rationale: "context recovery after compaction"
+
+  # QA & testing
+  - phrase: "run a full QA cycle on this project"
+    expected: qa-cycle
+    rationale: "master QA orchestrator"
+
+  - phrase: "fix the open QA issues"
+    expected: qa-fix
+    rationale: "fixes issues from QA DB"
+
+  - phrase: "verify the fixes I just made"
+    expected: qa-verify
+    rationale: "verification of TESTING-status issues"
+
+  # Research
+  - phrase: "do a deep research across multiple tracks"
+    expected: deep-research
+    rationale: "multi-track investigation with evidence hierarchy"
+
+  - phrase: "analyze this URL for improvements"
+    expected: research
+    rationale: "URL/image → skill recommendations"
+
+  - phrase: "scrape this website"
+    expected: firecrawl
+    rationale: "Firecrawl for markdown extraction"
+
+  - phrase: "bypass cloudflare on this site"
+    expected: scrapling
+    rationale: "stealth anti-bot scraping"
+
+  - phrase: "take a lighthouse audit of this page"
+    expected: browserless
+    rationale: "headless browser with lighthouse"
+
+  - phrase: "what's been happening on reddit and twitter in the last 30 days"
+    expected: last30days
+    rationale: "social + web multi-source research"
+
+  # AI quality & growth
+  - phrase: "evaluate the LLM output quality"
+    expected: llm-eval
+    rationale: "LLM eval pipeline"
+
+  - phrase: "optimize the signup conversion funnel"
+    expected: growth
+    rationale: "CRO / signup / onboarding"
+
+  # Utilities
+  - phrase: "send an email from the agent inbox"
+    expected: agentmail
+    rationale: "AgentMail API inbox"
+
+  - phrase: "post a message to slack"
+    expected: slack
+    rationale: "Slack automation"
+
+  - phrase: "search my memory for past decisions"
+    expected: qmd
+    rationale: "semantic search over markdown"
+
+  - phrase: "consolidate my memory and prune old entries"
+    expected: memory-consolidation
+    rationale: "memory maintenance"
+
+  - phrase: "sync my claude setup repo"
+    expected: cs
+    rationale: "personal setup repo sync"
+
+  # Decision support
+  - phrase: "get an advisory board to deliberate this decision"
+    expected: vibc
+    rationale: "12-seat council for complex decisions"
+
+  # Deprecation signals — phrases that should NOT match a skill
+  # (uncomment and set expected: null when testing false-positive resistance)
+  # - phrase: "hello how are you"
+  #   expected: null
+  #   rationale: "casual chit-chat should not route to any skill"

@@ -1,0 +1,320 @@
+#!/usr/bin/env python3
+"""
+routing-eval — verify skill-first.md routing table against a seed corpus of
+phrase→skill cases. Catches misrouted skills, shadow skills, and drift between
+SKILL.md descriptions and the routing table.
+
+Usage:
+  routing-eval                    # run all cases, pretty report
+  routing-eval --json             # JSON output (for CI / skill-audit)
+  routing-eval --cases PATH       # use custom cases file
+  routing-eval --strict           # exit 1 on any failure (for CI)
+  routing-eval --only <phrase>    # run a single case matching phrase substring
+
+Exit codes:
+  0 — all cases pass (or non-strict mode)
+  1 — at least one case failed AND --strict was set
+  2 — setup error (missing files, bad YAML)
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+from pathlib import Path
+
+try:
+    import yaml
+except ImportError:
+    print("error: pyyaml not installed. run: pip3 install pyyaml", file=sys.stderr)
+    sys.exit(2)
+
+SETUP_ROOT = Path.home() / ".claude-setup"
+SKILLS_DIR = SETUP_ROOT / "skills"
+ROUTING_TABLE = SETUP_ROOT / "rules" / "skill-first.md"
+DEFAULT_CASES = SKILLS_DIR / "_audit" / "routing-eval" / "cases.yaml"
+
+STOPWORDS = {
+    "a", "an", "the", "is", "are", "be", "to", "of", "for", "on", "in", "and",
+    "or", "with", "this", "that", "my", "me", "i", "it", "its", "do", "does",
+    "please", "can", "could", "would", "should", "have", "has", "was", "were",
+    "at", "by", "from", "as", "if", "then", "so", "but", "not", "no", "yes",
+    "review", "check", "run", "make", "get", "got", "use", "using", "new",
+    "full", "all", "more", "out",
+}
+
+# Skills that live outside ~/.claude-setup/skills/ — built into Claude Code,
+# plugin-provided, or native slash-commands. Don't flag as broken references.
+BUILTIN_SKILLS = {
+    # Claude Code built-ins
+    "batch", "init", "loop", "memory", "rc", "remote-control", "review",
+    "security-review", "simplify", "skill-tree", "ultrareview",
+    # Legacy aliases still referenced in routing
+    "project-orchestrator",
+}
+
+# Skill directory name → frontmatter name mapping for slash-command aliases.
+# The routing table uses the shorter /cpo while the skill's frontmatter name
+# is "cpo-ai-skill". Add aliases here when a skill is referenced by multiple names.
+SKILL_ALIASES = {
+    "cpo": "cpo-ai-skill",
+    "verify-conta": "verify-conta",
+}
+
+
+def tokenize(text: str) -> set[str]:
+    """Lowercase word-split, drop stopwords and tokens under 3 chars."""
+    words = re.findall(r"[a-z0-9][a-z0-9-]*", text.lower())
+    return {w for w in words if len(w) >= 3 and w not in STOPWORDS}
+
+
+def load_cases(path: Path) -> list[dict]:
+    data = yaml.safe_load(path.read_text())
+    cases = data.get("cases") or []
+    for i, c in enumerate(cases):
+        if "phrase" not in c or "expected" not in c:
+            raise ValueError(f"case {i} missing phrase or expected: {c}")
+    return cases
+
+
+def load_skill_descriptions() -> dict[str, str]:
+    """Return {skill-name: description} for every SKILL.md (non-archived)."""
+    out = {}
+    for skill_md in SKILLS_DIR.glob("*/SKILL.md"):
+        if skill_md.parent.name.startswith("_"):
+            continue
+        text = skill_md.read_text()
+        m = re.search(r"^---\s*$(.+?)^---\s*$", text, re.MULTILINE | re.DOTALL)
+        if not m:
+            continue
+        front = m.group(1)
+        name_m = re.search(r"^name:\s*(.+?)\s*$", front, re.MULTILINE)
+        desc_m = re.search(r'^description:\s*"?(.+?)"?\s*$', front, re.MULTILINE)
+        if name_m:
+            name = name_m.group(1).strip()
+            desc = desc_m.group(1).strip() if desc_m else ""
+            out[name] = desc
+    return out
+
+
+def load_routing_table() -> set[str]:
+    """Extract every `/skill-name` reference from the routing table."""
+    text = ROUTING_TABLE.read_text()
+    return set(re.findall(r"`/([a-z][a-z0-9-]*)`", text))
+
+
+def extract_triggers(description: str) -> set[str]:
+    """Pull trigger phrases from a description.
+
+    Looks for `Triggers on: ...`, `Triggers: ...`, `Trigger when: ...`, or
+    everything after a period in a short description. Returns the token set.
+    """
+    m = re.search(r"Trigger(?:s)?\s*(?:on|when)?:\s*([^.]*)", description, re.IGNORECASE)
+    trigger_text = m.group(1) if m else description
+    return tokenize(trigger_text)
+
+
+SHADOW_THRESHOLD = 5  # raise bar — short trigger overlap is normal
+
+
+def resolve_skill(name: str, skills: dict[str, str]) -> str | None:
+    """Map a routing-table slash-name to a real skill name, or None if built-in."""
+    if name in skills:
+        return name
+    if name in SKILL_ALIASES and SKILL_ALIASES[name] in skills:
+        return SKILL_ALIASES[name]
+    return None
+
+
+def evaluate(cases: list[dict]) -> dict:
+    skills = load_skill_descriptions()
+    routed = load_routing_table()
+
+    trigger_index = {name: extract_triggers(desc) for name, desc in skills.items()}
+    desc_index = {name: tokenize(desc) for name, desc in skills.items()}
+
+    results = []
+    for case in cases:
+        phrase = case["phrase"]
+        expected = case["expected"]
+        rationale = case.get("rationale", "")
+        phrase_tokens = tokenize(phrase)
+
+        issues = []
+
+        # Null-expected: phrase should match NO skill
+        if expected is None:
+            matches = [
+                n for n, toks in trigger_index.items()
+                if phrase_tokens & toks
+            ]
+            if matches:
+                issues.append(f"phrase should not match any skill but matched: {matches}")
+            results.append({
+                "phrase": phrase,
+                "expected": None,
+                "rationale": rationale,
+                "issues": issues,
+                "passed": not issues,
+                "matches": matches,
+            })
+            continue
+
+        # Skill exists (direct or via alias, or built-in)?
+        resolved = resolve_skill(expected, skills)
+        if resolved is None:
+            if expected in BUILTIN_SKILLS:
+                # Built-in — only verify it's in the routing table
+                if expected not in routed:
+                    issues.append(f"built-in skill '{expected}' missing from skill-first.md routing table")
+                results.append({
+                    "phrase": phrase, "expected": expected, "rationale": rationale,
+                    "builtin": True, "issues": issues, "passed": not issues, "shadows": [],
+                })
+                continue
+            issues.append(f"expected skill '{expected}' has no SKILL.md (and not in BUILTIN_SKILLS)")
+            results.append({
+                "phrase": phrase, "expected": expected, "rationale": rationale,
+                "issues": issues, "passed": False, "shadows": [],
+            })
+            continue
+
+        # Skill in routing table? (check both the alias and the real name)
+        if expected not in routed and resolved not in routed:
+            issues.append(f"expected skill '{expected}' missing from skill-first.md routing table")
+
+        # Use the resolved name for trigger/desc lookups
+        expected = resolved
+
+        # Phrase keywords overlap trigger phrases?
+        expected_triggers = trigger_index[expected]
+        expected_desc = desc_index[expected]
+        trigger_overlap = phrase_tokens & expected_triggers
+        desc_overlap = phrase_tokens & expected_desc
+
+        if not trigger_overlap and not desc_overlap:
+            issues.append(
+                f"phrase keywords {sorted(phrase_tokens)} overlap neither triggers "
+                f"{sorted(expected_triggers)} nor description tokens"
+            )
+
+        # Shadow check: which OTHER skills' triggers also match?
+        shadows = []
+        for name, toks in trigger_index.items():
+            if name == expected:
+                continue
+            overlap = phrase_tokens & toks
+            if overlap:
+                shadows.append({"skill": name, "matched_tokens": sorted(overlap)})
+
+        if len(shadows) >= SHADOW_THRESHOLD:
+            issues.append(f"shadow risk: {len(shadows)} other skills match this phrase (threshold {SHADOW_THRESHOLD})")
+
+        results.append({
+            "phrase": phrase,
+            "expected": expected,
+            "rationale": rationale,
+            "trigger_overlap": sorted(trigger_overlap),
+            "desc_overlap": sorted(desc_overlap - trigger_overlap),
+            "shadows": shadows,
+            "issues": issues,
+            "passed": not issues,
+        })
+
+    passed = sum(1 for r in results if r["passed"])
+    failed = len(results) - passed
+    shadow_heavy = [r for r in results if len(r.get("shadows", [])) >= SHADOW_THRESHOLD]
+
+    # Compute routed-but-missing after filtering out builtins and aliases
+    routed_resolved = set()
+    for r in routed:
+        resolved = resolve_skill(r, skills)
+        if resolved:
+            routed_resolved.add(resolved)
+    unresolved = routed - set(skills.keys()) - {a for a in SKILL_ALIASES if SKILL_ALIASES[a] in skills} - BUILTIN_SKILLS
+
+    return {
+        "summary": {
+            "total": len(results),
+            "passed": passed,
+            "failed": failed,
+            "shadow_threshold": SHADOW_THRESHOLD,
+            "shadow_heavy": len(shadow_heavy),
+            "skills_in_library": len(skills),
+            "skills_in_routing_table": len(routed),
+            "routed_but_missing_skill": sorted(unresolved),
+            "skills_not_in_routing_table": sorted(set(skills.keys()) - routed_resolved),
+        },
+        "results": results,
+    }
+
+
+def print_pretty(report: dict) -> None:
+    s = report["summary"]
+    print(f"routing-eval: {s['passed']}/{s['total']} passed, {s['failed']} failed")
+    print(f"  library: {s['skills_in_library']} skills, routing table has {s['skills_in_routing_table']} /-refs")
+
+    if s["routed_but_missing_skill"]:
+        print(f"\n  ⚠ routed but no SKILL.md: {', '.join(s['routed_but_missing_skill'])}")
+    if s["skills_not_in_routing_table"]:
+        extras = s["skills_not_in_routing_table"]
+        print(f"\n  ⚠ skills missing from routing table ({len(extras)}):")
+        for n in extras:
+            print(f"      - {n}")
+
+    failures = [r for r in report["results"] if not r["passed"]]
+    if failures:
+        print(f"\n--- {len(failures)} FAILURES ---")
+        for r in failures:
+            print(f"\n  phrase: {r['phrase']!r}")
+            print(f"  expected: {r['expected']}")
+            if r.get("rationale"):
+                print(f"  rationale: {r['rationale']}")
+            for issue in r["issues"]:
+                print(f"    ✗ {issue}")
+
+    shadow_heavy = [r for r in report["results"] if len(r.get("shadows", [])) >= 3]
+    if shadow_heavy:
+        print(f"\n--- {len(shadow_heavy)} SHADOW RISKS (3+ skills match phrase) ---")
+        for r in shadow_heavy:
+            shadow_names = [s["skill"] for s in r["shadows"]]
+            print(f"  {r['phrase']!r} → expected {r['expected']}, also matches: {', '.join(shadow_names)}")
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[1] if __doc__ else "")
+    ap.add_argument("--cases", type=Path, default=DEFAULT_CASES)
+    ap.add_argument("--json", action="store_true", help="emit JSON")
+    ap.add_argument("--strict", action="store_true", help="exit 1 on any failure")
+    ap.add_argument("--only", type=str, help="run only cases whose phrase contains this substring")
+    args = ap.parse_args()
+
+    if not args.cases.exists():
+        print(f"error: cases file not found: {args.cases}", file=sys.stderr)
+        return 2
+    if not ROUTING_TABLE.exists():
+        print(f"error: routing table not found: {ROUTING_TABLE}", file=sys.stderr)
+        return 2
+
+    cases = load_cases(args.cases)
+    if args.only:
+        cases = [c for c in cases if args.only.lower() in c["phrase"].lower()]
+        if not cases:
+            print(f"error: no cases match --only={args.only!r}", file=sys.stderr)
+            return 2
+
+    report = evaluate(cases)
+
+    if args.json:
+        print(json.dumps(report, indent=2))
+    else:
+        print_pretty(report)
+
+    if args.strict and report["summary"]["failed"] > 0:
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
