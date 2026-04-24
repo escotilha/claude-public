@@ -9,6 +9,9 @@ paths:
 context: fork
 model: opus
 effort: medium
+skills:
+  - fulltest-skill
+  - qa-fix
 allowed-tools:
   - Agent
   - TaskCreate

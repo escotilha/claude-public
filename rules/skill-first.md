@@ -22,7 +22,6 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Debug a bug (Iron Law)        | `/investigate`          | Bug, 500, regression — enforces root-cause before fix, 3-strike escalation |
 | Safety guardrails for bash    | `/careful`              | Before prod work / deploys — warns on rm, DROP, force-push, kubectl delete |
 | Restrict edits to a directory | `/freeze`               | While debugging — blocks Edit/Write outside chosen path, prevents scope creep |
-| Cloud parallel code review    | `/ultrareview`          | Multi-reviewer cloud-based review (Claude Code 2.1.111+). Distinct from `/cto` (local swarm) and `/review-changes` (single-agent). Use for PR-scale review. |
 | PR review (GitHub)            | `/review` (built-in)    | Review a specific pull request by number or URL                                                                                                             |
 | Security review (branch)      | `/security-review` (built-in) | Security-focused review of pending changes on current branch                                                                                          |
 | Initialize CLAUDE.md          | `/init` (built-in)      | Bootstrap a new CLAUDE.md file with codebase documentation                                                                                                  |
@@ -42,7 +41,6 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Recurring interval task       | `/loop` (built-in)      | Poll status, repeat a command on a schedule              |
 | Schedule a remote agent       | `/schedule`             | Cron-based triggers, remote agents (Routines when GA)    |
 | Fetch API docs for a library  | `/get-api-docs`         | Before writing code that uses external APIs              |
-| Split large docs into tree    | `/skill-tree`           | API docs or references too large for subagent context    |
 | Build with Claude API/SDK     | `/claude-api`           | Code imports anthropic SDK or user asks about Claude API |
 | Context recovery              | `/primer`               | After compaction, new session, or "where was I?"         |
 | Checkpoint before /clear      | `/handoff`              | Context 85%+, before /clear/compact — writes resume block to plan doc that /primer consumes |
