@@ -23,3 +23,4 @@ Two sessions silently picked the same Alembic migration number (`072`) with diff
 - sa-phasec | feat/sa-tx-detail-phase-c | contably | tx detail modal Phase C — attachments (transaction_attachments join table + uploads reuse) + Histórico tab (DataLineage) | 2026-04-19
 - cto-p1 | chore/cto-p1-restructure | claude-setup | /cto SKILL.md restructure: split 1854-line monolith into orchestrator ≤300 lines + references/ | 2026-04-23
 - cto-p2 | chore/cto-p2-review-actions | claude-setup | act on /cto self-review: measurement protocol + P2 eval harness spec + dispatch policy draft | 2026-04-23
+- sa-shadow | feat/sa-contably-shadow-bootstrap | oxi | Contably shadow adapter bootstrap (observe-only) | 2026-04-25
