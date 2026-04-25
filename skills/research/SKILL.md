@@ -60,18 +60,20 @@ All reads and writes go to the iCloud path directly. Never use symlink paths.
 
 ## Scope
 
-This skill evaluates research **only** against two targets:
+This skill evaluates research **only** against three targets:
 
 1. **Claude Code setup** — skills, agents, hooks, MCP servers, memory, subagent patterns, model tiers, CLI features
 2. **Contably** — Brazil accounting/tax compliance SaaS (`~/code/contably`, Next.js + Supabase)
+3. **oxi** — Autonomous Claude Code orchestrator (`~/code/oxi`, https://github.com/escotilha/oxi). Python; turns a markdown roadmap into shipped PRs via `claude -p` workers in git worktrees, with critic review, budget caps, heartbeat reaper, and adapter-based project config.
 
-Ignore relevance to any other project (AgentWave, OpenClaw, SourceRank, etc.). If content is unrelated to either target, report "No actionable recommendations" — do not invent recommendations for other projects.
+Ignore relevance to any other project (AgentWave, OpenClaw, SourceRank, etc.). If content is unrelated to any of the three targets, report "No actionable recommendations" — do not invent recommendations for other projects.
 
 ## Active Projects
 
-| Project  | Path            | Stack              | Key Needs                                                    |
-| -------- | --------------- | ------------------ | ------------------------------------------------------------ |
-| Contably | ~/code/contably | Next.js + Supabase | Brazil accounting, tax compliance, financial data extraction |
+| Project  | Path            | Stack                | Key Needs                                                                                                       |
+| -------- | --------------- | -------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Contably | ~/code/contably | Next.js + Supabase   | Brazil accounting, tax compliance, financial data extraction                                                    |
+| oxi      | ~/code/oxi      | Python, `claude -p`, git worktrees | Autonomous orchestration, critic models, budget/safety rails, adapter pattern, prompt-injection isolation, dispatch reliability |
 
 ### Claude Code Skill Map (for matching content to Claude Code setup)
 
