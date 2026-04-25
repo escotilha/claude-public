@@ -178,14 +178,15 @@ Classify content type:
 | **Product/Feature**   | Product launch, feature demo, UX pattern         |
 | **Infrastructure**    | Deployment, CI/CD, monitoring, DevOps            |
 
-Score relevance 0-10 against four targets (Claude Code + Contably only — ignore all other projects):
+Score relevance 0-10 against five targets (Claude Code + Contably + oxi only — ignore all other projects):
 
 1. **Claude Code setup** — Does it improve skills, agents, hooks, MCP servers, memory, or subagent patterns? Use the Claude Code Skill Map to match.
 2. **Existing skills** — Does it introduce a tool/pattern an existing skill could use? Use the Claude Setup Skill Map to match.
 3. **New skill opportunity** — No existing skill covers this, it's reusable, aligns with our stack (TypeScript, Next.js, Supabase)?
 4. **Contably** — Would Contably benefit directly (Brazil accounting, tax compliance, Next.js + Supabase improvements)?
+5. **oxi** — Would oxi benefit directly? Score high for: autonomous agent orchestration patterns, `claude -p` headless usage, git worktree workflows, critic/judge model patterns, budget/cost guardrails, prompt-injection defenses, heartbeat/reaper patterns, dispatch reliability, adapter/plugin architectures, Python packaging (PyPI), markdown-as-config, PR auto-merge policies, multi-agent CI patterns.
 
-If content is not relevant to any of these four, score it low and report "No actionable recommendations". Do not invent recommendations for projects outside this scope.
+If content is not relevant to any of these five, score it low and report "No actionable recommendations". Do not invent recommendations for projects outside this scope.
 
 ### Phase 2: Recommend + Act
 
@@ -226,6 +227,18 @@ If content is not relevant to any of these four, score it low and report "No act
 - **Target:** [Contably area: accounting engine / tax compliance / data ingestion / UI / Supabase schema / etc.]
 - **What:** [specific change]
 - **Why:** [concrete benefit]
+- **Effort:** Low / Medium / High
+- **Score:** X/10 — [one-line justification]
+
+### oxi Recommendations
+
+[Only include this section if oxi relevance score >= 3. Number continues from the previous section.]
+
+#### N. [Improve Core / New Adapter Pattern / Strengthen Guardrail / Dispatch Reliability / Critic Improvement] — Score: X/10
+
+- **Target:** [oxi area: planner / dispatch / pr_watcher / auto_merge critic / heartbeat / ship_recovery / budget / deadman / oauth_watch / adapter API / docs / packaging]
+- **What:** [specific change]
+- **Why:** [concrete benefit — autonomous safety, cost, reliability, dev experience]
 - **Effort:** Low / Medium / High
 - **Score:** X/10 — [one-line justification]
 
