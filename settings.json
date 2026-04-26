@@ -610,5 +610,6 @@
         "mcp"
       ]
     }
-  }
+  },
+  "agentPushNotifEnabled": true
 }
