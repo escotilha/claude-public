@@ -2,7 +2,7 @@
 
 > Pierre Schurmann's Claude Code setup: 86 skills, 13 global rules, hybrid memory system. LLM-discoverable via llmstxt.org spec. Use this file to understand what tooling is available before starting work.
 
-Generated: 2026-04-25T02:00:04Z
+Generated: 2026-04-26T02:00:09Z
 
 ---
 
@@ -1202,6 +1202,7 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Build with Claude API/SDK     | `/claude-api`           | Code imports anthropic SDK or user asks about Claude API |
 | Context recovery              | `/primer`               | After compaction, new session, or "where was I?"         |
 | Checkpoint before /clear      | `/handoff`              | Context 85%+, before /clear/compact — writes resume block to plan doc that /primer consumes |
+| Checkpoint (Contably only)    | `/handoff-conta`        | Same as `/handoff`, hard-scoped to `/Users/ps/code/contably` — refuses to read or commit elsewhere |
 | Search memory                 | `mem-search "<query>"`  | Find past decisions, patterns, learnings (CLI tool)      |
 | Advisory board deliberation   | `/vibc`                 | Complex decision needing diverse perspectives            |
 | Office docs (.docx/xlsx/pptx) | `/officecli`            | Create, edit, inspect Word/Excel/PowerPoint documents    |
@@ -1940,6 +1941,22 @@ Structured frameworks for optimizing SaaS conversion funnels, pricing, retention
 # gws — Google Workspace CLI Automation
 
 Complex, multi-step Workspace automations using the `gws` CLI. For simple CRUD (read a file, send one email), use the `google-workspace` MCP instead. Use `/gws` when the task involves bulk operations, paginated datasets, multi-service pipelines, or requires dry-run preview.
+
+---
+
+## skills/handoff-conta
+
+- **name:** handoff-conta
+- **description:** Contably-only context handoff before /clear or compaction. Hard-scoped to the Contably repo — refuses to run elsewhere, never reads or references other projects. Writes progress log to a Contably plan doc, commits, outputs a resume block /primer can consume. Triggers on: handoff conta, contably handoff, checkpoint contably, /handoff-conta.
+- **user-invocable:** true
+- **model:** sonnet
+- **effort:** low
+
+# Handoff (Contably) — Context Checkpoint Before `/clear`
+
+Contably-scoped variant of `/handoff`. Same producer/consumer contract with `/primer`, but **hard-scoped to the Contably repo** so the checkpoint never pulls state from sibling projects (Sourcerank, Claudia, Nuvini-IR, Paperclip, etc.).
+
+This skill exists because a prior `/handoff` run conflated state across multiple repos in `/Users/ps/code/`. This variant refuses to run outside Contably and never reads files outside the Contably work
 
 ---
 

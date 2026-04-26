@@ -2,7 +2,7 @@
 
 > Pierre Schurmann's Claude Code setup: 86 skills, 13 global rules, hybrid memory system. LLM-discoverable via llmstxt.org spec. Use this file to understand what tooling is available before starting work.
 
-Last generated: 2026-04-25T02:00:03Z
+Last generated: 2026-04-26T02:00:08Z
 
 ## Rules
 
@@ -61,6 +61,7 @@ User-invocable skills. Trigger via `/<skill-name>` or natural-language match.
 - [get-api-docs](skills/get-api-docs/SKILL.md): Fetch current API docs for any library/SDK via chub CLI. 1,000+ APIs (Supabase, Anthropic, Clerk, Prisma, Stripe, Playwright). Triggers on: get api docs, fetch docs, chub, api documentation.
 - [growth](skills/growth/SKILL.md): SaaS growth engineering: CRO, pricing, signup, onboarding, SEO/GEO, churn prevention, A/B tests. Triggers on: growth, cro, conversion optimization, pricing strategy, signup flow, onboarding, seo audit
 - [gws](skills/gws/SKILL.md): Google Workspace CLI automation for bulk/complex tasks beyond MCP scope. Drive, Sheets, Gmail, Calendar, Chat, Admin. Triggers on: gws, google workspace automation, bulk drive, sheets pipeline, gmail 
+- [handoff-conta](skills/handoff-conta/SKILL.md): Contably-only context handoff before /clear or compaction. Hard-scoped to the Contably repo — refuses to run elsewhere, never reads or references other projects. Writes progress log to a Contably pl
 - [handoff](skills/handoff/SKILL.md): Context handoff before /clear or compaction. Writes progress log to plan doc, commits, outputs a resume block that /primer can consume. Triggers on: handoff, checkpoint context, before clear, pre-clea
 - [health-report](skills/health-report/SKILL.md): Health report for SourceRank AI: API tests, E2E, unit tests, Lighthouse in one HTML/PDF. Triggers on: health report, site health, functional report, prove it works, health-report.
 - [investigate](skills/investigate/SKILL.md): Root-cause debugging. Iron Law: no fix without root cause. 3-strike escalation. Triggers: debug this, fix this bug, why broken.
