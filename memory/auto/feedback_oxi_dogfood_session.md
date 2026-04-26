@@ -12,11 +12,18 @@ Three behavioral patterns Pierre validated during the 2026-04-26 OXi dogfood ses
 
 **How to apply:** Triggers: PyPI/npm publish, force-push to public branches, prod deploys, anything where "undo" requires a human apology somewhere. Even when explicitly asked, decline + offer the staged version. The override isn't "I'm tired, do it anyway" — that's the signal to wait.
 
-**2. Stop offering to do roadmap work the engine should pick up.** Late in the session, after I'd implemented T2-48 (a ~50-line CLI fix), Pierre had to remind me that doing T2-46/47/49/50 by hand "defeats the dogfood premise." OXi's whole point is that the engine writes code; me grinding through filed roadmap items in the same session as a human is the anti-pattern.
+**2. Roadmap items belong to the engine, not to me. This is a standing rule, not a heuristic.** Late in the session, after I'd implemented T2-48 (a ~50-line CLI fix), Pierre had to remind me that doing T2-46/47/49/50 by hand "defeats the dogfood premise." OXi's whole point is that the engine writes code; me grinding through filed roadmap items in the same session as a human is the anti-pattern. Pierre then made it explicit: **"always route these to the engine, never yourself directly."**
 
-**Why:** Every commit I make against the engine's own backlog is a commit the engine could make tomorrow once b2 ships. Doing it for it dilutes the dogfood signal AND wastes session tokens on work the engine will redo. T2-48 was the exception — it was the single substantive fix that *unblocks* the dogfood loop itself, so doing it manually had higher leverage than waiting for the engine to do it.
+**Why:** Every commit I make against the engine's own backlog is a commit the engine could make once it's running. Doing it for the engine dilutes the dogfood signal, wastes session tokens on work the engine will redo, and turns the "Pierre wakes up to merged PRs" narrative into "Pierre paid Claude to type for a few more hours." T2-48 was the exception — it was the single substantive fix that *unblocks* the dogfood loop itself, so doing it manually had higher leverage than waiting for the engine to do it.
 
-**How to apply:** When a project has its own autonomous engine (OXi, a roadmap-driven cron, scheduled Routines), default to filing items rather than implementing them. Only implement directly if (a) the fix unblocks the engine itself, or (b) the user explicitly says "do this one." Filing 8 well-scoped items in one session is a bigger product gain than implementing 1 and orphaning 7.
+**Specific scope: any conversation about OXi defaults to engine-as-implementer.** Pierre clarified late in the session: "Once we engage and we're talking about OXi, it's always about the engine." Translation: when the topic is OXi (the orchestrator at github.com/escotilha/oxibyoxi, NOT Oracle Cloud Infrastructure), assume every "let's do X" or "implement Y" or "fix Z" routes to the engine via a roadmap item, not to me as a direct implementer. The exceptions list above (a/b/c) still applies, but the burden of proof is on the exception, not on the default.
+
+**How to apply:** When a project has its own autonomous engine (OXi, a roadmap-driven cron, scheduled Routines), filing roadmap items IS the engineering work. Implementing them by hand is not. Only implement directly when:
+  - (a) The fix unblocks the engine itself (e.g. T2-48 — without it, the engine couldn't seed its own queue),
+  - (b) The user explicitly types an override word like "override" or "do this one yourself" with full context, or
+  - (c) The item is blocked by dependencies that don't exist yet AND can't reasonably be filed for the engine.
+
+When the user says ambiguous things like "do this now," **default to "file it / route it to the engine"**, not "execute it myself." Re-confirm before committing the wrong interpretation. Filing 10 well-scoped items with sharp acceptance criteria is a bigger product gain than implementing 2 and orphaning 8.
 
 **3. When the user asks "what's next" at the end of a long session, the honest answer is often "stop."** Three separate times tonight Pierre asked "what's next" and the right answer was "rest." I gave it once correctly, then drifted into proposing more work. Pattern: end-of-session "what's next" is often a fatigue check, not a planning question.
 
