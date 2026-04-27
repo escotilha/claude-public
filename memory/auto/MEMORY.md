@@ -19,6 +19,7 @@
 
 - [semantic/mistake_committed_hook_breaks_worktrees.md](semantic/mistake_committed_hook_breaks_worktrees.md) — A committed .claude/settings.json hook pointing at a decommissioned CLI breaks every oxi worker worktree dispatch; remove stale hooks after harness cutover
 - [semantic/mistake_hardcoded_legacy_fallback_in_code.md](semantic/mistake_hardcoded_legacy_fallback_in_code.md) — During rename refactors (e.g. `contably-os` → `psos`), hardcoded legacy path fallbacks inside source files (not config) are the sneakiest so
+- [semantic/mistake_nested_asyncio_run_in_async_loop.md](semantic/mistake_nested_asyncio_run_in_async_loop.md) — Calling sync fn from async coroutine where the sync fn does asyncio.run internally raises 'cannot be called from a running event loop' — wrap with asyncio.to_thread
 - [semantic/mistake_settings_bak_public_leak.md](semantic/mistake_settings_bak_public_leak.md) — 2026-04-21 incident — settings.json.bak-* file with literal API keys force-pushed to public GitHub because its filename didn't match the .ba
 - [semantic/mistake_validate-storage-constraints-before-schema.md](semantic/mistake_validate-storage-constraints-before-schema.md) — Always confirm runtime environment constraints (which databases are available, where the skill runs) before writing schema.sql or any storag
 - [semantic/pattern_autobrowse_failure_to_insight.md](semantic/pattern_autobrowse_failure_to_insight.md) — Self-improving browser automation — failure-to-insight retry loop that graduates winning workflows into reusable skills
