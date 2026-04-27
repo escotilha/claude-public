@@ -17,10 +17,12 @@
 
 ## Semantic — patterns, mistakes, tech-insights
 
+- [semantic/mistake_committed_hook_breaks_worktrees.md](semantic/mistake_committed_hook_breaks_worktrees.md) — A committed .claude/settings.json hook pointing at a decommissioned CLI breaks every oxi worker worktree dispatch; remove stale hooks after harness cutover
 - [semantic/mistake_hardcoded_legacy_fallback_in_code.md](semantic/mistake_hardcoded_legacy_fallback_in_code.md) — During rename refactors (e.g. `contably-os` → `psos`), hardcoded legacy path fallbacks inside source files (not config) are the sneakiest so
 - [semantic/mistake_settings_bak_public_leak.md](semantic/mistake_settings_bak_public_leak.md) — 2026-04-21 incident — settings.json.bak-* file with literal API keys force-pushed to public GitHub because its filename didn't match the .ba
 - [semantic/mistake_validate-storage-constraints-before-schema.md](semantic/mistake_validate-storage-constraints-before-schema.md) — Always confirm runtime environment constraints (which databases are available, where the skill runs) before writing schema.sql or any storag
 - [semantic/pattern_autobrowse_failure_to_insight.md](semantic/pattern_autobrowse_failure_to_insight.md) — Self-improving browser automation — failure-to-insight retry loop that graduates winning workflows into reusable skills
+- [semantic/pattern_migration_importlib_date_prefix.md](semantic/pattern_migration_importlib_date_prefix.md) — Load date-prefixed Alembic migration files in pytest via importlib.util.spec_from_file_location + stable sys.modules alias; patch.object against the alias
 - [semantic/pattern_db_path_defaults_match_data_location.md](semantic/pattern_db_path_defaults_match_data_location.md) — When a CLI resolves DB path via `defaults.db_path()` with an env override, the default MUST match where data actually lives — otherwise inte
 - [semantic/pattern_dogfood-before-trusting-autonomous-dispatch.md](semantic/pattern_dogfood-before-trusting-autonomous-dispatch.md) — v4 Phase 5/6 dogfood surfaced 3 sandbox bugs unit tests couldn't catch. Pattern is to trigger a real task before declaring an orchestrator "
 - [semantic/pattern_full-skill-vs-flag-when-personas-diverge.md](semantic/pattern_full-skill-vs-flag-when-personas-diverge.md) — When a new skill overlaps with an existing skill but has different personas, context-loading, or council composition — build a full separate

@@ -31,3 +31,4 @@ Similarly, argparse `help=` defaults contained `/opt/contably-os/BRIEF.md` and `
 
 - [pattern-db-path-defaults-match-data-location](pattern_db_path_defaults_match_data_location.md) — adjacent gotcha about defaults/data mismatch
 - [psos-migration-2026-04-23-complete](../projects/psos_migration_2026-04-23_complete.md)
+- [mistake-committed-hook-breaks-worktrees](mistake_committed_hook_breaks_worktrees.md) — same pattern at config level: decommissioned binary referenced in committed settings.json, breaks all worktrees (2026-04-27)
