@@ -50,6 +50,7 @@
 - [working/contably-os-v4-online-2026-04-21.md](working/contably-os-v4-online-2026-04-21.md) — What's running in production as of 2026-04-21 end-of-day. Resume block for future sessions.
 - [working/resume_2026-04-22_overnight.md](working/resume_2026-04-22_overnight.md) — Resume pointer for the Contably overnight engine session that was rate-limited at 22:40 local. Any new session should read this first.
 - [working/resume_mary_restart_2026-04-23.md](working/resume_mary_restart_2026-04-23.md) — Mary restart COMPLETED 2026-04-23 03:40 — Discord verified end-to-end on Max plan via claude-cli
+- [working/resume_oxi_cutover_2026-04-27.md](working/resume_oxi_cutover_2026-04-27.md) — OXi cutover paused at 22:11 UTC 2026-04-27 (97% context). Engine autonomous on Mini, 16+ PRs merged. Resume at 23:20 UTC / 20:20 BRT.
 
 ## Entities (legacy) — agents, deals, registries
 
