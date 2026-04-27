@@ -57,4 +57,8 @@ Production receipt at pause: 16 PRs merged, ~$70 spent, 0 UNHEALTHY trips since 
 ## Timeline
 
 - **2026-04-27 22:11 UTC** — [session] Paused at 97% context. Engine running autonomously. (Source: session — OXi cutover Phase 4 day 1)
-- **2026-04-27 23:20 UTC (20:20 BRT)** — [planned] Session resumes; user expects to invoke `/primer` to reconstruct state from this note.
+- **2026-04-27 22:18 UTC** — [failure] Engine flipped UNHEALTHY after saturate auto_merge raised nested-asyncio.run error 5 times consecutively. saturate self-terminated. (Source: failure — saturate.py:468)
+- **2026-04-27 23:20 UTC (20:20 BRT)** — [session] Resumed; ran /primer.
+- **2026-04-27 23:36 UTC** — [implementation] Diagnosed root cause + opened PR Xurman/oxi#235 (commit 155ee8e) wrapping `auto_merge.run` in `asyncio.to_thread`. Regression test added. Full saturate suite 29/29 pass. (Source: implementation — Xurman/oxi PR #235)
+- **2026-04-27 23:43 UTC** — [implementation] PR #235 merged via REST API (GraphQL still rate-limited). Local main pulled to fb0d717. (Source: implementation — Xurman/oxi commit fb0d717)
+- **2026-04-27 23:45 UTC** — [implementation] `oxi v3 heal` cleared UNHEALTHY flag. Saturate restarted in tmux session `oxi-saturate` with concurrency=20, $5000/day cap. 0 asyncio errors in new run; 4 dispatches in flight, 1 succeeded, $163 spent. Engine fully recovered. (Source: session — engine restored)
