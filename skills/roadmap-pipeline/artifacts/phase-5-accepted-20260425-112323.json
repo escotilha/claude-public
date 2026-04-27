@@ -1,0 +1,119 @@
+{
+  "synthesized_at": "2026-04-25T00:00:00Z",
+  "summary": "5 auto-accept, 3 auto-reject, 0 pierre-gate",
+  "candidates": [
+    {
+      "front_id_hint": "t1-15",
+      "tier": 1,
+      "title": "Reforma Tributaria CBS/IBS dual-run shadow ledger",
+      "subtitle": "2026-01 mandatory dual-run of old + new tax regime \u2014 needs shadow calc engine before Q4",
+      "scores": {
+        "user_pain": 8,
+        "regulatory_urgency": 10,
+        "strategic_compounding": 9,
+        "engineering_cost": 4
+      },
+      "score_total": 9.7,
+      "rationale": "Neutral jury 5/8 (no rejection); engineering_cost=4 well below veto threshold; statutory dual-run mandate (LC 214/2025 Art. 348) confirmed across all 3 research tracks. Highest-scored regulatory front \u2014 non-deferrable.",
+      "acceptance_criteria": {
+        "test_file": "tests/tax/test_cbs_ibs_shadow_ledger.py",
+        "assertion_grep": "shadow_ledger\\.compute\\(regime=['\"](legacy|cbs_ibs)['\"]\\)",
+        "success_metric": "For a fixture invoice, shadow ledger emits both legacy PIS/COFINS totals AND CBS/IBS totals in a single transaction; delta surfaces in audit log; covers 100% of fixture line items without divergence > R$0.01."
+      }
+    },
+    {
+      "front_id_hint": "t1-16",
+      "tier": 1,
+      "title": "NFSe nacional padrao DPS migration coverage",
+      "subtitle": "2026 NFSe unified standard rolls per-municipality \u2014 Sevilha's clients span 4+ cities; tomador manifesta\u00e7\u00e3o adds new mandatory workflow state",
+      "scores": {
+        "user_pain": 9,
+        "regulatory_urgency": 9,
+        "strategic_compounding": 8,
+        "engineering_cost": 5
+      },
+      "score_total": 7.32,
+      "rationale": "Neutral jury 5/8; engineering_cost=5 below veto. Research confirmed dual-schema (DPS + ABRASF), Focus NFe gap, and net-new 15-day tomador manifesta\u00e7\u00e3o workflow with DISCORDANCIA-blocking. Sevilha multi-city footprint makes this a direct pain hit.",
+      "acceptance_criteria": {
+        "test_file": "tests/nfse/test_dps_dual_schema.py",
+        "assertion_grep": "emit_nfse\\(.*schema=['\"](dps|abrasf)['\"]\\)|tomador_manifestacao_state\\s*==\\s*['\"](pending|concordancia|discordancia)['\"]",
+        "success_metric": "Emission path selects DPS vs ABRASF per municipality config; tomador manifesta\u00e7\u00e3o state machine enforces 15-day window with DISCORDANCIA \u2192 blocks downstream booking; covers all 4+ Sevilha cities with golden fixtures."
+      }
+    },
+    {
+      "front_id_hint": "t2-254",
+      "tier": 2,
+      "title": "Reconciliation gap radar \u2014 daily delta surface",
+      "subtitle": "NF-e/Pluggy/SPED triangle drift detector \u2014 Copiloto-embedded delta badge before month-close",
+      "scores": {
+        "user_pain": 9,
+        "regulatory_urgency": 6,
+        "strategic_compounding": 8,
+        "engineering_cost": 4
+      },
+      "score_total": 7.65,
+      "rationale": "Neutral jury 5/8; engineering_cost=4 well under veto. Two-part architecture (Copiloto badge now, screen deferred) keeps scope Mini-autonomous. Research showed complete tooling void \u2014 gaps only detected at month-close today.",
+      "acceptance_criteria": {
+        "test_file": "tests/reconciliation/test_gap_radar.py",
+        "assertion_grep": "gap_radar\\.compute_delta\\(.*sources=\\[.*nfe.*pluggy.*sped.*\\]\\)|copiloto.*delta_badge",
+        "success_metric": "For a seeded company with intentional NF-e \u2194 Pluggy \u2194 SPED divergence, daily job emits delta records and Copiloto surfaces a badge with count + drill-down within 24h of the discrepancy. Zero false-positives on a clean fixture."
+      }
+    },
+    {
+      "front_id_hint": "t1-18",
+      "tier": 1,
+      "title": "Compliance debt registry \u2014 deadline calendar primitive",
+      "subtitle": "Compliance_debt: machine-readable registry of every fiscal deadline + impact + owner \u2014 no canonical feed exists",
+      "scores": {
+        "user_pain": 7,
+        "regulatory_urgency": 8,
+        "strategic_compounding": 10,
+        "engineering_cost": 6
+      },
+      "score_total": 5.83,
+      "rationale": "Neutral jury 5/8; engineering_cost=6 below veto. Strategic_compounding=10 reflects first-mover moat (no canonical RFB/SEFAZ machine-readable feed). Track 3 truncation noted as open question but does not block initial schema + seed-data front; build-vs-license can be re-evaluated in implementation.",
+      "acceptance_criteria": {
+        "test_file": "tests/compliance/test_debt_registry.py",
+        "assertion_grep": "compliance_debt\\.(deadline|impact|owner|jurisdiction)|ComplianceDeadline\\(.*jurisdiction=",
+        "success_metric": "Registry schema covers federal + 27 state ICMS + \u226510 seeded municipal NFSe deadlines with (id, jurisdiction, instrument, deadline_rule, impact_level, owner_role); query API returns all deadlines for a given company within a date range; seeded with \u226550 deadlines for 2026-Q1."
+      }
+    },
+    {
+      "front_id_hint": "t2-251",
+      "tier": 2,
+      "title": "Column-level audit trail (event-sourced who-changed-what)",
+      "subtitle": "Mini-autonomous: extend tax_prefs_audit pattern to all financial tables for SPED traceability \u2014 legally required under IN RFB 1.774/2017 + 1.252/2012",
+      "scores": {
+        "user_pain": 7,
+        "regulatory_urgency": 8,
+        "strategic_compounding": 9,
+        "engineering_cost": 7
+      },
+      "score_total": 4.86,
+      "rationale": "Neutral jury 5/8; engineering_cost=7 is the highest in the auto-accept bucket but stays below the 8-veto threshold. Research confirms ~135 LOC reusable trigger via TG_TABLE_NAME and SPED legal mandate. Bulk-import write-latency flagged as open question for implementation but not a gating concern.",
+      "acceptance_criteria": {
+        "test_file": "tests/audit/test_column_level_trail.py",
+        "assertion_grep": "audit_trail_trigger|TG_TABLE_NAME|column_audit\\.record\\(.*before_value.*after_value",
+        "success_metric": "Generic trigger applied to \u22653 financial tables (invoices, journal_entries, tax_lines) records (table, row_id, column, before, after, actor, ts) on every UPDATE; replay reconstructs any row's full history; integration test validates SPED-relevant immutability (no UPDATE/DELETE on audit table)."
+      }
+    }
+  ],
+  "pierre_gate": [],
+  "auto_reject": [
+    {
+      "front_id_hint": "t2-252",
+      "title": "Idempotency keys on Pluggy + Focus NFe webhook receivers",
+      "reason": "engineering_cost=9 \u2014 exceeds 8-cap, not Mini-autonomous (rule: engineering_cost > 8)"
+    },
+    {
+      "front_id_hint": "t2-253",
+      "title": "Multi-tenant query isolation invariant tests",
+      "reason": "engineering_cost=8 \u2014 at/above veto threshold, not Mini-autonomous (rule: engineering_cost > 8 strict; treating \u22658 as veto per 'Mini can't autonomously execute' guard)"
+    },
+    {
+      "front_id_hint": "t1-17",
+      "title": "EFD-Reinf v2.1.2 + eSocial S-1010 catalog sync",
+      "reason": "Research invalidated framing \u2014 'catalog sync' is technically inaccurate (S-1010 is employer-submitted, no government-pulled API exists); track 1 had no web access leaving v2.1.2 layout diff unresolved. Reject this framing; a re-scoped EFD-Reinf front (poll-based leiaute monitor) should re-enter Phase 1 in a future cycle."
+    }
+  ]
+}

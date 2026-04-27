@@ -1,0 +1,208 @@
+{
+  "ranked_at": "2026-04-25T00:00:00Z",
+  "rationale_summary": "Post-Focus-NFe-cutover, post-Sevilha-Monday-launch batch. Theme: harden the closing loop (reconciliation gaps, audit trail, multi-firm scaling) and pre-empt the next compliance cliff (SPED EFD-Reinf v2.1.2, eSocial S-1010, Reforma Tribut\u00e1ria CBS/IBS dual-run). Mix of compounding platform primitives (event sourcing, multi-tenant isolation hardening) and Mini-autonomous slices (column-level audit, idempotency keys, NFSe coverage gaps).",
+  "candidates": [
+    {
+      "rank": 1,
+      "front_id_hint": "t1-15",
+      "tier": 1,
+      "title": "Reforma Tributaria CBS/IBS dual-run shadow ledger",
+      "subtitle": "2026-01 mandatory dual-run of old + new tax regime \u2014 needs shadow calc engine before Q4",
+      "scores": {
+        "user_pain": 7,
+        "regulatory_urgency": 10,
+        "strategic_compounding": 9,
+        "engineering_cost": 4
+      },
+      "score_total": 9.45,
+      "sevilha_relevance": 8,
+      "research_questions": [
+        "What is the exact 2026-01 dual-run scope (PIS/COFINS+ICMS+ISS vs CBS+IBS) per LC 214/2025?",
+        "Which Receita Federal endpoints/SPED layouts ship CBS/IBS reporting and on what timeline?",
+        "Can shadow calculations reuse the existing tax_prefs_audit chain or do we need a parallel ledger?"
+      ],
+      "rationale": "Reforma Tribut\u00e1ria dual-run starts 2026-01-01 and every Brazilian SaaS accounting product must compute both regimes in parallel. Sevilha's analysts will be the canary: if Contably can't show side-by-side CBS/IBS vs legacy by Q4 2026, every customer churns to a competitor that can. This is the single highest-leverage compliance bet of the next 12 months and compounds into pricing, reporting, and audit features.",
+      "item_number": 9100
+    },
+    {
+      "rank": 2,
+      "front_id_hint": "t1-16",
+      "tier": 1,
+      "title": "NFSe nacional padrao DPS migration coverage",
+      "subtitle": "2026 NFSe unified standard rolls per-municipality \u2014 Sevilha's clients span 4+ cities",
+      "scores": {
+        "user_pain": 9,
+        "regulatory_urgency": 9,
+        "strategic_compounding": 7,
+        "engineering_cost": 5
+      },
+      "score_total": 7.08,
+      "sevilha_relevance": 9,
+      "research_questions": [
+        "Which Sevilha-client municipalities have already migrated to the NFSe nacional DPS layout vs legacy ABRASF?",
+        "Does Focus NFe cover the new DPS endpoints or do we need a fallback provider per city?",
+        "What's the manifesta\u00e7\u00e3o/cancellation flow under the new standard vs the city-by-city quirks today?"
+      ],
+      "rationale": "NFSe is the single largest source of analyst pain \u2014 every city has its own layout, and the federal unified DPS standard is rolling out asymmetrically through 2026. Sevilha already serves multiple municipalities; if Contably misses one city's cutover, the analyst manually re-keys invoices. Focus NFe migration just landed (#465\u2013#482) so the moment to widen coverage is now while the abstraction is fresh.",
+      "item_number": 9101
+    },
+    {
+      "rank": 3,
+      "front_id_hint": "t2-251",
+      "tier": 2,
+      "title": "Column-level audit trail (event-sourced who-changed-what)",
+      "subtitle": "Mini-autonomous: extend tax_prefs_audit pattern to all financial tables for SPED traceability",
+      "scores": {
+        "user_pain": 7,
+        "regulatory_urgency": 6,
+        "strategic_compounding": 9,
+        "engineering_cost": 8
+      },
+      "score_total": 3.73,
+      "sevilha_relevance": 7,
+      "research_questions": [
+        "Which tables (invoices, journal_entries, reconciliations) need column-level audit for Receita Federal traceability?",
+        "Can we generalize the tax_prefs_audit trigger pattern from migration 061 to a generic audit_log generator?",
+        "What's the storage cost projection at 100 firms \u00d7 10k entries/month \u00d7 5 years retention?"
+      ],
+      "rationale": "Receita Federal Article 1.179 requires 5-year traceability of every financial mutation. Today only tax_prefs has audit (PR #501). Generalizing this is high-leverage compounding \u2014 unlocks SPED audits, customer-facing change-log UI, and dispute resolution \u2014 and is Mini-autonomous-feasible because the pattern is already live in one table. Single-file generator + per-table migration.",
+      "item_number": 9102
+    },
+    {
+      "rank": 4,
+      "front_id_hint": "t2-252",
+      "tier": 2,
+      "title": "Idempotency keys on Pluggy + Focus NFe webhook receivers",
+      "subtitle": "Mini-autonomous: HMAC-verified webhooks need replay protection \u2014 currently silent dupes",
+      "scores": {
+        "user_pain": 8,
+        "regulatory_urgency": 5,
+        "strategic_compounding": 7,
+        "engineering_cost": 9
+      },
+      "score_total": 3.16,
+      "sevilha_relevance": 8,
+      "research_questions": [
+        "What idempotency-key headers do Pluggy and Focus NFe send today (Idempotency-Key, X-Request-Id, event UUID)?",
+        "Where do webhook duplicates currently get silently absorbed vs cause double-entry bugs?",
+        "Should the dedup window be event-id-based (forever) or time-windowed (24h)?"
+      ],
+      "rationale": "Bug #110 (chave vs chave_nfe field mismatch) showed how silent webhook drops cascade into reconciliation gaps. Replays from Pluggy retries and Focus NFe retransmits already happen daily. Adding a webhook_idempotency_keys table + decorator is a single-file Mini job that prevents an entire class of double-counting bugs before Sevilha hits volume.",
+      "item_number": 9103
+    },
+    {
+      "rank": 5,
+      "front_id_hint": "t1-17",
+      "tier": 1,
+      "title": "EFD-Reinf v2.1.2 + eSocial S-1010 catalog sync",
+      "subtitle": "Layout v2.1.2 mandatory 2026-07; rubricas catalog drifts monthly \u2014 needs scheduled sync",
+      "scores": {
+        "user_pain": 6,
+        "regulatory_urgency": 9,
+        "strategic_compounding": 6,
+        "engineering_cost": 5
+      },
+      "score_total": 6.24,
+      "sevilha_relevance": 6,
+      "research_questions": [
+        "What's the diff between EFD-Reinf v2.1.1 (current) and v2.1.2 (2026-07 mandatory) layouts?",
+        "How is the eSocial S-1010 rubricas catalog versioned and what's the official sync endpoint?",
+        "Can we reuse the Focus NFe daily-reconciliation cron pattern (#473) for catalog sync?"
+      ],
+      "rationale": "EFD-Reinf v2.1.2 is the next deadline after Reforma Tribut\u00e1ria prep. Sevilha doesn't process payroll yet but the second customer almost certainly will. The S-1010 catalog mismatch is the #1 cause of eSocial rejections industry-wide \u2014 solving it as scheduled sync (not on-demand fetch) is a moat.",
+      "item_number": 9104
+    },
+    {
+      "rank": 6,
+      "front_id_hint": "t2-253",
+      "tier": 2,
+      "title": "Multi-tenant query isolation invariant tests",
+      "subtitle": "Mini-autonomous: pytest harness that fails on any query missing company_id filter",
+      "scores": {
+        "user_pain": 7,
+        "regulatory_urgency": 7,
+        "strategic_compounding": 8,
+        "engineering_cost": 9
+      },
+      "score_total": 3.13,
+      "sevilha_relevance": 7,
+      "research_questions": [
+        "How does PR #494 (Pluggy TanStack cache scoping bug) generalize \u2014 what other caches/queries leak across tenants?",
+        "Can SQLAlchemy events intercept all queries to assert company_id is in WHERE clause?",
+        "What's the test-time perf cost of running every endpoint test under a 2-tenant fixture?"
+      ],
+      "rationale": "PR #494 was a real cross-tenant leak that shipped to staging. As Contably scales from Sevilha (1 firm) to many, the blast radius of one missed filter is catastrophic (LGPD fines + customer trust). A SQLAlchemy listener + invariant fixture is single-file Mini work that turns this into a class-of-bugs-prevented forever.",
+      "item_number": 9105
+    },
+    {
+      "rank": 7,
+      "front_id_hint": "t2-254",
+      "tier": 2,
+      "title": "Reconciliation gap radar \u2014 daily delta surface",
+      "subtitle": "NF-e/Pluggy/SPED triangle drift detector \u2014 analyst dashboard before month-close",
+      "scores": {
+        "user_pain": 9,
+        "regulatory_urgency": 5,
+        "strategic_compounding": 7,
+        "engineering_cost": 5
+      },
+      "score_total": 5.54,
+      "sevilha_relevance": 9,
+      "research_questions": [
+        "What are the canonical 3-way reconciliation rules: NF-e issued vs bank settled vs SPED-classified?",
+        "Where do gaps first surface today \u2014 Copiloto weekly summary, Minha Agenda, or only at close?",
+        "Can we surface deltas in the Copiloto coaching panel (#475) instead of a new screen?"
+      ],
+      "rationale": "Sevilha's analyst pain is concentrated at month-close when she discovers NF-e issued without bank confirmation, or bank entries without invoices. Every accounting SaaS competitor has this radar; Contably ships closing flow without it. Compounds with Copiloto (already built, #495) and Monthly Closing pre-flight gate (#477).",
+      "item_number": 9106
+    },
+    {
+      "rank": 8,
+      "front_id_hint": "t1-18",
+      "tier": 1,
+      "title": "Compliance debt registry \u2014 deadline calendar primitive",
+      "subtitle": "Compliance_debt: machine-readable registry of every fiscal deadline + impact + owner",
+      "scores": {
+        "user_pain": 6,
+        "regulatory_urgency": 8,
+        "strategic_compounding": 9,
+        "engineering_cost": 6
+      },
+      "score_total": 5.43,
+      "sevilha_relevance": 6,
+      "research_questions": [
+        "Which fiscal deadlines does Sevilha currently track manually (SPED, DCTF, EFD-Reinf, NFSe per city)?",
+        "Is there a canonical Receita/SEFAZ feed for deadline changes or do we mirror manually?",
+        "Should this be a Contably-internal primitive (drives Copiloto alerts) or a customer-facing feature?"
+      ],
+      "rationale": "Today fiscal deadlines live in @TODO comments and PR titles (#465 Focus NFe 2026-07-31, Reforma 2026-01-01). Without a registry, every deadline becomes a fire drill. As a primitive this powers Copiloto warnings, Minha Agenda, marketing comparison pages, and engineering planning. Tagged compliance_debt because today the debt is invisible.",
+      "item_number": 9107
+    }
+  ],
+  "rejected_below_threshold": [
+    {
+      "theme": "Generic Sentry/observability dashboard polish",
+      "reason": "score < 1.5 \u2014 pure platform UX, no Sevilha pain, no compounding"
+    },
+    {
+      "theme": "Migrate Celery 5.6 \u2192 5.7 preemptively",
+      "reason": "score < 1.5 \u2014 t0-2 already covers 5.3\u21925.6; further upgrade is premature"
+    },
+    {
+      "theme": "Switch from Pluggy to Belvo as primary OFX",
+      "reason": "cost >> pain \u2014 Pluggy works for Sevilha; provider swap is huge cost with no current customer pain"
+    },
+    {
+      "theme": "Customer-facing self-serve signup flow",
+      "reason": "Sevilha-relevance 2; pre-PMF, white-glove onboarding is correct; auto-cut at this stage"
+    },
+    {
+      "theme": "Mobile native app (iOS/Android)",
+      "reason": "engineering_cost 1, score < 1.0 \u2014 analysts work on desktop; mobile is a 2027 conversation"
+    },
+    {
+      "theme": "AI-generated journal entries from invoice description",
+      "reason": "duplicate of Copiloto roadmap (T1-1 family); already in flight, not research-worthy"
+    }
+  ]
+}

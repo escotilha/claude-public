@@ -1,0 +1,204 @@
+{
+  "ranked_at": "2026-04-25T00:00:00Z",
+  "rationale_summary": "Post-Focus-NFe-cutover batch: now that fiscal emission is unblocked for Monday, research investment shifts to (a) closing the SPED/eSocial regulatory gaps that come due in the next 30-90 days, (b) hardening the daily-reconciliation + monthly-close primitives Sevilha analysts will hit on day 1, and (c) two Mini-autonomous-feasible platform primitives (idempotency keys, audit trail) that unlock 5+ downstream fronts. Compliance-heavy: 5 of 8 candidates carry regulatory_urgency >= 7, reflecting Brazilian fiscal calendar pressure.",
+  "candidates": [
+    {
+      "rank": 1,
+      "front_id_hint": "t2-301",
+      "tier": 2,
+      "title": "SPED Fiscal/Contribui\u00e7\u00f5es \u2014 Monthly Transmission Hardening",
+      "subtitle": "Sevilha's first SPED filing lands within 30d; current pipeline lacks retry + reconcile guarantees",
+      "scores": {
+        "user_pain": 9,
+        "regulatory_urgency": 10,
+        "strategic_compounding": 8,
+        "engineering_cost": 5
+      },
+      "score_total": 7.72,
+      "sevilha_relevance": 9,
+      "research_questions": [
+        "What are the failure modes of SPED EFD-Contribui\u00e7\u00f5es/ICMS-IPI transmission and how do peers (Omie, Conta Azul) handle rejection codes 100-999?",
+        "Should we adopt a state-machine pattern (queued\u2192signed\u2192transmitted\u2192accepted\u2192rejected) and what's the minimal schema?",
+        "What's the validation gap between our generated SPED files and SEFAZ/RFB validators (PVA, SPED Contribui\u00e7\u00f5es)?"
+      ],
+      "rationale": "Sevilha's first SPED transmission falls inside the 30-day Sevilha window and is the single largest regulatory risk after Focus NFe. The existing f3e-sped front is unscoped. Research is warranted because failure modes are domain-specific (each SPED block has its own rejection taxonomy) and Mini cannot guess them without literature.",
+      "item_number": 9100
+    },
+    {
+      "rank": 2,
+      "front_id_hint": "t2-302",
+      "tier": 2,
+      "title": "eSocial S-1000..S-2299 Event Pipeline",
+      "subtitle": "Folha events have monthly + event-driven deadlines; missing them = R$2k+ per event in fines",
+      "scores": {
+        "user_pain": 8,
+        "regulatory_urgency": 10,
+        "strategic_compounding": 9,
+        "engineering_cost": 4
+      },
+      "score_total": 8.45,
+      "sevilha_relevance": 8,
+      "research_questions": [
+        "What is the minimal viable subset of eSocial events (S-1000, S-1005, S-1010, S-1020, S-1200, S-2200, S-2299) Sevilha needs in month 1 vs deferred?",
+        "How do we handle the eSocial XSD schema versioning + WS-Security signing (A1 vs A3 cert) compared to NFe?",
+        "What's the event-ordering invariant (e.g. S-1000 before any S-1200) and how should the queue enforce it?"
+      ],
+      "rationale": "f3d-esocial is listed but unscoped. eSocial penalties accrue per-event-per-day, so it's the second-highest regulatory exposure after SPED. Research is needed because event ordering + cert handling are non-trivial and copy-pasting from Focus-NFe patterns will mislead \u2014 eSocial uses different signing and a strict DAG.",
+      "item_number": 9101
+    },
+    {
+      "rank": 3,
+      "front_id_hint": "t2-303",
+      "tier": 2,
+      "title": "Daily Reconciliation Engine \u2014 Bank\u2194NFe\u2194Ledger",
+      "subtitle": "Sevilha analysts will reconcile Pluggy txns vs NFe vs ledger daily; needs deterministic match algorithm",
+      "scores": {
+        "user_pain": 10,
+        "regulatory_urgency": 4,
+        "strategic_compounding": 9,
+        "engineering_cost": 5
+      },
+      "score_total": 5.76,
+      "sevilha_relevance": 9,
+      "research_questions": [
+        "What matching algorithm (exact-amount-date, fuzzy with tolerance window, ML-ranked) is industry standard for BR bank\u2194NFe reconciliation, and what false-positive rate is acceptable?",
+        "How should unmatched items surface in the analyst UI \u2014 queue-per-company, severity tiers, or single inbox?",
+        "What's the data model for partial matches (e.g. one Pix to N invoices) and how does it interact with monthly close locking?"
+      ],
+      "rationale": "f2-daily-reconciliation is the daily workflow Sevilha will touch most. The Phase 0 throughput shows zero recent PRs against it, meaning the primitive is undefined. Research-worthy because the matching algorithm is a one-way door \u2014 the data model chosen now constrains 6 months of UX work.",
+      "item_number": 9102
+    },
+    {
+      "rank": 4,
+      "front_id_hint": "t2-304",
+      "tier": 2,
+      "title": "Monthly Close Lock + Reopen State Machine",
+      "subtitle": "PR #477 added pre-flight gate, but lock/reopen lifecycle is undefined and blocks audit trail",
+      "scores": {
+        "user_pain": 9,
+        "regulatory_urgency": 7,
+        "strategic_compounding": 9,
+        "engineering_cost": 6
+      },
+      "score_total": 5.63,
+      "sevilha_relevance": 8,
+      "research_questions": [
+        "What's the canonical close-period state machine (open\u2192pre-close\u2192closed\u2192reopened\u2192re-closed) and what events should be immutable post-close?",
+        "How do peers handle retroactive corrections (NFe canceled 60d after close) \u2014 journal reversal, side-period, or hard reopen?",
+        "What's the minimal audit-trail schema needed to satisfy CFC + RFB inspections during a close-reopen cycle?"
+      ],
+      "rationale": "PR #477 (T1-6) shipped the Aprovar/Bloquear gate but the underlying state model isn't documented. Sevilha will hit reopen scenarios within first 60 days (NFe cancellations are common). Research warranted because retroactive-correction patterns vary widely across BR accounting firms and the wrong primitive locks us out of mid-market customers.",
+      "item_number": 9103
+    },
+    {
+      "rank": 5,
+      "front_id_hint": "t2-305",
+      "tier": 2,
+      "title": "Idempotency Key Primitive \u2014 Cross-Service",
+      "subtitle": "Webhooks (Pluggy, Focus NFe) + crons + admin actions all need same-request-twice safety",
+      "scores": {
+        "user_pain": 7,
+        "regulatory_urgency": 5,
+        "strategic_compounding": 10,
+        "engineering_cost": 8
+      },
+      "score_total": 3.62,
+      "sevilha_relevance": 6,
+      "research_questions": [
+        "Should idempotency be a decorator + Redis backend, a DB unique-constraint pattern, or a middleware \u2014 and what's the right TTL (24h, 7d, indefinite)?",
+        "How do we handle partial-success scenarios where the side effect (Focus NFe emission) succeeded but our DB write failed?",
+        "What's the migration path to retrofit existing webhook handlers (Pluggy, Focus NFe) without breaking in-flight messages?"
+      ],
+      "rationale": "PR #494 (Pluggy cache scope bug) and #110 (chave vs chave_nfe drop) are symptoms of missing idempotency primitive. Mini-autonomous-feasible (engineering_cost 8) \u2014 single decorator + Redis backend, ~3 files. Compounds across every async path. Research clarifies the partial-success semantics which Mini cannot decide alone.",
+      "item_number": 9104
+    },
+    {
+      "rank": 6,
+      "front_id_hint": "t2-306",
+      "tier": 2,
+      "title": "Audit Trail \u2014 Append-Only Event Log",
+      "subtitle": "RFB inspections require who-did-what-when on every fiscal mutation; today: scattered logs",
+      "scores": {
+        "user_pain": 6,
+        "regulatory_urgency": 9,
+        "strategic_compounding": 9,
+        "engineering_cost": 7
+      },
+      "score_total": 4.97,
+      "sevilha_relevance": 7,
+      "research_questions": [
+        "What's the minimal event-log schema (actor, action, entity, before/after, timestamp, request_id) and should it be table-per-domain or single events table?",
+        "How long must we retain (5 years per BR fiscal law? 10 years for some events?) and what's the archival strategy?",
+        "Should this be SQL (audit table + triggers) or event-stream (Kafka/Redpanda) \u2014 and what's the TCO at firm-50 scale?"
+      ],
+      "rationale": "RFB/CFC audits require demonstrable chain-of-custody for fiscal data. PR #492-494 show ad-hoc audit logging today. Mini-feasible at engineering_cost 7 if we pick the SQL route. Research needed to choose retention strategy and avoid a rip-and-replace at firm-50.",
+      "item_number": 9105
+    },
+    {
+      "rank": 7,
+      "front_id_hint": "t2-307",
+      "tier": 2,
+      "title": "DCTFWeb + DARF Generation",
+      "subtitle": "Monthly federal tax declaration follows SPED; Sevilha hits this in month 2",
+      "scores": {
+        "user_pain": 7,
+        "regulatory_urgency": 9,
+        "strategic_compounding": 6,
+        "engineering_cost": 5
+      },
+      "score_total": 5.44,
+      "sevilha_relevance": 7,
+      "research_questions": [
+        "What's the integration path: SERPRO API direct, gov.br oauth, or SEFAZ web-scraping fallback \u2014 and what are the SLAs/quotas?",
+        "How does DCTFWeb consume the SPED Contribui\u00e7\u00f5es output we generate, and where are the data-shape mismatches?",
+        "What's the DARF generation + barcode (linha digit\u00e1vel) algorithm and is there a maintained BR library?"
+      ],
+      "rationale": "DCTFWeb is the natural sequel to SPED Contribui\u00e7\u00f5es (rank 1) \u2014 same data, different submission path. Sevilha will need this in month 2. Research-worthy because SERPRO integration paths shifted in 2024-2025 and the pre-Focus-NFe approach (web scraping) is brittle.",
+      "item_number": 9106
+    },
+    {
+      "rank": 8,
+      "front_id_hint": "t2-308",
+      "tier": 2,
+      "title": "Copiloto Sevilha \u2014 Insight Quality Eval Loop",
+      "subtitle": "T1-1 shipped engagement tracking (#495); now need eval to know if insights are actually useful",
+      "scores": {
+        "user_pain": 6,
+        "regulatory_urgency": 2,
+        "strategic_compounding": 8,
+        "engineering_cost": 7
+      },
+      "score_total": 2.53,
+      "sevilha_relevance": 7,
+      "research_questions": [
+        "What's the minimal LLM-as-judge rubric for accounting-insight quality (correctness, actionability, novelty) and how do we calibrate against Sevilha analyst ground-truth?",
+        "Should engagement (PR #495) feed directly into the eval loop or stay as a separate signal \u2014 and what's the offline-eval cadence?",
+        "What's the regression-detection threshold \u2014 when does a model/prompt change get auto-rolled-back?"
+      ],
+      "rationale": "PR #495 shipped engagement tracking but there's no quality signal yet \u2014 engagement \u2260 correctness for accounting. Mini-autonomous-feasible (engineering_cost 7) once research nails the rubric. Lower regulatory_urgency drops the score, but slot reserved for the second high-engineering_cost \u2265 7 candidate per selection rule 1.",
+      "item_number": 9107
+    }
+  ],
+  "rejected_below_threshold": [
+    {
+      "theme": "Pluggy provider expansion (BTG, Inter, etc.)",
+      "reason": "low regulatory_urgency, high engineering_cost per provider, score ~1.4 \u2014 execute-don't-research"
+    },
+    {
+      "theme": "Admin UI polish (PR #493 follow-ups)",
+      "reason": "user_pain 4, strategic_compounding 2, score ~1.1 \u2014 pure UX, ship via Mini directly"
+    },
+    {
+      "theme": "Celery 5.6 follow-up tuning",
+      "reason": "t0-2 already in flight; not research-worthy, just execution"
+    },
+    {
+      "theme": "Migration tooling improvements",
+      "reason": "t0-103/104 already exhaustively addressed via #501; tooling refactor would be premature"
+    },
+    {
+      "theme": "Multi-tenant scale-out to firm-100",
+      "reason": "sevilha_relevance 1, premature \u2014 revisit at firm-10"
+    }
+  ]
+}

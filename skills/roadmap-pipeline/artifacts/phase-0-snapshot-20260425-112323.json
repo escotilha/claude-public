@@ -1,0 +1,968 @@
+{
+  "snapshot_ts": "2026-04-25T11:23:34Z",
+  "repo": "Contably/contably",
+  "signals": {
+    "merged_prs_7d": [
+      {
+        "additions": 634,
+        "deletions": 457,
+        "mergedAt": "2026-04-24T19:55:02Z",
+        "number": 501,
+        "title": "fix(alembic): exhaustive MySQL-dialect migration hotfix (supersedes #496-499)"
+      },
+      {
+        "additions": 155,
+        "deletions": 0,
+        "mergedAt": "2026-04-24T20:06:02Z",
+        "number": 500,
+        "title": "feat(cicd): auto-promote staging\u2192production every 4h (T2-250)"
+      },
+      {
+        "additions": 325,
+        "deletions": 5,
+        "mergedAt": "2026-04-24T20:05:58Z",
+        "number": 495,
+        "title": "feat(copiloto): T1-1 Copiloto Sevilha \u2014 wire engagement tracking + fix onboarding GET"
+      },
+      {
+        "additions": 18,
+        "deletions": 7,
+        "mergedAt": "2026-04-24T20:05:55Z",
+        "number": 494,
+        "title": "fix(admin): scope Pluggy TanStack cache by company_id"
+      },
+      {
+        "additions": 463,
+        "deletions": 32,
+        "mergedAt": "2026-04-24T20:05:51Z",
+        "number": 493,
+        "title": "feat(admin): dev user password reset + inline error UX"
+      },
+      {
+        "additions": 52,
+        "deletions": 35,
+        "mergedAt": "2026-04-24T20:05:48Z",
+        "number": 492,
+        "title": "feat(nav): t1-110 \u2014 Minha Agenda first for all users"
+      },
+      {
+        "additions": 143,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T20:33:37Z",
+        "number": 490,
+        "title": "chore(roadmap): T0-17..T0-25 Focus NFe safe-evolution slices"
+      },
+      {
+        "additions": 131,
+        "deletions": 10,
+        "mergedAt": "2026-04-23T20:31:39Z",
+        "number": 489,
+        "title": "fix(ci): T0-18 migration Job ordered BEFORE Deployment rollout (staging)"
+      },
+      {
+        "additions": 42,
+        "deletions": 16,
+        "mergedAt": "2026-04-23T20:28:59Z",
+        "number": 488,
+        "title": "fix(fiscal): T0-19 Focus NFe dialect-neutral _persist_event + log redaction"
+      },
+      {
+        "additions": 33,
+        "deletions": 2,
+        "mergedAt": "2026-04-23T20:25:07Z",
+        "number": 487,
+        "title": "fix(kustomize): T0-17 disableNameSuffixHash + configmap-patch verify parity"
+      },
+      {
+        "additions": 8,
+        "deletions": 9,
+        "mergedAt": "2026-04-23T19:15:21Z",
+        "number": 486,
+        "title": "chore(ci): fix diag workflow pod selector"
+      },
+      {
+        "additions": 67,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T19:08:04Z",
+        "number": 485,
+        "title": "chore(ci): one-off diag-staging-pod workflow"
+      },
+      {
+        "additions": 1,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T18:57:06Z",
+        "number": 484,
+        "title": "chore(deploy): trigger staging redeploy v2 (secrets now in place)"
+      },
+      {
+        "additions": 1,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T18:44:34Z",
+        "number": 483,
+        "title": "chore(deploy): trigger staging redeploy for Focus NFe routes"
+      },
+      {
+        "additions": 1100,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T17:52:49Z",
+        "number": 482,
+        "title": "feat(fiscal): T0-16 \u2014 Focus NFe cutover script (reopens #479)"
+      },
+      {
+        "additions": 538,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T17:42:26Z",
+        "number": 481,
+        "title": "feat(fiscal): T0-12 \u2014 Focus NFe webhook receiver (reopens #478)"
+      },
+      {
+        "additions": 477,
+        "deletions": 43,
+        "mergedAt": "2026-04-23T18:17:29Z",
+        "number": 480,
+        "title": "feat(fiscal): T0-14 \u2014 provider switch + admin shim + CNPJ lookup (reopens #476)"
+      },
+      {
+        "additions": 604,
+        "deletions": 2,
+        "mergedAt": "2026-04-23T17:07:34Z",
+        "number": 477,
+        "title": "feat(monthly-closing): AF-admin pre-flight gate before Aprovar/Bloquear (T1-6)"
+      },
+      {
+        "additions": 503,
+        "deletions": 5,
+        "mergedAt": "2026-04-23T17:09:51Z",
+        "number": 475,
+        "title": "feat(copiloto): T1-1 Copiloto Sevilha \u2014 weekly summary endpoint + page coaching panels"
+      },
+      {
+        "additions": 149,
+        "deletions": 13,
+        "mergedAt": "2026-04-23T17:12:03Z",
+        "number": 474,
+        "title": "feat(fiscal): T0-11 \u2014 Focus NFe settings, env guard, feature flags + test coverage"
+      },
+      {
+        "additions": 670,
+        "deletions": 1,
+        "mergedAt": "2026-04-23T16:51:54Z",
+        "number": 473,
+        "title": "feat(fiscal): T0-13 \u2014 Focus NFe daily reconciliation + manifesta\u00e7\u00e3o crons"
+      },
+      {
+        "additions": 1431,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T16:54:18Z",
+        "number": 472,
+        "title": "feat(fiscal): T0-10 \u2014 Focus NFe provider protocol + FocusNFeClient"
+      },
+      {
+        "additions": 38,
+        "deletions": 1,
+        "mergedAt": "2026-04-23T16:47:20Z",
+        "number": 471,
+        "title": "feat(ci): T0-15 Focus NFe CI/CD secret injection + configmap"
+      },
+      {
+        "additions": 22,
+        "deletions": 34,
+        "mergedAt": "2026-04-23T16:18:44Z",
+        "number": 469,
+        "title": "fix(ci): run psos-ingest-roadmap on self-hosted VPS runner"
+      },
+      {
+        "additions": 1,
+        "deletions": 1,
+        "mergedAt": "2026-04-23T16:08:22Z",
+        "number": 468,
+        "title": "chore(roadmap): refresh date \u2014 trigger first auto-ingest"
+      },
+      {
+        "additions": 79,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T16:00:28Z",
+        "number": 467,
+        "title": "ci(psos): auto-ingest roadmap into engine fronts on merge"
+      },
+      {
+        "additions": 138,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T15:41:11Z",
+        "number": 466,
+        "title": "chore(roadmap): T0-10..T0-16 \u2014 Focus NFe migration"
+      },
+      {
+        "additions": 272,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T15:24:05Z",
+        "number": 465,
+        "title": "docs: Nuvem Fiscal \u2192 Focus NFe migration plan (hard deadline 2026-07-31)"
+      },
+      {
+        "additions": 389,
+        "deletions": 30,
+        "mergedAt": "2026-04-23T15:08:01Z",
+        "number": 461,
+        "title": "feat(erp): T4-102 \u2014 Dominio ERP import compatibility"
+      },
+      {
+        "additions": 679,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T14:56:24Z",
+        "number": 460,
+        "title": "feat(invoices): T4-105 NF-e cross-month deduplication"
+      },
+      {
+        "additions": 9,
+        "deletions": 9,
+        "mergedAt": "2026-04-23T14:09:11Z",
+        "number": 458,
+        "title": "ci(probe): flip back to ubuntu-latest"
+      },
+      {
+        "additions": 9,
+        "deletions": 32,
+        "mergedAt": "2026-04-23T13:35:08Z",
+        "number": 457,
+        "title": "ci: move to self-hosted runner (contably-mini)"
+      },
+      {
+        "additions": 24,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T12:38:21Z",
+        "number": 456,
+        "title": "chore(ci): BuildFailed stub + ci.yml trailing newline to clear phantom workflow"
+      },
+      {
+        "additions": 488,
+        "deletions": 10,
+        "mergedAt": "2026-04-23T14:17:02Z",
+        "number": 455,
+        "title": "feat(portal): T2-115 \u2014 client portal orchestrator visibility"
+      },
+      {
+        "additions": 323,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T14:53:40Z",
+        "number": 454,
+        "title": "feat(models): T4-5 slice 2/4 \u2014 approval chain ORM models"
+      },
+      {
+        "additions": 222,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T14:20:04Z",
+        "number": 453,
+        "title": "feat(whatsapp): T4-3 slice 2/3 \u2014 Celery tasks for WhatsApp delivery"
+      },
+      {
+        "additions": 0,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T14:17:08Z",
+        "number": 452,
+        "title": "feat(infra): os-5 \u2014 psos staging VPS for orchestrator code changes"
+      },
+      {
+        "additions": 131,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T14:17:12Z",
+        "number": 451,
+        "title": "docs: T2-131 coordinator lock + daily-cycles rollout plan"
+      },
+      {
+        "additions": 131,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T11:46:50Z",
+        "number": 450,
+        "title": "docs: T2-131 coordinator lock + daily-cycles rollout plan (stacks on #448)"
+      },
+      {
+        "additions": 1005,
+        "deletions": 35,
+        "mergedAt": "2026-04-23T11:51:50Z",
+        "number": 449,
+        "title": "feat(accounting): journal entry export \u2014 CSV, XLSX, and SPED Contribui\u00e7\u00f5es unit tests (T1-8)"
+      },
+      {
+        "additions": 1237,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T11:46:47Z",
+        "number": 448,
+        "title": "docs(roadmap): T2-125..T2-130 \u2014 retry UX + 3 daily cycles (dep-update, security, discovery)"
+      },
+      {
+        "additions": 149,
+        "deletions": 21,
+        "mergedAt": "2026-04-23T14:17:17Z",
+        "number": 447,
+        "title": "feat(close): T1-106 \u2014 AF-admin pre-flight checklist acknowledge-to-proceed gate"
+      },
+      {
+        "additions": 93,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T11:24:46Z",
+        "number": 446,
+        "title": "feat(ui): global period lock banner (t1-7)"
+      },
+      {
+        "additions": 0,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T14:17:21Z",
+        "number": 445,
+        "title": "feat(workflows): T2-112 orchestrator workflow timeline admin UI"
+      },
+      {
+        "additions": 212,
+        "deletions": 7,
+        "mergedAt": "2026-04-23T11:25:17Z",
+        "number": 444,
+        "title": "fix(deps): T4-7 \u2014 ESLint 9 / redis-py 6.x / openai SDK 2 upgrades"
+      },
+      {
+        "additions": 821,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T14:17:26Z",
+        "number": 443,
+        "title": "feat(orchestrator): T2-11 \u2014 orchestrator-driven monthly close pipeline"
+      },
+      {
+        "additions": 1258,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T11:25:20Z",
+        "number": 442,
+        "title": "feat(workflows): T2-111 orchestrator-driven monthly close pipeline"
+      },
+      {
+        "additions": 397,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T10:55:55Z",
+        "number": 441,
+        "title": "docs(roadmap): T2-121..T2-124 PSOS dashboard + dispatch fixes"
+      },
+      {
+        "additions": 304,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T11:25:23Z",
+        "number": 440,
+        "title": "test(journal-entry-export): unit tests for CSV, XLSX, SPED service (T1-8)"
+      },
+      {
+        "additions": 209,
+        "deletions": 6,
+        "mergedAt": "2026-04-23T11:25:26Z",
+        "number": 439,
+        "title": "feat(gemini): T4-6 slice 1 \u2014 GeminiVisionProvider unit tests for google-genai SDK"
+      },
+      {
+        "additions": 229,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T11:25:29Z",
+        "number": 438,
+        "title": "feat(db): T4-5 slice 1/4 \u2014 multi-sig approval chain schema"
+      },
+      {
+        "additions": 300,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T11:25:32Z",
+        "number": 437,
+        "title": "feat(whatsapp): T4-3 slice 1/3 \u2014 WhatsApp provider core + settings (300 LOC)"
+      },
+      {
+        "additions": 213,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T11:25:35Z",
+        "number": 436,
+        "title": "feat(close): t1-6 \u2014 AF-admin pre-flight checklist wire-up + preflight.md"
+      },
+      {
+        "additions": 93,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T11:25:38Z",
+        "number": 435,
+        "title": "feat(ui): period lock banner on tax overview and calendar pages (t1-7)"
+      },
+      {
+        "additions": 466,
+        "deletions": 30,
+        "mergedAt": "2026-04-23T11:25:41Z",
+        "number": 434,
+        "title": "feat(workflows): T2-114 \u2014 parallel orchestrator step execution"
+      },
+      {
+        "additions": 0,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T14:17:30Z",
+        "number": 433,
+        "title": "feat(workflows): T2-112 orchestrator workflow timeline admin UI"
+      },
+      {
+        "additions": 140,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T10:08:59Z",
+        "number": 432,
+        "title": "docs(roadmap): T2-117..T2-120 PSOS self-improvement from 2026-04-23 incidents"
+      },
+      {
+        "additions": 21,
+        "deletions": 15,
+        "mergedAt": "2026-04-23T09:31:15Z",
+        "number": 431,
+        "title": "fix(migrations): dialect-neutral table_exists for analytics migration (staging unblock)"
+      },
+      {
+        "additions": 61,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T09:48:08Z",
+        "number": 430,
+        "title": "fix(migrations): merge 4 heads for staging deploy (unblocks PR #428)"
+      },
+      {
+        "additions": 379,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T08:13:10Z",
+        "number": 429,
+        "title": "feat(infra): OS-5 \u2014 staging VPS for psos orchestrator code changes"
+      },
+      {
+        "additions": 701,
+        "deletions": 35,
+        "mergedAt": "2026-04-23T09:55:05Z",
+        "number": 428,
+        "title": "feat(accounting): journal entry export \u2014 CSV, XLSX, and SPED Contribui\u00e7\u00f5es (T1-8)"
+      },
+      {
+        "additions": 466,
+        "deletions": 30,
+        "mergedAt": "2026-04-23T08:13:05Z",
+        "number": 427,
+        "title": "feat(workflows): T2-114 \u2014 parallel orchestrator step execution"
+      },
+      {
+        "additions": 466,
+        "deletions": 30,
+        "mergedAt": "2026-04-23T08:13:00Z",
+        "number": 426,
+        "title": "feat(workflows): T2-114 \u2014 parallel orchestrator step execution"
+      },
+      {
+        "additions": 380,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T08:12:54Z",
+        "number": 425,
+        "title": "feat(orchestrator): T2-116 job registry + self-documenting API"
+      },
+      {
+        "additions": 297,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T08:12:35Z",
+        "number": 424,
+        "title": "feat(closing-report): YoY delta section \u2014 T1-104 slice 1 (297 LOC)"
+      },
+      {
+        "additions": 624,
+        "deletions": 187,
+        "mergedAt": "2026-04-23T05:25:19Z",
+        "number": 423,
+        "title": "feat(workflows): T2-112 orchestrator workflow timeline admin UI"
+      },
+      {
+        "additions": 136,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T05:23:09Z",
+        "number": 422,
+        "title": "feat(infra): psos-staging GHA workflow \u2014 os-5 slice 1/2"
+      },
+      {
+        "additions": 232,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T05:23:05Z",
+        "number": 421,
+        "title": "feat(journal-entries): T1-8 slice-1 \u2014 export service layer (CSV, XLSX, SPED)"
+      },
+      {
+        "additions": 33,
+        "deletions": 2,
+        "mergedAt": "2026-04-23T05:20:47Z",
+        "number": 420,
+        "title": "feat(close): t0-103 \u2014 period write-guard 422 with remediation on Pluggy late arrivals"
+      },
+      {
+        "additions": 297,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T08:15:29Z",
+        "number": 419,
+        "title": "feat(monthly-closing): close-readiness API \u2014 slice 1/3 (T1-103)"
+      },
+      {
+        "additions": 87,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T05:19:22Z",
+        "number": 418,
+        "title": "feat(ui): period lock banner global coverage \u2014 T2-30"
+      },
+      {
+        "additions": 216,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T05:19:18Z",
+        "number": 417,
+        "title": "feat(monthly-closing): T1-102 slice-1 \u2014 checklist WebSocket backend endpoint"
+      },
+      {
+        "additions": 429,
+        "deletions": 109,
+        "mergedAt": "2026-04-23T08:12:05Z",
+        "number": 415,
+        "title": "feat(closing): T0-105 \u2014 canonicalization completeness gate (slice 1/2)"
+      },
+      {
+        "additions": 291,
+        "deletions": 1,
+        "mergedAt": "2026-04-23T05:16:37Z",
+        "number": 414,
+        "title": "feat(closing): T0-102 \u2014 Wire Journal Auto-Post into Close Workflow"
+      },
+      {
+        "additions": 89,
+        "deletions": 1,
+        "mergedAt": "2026-04-23T05:16:32Z",
+        "number": 413,
+        "title": "test(closing): add monthly_closing_mvp feature flag gate tests (T0-101)"
+      },
+      {
+        "additions": 263,
+        "deletions": 0,
+        "mergedAt": "2026-04-23T05:16:29Z",
+        "number": 412,
+        "title": "feat(monthly-closing): WeasyPrint PDF render probe endpoint [T0-104 slice 1/2]"
+      },
+      {
+        "additions": 263,
+        "deletions": 0,
+        "mergedAt": "2026-04-22T23:54:31Z",
+        "number": 401,
+        "title": "feat(monthly-closing): WeasyPrint PDF render probe endpoint (T0-104 slice 1/2)"
+      },
+      {
+        "additions": 301,
+        "deletions": 10,
+        "mergedAt": "2026-04-22T23:54:28Z",
+        "number": 400,
+        "title": "feat(industry-rules): T3-3 slice-1 \u2014 per-firm rule override API (backend)"
+      },
+      {
+        "additions": 1,
+        "deletions": 0,
+        "mergedAt": "2026-04-22T22:26:32Z",
+        "number": 372,
+        "title": "ship_recovery: Implement t2-35 \u2014 contably-os: planner reads memory before each plan (companion "
+      },
+      {
+        "additions": 1391,
+        "deletions": 0,
+        "mergedAt": "2026-04-22T22:26:29Z",
+        "number": 371,
+        "title": "feat(contably-os): T2-34 \u2014 tiered memory store (Option A)"
+      },
+      {
+        "additions": 51,
+        "deletions": 0,
+        "mergedAt": "2026-04-22T22:05:43Z",
+        "number": 370,
+        "title": "docs(roadmap): T2-37 \u2014 per-batch pre-flight (T0 \u2014 fixes today's stuck-task root cause)"
+      },
+      {
+        "additions": 30,
+        "deletions": 0,
+        "mergedAt": "2026-04-22T21:59:26Z",
+        "number": 369,
+        "title": "docs(roadmap): T2-36 \u2014 pre-deploy test-pyramid expansion"
+      },
+      {
+        "additions": 57,
+        "deletions": 0,
+        "mergedAt": "2026-04-22T21:55:52Z",
+        "number": 368,
+        "title": "docs(roadmap): T2-34 + T2-35 \u2014 tiered memory store + planner integration"
+      },
+      {
+        "additions": 174,
+        "deletions": 0,
+        "mergedAt": "2026-04-22T22:25:27Z",
+        "number": 367,
+        "title": "docs(research): claude-code memory architecture in PSOS \u2014 Option A recommendation"
+      },
+      {
+        "additions": 946,
+        "deletions": 0,
+        "mergedAt": "2026-04-22T22:25:23Z",
+        "number": 366,
+        "title": "feat(mapping-rules): T2-27 \u2014 Rule History panel for mapping rules admin"
+      },
+      {
+        "additions": 907,
+        "deletions": 2,
+        "mergedAt": "2026-04-22T22:25:18Z",
+        "number": 365,
+        "title": "feat(analytics): T2-23 \u2014 Phase0 analytics events schema migration"
+      },
+      {
+        "additions": 892,
+        "deletions": 0,
+        "mergedAt": "2026-04-22T22:44:03Z",
+        "number": 364,
+        "title": "feat(transactions): T2-29 \u2014 bulk categorize bank transactions"
+      },
+      {
+        "additions": 934,
+        "deletions": 0,
+        "mergedAt": "2026-04-22T22:25:13Z",
+        "number": 363,
+        "title": "feat(reports): T2-20 \u2014 Financial Reports CSV + XLSX export (DRE / Balanco)"
+      },
+      {
+        "additions": 206,
+        "deletions": 1,
+        "mergedAt": "2026-04-22T22:25:10Z",
+        "number": 362,
+        "title": "feat(copiloto): T2-28 \u2014 wiki search source attribution in Copiloto sidebar"
+      },
+      {
+        "additions": 503,
+        "deletions": 0,
+        "mergedAt": "2026-04-22T22:25:06Z",
+        "number": 361,
+        "title": "feat(slack-feedback): T2-25 \u2014 Slack feedback loop wired to PSOS engine bridge"
+      },
+      {
+        "additions": 523,
+        "deletions": 24,
+        "mergedAt": "2026-04-22T22:25:02Z",
+        "number": 360,
+        "title": "feat(workflows): T2-21 \u2014 export workflows table as CSV and XLSX"
+      },
+      {
+        "additions": 330,
+        "deletions": 22,
+        "mergedAt": "2026-04-22T22:01:41Z",
+        "number": 359,
+        "title": "feat(reconciliation): export table CSV + XLSX (T2-19)"
+      },
+      {
+        "additions": 172,
+        "deletions": 138,
+        "mergedAt": "2026-04-22T22:24:59Z",
+        "number": 358,
+        "title": "feat(ui): T2-30 \u2014 Period Lock Status Indicator"
+      },
+      {
+        "additions": 233,
+        "deletions": 0,
+        "mergedAt": "2026-04-22T22:24:55Z",
+        "number": 357,
+        "title": "feat(feature-flags): phase-rollout env-var gates (T2-24)"
+      },
+      {
+        "additions": 304,
+        "deletions": 14,
+        "mergedAt": "2026-04-22T21:57:20Z",
+        "number": 356,
+        "title": "feat(reconciliation): surface AI match_confidence in pending reviews (T2-26)"
+      },
+      {
+        "additions": 897,
+        "deletions": 0,
+        "mergedAt": "2026-04-22T22:01:32Z",
+        "number": 355,
+        "title": "feat(contably-os): T2-13 ledger pattern detection \u2192 self-filing"
+      },
+      {
+        "additions": 522,
+        "deletions": 83,
+        "mergedAt": "2026-04-22T22:24:52Z",
+        "number": 354,
+        "title": "feat(transactions): server-side CSV + XLSX export endpoint (T2-18)"
+      },
+      {
+        "additions": 248,
+        "deletions": 0,
+        "mergedAt": "2026-04-22T21:54:24Z",
+        "number": 353,
+        "title": "feat(storage): T2-22 \u2014 StorageService HMAC signed URLs (phase0 cherry-pick 1/3)"
+      },
+      {
+        "additions": 889,
+        "deletions": 312,
+        "mergedAt": "2026-04-22T22:43:59Z",
+        "number": 352,
+        "title": "feat(psos-bridge): T2-15 \u2014 self-learning bridge (Contably emitter)"
+      },
+      {
+        "additions": 19,
+        "deletions": 0,
+        "mergedAt": "2026-04-22T21:36:24Z",
+        "number": 351,
+        "title": "docs(roadmap): T2-32 \u2014 dashboard derived-status must filter by task recency"
+      }
+    ],
+    "open_prs": [
+      {
+        "createdAt": "2026-04-25T02:26:34Z",
+        "headRefName": "feat/sa-t2-112-auto-20260425-020617",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 552,
+        "title": "feat(orchestrator): T2-112 \u2014 Orchestrator Workflow Timeline admin page"
+      },
+      {
+        "createdAt": "2026-04-25T02:21:37Z",
+        "headRefName": "feat/sa-t2-1-auto-20260425-020617",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 551,
+        "title": "feat(esocial): T2-1 \u2014 eSocial TecnoSpeed integration (payroll bridge + route fixes + S-1010)"
+      },
+      {
+        "createdAt": "2026-04-25T02:18:20Z",
+        "headRefName": "feat/sa-t-sevilha-rollback-rehearsal-auto-20260425-020453",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 550,
+        "title": "feat(cicd): rollback-staging workflow + runbook + tests (t-sevilha-rollback-rehearsal)"
+      },
+      {
+        "createdAt": "2026-04-25T02:17:52Z",
+        "headRefName": "feat/sa-t1-3-auto-20260425-020453",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 549,
+        "title": "chore(t1-3): verify CSV/Excel export already complete (T1-3 audit)"
+      },
+      {
+        "createdAt": "2026-04-25T02:17:22Z",
+        "headRefName": "feat/sa-t-sevilha-onboard-test-auto-20260425-020453",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 548,
+        "title": "test(smoke): Sevilha first-client onboarding smoke \u2014 AF Admin identity"
+      },
+      {
+        "createdAt": "2026-04-25T02:17:09Z",
+        "headRefName": "feat/sa-t2-111-auto-20260425-020617",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 547,
+        "title": "feat(monthly-close): T2-111 orchestrator-driven close pipeline HTTP API"
+      },
+      {
+        "createdAt": "2026-04-25T02:16:17Z",
+        "headRefName": "feat/sa-t1-2-auto-20260425-020453",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 546,
+        "title": "test(onboarding): T1-2 \u2014 WelcomeModal, task definitions, and settings reset tests"
+      },
+      {
+        "createdAt": "2026-04-25T02:15:54Z",
+        "headRefName": "feat/sa-t1-111-auto-20260425-020453",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 545,
+        "title": "feat(client-portal): restore bank statement upload button (T1-111)"
+      },
+      {
+        "createdAt": "2026-04-25T02:14:25Z",
+        "headRefName": "feat/sa-t2-11-auto-20260425-020617",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 544,
+        "title": "docs(roadmap): mark T2-10 and T2-11 as SHIPPED (psos PR #9)"
+      },
+      {
+        "createdAt": "2026-04-25T01:14:40Z",
+        "headRefName": "feat/sa-os-3-dashboard-html-auto-20260425-005308",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 543,
+        "title": "feat(contably-os): os-3 \u2014 dashboard health check GHA workflow + probe script"
+      },
+      {
+        "createdAt": "2026-04-25T01:10:50Z",
+        "headRefName": "feat/sa-os-1-planner-pr-diff-auto-20260425-005308",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 542,
+        "title": "feat(contably-os): os-1 \u2014 planner reads open-PR unified diffs before selecting files_touched"
+      },
+      {
+        "createdAt": "2026-04-25T01:10:36Z",
+        "headRefName": "feat/sa-os-4-cost-tracker-auto-20260425-005308",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 541,
+        "title": "feat(cost-tracker): os-4 automated token/cost reporting from stream-json"
+      },
+      {
+        "createdAt": "2026-04-25T01:07:12Z",
+        "headRefName": "feat/sa-os-6-scope-gate-v2-auto-20260425-005308",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 540,
+        "title": "feat(psos): os-6 scope gate v2 \u2014 roadmap goal-text linter + CI gate"
+      },
+      {
+        "createdAt": "2026-04-25T01:04:20Z",
+        "headRefName": "feat/sa-os-2-tail-dispatch-auto-20260425-005308",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 539,
+        "title": "feat(infra): os-2-tail-dispatch \u2014 SSH remote wrapper + infra README"
+      },
+      {
+        "createdAt": "2026-04-24T23:52:41Z",
+        "headRefName": "feat/sa-t1-6-auto-20260424-233625",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 538,
+        "title": "fix(tests): repair 4 stale Vitest failures + add manual/mkdocs.yml (T1-6)"
+      },
+      {
+        "createdAt": "2026-04-24T23:49:24Z",
+        "headRefName": "feat/sa-t1-7-auto-20260424-233625",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 537,
+        "title": "feat(ui): global period lock status indicator in header (t1-7)"
+      },
+      {
+        "createdAt": "2026-04-24T23:49:23Z",
+        "headRefName": "feat/sa-t1-5-auto-20260424-233625",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 536,
+        "title": "feat(erp): T1-5 \u2014 Nibo ERP connector infrastructure + integration tests"
+      },
+      {
+        "createdAt": "2026-04-24T23:48:56Z",
+        "headRefName": "feat/sa-t1-4-auto-20260424-233625",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 535,
+        "title": "feat(ux): replace page-level spinners with skeleton loaders (T1-4)"
+      },
+      {
+        "createdAt": "2026-04-24T23:45:47Z",
+        "headRefName": "feat/sa-t1-111-auto-20260424-233259",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 534,
+        "title": "feat(admin): T1-111 \u2014 restore bank statement upload to admin Statements tab"
+      },
+      {
+        "createdAt": "2026-04-24T23:44:42Z",
+        "headRefName": "feat/sa-t1-3-auto-20260424-233259",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 533,
+        "title": "feat(export): T1-3 \u2014 CSV/XLSX export for Plano de Contas (Chart of Accounts)"
+      },
+      {
+        "createdAt": "2026-04-24T23:43:14Z",
+        "headRefName": "feat/sa-t1-2-auto-20260424-233259",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 532,
+        "title": "feat(onboarding): T1-2 Progressive Onboarding Flow \u2014 configure_preferences detection + modal guard + tests"
+      },
+      {
+        "createdAt": "2026-04-24T23:43:06Z",
+        "headRefName": "feat/sa-t-sevilha-rollback-rehearsal-auto-20260424-233259",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 531,
+        "title": "docs(ops): staging rollback rehearsal \u2014 runbook + workflow (T2-250 follow-up)"
+      },
+      {
+        "createdAt": "2026-04-24T23:40:32Z",
+        "headRefName": "feat/sa-t-sevilha-onboard-test-auto-20260424-233259",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 530,
+        "title": "test(smoke): Sevilha first-client onboarding smoke \u2014 API gap fixes + unit regression tests"
+      },
+      {
+        "createdAt": "2026-04-24T22:53:19Z",
+        "headRefName": "fix/sa-t0-110-hotfix-20260425-004349-00",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 529,
+        "title": "fix(focus-nfe): handle chave_nfe field name + dedup multiple versions"
+      },
+      {
+        "createdAt": "2026-04-24T21:54:23Z",
+        "headRefName": "feat/sa-t-sevilha-onboard-test-20260424-232310-00",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 528,
+        "title": "test(smoke): Sevilha onboarding smoke test \u2014 12/12 PASS"
+      },
+      {
+        "createdAt": "2026-04-24T21:42:09Z",
+        "headRefName": "feat/sa-t-sevilha-invoice-upload-20260424-232310-02",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 527,
+        "title": "fix(invoices): wire NFe upload to processing pipeline + fix field names"
+      },
+      {
+        "createdAt": "2026-04-24T21:41:07Z",
+        "headRefName": "feat/sa-os-3-dashboard-html-auto-20260424-211834",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 526,
+        "title": "feat(contably-os): T2-14 dashboard tabs \u2014 In-flight / Completed / Activity"
+      },
+      {
+        "createdAt": "2026-04-24T21:39:13Z",
+        "headRefName": "feat/sa-t-sevilha-client-comms-20260424-232310-03",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 525,
+        "title": "feat(tickets): Sevilha client-comms smoke + notify fix"
+      },
+      {
+        "createdAt": "2026-04-24T21:34:54Z",
+        "headRefName": "feat/sa-os-1-planner-pr-diff-auto-20260424-211834",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 524,
+        "title": "feat(contably-os): os-1 \u2014 PR diff fetcher + auto-refresh GHA workflow"
+      },
+      {
+        "createdAt": "2026-04-24T21:34:03Z",
+        "headRefName": "feat/sa-t-sevilha-first-close-20260424-232310-01",
+        "mergeStateStatus": "UNSTABLE",
+        "number": 523,
+        "title": "feat(close): Sevilha first-close dry-run \u2014 docs + 2 P1 fixes (F-05, F-01) + XLSX export"
+      }
+    ],
+    "psos_task_outcomes_7d": [
+      {
+        "status": "abandoned",
+        "count": 89
+      },
+      {
+        "status": "blocked",
+        "count": 15
+      },
+      {
+        "status": "merged",
+        "count": 205
+      }
+    ],
+    "psos_active_fronts_by_tier": [
+      {
+        "tier": null,
+        "count": 7
+      },
+      {
+        "tier": 0,
+        "count": 20
+      },
+      {
+        "tier": 2,
+        "count": 70
+      },
+      {
+        "tier": 3,
+        "count": 17
+      },
+      {
+        "tier": 4,
+        "count": 13
+      }
+    ],
+    "psos_engine_status": "killswitch: off\nrunning: 0\nspent: $44.83 / cap $250.00 (warn $130.00)\nrate_limit: 0/900 msg (5h window, Max 20x)\ndashboard last rendered: 2026-04-25T11:23:17Z",
+    "prod_health_http_code": "200",
+    "staging_health_http_code": "200"
+  },
+  "derived": {
+    "merged_count_7d": 100,
+    "lines_added_7d": 33887,
+    "lines_deleted_7d": 1869,
+    "open_pr_count": 30,
+    "active_fronts_total": 127,
+    "prod_healthy": true,
+    "staging_healthy": true
+  }
+}

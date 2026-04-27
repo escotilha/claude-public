@@ -1,0 +1,159 @@
+You are /cpo for Contably (Brazilian accounting automation SaaS, first
+paying customer Sevilha launches Monday).
+
+You ranked these 8 candidates earlier (Phase 1, judgment-only). Now Phase 2
+delivered $10-12 of research across 24 tracks (3 per candidate). Your task:
+RE-rank the same 8 candidates using the new evidence. Promote items where
+research revealed urgency or unlock-value Phase 1 missed. Demote items where
+research surfaced higher engineering cost or strategic dead-ends.
+
+DO NOT add new items. DO NOT drop items below the threshold (Phase 5 handles
+that). Just re-score and re-order.
+
+## Original Phase 1 ranking
+
+  1. **Reforma Tributaria CBS/IBS dual-run shadow ledger** (tier 1) score=9.45 sevilha=8/10
+     subtitle: 2026-01 mandatory dual-run of old + new tax regime — needs shadow calc engine before Q4
+     scores: {'user_pain': 7, 'regulatory_urgency': 10, 'strategic_compounding': 9, 'engineering_cost': 4}
+  2. **NFSe nacional padrao DPS migration coverage** (tier 1) score=7.08 sevilha=9/10
+     subtitle: 2026 NFSe unified standard rolls per-municipality — Sevilha's clients span 4+ cities
+     scores: {'user_pain': 9, 'regulatory_urgency': 9, 'strategic_compounding': 7, 'engineering_cost': 5}
+  3. **Column-level audit trail (event-sourced who-changed-what)** (tier 2) score=3.73 sevilha=7/10
+     subtitle: Mini-autonomous: extend tax_prefs_audit pattern to all financial tables for SPED traceability
+     scores: {'user_pain': 7, 'regulatory_urgency': 6, 'strategic_compounding': 9, 'engineering_cost': 8}
+  4. **Idempotency keys on Pluggy + Focus NFe webhook receivers** (tier 2) score=3.16 sevilha=8/10
+     subtitle: Mini-autonomous: HMAC-verified webhooks need replay protection — currently silent dupes
+     scores: {'user_pain': 8, 'regulatory_urgency': 5, 'strategic_compounding': 7, 'engineering_cost': 9}
+  5. **EFD-Reinf v2.1.2 + eSocial S-1010 catalog sync** (tier 1) score=6.24 sevilha=6/10
+     subtitle: Layout v2.1.2 mandatory 2026-07; rubricas catalog drifts monthly — needs scheduled sync
+     scores: {'user_pain': 6, 'regulatory_urgency': 9, 'strategic_compounding': 6, 'engineering_cost': 5}
+  6. **Multi-tenant query isolation invariant tests** (tier 2) score=3.13 sevilha=7/10
+     subtitle: Mini-autonomous: pytest harness that fails on any query missing company_id filter
+     scores: {'user_pain': 7, 'regulatory_urgency': 7, 'strategic_compounding': 8, 'engineering_cost': 9}
+  7. **Reconciliation gap radar — daily delta surface** (tier 2) score=5.54 sevilha=9/10
+     subtitle: NF-e/Pluggy/SPED triangle drift detector — analyst dashboard before month-close
+     scores: {'user_pain': 9, 'regulatory_urgency': 5, 'strategic_compounding': 7, 'engineering_cost': 5}
+  8. **Compliance debt registry — deadline calendar primitive** (tier 1) score=5.43 sevilha=6/10
+     subtitle: Compliance_debt: machine-readable registry of every fiscal deadline + impact + owner
+     scores: {'user_pain': 6, 'regulatory_urgency': 8, 'strategic_compounding': 9, 'engineering_cost': 6}
+
+## Phase 2 research findings (per candidate)
+
+### t1-15
+  - track 1 (completed): INCREASES priority — the 2026 dual-run is confirmed mandatory (LC 214/2025 Art. 348), requires six-tax parallel apuração with credit-offset logic and new NFe fields from January 2026, making a shadow calc engine a hard compliance prerequisite, not an optional enhancement, for any Brazilian fiscal SaaS.
+  - track 2 (completed): INCREASES priority — the dual-run is statutory from January 2026 with CBS/IBS test rates already live, but SPED/CG-IBS submission layouts remain unfinalized, making a calculate-only shadow ledger the only viable compliance posture for Contably customers right now and creating a clear first-mover window before ERP vendors ship GA modules.
+  - track 3 (completed): INCREASES priority — the dual-run is a mandatory regulatory filing (not optional shadow bookkeeping), and the structural incompatibility between PIS/COFINS/ICMS audit schemas and CBS/IBS value-added logic confirms a net-new parallel ledger is required, making this a non-deferrable build item before Q4 2026.
+
+### t1-16
+  - track 1 (completed): INCREASES priority — dual-schema reality (DPS + legacy ABRASF coexisting across municipalities) means coverage gaps are structural and immediate, not hypothetical, making this a near-certain pain point for any Sevilha client operating across 2+ cities today.
+  - track 2 (completed): INCREASES priority — Focus NFe lacks confirmed DPS-native endpoints as of mid-2025, creating a real coverage gap risk for multi-city Sevilha clients that Contably must architect around before city decommission deadlines hit in 2026–2027.
+  - track 3 (completed): INCREASES priority — the formalized tomador manifestação API with its 15-day window and `DISCORDANCIA`-blocking state is a net-new workflow state absent from all legacy city systems, making this a mandatory rebuild (not a migration) for any multi-city service provider like Sevilha's clients, and a high-differentiation feature if Contably handles it correctly.
+
+### t2-251
+  - track 1 (completed): INCREASES priority — SPED mandates byte-exact column-level immutability for invoice fields (`chave_acesso`, CFOP, tax values) and journal entry fields (`numero_lancamento`, `data_lancamento`, `historico`, `valor`) via signed ECD/EFD transmission protocols, making this a legal compliance requirement under IN RFB nº 1.774/2017 and IN RFB nº 1.252/2012, not merely a product feature.
+  - track 2 (completed): INCREASES priority — the generalization is architecturally trivial (one reusable PL/pgSQL trigger function via TG_TABLE_NAME + row_to_json JSONB blobs, ~135 LOC total), MySQL dialect is compatible, and the SQLAlchemy before_flush session identity hook cleanly solves the changed_by attribution problem across all write paths without per-endpoint instrumentation.
+  - track 3 (completed): DOESN'T CHANGE priority — storage cost is negligible (~$4/month at full scale); the real implementation risk is write-latency amplification on bulk imports, which is solvable but must be designed upfront.
+
+### t2-252
+  - track 1 (completed): INCREASES priority — neither Pluggy nor Focus NFe sends a header-level idempotency key, meaning Contably must implement payload-body-based dedup itself (Pluggy `id` UUID; Focus NFe `chave_acesso`+`status` tuple); the absence of a platform-provided guard makes silent duplicate processing a real production risk, strengthening the case for building this protection explicitly.
+  - track 2 (completed): INCREASES priority — the git history confirms two active/recent double-entry bug instances (T0-110 still unmerged, T4-105 just fixed) and a pattern of reactive point-fixes rather than a general idempotency primitive, making the case for middleware-level protection stronger and more urgent.
+  - track 3 (completed): INCREASES priority — retry windows for both Pluggy (≤48 h) and Focus NF-e (≤72 h), combined with SEFAZ's 7-day NFe cancellation window and Brazilian tax law's exactly-once fiscal processing requirement, make permanent event-ID dedup not just a reliability nicety but a compliance necessity; the 24 h TTL alternative introduces a concrete failure mode with no meaningful cost saving at Contably's scale.
+
+### t1-17
+  - track 1 (completed): DOESN'T CHANGE priority — cannot verify the specific layout diff without web access; the research question remains open and should be re-run in a session with WebSearch + WebFetch permissions enabled before Phase 3 re-ranking
+  - track 2 (completed): DECREASES priority — the S-1010 "catalog sync" is employer-submitted (not government-pulled), there is no official sync endpoint, and the actual drift signal is irregular leiaute/portaria updates that require document polling rather than an API integration, making the scheduled-sync framing in the candidate description technically inaccurate and reducing implementation urgency.
+  - track 3 (completed): INCREASES priority — ~40–50% of the NFe cron harness (scheduler, diff-act loop, retry queue, lote polling) transfers directly, making this a bounded adaptation rather than a greenfield build, though the external-poll-vs-push-submission inversion and structured record diffing are non-trivial additions that the team should scope explicitly.
+
+### t2-253
+  - track 1 (completed): INCREASES priority — the PR #494 pattern recurs across at least 4 distinct layers (frontend cache, backend ORM, webhook dedup, background jobs), confirmed by the reactive sequence of PRs #460→#488→#494→#529, and no preventative automated guardrail exists today.
+  - track 2 (completed): INCREASES priority — SQLAlchemy's `before_cursor_execute` engine event reliably intercepts virtually all queries (including raw SQL) at the string level, making a pytest fixture-based isolation harness straightforwardly implementable, with the only meaningful gap being raw DBAPI cursor bypasses which are rare in disciplined ORM codebases.
+  - track 3 (completed): INCREASES priority — The test-time overhead of the canary-row 2-tenant invariant pattern is negligible (+3–8% per test, ~0.5–1s on a typical 200-test suite), which removes the main practical objection to adopting it; the candidate's correctness benefit (catching missing `company_id` filters at test time) outweighs its cost by a wide margin.
+
+### t2-254
+  - track 1 (completed): INCREASES priority — The 3-way triangle has a concrete, legally grounded regulatory basis across at least 4 distinct SPED instruments with hard deadlines and automated RFB cross-referencing already in production (NF-e DB × EFD-Contribuições M200), meaning the data for gap detection already exists in structured form; Contably building a pre-close radar against these canonical rules addresses a real, quantifiable compliance exposure that Brazilian accounting firms currently resolve manually.
+  - track 2 (completed): INCREASES priority — gaps are universally detected only at month-close today, meaning a daily delta radar fills a complete void in the current tooling landscape, not a marginal improvement over existing weekly surfaces.
+  - track 3 (completed): INCREASES priority — the Copiloto panel is the correct surface for the signal layer (delta badge + one-liner), making the reconciliation gap radar a two-part architecture (embed alert in Copiloto now, defer investigation screen), which lowers implementation cost and de-risks the feature against a new-screen build.
+
+### t1-18
+  - track 1 (completed): INCREASES priority — Brazil's fiscal obligation landscape is structurally complex (27-state ICMS calendars + 3,000+ municipal NFSe deadlines + 5 distinct federal obligations with per-regime applicability rules), confirming that a machine-readable compliance registry is a high-value primitive for any Contably/Sevilha client company.
+  - track 2 (completed): INCREASES priority — no canonical Receita/SEFAZ machine-readable feed exists; deadline tracking requires scraping 28+ fragmented HTML/PDF sources or licensing private vendor data, confirming this is a genuine data infrastructure problem and a real moat opportunity for whoever builds the authoritative machine-readable registry first.
+  - track 3 (truncated): (no verdict)
+
+
+## Re-ranking rules
+
+1. Use the same formula as Phase 1:
+   ```
+   score = (user_pain × 1.0
+         + regulatory_urgency × 2.0
+         + strategic_compounding × 1.2)
+         / engineering_cost
+   ```
+
+2. For each candidate, identify the BIGGEST score change driver from research.
+   Examples:
+   - "Research showed Brazilian Receita Federal rule X takes effect in 30
+     days, not 6 months — bumping regulatory_urgency from 5 to 9"
+   - "Research found a competitor open-sourced this exact feature last week
+     — bumping user_pain (table-stakes now) but lowering strategic_compounding
+     (no longer a moat)"
+   - "Research surfaced 3-week implementation cost where Phase 1 estimated
+     1 week — engineering_cost goes from 4 to 8, score collapses"
+
+3. If Phase 2 research was inconclusive for an item (no signal either way),
+   keep the Phase 1 scores unchanged. Note this explicitly in the rationale.
+
+4. Source-quality gating (NEW — required as of 2026-04-25 spawn upgrade):
+   Phase 2 research outputs include per-URL `[fetched]` markers. URLs marked
+   `[fetched]` were verified by WebFetch; URLs marked `[fetch failed: ...]`
+   or `[search failed]` were not. Treat findings differently based on grounding:
+   - Findings backed by ≥2 `[fetched]` URLs → high confidence, fully credit the
+     score shift this research suggests.
+   - Findings with only `[fetch failed]` or no fetch markers → low confidence,
+     apply at most half the score shift the research suggests, and prefer to
+     leave Phase 1 scores unchanged unless the research is internally consistent
+     and consistent with model knowledge.
+   - If a research track shows ALL `[fetch failed]` markers, flag it in
+     `research_questions_open` so Phase 5 / Pierre can re-run.
+
+5. New rank = sort by new score_total descending.
+
+## Output format (strict)
+
+Return a JSON object with this shape:
+
+```
+{
+  "reranked_at": "ISO 8601",
+  "summary_of_shifts": "1-2 sentences: which items moved most, and why",
+  "candidates": [
+    {
+      "rank": 1,
+      "front_id_hint": "(unchanged from Phase 1)",
+      "tier": (unchanged),
+      "title": (unchanged),
+      "subtitle": (unchanged unless research suggests sharper framing),
+      "scores": {"user_pain": N, "regulatory_urgency": N, "strategic_compounding": N, "engineering_cost": N},
+      "score_total": float,
+      "previous_rank": (from Phase 1),
+      "previous_score_total": (from Phase 1),
+      "delta": "(+1.2 / -0.4 / 0.0)",
+      "evidence_summary": "1-2 sentences citing the research that drove the score change",
+      "research_questions_resolved": ["..."],
+      "research_questions_open": ["..."]
+    },
+    ...
+  ]
+}
+```
+
+## Constraints
+
+- Output MUST be valid JSON parseable by `json.loads`
+- Same 8 candidates, no additions, no deletions
+- Each candidate's `delta` field must explain ANY score change of |0.3+|
+- If 0 candidates had score changes, surface that in summary_of_shifts —
+  research budget was wasted, suggest tightening Phase 1 or Phase 2 scope
+- Do not add prose outside the JSON
+
+The orchestrator pipes your output directly into Phase 4 (jury).

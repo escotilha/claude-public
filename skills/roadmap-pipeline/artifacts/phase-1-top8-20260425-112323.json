@@ -1,0 +1,203 @@
+{
+  "ranked_at": "2026-04-25T00:00:00Z",
+  "rationale_summary": "Sevilha launches Monday \u2014 this batch prioritizes compliance-debt fronts (eSocial, SPED, NF-e edge cases) that compound for firm-2+ onboarding, plus 2 Mini-autonomous slices (passlib cleanup, Celery beat hardening) and platform primitives (audit log, idempotency keys) that unblock multi-tenant scale. Heavy weight on regulatory_urgency since fiscal deadlines = customer churn. No tier-0 items included \u2014 those are already in flight or shipped.",
+  "candidates": [
+    {
+      "rank": 1,
+      "front_id_hint": "t1-201",
+      "tier": 1,
+      "title": "eSocial S-2200/S-2299 admission/termination events",
+      "subtitle": "Sevilha has 12 employees \u2014 admission/term events due 1 business day after fact",
+      "scores": {
+        "user_pain": 9,
+        "regulatory_urgency": 10,
+        "strategic_compounding": 7,
+        "engineering_cost": 5
+      },
+      "score_total": 7.48,
+      "sevilha_relevance": 8,
+      "research_questions": [
+        "What's the minimal viable S-2200/S-2299 XML schema + signing flow we can ship in 2 weeks against the production eSocial endpoint?",
+        "Can we reuse the Focus NFe webhook+reconciliation pattern (T0-12/T0-13) for eSocial event lifecycle, or does eSocial's polling/event-receipt model require a different abstraction?",
+        "What's the failure-mode catalog for eSocial rejections (c\u00f3digos de retorno) and which need automatic retry vs. analyst escalation?"
+      ],
+      "rationale": "Sevilha's analysts already process payroll manually; without eSocial automation we lose the daily-workflow promise. S-2200/S-2299 are the highest-frequency eSocial events for a small-firm portfolio and carry per-day fines. Pattern compounds: once we own eSocial event lifecycle, S-2230 (afastamento) and S-1200 (folha) reuse the same client + reconciler.",
+      "item_number": 9100
+    },
+    {
+      "rank": 2,
+      "front_id_hint": "t2-301",
+      "tier": 2,
+      "title": "Multi-tenant audit log primitive (who/what/when)",
+      "subtitle": "Compliance + debugging \u2014 every state-changing op writes immutable audit row scoped by company_id",
+      "scores": {
+        "user_pain": 7,
+        "regulatory_urgency": 8,
+        "strategic_compounding": 10,
+        "engineering_cost": 5
+      },
+      "score_total": 7.0,
+      "sevilha_relevance": 6,
+      "research_questions": [
+        "Should audit log live in MySQL (same DB, easier joins) or a separate append-only store (S3+Athena, ClickHouse) for retention + cost?",
+        "What's the minimum field set that satisfies LGPD (Art. 37) data-controller logging requirements without bloating write volume?",
+        "Can we piggyback on SQLAlchemy event listeners + a single decorator on FastAPI routes, or does the monthly-closing approval flow need bespoke instrumentation?"
+      ],
+      "rationale": "Pluggy cache scoping (#494) and the AF-admin pre-flight gate (#477) are signals that multi-tenant boundary bugs are recurring. An audit log primitive resolves the 'who approved this closing?' question Sevilha analysts will ask within 30 days, AND becomes the substrate for future SOC2 / LGPD posture. High strategic compounding.",
+      "item_number": 9101
+    },
+    {
+      "rank": 3,
+      "front_id_hint": "t2-302",
+      "tier": 2,
+      "title": "SPED Contribui\u00e7\u00f5es (PIS/COFINS) monthly transmission",
+      "subtitle": "Monthly federal obligation due day 14 \u2014 Sevilha's first close lands May 2026",
+      "scores": {
+        "user_pain": 8,
+        "regulatory_urgency": 10,
+        "strategic_compounding": 6,
+        "engineering_cost": 4
+      },
+      "score_total": 7.3,
+      "sevilha_relevance": 8,
+      "research_questions": [
+        "What's the delta between SPED Fiscal (already in f3e-sped) and SPED Contribui\u00e7\u00f5es layout, and which records can we reuse?",
+        "Can we generate the EFD-Contribui\u00e7\u00f5es file from existing NF-e + service-invoice data already ingested, or do we need a new fact table for PIS/COFINS apportionment?",
+        "What's the production-validation strategy \u2014 submit to RFB homologa\u00e7\u00e3o first, or reconcile against analyst-prepared output for first 2 closings?"
+      ],
+      "rationale": "SPED Fiscal is on the roadmap (f3e), but Contribui\u00e7\u00f5es is the OTHER monthly federal SPED that Sevilha's clients owe. Missing the 14th = automatic R$500-1500 fine per company. Engineering cost is moderate (file-format work, no new integrations) and it directly unblocks the monthly-close promise.",
+      "item_number": 9102
+    },
+    {
+      "rank": 4,
+      "front_id_hint": "t1-202",
+      "tier": 1,
+      "title": "Idempotency-key middleware for write endpoints",
+      "subtitle": "Prevents double-posting from analyst retries + webhook replays \u2014 critical before Monday",
+      "scores": {
+        "user_pain": 8,
+        "regulatory_urgency": 5,
+        "strategic_compounding": 9,
+        "engineering_cost": 8
+      },
+      "score_total": 4.225,
+      "sevilha_relevance": 8,
+      "research_questions": [
+        "What's the right key namespace \u2014 per-company, per-user, or per-route \u2014 given that Pluggy webhooks and Focus NFe webhooks both already retry?",
+        "Should we store keys in Redis (TTL'd) or MySQL (durable but slower), and what's the read-cost on the hot path?",
+        "Which endpoints MUST be idempotent for Monday (close-month, post-NFe, manifest-NFe) vs. nice-to-have?"
+      ],
+      "rationale": "The chave_nfe drop bug (T0-110) and Pluggy cache mis-scoping (#494) hint that we're rediscovering the same class of bug \u2014 non-idempotent operations under retry. A single middleware + decorator pattern is Mini-autonomous-feasible (cost=8) and prevents an entire bug class. Lands before Sevilha gives this MUCH lower risk on Monday.",
+      "item_number": 9103
+    },
+    {
+      "rank": 5,
+      "front_id_hint": "t2-303",
+      "tier": 2,
+      "title": "DCTFWeb auto-generation from eSocial + EFD-Reinf",
+      "subtitle": "Federal tax declaration \u2014 replaces DCTF in 2026, due 15th of M+2",
+      "scores": {
+        "user_pain": 7,
+        "regulatory_urgency": 9,
+        "strategic_compounding": 7,
+        "engineering_cost": 3
+      },
+      "score_total": 8.47,
+      "sevilha_relevance": 5,
+      "research_questions": [
+        "What's the data-pipeline dependency chain \u2014 does DCTFWeb generation require BOTH eSocial S-1200 AND EFD-Reinf to be transmitted first, or can we approximate from local data?",
+        "RFB exposes DCTFWeb via a service portal \u2014 is there an API or do we have to scrape/upload-file?",
+        "What does Sevilha do TODAY for DCTFWeb (manual vs. competitor tool), and what's the time-saving threshold for it to be worth shipping vs. punting to firm-2?"
+      ],
+      "rationale": "DCTFWeb is the federal-tax declaration that consolidates eSocial + Reinf. Engineering cost is genuinely high (depends on TWO upstream integrations) so it scores well per formula, but Sevilha-relevance is 5 because they may already have a workflow. Worth researching to clarify scope before committing.",
+      "item_number": 9104
+    },
+    {
+      "rank": 6,
+      "front_id_hint": "t3-201",
+      "tier": 3,
+      "title": "Celery beat schedule hardening + missed-run alerting",
+      "subtitle": "Daily reconciliation crons silently failing = lost NFes \u2014 needs detector",
+      "scores": {
+        "user_pain": 9,
+        "regulatory_urgency": 6,
+        "strategic_compounding": 6,
+        "engineering_cost": 9
+      },
+      "score_total": 3.36,
+      "sevilha_relevance": 7,
+      "research_questions": [
+        "What's the right liveness signal \u2014 per-task last-success timestamp in Redis, or a watchdog cron that compares schedule.json to actual runs?",
+        "Should alerts go to Slack/PagerDuty or surface in the admin UI as a banner so analysts see drift before the customer does?",
+        "Can we leverage Celery 5.6 (just upgraded in T0-2) features like schedule-revision IDs, or do we need to roll our own?"
+      ],
+      "rationale": "T0-110 (chave_nfe drops) was discovered late because there was no detector. Celery upgrade just landed, so the substrate is fresh. Mini-autonomous-feasible (cost=9) \u2014 single new task + alert hook. High user_pain because silent failures erode customer trust faster than visible bugs.",
+      "item_number": 9105
+    },
+    {
+      "rank": 7,
+      "front_id_hint": "t3-202",
+      "tier": 3,
+      "title": "passlib \u2192 pwdlib leftover removal + bcrypt deprecation",
+      "subtitle": "T0-1 migrated logic; this finishes the cleanup + removes pinned passlib",
+      "scores": {
+        "user_pain": 3,
+        "regulatory_urgency": 4,
+        "strategic_compounding": 5,
+        "engineering_cost": 10
+      },
+      "score_total": 1.7,
+      "sevilha_relevance": 3,
+      "research_questions": [
+        "What's the residual import surface for passlib after T0-1, and which third-party deps still pull it transitively?",
+        "Does any persisted password hash use a passlib-only scheme that pwdlib can't verify, requiring a re-hash-on-login flow?"
+      ],
+      "rationale": "Mini-autonomous-feasible filler. Low pain but cost=10 (single-file, deterministic) and provides a clean win for the engine queue. Score barely clears 1.5 threshold but earns its slot via the 'engineering_cost \u2265 7' reservation.",
+      "item_number": 9106
+    },
+    {
+      "rank": 8,
+      "front_id_hint": "t2-304",
+      "tier": 2,
+      "title": "Tax-regime-aware monthly-close checklist",
+      "subtitle": "Simples Nacional vs Lucro Presumido vs Real \u2014 checklists diverge sharply",
+      "scores": {
+        "user_pain": 8,
+        "regulatory_urgency": 7,
+        "strategic_compounding": 7,
+        "engineering_cost": 5
+      },
+      "score_total": 6.16,
+      "sevilha_relevance": 7,
+      "research_questions": [
+        "What's the actual checklist delta across the 3 regimes \u2014 how many overlapping vs regime-specific steps?",
+        "Should regime live on the company entity (single source of truth) or the closing-period (allows mid-year regime change)?",
+        "Can we model this as a DAG of obligations with regime-conditional edges, so adding MEI later is additive?"
+      ],
+      "rationale": "Sevilha portfolio is mixed-regime. The current monthly-close pre-flight gate (#477) is regime-agnostic; that breaks for Lucro Real clients who owe ECF + ECD. Researching the regime taxonomy NOW prevents a v2 rewrite of the close engine in 60 days.",
+      "item_number": 9107
+    }
+  ],
+  "rejected_below_threshold": [
+    {
+      "theme": "Generic UI dark mode + theming",
+      "reason": "user_pain=2, regulatory_urgency=0, score < 1.0 \u2014 pure polish, no Sevilha lever"
+    },
+    {
+      "theme": "Refactor admin routes into versioned API blueprints",
+      "reason": "engineering_cost=2, strategic_compounding=4 \u2014 score ~3 but Sevilha-irrelevant pre-launch; defer to firm-3 platform sweep"
+    },
+    {
+      "theme": "Real-time collaborative spreadsheet for closing review",
+      "reason": "engineering_cost=1 (cross-system, websockets, OT), score < 1.5 \u2014 not Mini-autonomous-feasible, deserves a separate planning round"
+    },
+    {
+      "theme": "Add OpenTelemetry tracing across FastAPI + Celery",
+      "reason": "regulatory_urgency=2, strategic_compounding=8 but engineering_cost=3 \u2014 score ~5.7 but Sevilha-relevance=2; revisit after first 3 customers reveal real perf hotspots"
+    },
+    {
+      "theme": "ML-based NFe categorization auto-suggest",
+      "reason": "engineering_cost=2 (data labeling, model serving, eval pipeline), no jury would clear it for Phase 2 \u2014 pre-research dependency on labeled dataset"
+    }
+  ]
+}
