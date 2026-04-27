@@ -1,0 +1,73 @@
+{
+  "sequential-thinking": {
+    "type": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-sequential-thinking"
+    ],
+    "env": {}
+  },
+  "memory": {
+    "type": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-memory"
+    ],
+    "env": {}
+  },
+  "postgres": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-postgres",
+      "postgresql://postgres:postgres@localhost:5432/postgres"
+    ]
+  },
+  "chrome-devtools": {
+    "type": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "chrome-devtools-mcp@latest"
+    ],
+    "env": {}
+  },
+  "google-workspace": {
+    "type": "stdio",
+    "command": "uvx",
+    "args": [
+      "workspace-mcp",
+      "--tool-tier",
+      "core"
+    ],
+    "env": {
+      "GOOGLE_OAUTH_CLIENT_ID": "525667674730-4om88m56ml8vqpl69v829p4f6c9ud2pj.apps.googleusercontent.com",
+      "GOOGLE_OAUTH_CLIENT_SECRET": "<PASTE_FROM_1PASSWORD>",
+      "USER_GOOGLE_EMAIL": "p@nuvini.ai"
+    }
+  },
+  "exa": {
+    "type": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "exa-mcp-server"
+    ],
+    "env": {
+      "EXA_API_KEY": "<PASTE_FROM_1PASSWORD>"
+    }
+  },
+  "brave-search": {
+    "type": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-brave-search"
+    ],
+    "env": {
+      "BRAVE_API_KEY": "<PASTE_FROM_1PASSWORD>"
+    }
+  }
+}
