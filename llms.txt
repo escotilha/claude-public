@@ -2,18 +2,21 @@
 
 > Pierre Schurmann's Claude Code setup: 86 skills, 13 global rules, hybrid memory system. LLM-discoverable via llmstxt.org spec. Use this file to understand what tooling is available before starting work.
 
-Last generated: 2026-04-27T02:00:07Z
+Last generated: 2026-04-27T18:53:13Z
 
 ## Rules
 
 Global behavioral rules loaded into every Claude session via CLAUDE.md.
 
+- [AGENT-TEAMS-STRATEGY.original.md](rules/AGENT-TEAMS-STRATEGY.original.md): Agent Teams Migration Strategy
 - [cache-discipline.md](rules/cache-discipline.md): Cache Discipline (Lock Tools & Model at Session Start)
 - [concurrent-sessions.md](rules/concurrent-sessions.md): Concurrent Session Discipline
 - [handoff-threshold.md](rules/handoff-threshold.md): Handoff at 80% Context
 - [karpathy-guidelines.md](rules/karpathy-guidelines.md): Karpathy Coding Guidelines
 - [memory-strategy.md](rules/memory-strategy.md): Memory Strategy
+- [memory-strategy.original.md](rules/memory-strategy.original.md): Memory Strategy
 - [model-tier-strategy.md](rules/model-tier-strategy.md): Model Tier Strategy for Subagents
+- [model-tier-strategy.original.md](rules/model-tier-strategy.original.md): Model Tier Strategy for Subagents
 - [nuvini-sync-rules.md](rules/nuvini-sync-rules.md): Nuvini Claude Repo Sync Rules
 - [opus-4-7-prompting.md](rules/opus-4-7-prompting.md): Opus 4.7 Prompting Patterns
 - [parallel-first.md](rules/parallel-first.md): Parallel-First Execution Rule

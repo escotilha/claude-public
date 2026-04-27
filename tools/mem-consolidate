@@ -15,10 +15,15 @@ log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$LOG_FILE"; }
 
 log "=== Consolidation started ==="
 
+# Helper: enumerate all memory files (root + tier subdirs), excluding indices
+list_memory_files() {
+  find "$MEMORY_DIR" -maxdepth 2 -type f -name "*.md" \
+    ! -name "MEMORY.md" ! -name "_tier.md" ! -name "_index.md" 2>/dev/null
+}
+
 # --- Step 1: Prune stale memories ---
 PRUNED=0
-for f in "$MEMORY_DIR"/*.md; do
-  [[ "$(basename "$f")" == "MEMORY.md" ]] && continue
+while IFS= read -r f; do
   [[ ! -f "$f" ]] && continue
 
   # Get modification date (macOS stat format)
@@ -32,12 +37,17 @@ for f in "$MEMORY_DIR"/*.md; do
   # Check content length (proxy for value — very short memories are likely low-value)
   content_lines=$(grep -c -v -E "^---$|^$|^name:|^description:|^type:" "$f" 2>/dev/null || echo "0")
 
+  # Skip pruning files in personal/ tier (never auto-decay per memory-strategy.md)
+  if [[ "$f" == *"/personal/"* ]]; then
+    continue
+  fi
+
   if [[ $age_days -gt $DECAY_DAYS && $content_lines -lt $MIN_LINES ]]; then
     log "PRUNE: $(basename "$f") — $age_days days old, $content_lines content lines"
     rm "$f"
     PRUNED=$((PRUNED + 1))
   fi
-done
+done < <(list_memory_files)
 log "Pruned $PRUNED stale memories"
 
 # --- Step 2: Detect near-duplicates by description ---
@@ -45,11 +55,10 @@ log "Pruned $PRUNED stale memories"
 DEDUP_INDEX=$(mktemp /tmp/mem-consolidate-dedup.XXXXXX)
 trap "rm -f '$DEDUP_INDEX'" EXIT
 DUPES=0
-for f in "$MEMORY_DIR"/*.md; do
-  [[ "$(basename "$f")" == "MEMORY.md" ]] && continue
+while IFS= read -r f; do
   [[ ! -f "$f" ]] && continue
 
-  desc=$(grep "^description:" "$f" 2>/dev/null | head -1 | sed 's/^description: *//' | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9 ]//g' | xargs)
+  desc=$(grep "^description:" "$f" 2>/dev/null | head -1 | sed 's/^description: *//' | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9 ]//g' | xargs || true)
   [[ -z "$desc" ]] && continue
 
   # Check if we've already seen this description
@@ -75,73 +84,91 @@ for f in "$MEMORY_DIR"/*.md; do
   else
     printf '%s\t%s\n' "$f" "$desc" >> "$DEDUP_INDEX"
   fi
-done
+done < <(list_memory_files)
 log "Removed $DUPES duplicates"
 
-# --- Step 3: Rebuild MEMORY.md index ---
+# --- Step 3: Rebuild MEMORY.md index (tier-aware, recursive) ---
+# Tier order: tiered structure first (active), legacy flat dirs second
+TIER_LIST=(
+  "personal:Personal — preferences, credentials, host"
+  "semantic:Semantic — patterns, mistakes, tech-insights"
+  "working:Working — live state, handoff buffers"
+  "episodic:Episodic — project timeline"
+  "entities:Entities (legacy) — agents, deals, registries"
+  "concepts:Concepts (legacy) — patterns, tech, mistakes"
+  "feedback:Feedback (legacy)"
+  "projects:Projects (legacy)"
+  "reference:Reference (legacy)"
+)
+
+extract_desc() {
+  local f="$1"
+  local d
+  d=$(awk '/^description:/{sub(/^description: */,""); gsub(/^"|"$/,""); print; exit}' "$f" 2>/dev/null)
+  if [[ -z "$d" ]]; then
+    d=$(grep -m1 -E '^[A-Za-z]' "$f" 2>/dev/null | sed 's/^# *//' | head -c 140)
+  fi
+  echo "${d:0:140}"
+}
+
 {
   echo "# Memory Index"
   echo ""
+  TOTAL_COUNT=$(find "$MEMORY_DIR" -maxdepth 2 -name "*.md" \
+    ! -name "MEMORY.md" ! -name "_tier.md" ! -name "_index.md" 2>/dev/null | wc -l | xargs)
+  echo "*Rebuilt $TODAY. $TOTAL_COUNT entries indexed.*"
+  echo ""
 
-  # Group by type — known types first, then uncategorized
-  for memory_type in user feedback project tech reference; do
-    type_files=()
-    for f in "$MEMORY_DIR"/*.md; do
-      [[ "$(basename "$f")" == "MEMORY.md" ]] && continue
-      [[ ! -f "$f" ]] && continue
-      file_type=$(grep "^type:" "$f" 2>/dev/null | head -1 | sed 's/^type: *//')
-      if [[ "$file_type" == "$memory_type" ]]; then
-        type_files+=("$f")
-      fi
-    done
+  # Root-level files (auto/*.md, not in any tier)
+  root_files=()
+  while IFS= read -r f; do
+    [[ -n "$f" ]] && root_files+=("$f")
+  done < <(find "$MEMORY_DIR" -maxdepth 1 -name "*.md" \
+    ! -name "MEMORY.md" 2>/dev/null | sort)
 
-    if [[ ${#type_files[@]} -gt 0 ]]; then
-      # Capitalize the type name for the section header
-      if [[ "$memory_type" == "feedback" ]]; then
-        section_name="Feedback"
-      elif [[ "$memory_type" == "tech" ]]; then
-        section_name="Tech Insights"
-      else
-        section_name="$(echo "${memory_type:0:1}" | tr '[:lower:]' '[:upper:]')${memory_type:1}s"
-      fi
-      echo "## $section_name"
-      echo ""
-      for f in "${type_files[@]}"; do
-        fname=$(basename "$f")
-        desc=$(grep "^description:" "$f" 2>/dev/null | head -1 | sed 's/^description: *//' | sed 's/^"//' | sed 's/"$//')
-        echo "- [$fname]($fname) — $desc"
-      done
-      echo ""
-    fi
-  done
-
-  # Uncategorized — files with no type or unknown type
-  uncat_files=()
-  for f in "$MEMORY_DIR"/*.md; do
-    [[ "$(basename "$f")" == "MEMORY.md" ]] && continue
-    [[ ! -f "$f" ]] && continue
-    file_type=$(grep "^type:" "$f" 2>/dev/null | head -1 | sed 's/^type: *//')
-    if [[ -z "$file_type" || ! "$file_type" =~ ^(user|feedback|project|tech|reference)$ ]]; then
-      uncat_files+=("$f")
-    fi
-  done
-
-  if [[ ${#uncat_files[@]} -gt 0 ]]; then
-    echo "## Uncategorized"
+  if [[ ${#root_files[@]} -gt 0 ]]; then
+    echo "## Root"
     echo ""
-    for f in "${uncat_files[@]}"; do
+    for f in "${root_files[@]}"; do
       fname=$(basename "$f")
-      desc=$(grep "^description:" "$f" 2>/dev/null | head -1 | sed 's/^description: *//' | sed 's/^"//' | sed 's/"$//')
-      echo "- [$fname]($fname) — ${desc:-no description}"
+      desc=$(extract_desc "$f")
+      echo "- [$fname]($fname) — $desc"
     done
     echo ""
   fi
+
+  # Tier dirs
+  for tier_entry in "${TIER_LIST[@]}"; do
+    tier="${tier_entry%%:*}"
+    label="${tier_entry#*:}"
+    tier_dir="$MEMORY_DIR/$tier"
+    [[ ! -d "$tier_dir" ]] && continue
+
+    tier_files=()
+    while IFS= read -r f; do
+      [[ -n "$f" ]] && tier_files+=("$f")
+    done < <(find "$tier_dir" -maxdepth 1 -name "*.md" \
+      ! -name "_tier.md" ! -name "_index.md" 2>/dev/null | sort)
+
+    [[ ${#tier_files[@]} -eq 0 ]] && continue
+
+    echo "## $label"
+    echo ""
+    for f in "${tier_files[@]}"; do
+      fname=$(basename "$f")
+      rel="$tier/$fname"
+      desc=$(extract_desc "$f")
+      echo "- [$rel]($rel) — $desc"
+    done
+    echo ""
+  done
 
   echo "# currentDate"
   echo "Today's date is $TODAY."
 } > "$MEMORY_INDEX"
 
-TOTAL=$(find "$MEMORY_DIR" -maxdepth 1 -name "*.md" ! -name "MEMORY.md" | wc -l | xargs)
+TOTAL=$(find "$MEMORY_DIR" -maxdepth 2 -name "*.md" \
+  ! -name "MEMORY.md" ! -name "_tier.md" ! -name "_index.md" 2>/dev/null | wc -l | xargs)
 log "Rebuilt MEMORY.md index with $TOTAL entries"
 
 # --- Step 4: Reindex search (FTS5) if mem-search exists ---

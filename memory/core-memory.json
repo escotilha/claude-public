@@ -24,7 +24,7 @@
     "documentation": "only when explicitly requested",
     "commits": "type(scope): description (conventional commits)"
   },
-  "lastConsolidation": "2026-04-21",
+  "lastConsolidation": "2026-04-27",
   "memoryConfig": {
     "relevanceThreshold": 5,
     "decayThresholdDays": 90,
