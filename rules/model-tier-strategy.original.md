@@ -1,6 +1,6 @@
 # Model Tier Strategy for Subagents
 
-Route subagent task to cheapest model that handle work. Save token, no lose quality.
+Route subagent tasks to the cheapest model that can handle the work. This saves tokens without sacrificing quality.
 
 ## Tier Definitions
 
@@ -13,25 +13,25 @@ Route subagent task to cheapest model that handle work. Save token, no lose qual
 
 ### Opus 4.7 Behavior (per Boris Cherny, 2026-04-16)
 
-Opus 4.7 change three thing affect this setup:
+Opus 4.7 changes three things that affect this setup:
 
-- **Default effort is `xhigh`** (auto-upgrade from 4.6 `high`). Tier: `low` / `high` / `xhigh` (recommend) / `max` (eval only — overthink). No use `max` in prod routine.
-- **Adaptive thinking replace `budget_tokens`** — no fixed thinking budget. Steer with prompt (see `opus-4-7-prompting.md`).
-- **More judicious subagent delegation** — 4.7 no auto-fan-out like 4.6. Skill rely on parallel subagent (`/cto` swarm, `/parallel-dev`, `/qa-cycle`) must include explicit fan-out instruction:
+- **Default effort is `xhigh`** (auto-upgraded from 4.6's `high`). Tiers: `low` / `high` / `xhigh` (recommended) / `max` (evals only — overthinks). Don't use `max` in production routines.
+- **Adaptive thinking replaces `budget_tokens`** — no more fixed thinking budget. Steer with prompts instead (see `opus-4-7-prompting.md`).
+- **More judicious subagent delegation** — 4.7 won't auto-fan-out the way 4.6 did. Skills that rely on parallel subagents (`/cto` swarm, `/parallel-dev`, `/qa-cycle`) must include an explicit fan-out instruction:
   > "Do not spawn a subagent for work you can complete directly in a single response. Spawn multiple subagents in the same turn when fanning out across items or reading multiple files."
 
-Interactive (multi-turn) mode reason more per turn than autonomous (single-turn) — front-load full intent + constraints + acceptance criteria in first message, then batch follow-up.
+Interactive (multi-turn) mode reasons more per turn than autonomous (single-turn) mode — front-load full intent + constraints + acceptance criteria in the first message, then batch follow-ups.
 
 ### Vault / CIMD Credentials for Routines (per Anthropic MCP blog, 2026-04-22)
 
-Scheduled Routine (Opus 4.7, autonomous) connect external service via MCP should register OAuth token in **Managed Agent Vaults**. Platform auto-inject + refresh credential into MCP connection — no manual token pass via env var or spawn prompt.
+Scheduled Routines (Opus 4.7, autonomous) that connect to external services via MCP should register OAuth tokens in **Managed Agent Vaults**. The platform auto-injects and refreshes credentials into MCP connections — no manual token passing via env vars or spawn prompts.
 
-- Never pass long-lived token through `CronCreate` payload or routine spawn prompt.
-- Register credential once in Vault; reference by name in MCP connection config.
-- Refresh handle by Anthropic CIMD (Credentials + Identity Management) layer — routine no need re-auth.
-- Apply to: contably-eod, chief-geo daily, any `/schedule`-created agent hit Supabase/GitHub/Pluggy/Slack via MCP.
+- Never pass long-lived tokens through `CronCreate` payloads or routine spawn prompts.
+- Register the credential once in the Vault; reference it by name in the MCP connection config.
+- Refresh is handled by Anthropic's CIMD (Credentials + Identity Management) layer — routines don't need to re-authenticate.
+- Applies to: contably-eod, chief-geo daily, any `/schedule`-created agent that hits Supabase/GitHub/Pluggy/Slack via MCP.
 
-Fallback (pre-Vault or non-Claude-Code host like Claudia): encrypt token at rest (1Password CLI, macOS Keychain), load via startup hook; never hardcode in routine config file.
+Fallback (pre-Vault or non-Claude-Code hosts like Claudia): encrypt tokens at rest (1Password CLI, macOS Keychain) and load via a startup hook; never hardcode in routine config files.
 
 ## Decision Matrix
 
@@ -77,7 +77,7 @@ Fallback (pre-Vault or non-Claude-Code host like Claudia): encrypt token at rest
 
 ## How to Apply
 
-When spawn subagent via Agent tool, always include `model` parameter:
+When spawning a subagent via the Agent tool, always include the `model` parameter:
 
 ```
 Agent(subagent_type="general-purpose", model="haiku", prompt="...")
@@ -85,12 +85,12 @@ Agent(subagent_type="Explore", model="haiku", prompt="...")
 Agent(subagent_type="general-purpose", model="sonnet", prompt="...")
 ```
 
-When spawn teammate via Agent Teams, include model guidance in spawn prompt:
-"Use model: sonnet for this teammate" (Agent Teams inherit from parent by default).
+When spawning teammates via Agent Teams, include model guidance in the spawn prompt:
+"Use model: sonnet for this teammate" (Agent Teams inherits from parent by default).
 
 ## Model Delegation Pattern (OpenClaw-Inspired)
 
-Beyond route subagent to cheaper Claude tier, more aggressive cost optimization is **model delegation**: use expensive model (Opus) strict for orchestration + reasoning, delegate text generation to cheap or free model.
+Beyond routing subagents to cheaper Claude tiers, a more aggressive cost optimization is **model delegation**: use an expensive model (Opus) strictly for orchestration and reasoning, while delegating text generation to a cheap or free model.
 
 ### How It Works
 
@@ -100,11 +100,11 @@ Orchestrator (Opus/Sonnet) → decides WHAT to do
 Generator (Haiku / local model) → does the mechanical work
 ```
 
-Orchestrator handle planning, tool selection, judgment call. Generator handle scaffolding, formatting, template expansion, deterministic output. Mirror OpenClaw pattern where Claude Opus orchestrate + local model handle generation, cut API cost ~10x.
+The orchestrator handles planning, tool selection, and judgment calls. The generator handles scaffolding, formatting, template expansion, and deterministic output. This mirrors the OpenClaw pattern where Claude Opus orchestrates while a local model handles generation, cutting API costs ~10x.
 
 ### Where This Applies Today
 
-In current Claude API ecosystem, already partial implement via tier strategy (Opus orchestrate, Haiku execute). Key insight: be **more aggressive** push work down:
+Within the current Claude API ecosystem, this is already partially implemented via the tier strategy (Opus orchestrates, Haiku executes). The key insight is to be **more aggressive** about pushing work down:
 
 | Current Pattern                                   | Delegation Pattern                                           |
 | ------------------------------------------------- | ------------------------------------------------------------ |
@@ -114,7 +114,7 @@ In current Claude API ecosystem, already partial implement via tier strategy (Op
 
 ## Advisor Strategy (Platform-Native)
 
-Announce April 9, 2026 by Anthropic. Platform now support first-party advisor pattern where two model share single context window with distinct role.
+Announced April 9, 2026 by Anthropic. The platform now supports a first-party advisor pattern where two models share a single context window with distinct roles.
 
 ### How It Works
 
@@ -126,17 +126,17 @@ Advisor (Opus) ← reviews shared context, sends advice back
 Shared context: conversation + tools + history
 ```
 
-Sonnet run agentic loop every turn (executor), handle file read, code write, tool orchestration, report gen. When judgment call needed — architecture trade-off, security severity assess, technology recommendation — Sonnet invoke Opus via tool call. Opus review full shared context + return advice. Executor act on advice.
+Sonnet runs the agentic loop every turn (executor), handling file reads, code writes, tool orchestration, and report generation. When a judgment call is needed — architecture trade-off, security severity assessment, technology recommendation — Sonnet invokes Opus via a tool call. Opus reviews the full shared context and returns its advice. The executor then acts on that advice.
 
 ### When to Use
 
-- **Long-running agentic session** where most turn mechanical (read, edit, run test) but few turn need deep reasoning
-- **Skill currently run all-Opus** that only need Opus judgment at key decision point — rest is Sonnet-capable work
-- **Cost-sensitive workflow** that currently avoid Opus entire but benefit from occasional Opus judgment
+- **Long-running agentic sessions** where most turns are mechanical (read, edit, run tests) but a few turns require deep reasoning
+- **Skills currently running all-Opus** that only need Opus judgment at key decision points — the rest is Sonnet-capable work
+- **Cost-sensitive workflows** that currently avoid Opus entirely but would benefit from occasional Opus judgment
 
 ### Cost Benefit
 
-Near-Opus intelligence at Sonnet cost. In typical 50-turn agentic session, Opus might activate at 5-8 decision point. Other 42-45 turn run at Sonnet pricing. Estimate ~70% cost reduction vs all-Opus for session with sparse judgment need.
+Near-Opus intelligence at Sonnet cost. In a typical 50-turn agentic session, Opus might activate at 5-8 decision points. The other 42-45 turns run at Sonnet pricing. Estimated ~70% cost reduction vs all-Opus for sessions with sparse judgment needs.
 
 ### Which Skills Benefit
 
@@ -146,23 +146,23 @@ Near-Opus intelligence at Sonnet cost. In typical 50-turn agentic session, Opus 
 | **deep-plan**    | Phase 2 (planning): Sonnet synthesizes research, Opus advises at decision gates         |
 | **parallel-dev** | CI fix escalation: Sonnet fixes, Opus advisor after 2 failed attempts                   |
 
-Skill require Opus on every turn (swarm orchestration, full architecture review) stay all-Opus.
+Skills that require Opus on every turn (swarm orchestration, full architecture reviews) should remain all-Opus.
 
 ### Relationship to Model Delegation
 
-Advisor strategy is **platform-native, first-party version** of what Model Delegation Pattern (below) describe as DIY approach. Key difference:
+The advisor strategy is the **platform-native, first-party version** of what the Model Delegation Pattern (below) describes as a DIY approach. Key differences:
 
-- **Shared context window** — no info loss between executor + advisor
-- **No custom routing logic** — platform handle model switching
+- **Shared context window** — no information loss between executor and advisor
+- **No custom routing logic** — the platform handles the model switching
 - **First-party API support** — stable, maintained by Anthropic
 
-Prefer advisor strategy when available. Fall back to DIY model delegation only for non-Claude-Code env (Claudia, Paperclip) where platform API not accessible.
+Prefer the advisor strategy when available. Fall back to DIY model delegation only for non-Claude-Code environments (Claudia, Paperclip) where the platform API is not accessible.
 
 ### Local Model Tier (Tier 0) — Claudia Infrastructure
 
-Tier 0 is **production-deployed** via Claudia 3-tier inference chain. These model handle message routing, text generation, lightweight agentic task outside Claude Code.
+Tier 0 is **production-deployed** via Claudia's 3-tier inference chain. These models handle message routing, text generation, and lightweight agentic tasks outside of Claude Code.
 
-**Note:** Claude Code subagent only route to Anthropic model (Haiku/Sonnet/Opus). Tier 0 apply to Claudia + other system that call local/cloud endpoint direct.
+**Note:** Claude Code subagents can only route to Anthropic models (Haiku/Sonnet/Opus). Tier 0 applies to Claudia and other systems that can call local/cloud endpoints directly.
 
 #### Deployed Infrastructure
 
@@ -199,47 +199,47 @@ Tier 0R: OpenRouter — Qwen 3.6 Plus (cloud, free while preview lasts)
 | **Tier 2**  | Sonnet                                                 | Medium | Claude Code subagents           |
 | **Tier 3**  | Opus                                                   | High   | Claude Code orchestration       |
 
-\* Qwen 3.6 Plus Preview free on OpenRouter as of March 2026. Previous gen go to $0.1/$0.3 after preview end — expect similar.
+\* Qwen 3.6 Plus Preview is free on OpenRouter as of March 2026. Previous gen went to $0.1/$0.3 after preview ended — expect similar.
 
 #### Candidate: Qwen3.5-27B-Claude-Opus-Distilled
 
-`Jackrong/Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled` — SFT+LoRA fine-tune on Claude 4.6 Opus reasoning trace. Q4_K_M at ~16.5 GB, 29-35 tok/s on RTX 3090, 262K context. Native tool-call, thinking mode, self-correction. Validate in Claude Code agentic loop (9+ min autonomous, 353K+ HF download). MLX 4-bit variant available. **Not yet deployed** — Qwen3.5-35B-A3B already running on Mini faster (103 vs ~30 tok/s) but lack reasoning distillation. Worth A/B test for agentic quality vs speed tradeoff.
+`Jackrong/Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled` — SFT+LoRA fine-tune on Claude 4.6 Opus reasoning traces. Q4_K_M at ~16.5 GB, 29-35 tok/s on RTX 3090, 262K context. Native tool-calling, thinking mode, self-correction. Validated in Claude Code agentic loops (9+ min autonomous, 353K+ HF downloads). MLX 4-bit variant available. **Not yet deployed** — the Qwen3.5-35B-A3B already running on Mini is faster (103 vs ~30 tok/s) though lacks the reasoning distillation. Worth A/B testing for agentic quality vs speed tradeoff.
 
 ### Practical Takeaway
 
-Even no local model, apply delegation mindset now:
+Even without local models, apply the delegation mindset now:
 
-1. **Pre-compute context** in orchestrator, no let each subagent rediscover
-2. **Split reasoning from generation** — if subagent need analyze AND format, consider two pass
-3. **Push formatting to Haiku** — any subagent whose final step "format findings as markdown table" could delegate that step
+1. **Pre-compute context** in the orchestrator instead of letting each subagent rediscover it
+2. **Split reasoning from generation** — if a subagent needs to analyze AND format, consider two passes
+3. **Push formatting to Haiku** — any subagent whose final step is "format findings as markdown table" could delegate that step
 
 ## Prompt Cache TTL (Subagents vs Orchestrator)
 
-Subagent run on **5m prompt cache TTL** — Anthropic intentional design, not bug (confirm by Boris Cherny, Claude Code team, April 2026). Subagent rare resume, so 1h cache would net overcharge. Main orchestrator session getting **1h cache** rolled out selective.
+Subagents run on **5m prompt cache TTL** — this is Anthropic's intentional design, not a bug (confirmed by Boris Cherny, Claude Code team, April 2026). Subagents are rarely resumed, so 1h cache would be a net overcharge. The main orchestrator session is getting **1h cache** rolled out selectively.
 
 **Cost implications for subagent-heavy patterns:**
 
-- No assume 1h cache benefit when estimate subagent token cost
-- Swarm pattern (3-5 reviewer) pay full cache-write cost per subagent at 5m TTL
-- ScheduleWakeup "sleep under 270s to stay in cache" rule still correct for subagent
-- Orchestrator session may benefit longer interval once 1h confirm active
-- Env var to force 1h or 5m coming (not yet available as of April 2026)
+- Don't assume 1h cache benefits when estimating subagent token costs
+- Swarm patterns (3-5 reviewers) pay full cache-write cost per subagent at 5m TTL
+- The ScheduleWakeup "sleep under 270s to stay in cache" rule remains correct for subagents
+- Orchestrator sessions may benefit from longer intervals once 1h is confirmed active
+- Env vars to force 1h or 5m are coming (not yet available as of April 2026)
 
-**Note:** Disable telemetry disable experiment gate client-side, force everything back to 5m — including main session.
+**Note:** Disabling telemetry disables experiment gates client-side, forcing everything back to 5m — including the main session.
 
 ## Context Window Considerations
 
-As of v2.1.75, Opus 4.6 default to **1M context** for Max/Team/Enterprise. Change cost calculus:
+As of v2.1.75, Opus 4.6 defaults to **1M context** for Max/Team/Enterprise. This changes the cost calculus:
 
-- Orchestrator skill (cto, ship, parallel-dev) hold more codebase context, no aggressive compaction
-- Spawn prompt include richer pre-computed context (Section 3.5), no crowd window
-- Subagent inherit Opus also get 1M, reduce need for aggressive scope-limit in spawn prompt
+- Orchestrator skills (cto, ship, parallel-dev) can hold more codebase context without aggressive compaction
+- Spawn prompts can include richer pre-computed context (Section 3.5) without crowding the window
+- Subagents inheriting Opus also get 1M, reducing the need for aggressive scope-limiting in spawn prompts
 
 ## Rule of Thumb
 
 **If the subagent only reads files and reports results → haiku.**
 **If the subagent writes code or makes judgment calls → sonnet.**
 **If the subagent makes architectural or security decisions → opus.**
-**If the task runs as a Claude Code Routine (scheduled, autonomous, no human oversight) → opus-4.7.** Noah Zweben (Claude Code PM) explicit position Routines + Opus 4.7 as "the real unlock" (2026-04-16). Default all Routine to 4.7 — background agent need self-verification + strong judgment under ambiguity.
+**If the task runs as a Claude Code Routine (scheduled, autonomous, no human oversight) → opus-4.7.** Noah Zweben (Claude Code PM) explicitly positioned Routines + Opus 4.7 as "the real unlock" (2026-04-16). Default all Routines to 4.7 — background agents need self-verification and strong judgment under ambiguity.
 **If a skill runs all-Opus but only needs Opus reasoning at decision points → advisor pattern (Sonnet executor + Opus advisor).**
 **If the task runs via Claudia (not Claude Code) → Tier 0b (Qwen3.5-35B-A3B on Mac Mini) or Tier 0a (OpenRouter).**
