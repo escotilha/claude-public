@@ -3,6 +3,7 @@
 ## Feedback
 
 - [feedback_oxi_dogfood_session.md](feedback_oxi_dogfood_session.md) — Patterns from a 4-hour OXi install/release session — when to push back on autonomy, when to do work yourself, when to delegate to the engine
+- [personal/feedback_format_decisions_as_numbered_lists.md](personal/feedback_format_decisions_as_numbered_lists.md) — Format every decision list (options, halt points, follow-ups) as numbered, not bulleted, so Pierre can refer to items by number.
 
 ## References
 
