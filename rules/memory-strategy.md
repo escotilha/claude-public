@@ -2,7 +2,7 @@
 
 ## Tier Taxonomy (4 tiers, 2026-04-21)
 
-Memories live in one of four cognitive tiers. Pick the tier based on role, not content type.
+Memory live in four cognitive tier. Pick tier by role, not content type.
 
 | Tier | Path | What goes here | Decay |
 | --- | --- | --- | --- |
@@ -11,7 +11,7 @@ Memories live in one of four cognitive tiers. Pick the tier based on role, not c
 | **Semantic** | `auto/semantic/` | Distilled patterns, mistakes, tech-insights, architecture decisions | 90 days (mistakes 180d, research 60d) |
 | **Personal** | `auto/personal/` | User preferences, credentials, account state, explicit feedback | Never auto-decay |
 
-See each tier's `_tier.md` for full rules. Legacy flat directories (`concepts/`, `entities/`, `feedback/`, `projects/`, `reference/`) remain until naturally touched — new memories write into the tiered structure.
+See each tier `_tier.md` for full rule. Legacy flat dir (`concepts/`, `entities/`, `feedback/`, `projects/`, `reference/`) stay til touched — new memory write into tiered structure.
 
 ### Routing guidance
 
@@ -28,17 +28,17 @@ See each tier's `_tier.md` for full rules. Legacy flat directories (`concepts/`,
 
 ## Salience Formula
 
-Retention and promotion decisions use:
+Retention + promotion use:
 
 ```
 salience = recency × pain × importance  (each 0–1)
 ```
 
-- **recency:** `max(0, 1 - days_since_last_use / tier_decay_threshold)`. `personal/` skips this (always 1.0).
-- **pain:** 0.1 trivial → 1.0 prod-outage/data-loss. Dominates retention for mistakes and incidents.
-- **importance:** 0.2 project-only → 1.0 user-declared rule. Dominates for personal/ entries.
+- **recency:** `max(0, 1 - days_since_last_use / tier_decay_threshold)`. `personal/` skip (always 1.0).
+- **pain:** 0.1 trivial → 1.0 prod-outage/data-loss. Dominate retention for mistake + incident.
+- **importance:** 0.2 project-only → 1.0 user-declared rule. Dominate for personal/ entry.
 
-**Thresholds:** ≥0.7 promote, 0.4–0.7 retain, 0.15–0.4 review, <0.15 archive. See `~/.claude-setup/skills/memory-consolidation/SKILL.md` Phase 2 for the pseudocode and Phase 4 for where it runs.
+**Thresholds:** ≥0.7 promote, 0.4–0.7 retain, 0.15–0.4 review, <0.15 archive. See `~/.claude-setup/skills/memory-consolidation/SKILL.md` Phase 2 for pseudocode, Phase 4 for run site.
 
 ## Entity Naming: `{type}:{identifier}`
 
@@ -53,11 +53,11 @@ salience = recency × pain × importance  (each 0–1)
 | `common-bug:`      | Frequently found issues       |
 | `architecture:`    | Architecture decisions        |
 
-Use lowercase with hyphens. Include project name when project-specific.
+Lowercase + hyphens. Include project name when project-specific.
 
 ## Page Format: Compiled Truth + Timeline
 
-Every memory entity follows the **compiled truth + timeline** pattern (adapted from GBrain):
+Every memory entity follow **compiled truth + timeline** pattern (from GBrain):
 
 ```markdown
 ---
@@ -80,14 +80,14 @@ Keep it concise: 3-10 lines covering the actionable state.}
 
 **Key rules:**
 
-- Compiled truth gets **rewritten** (not appended) when the current understanding changes
-- Timeline is **append-only** and reverse-chronological — the evidence trail never gets edited
-- Compiled truth answers "what do we currently know?" — timeline answers "how did we get here?"
-- When compiled truth and timeline contradict, flag the contradiction explicitly
+- Compiled truth get **rewritten** (not appended) when current understanding change
+- Timeline **append-only** + reverse-chronological — evidence trail never edited
+- Compiled truth answer "what we currently know?" — timeline answer "how we got here?"
+- When compiled truth + timeline contradict, flag contradiction explicit
 
 ## Required Observations (Timeline Entries)
 
-Every entity's timeline must include entries with:
+Every entity timeline must have entry with:
 
 - `"Discovered: {date}"`
 - `"Source: {type} — {detail}"` (see Source Types below)
@@ -96,7 +96,7 @@ Every entity's timeline must include entries with:
 
 ### Source Types
 
-Use a typed `Source:` format to enable source-based filtering and pruning during consolidation:
+Typed `Source:` format enable source-based filter + prune during consolidation:
 
 | Type             | Format                                        | Example                                                    |
 | ---------------- | --------------------------------------------- | ---------------------------------------------------------- |
@@ -109,61 +109,61 @@ Use a typed `Source:` format to enable source-based filtering and pruning during
 | `session`        | `Source: session — {skill or context}`        | `Source: session — /ship feature auth`                     |
 | `consolidation`  | `Source: consolidation — merged from {names}` | `Source: consolidation — merged from pattern:a, pattern:b` |
 
-During consolidation, source types enable targeted pruning:
+During consolidation, source type enable targeted prune:
 
-- `research` sources decay faster (60 days) — market data goes stale
-- `failure` sources are retained longer (180 days) — mistakes are expensive to relearn
-- `user-feedback` sources never auto-decay — explicit user preferences are stable
+- `research` source decay faster (60 days) — market data go stale
+- `failure` source kept longer (180 days) — mistake expensive to relearn
+- `user-feedback` source never auto-decay — explicit user preference stable
 
 ## Dedup Before Write
 
-Before creating any new memory file, check for duplicates using `mem-search`:
+Before make new memory file, check duplicate with `mem-search`:
 
 ```bash
 ~/.claude-setup/tools/mem-search "<key terms from the memory>"
 ```
 
-- If a high-relevance match exists → UPDATE the existing file instead of creating a new one
-- If partial match (related but different) → consider merging into the existing file
-- If no match → create new file as normal
-- After writing → run `~/.claude-setup/tools/mem-search --reindex` to update the search index
+- High-relevance match exist → UPDATE existing file, no make new
+- Partial match (related but different) → consider merge into existing
+- No match → make new file
+- After write → run `~/.claude-setup/tools/mem-search --reindex` to update search index
 
 ## Cross-Link on Write
 
-After writing a new memory file, update 3-5 **existing** memory files that the new information touches. This turns isolated memories into a connected knowledge graph at ingest time (Karpathy wiki pattern).
+After write new memory file, update 3-5 **existing** memory file the new info touch. Turn isolated memory into connected knowledge graph at ingest time (Karpathy wiki pattern).
 
 ### Process
 
-1. **Search for related memories** — run `mem-search` with 2-3 keyword queries from the new memory's content
-2. **Select 3-5 most relevant** existing files, prioritizing:
-   - Memories the new one **contradicts** (add contradiction note to both)
-   - Memories the new one **extends** (add "Related:" back-reference)
-   - Memories the new one **validates** (add confirmation note)
-   - Memories in a different type that share the same domain
-3. **Update each related file** — append a `Related:` line or update an existing one:
+1. **Search related memory** — run `mem-search` with 2-3 keyword query from new memory content
+2. **Pick 3-5 most relevant** existing file, prioritize:
+   - Memory the new one **contradict** (add contradiction note to both)
+   - Memory the new one **extends** (add "Related:" back-ref)
+   - Memory the new one **validates** (add confirmation note)
+   - Memory in different type sharing same domain
+3. **Update each related file** — append `Related:` line or update existing:
    ```
    Related: [new-memory-title](new-memory-file.md) — one-line why ({date})
    ```
-4. **Update MEMORY.md** — if the related file's one-liner in the index should mention the new connection, update it
-5. **Reindex** — run `~/.claude-setup/tools/mem-search --reindex` after all writes
+4. **Update MEMORY.md** — if related file one-liner in index should mention new connection, update it
+5. **Reindex** — run `~/.claude-setup/tools/mem-search --reindex` after all write
 
 ### Budget
 
-- Max 5 related files updated per new memory
-- Max 2 `mem-search` calls per new memory
-- Skip cross-linking if the new memory is trivial (score < 5) or a minor update to an existing file
+- Max 5 related file updated per new memory
+- Max 2 `mem-search` call per new memory
+- Skip cross-link if new memory trivial (score < 5) or minor update to existing
 
 ### When to Skip Cross-Linking
 
-- Simple observation additions to existing memories (e.g., "Applied in: project - date - HELPFUL")
-- Updating a single field in an existing memory
-- When the `mem-search` returns no results with score >= 3.0
+- Simple observation add to existing memory (e.g., "Applied in: project - date - HELPFUL")
+- Update single field in existing memory
+- When `mem-search` return no result with score >= 3.0
 
 ## Save vs Skip
 
-**Save when:** high generality, learned from failure, user explicitly shared, expensive to regenerate, high severity.
-**Skip when:** duplicate exists (>85% similar), project-specific detail, trivial/obvious.
+**Save when:** high generality, learned from failure, user explicit shared, expensive to regenerate, high severity.
+**Skip when:** duplicate exist (>85% similar), project-specific detail, trivial/obvious.
 
 ## Hybrid Retrieval (v1, 2026-04-21)
 
-`mem-search` default mode fuses FTS5 BM25 with local vector recall via Reciprocal Rank Fusion (k=60, tunable via `MEM_RRF_K`). Embeddings: `sentence-transformers/all-MiniLM-L6-v2` (384-dim, local Python, no network). Each page chunks as one `truth` + one chunk per timeline bullet. Per-file mtime tracked in `vec_meta`; only changed files re-embed on nightly `mem-consolidate`. Escape hatches: `--fts` (FTS5 only), `--vec` (vector only), `MEM_HYBRID=0` (global FTS5 fallback), `mem-embed drop && mem-search --reindex --vectors-full` (after switching `MEM_MODEL`). Observability: `mem-search --vec-status`. A link-graph digest lives at `memory/auto/reports/GRAPH_REPORT.md` — read before `mem-search` for a bird's-eye view.
+`mem-search` default mode fuse FTS5 BM25 with local vector recall via Reciprocal Rank Fusion (k=60, tunable via `MEM_RRF_K`). Embeddings: `sentence-transformers/all-MiniLM-L6-v2` (384-dim, local Python, no network). Each page chunk as one `truth` + one chunk per timeline bullet. Per-file mtime tracked in `vec_meta`; only changed file re-embed on nightly `mem-consolidate`. Escape hatch: `--fts` (FTS5 only), `--vec` (vector only), `MEM_HYBRID=0` (global FTS5 fallback), `mem-embed drop && mem-search --reindex --vectors-full` (after switch `MEM_MODEL`). Observability: `mem-search --vec-status`. Link-graph digest live at `memory/auto/reports/GRAPH_REPORT.md` — read before `mem-search` for bird's-eye view.
