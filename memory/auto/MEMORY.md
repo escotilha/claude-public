@@ -39,6 +39,7 @@
 - [semantic/tech-insight_skill-tool-args-not-forwarded-from-orchestrator.md](semantic/tech-insight_skill-tool-args-not-forwarded-from-orchestrator.md) — Invoking a skill via the Skill tool from inside an orchestrator context does NOT forward args to the subprocess — the skill body runs but th
 - [semantic/tech-insight-oxi-bare-mode-skips-hooks.md](semantic/tech-insight-oxi-bare-mode-skips-hooks.md) — Oxi workers run `claude -p --bare` by default — skips plugin hooks, auto-memory, and keychain auth for CI reproducibility. Global PreToolUse
 - [semantic/tech-insight-prompt-cache-invalidation.md](semantic/tech-insight-prompt-cache-invalidation.md) — Mid-session tool-list or model changes invalidate the Anthropic prompt cache prefix and drop cache hit rate from ~90% to near 0 for the rest
+- [semantic/tech-insight_oke_api_key_vs_session_auth.md](semantic/tech-insight_oke_api_key_vs_session_auth.md) — Contably OKE rejects API-key kubectl tokens but accepts session-token kubectl for same OCID — sessions are the only working path until cluster RBAC is fixed
 - [semantic/tech-insight:mcp-agent-production-patterns.md](semantic/tech-insight:mcp-agent-production-patterns.md) — Anthropic guide on MCP vs direct API vs CLI for production agents — server design, context-efficient clients, skills pairing, CIMD/Vault aut
 
 ## Working — live state, handoff buffers
