@@ -1,6 +1,6 @@
 # Agent Teams Migration Strategy
 
-Strategy for fold Agent Teams into Claude Code skill system. Focus: cost-effective, no over-engineer, incremental rollout.
+A practical strategy for integrating Agent Teams into the Claude Code skills system. Focuses on cost-effectiveness, minimal over-engineering, and incremental rollout.
 
 **Created:** 2026-02-05
 **Status:** Draft
@@ -21,7 +21,7 @@ Strategy for fold Agent Teams into Claude Code skill system. Focus: cost-effecti
 
 ### Scoring Criteria
 
-Score skill on three dimension (1-5 scale):
+Each skill is scored on three dimensions (1-5 scale):
 
 | Criterion              | Description                                                     | Weight |
 | ---------------------- | --------------------------------------------------------------- | ------ |
@@ -46,37 +46,37 @@ Score skill on three dimension (1-5 scale):
 
 #### MIGRATE to Agent Teams: `parallel-dev`
 
-**Why:** Strongest candidate. Feature run in isolated git worktree — perfect file independence, zero conflict. Teammate on `feature/auth` + `feature/notifications` never touch same file. Current Task approach mean orchestrator get no real-time update; Agent Teams let teammate message lead on blocker/finish, message each other for cross-feature coordination (e.g., "I expose user API at `/api/users` — use this endpoint"). Worktree isolation kill biggest Agent Teams risk (file conflict).
+**Why:** This is the strongest candidate. Features run in isolated git worktrees -- perfect file independence, zero conflict risk. Teammates working on `feature/auth` and `feature/notifications` never touch the same files. The current Task-based approach means the orchestrator gets no real-time updates; Agent Teams gives teammates the ability to message the lead when they hit blockers or finish, and to message each other when cross-feature coordination is needed (e.g., "I'm exposing the user API at `/api/users` -- use this endpoint"). The worktree isolation eliminates the biggest Agent Teams risk (file conflicts) entirely.
 
-**Token justification:** Each feature agent need own context anyway (read full codebase for worktree). Coordination overhead offset by real-time message replace polling loop in Phase 4.
+**Token justification:** Each feature agent needs its own context anyway (reading the full codebase for its worktree). The coordination overhead is offset by real-time messaging replacing the polling loop in Phase 4 of the current implementation.
 
 #### HYBRID (Teams for complex, subagents for simple): `cto`
 
-**Why:** CTO skill have two mode — sequential + swarm. Sequential (focused question like "Is our auth secure?") stay single session. Swarm (full codebase review) already describe inter-analyst comm (security tell performance about N+1 queries, stack tell security about vulnerable deps). Cross-concern detection genuinely benefit from Agent Teams direct messaging. But simple "review auth module" no need five context window.
+**Why:** The CTO skill has two modes -- sequential and swarm. Sequential mode (focused questions like "Is our auth secure?") should remain a single session. Swarm mode (full codebase review) already describes inter-analyst communication (security telling performance about N+1 queries, stack telling security about vulnerable deps). This cross-concern detection genuinely benefits from Agent Teams' direct messaging. However, a simple "review the auth module" does not need five separate context windows.
 
-**Token justification:** Swarm already burn 5x context. Question: is Agent Teams message overhead worth real-time cross-concern detect? Full review: yes. Focused review: no.
+**Token justification:** Swarm mode already burns 5x context. The question is whether Agent Teams' messaging overhead is worth the real-time cross-concern detection. For full reviews: yes. For focused reviews: no.
 
 #### STAY with subagents: `fulltest-skill`
 
-**Why:** Skill document "swarm mode" with TeammateTool, but actual test workflow is report-back, not collaborative. Tester-3 find CSS 404 + broadcast — other testers just skip that check. Notification, not discussion. Subagent achieve same by write result to shared file orchestrator read. Fixer (CSS, JS) similarly just report completion. No real inter-agent reasoning happen.
+**Why:** Despite the skill already documenting a "swarm mode" with TeammateTool, the actual testing workflow is report-back, not collaborative. Tester-3 finds a CSS 404 and broadcasts it -- but other testers just skip that check. This is a notification, not a discussion. Subagents can achieve this by writing results to a shared file that the orchestrator reads. The fixers (CSS fixer, JS fixer) similarly just report completion. No real inter-agent reasoning happens.
 
-**Token justification:** 15 page testers = 15 full context window with Agent Teams. Each page test lightweight (navigate, check console, check network, screenshot). Per-tester token cost far exceed benefit vs batched Task call (3-5 pages per subagent).
+**Token justification:** With 15 page testers, Agent Teams would spawn 15 full context windows. Each page test is lightweight (navigate, check console, check network, screenshot). The per-tester token cost far exceeds the benefit vs. batched Task calls (3-5 pages per subagent).
 
 #### STAY with subagents: `cpo-ai-skill`
 
-**Why:** CPO skill orchestrate sequential phase (Discovery, Planning, Execution). Within execution, spawn specialist subagent (frontend-design-agent, backend-api-agent, database-setup-agent) on different stage. Agents no need discuss — implement assigned stage + report back. CPO lead synthesize. Pure subagent model: focused task, only result matter.
+**Why:** The CPO skill orchestrates sequential phases (Discovery, Planning, Execution). Within execution, it spawns specialist subagents (frontend-design-agent, backend-api-agent, database-setup-agent) that work on different stages. These agents do not need to discuss with each other -- they implement their assigned stage and report back. The CPO lead synthesizes. This is exactly the subagent model: focused tasks, only the result matters.
 
-**Token justification:** CPO session already very long + token-heavy (full product lifecycle). Add Agent Teams overhead to expensive workflow wasteful. Subagent model (result summarized back) more token-efficient.
+**Token justification:** CPO sessions are already extremely long and token-heavy (full product lifecycle). Adding Agent Teams overhead to an already expensive workflow is wasteful. The subagent model (results summarized back) is more token-efficient here.
 
 #### STAY single session: `review-changes`, `cpr`, `test-and-fix`, `website-design`
 
-**Why:** Single-purpose, fast, sequential. No parallelism need. Multi-agent coordination = pure overhead.
+**Why:** These skills are single-purpose, fast, and sequential. No parallelism needed. Adding any multi-agent coordination would be pure overhead.
 
 ---
 
 ## 2. Decision Framework
 
-Use flowchart before add Agent Teams to any skill, current or future:
+Use this flowchart before adding Agent Teams to any skill, current or future:
 
 ```
 START: Does the skill spawn multiple workers?
@@ -127,7 +127,7 @@ USE AGENT TEAMS.
 
 ### The "3-5 Rule"
 
-Agent Teams cost-effective with **3-5 teammates**. Below 3, coordination overhead exceed benefit. Above 5, token cost scale linear but coordination quality degrade (broadcast flood everyone, lead struggle to synthesize).
+Agent Teams are cost-effective with **3-5 teammates**. Below 3, the coordination overhead exceeds the benefit. Above 5, token costs scale linearly but coordination quality degrades (broadcast messages flood everyone, the lead struggles to synthesize).
 
 ---
 
@@ -157,10 +157,10 @@ Report: severity, file:line, issue, fix. Message lead when done.
 
 **Rules for spawn prompts:**
 
-1. Name specific dir/file to review — no say "full codebase"
-2. List 2-3 priority check, not exhaustive checklist
-3. Tell teammate what format to report in
-4. Tell when to message (on completion, on critical finding) vs stay silent
+1. Name the specific directories/files to review -- do not say "full codebase"
+2. List 2-3 priority checks, not exhaustive checklists
+3. Tell the teammate what format to report in
+4. Tell them when to message (on completion, on critical findings) vs. when to stay silent
 
 ### 3.2 Messaging Discipline
 
@@ -172,18 +172,18 @@ Report: severity, file:line, issue, fix. Message lead when done.
 
 **Never broadcast for:**
 
-- Progress update ("I'm 50% done") — lead get idle notification
-- Individual finding ("I found bug in file X") — message lead only
-- Acknowledgment ("Got it, thanks") — pure token waste
+- Progress updates ("I'm 50% done") -- the lead gets idle notifications
+- Individual findings ("I found a bug in file X") -- message the lead only
+- Acknowledgments ("Got it, thanks") -- pure token waste
 
 **Only broadcast for:**
 
-- Blocking discovery that change everyone approach ("DB schema completely different from assumed")
-- Shared resource conflict ("I modify config file, everyone else wait")
+- Blocking discoveries that change everyone's approach ("The database schema is completely different from what we assumed")
+- Shared resource conflicts ("I'm modifying the config file, everyone else wait")
 
 ### 3.3 Early Shutdown
 
-Teammate no self-terminate. Lead must ask shutdown. Build pattern into orchestration:
+Teammates do not self-terminate. The lead must ask them to shut down. Build these patterns into your orchestration:
 
 ```
 When spawning the team, include in the lead's instructions:
@@ -191,7 +191,7 @@ When spawning the team, include in the lead's instructions:
 Do not wait for all teammates before shutting down finished ones."
 ```
 
-**Why this matter:** Idle teammate still consume token in context window for every subsequent message receive, including broadcast. Shut down finished teammate before others complete save big tokens.
+**Why this matters:** An idle teammate still consumes tokens in its context window for every subsequent message it receives, including broadcasts. Shutting down finished teammates before others complete saves significant tokens.
 
 ### 3.4 Task Granularity
 
@@ -201,7 +201,7 @@ Do not wait for all teammates before shutting down finished ones."
 Task 1: "Review entire backend for issues"
 ```
 
-**Good:** 3-5 task per teammate (checkpoint, reassignable)
+**Good:** 3-5 tasks per teammate (checkpoints, reassignable)
 
 ```
 Task 1: "Review auth module for bypass risks"
@@ -210,15 +210,15 @@ Task 3: "Review middleware for missing validation"
 Task 4: "Check dependency versions for CVEs"
 ```
 
-Let lead:
+This lets the lead:
 
-- Track progress without ask
-- Reassign unfinished task if teammate stuck
-- Shut down teammate who finish batch early
+- Track progress without asking
+- Reassign unfinished tasks if a teammate gets stuck
+- Shut down teammates who finish their batch early
 
 ### 3.5 Avoid Re-Reading
 
-When spawn teammate need codebase context, pre-compute + include key info in spawn prompt instead of make each teammate discover independently:
+When spawning teammates that need codebase context, pre-compute and include key information in the spawn prompt instead of making each teammate discover it independently:
 
 ```
 Spawn teammate "perf-reviewer":
@@ -228,11 +228,11 @@ Known bottleneck: orders query on line 78 of src/services/orders.ts
 Focus: N+1 queries, missing indexes, uncached expensive operations.
 ```
 
-Each teammate read `package.json`, run `find`, explore dir = waste token lead already spent.
+Each teammate reading `package.json`, running `find`, and exploring the directory structure wastes tokens that the lead already spent gathering.
 
 ### 3.6 Vault-as-Context for Subagents
 
-When project have knowledge vault (Obsidian, `~/.claude-setup/memory/`, wiki page, any structured markdown corpus), orchestrator should read vault `CLAUDE.md` + relevant context **once**, then inject distilled context into spawn prompt. Prevent N subagent each read same vault file independently.
+When the project has a knowledge vault (Obsidian, `~/.claude-setup/memory/`, wiki pages, or any structured markdown corpus), the orchestrator should read the vault's `CLAUDE.md` and relevant context files **once**, then inject distilled context into spawn prompts. This prevents N subagents from each reading the same vault files independently.
 
 **Pattern:**
 
@@ -251,12 +251,12 @@ Spawn teammate "auth-reviewer":
 
 **When to apply:**
 
-- Any skill that spawn 3+ subagent + project have `CLAUDE.md` or knowledge vault
-- `/cto` swarm mode — inject project decision into all analyst
-- `/parallel-dev` — inject shared API contract + convention into feature agent
-- `/deep-plan` Phase 2 — inject prior research note into planning agent
+- Any skill that spawns 3+ subagents and the project has a `CLAUDE.md` or knowledge vault
+- `/cto` swarm mode — inject project decisions into all analysts
+- `/parallel-dev` — inject shared API contracts and conventions into feature agents
+- `/deep-plan` Phase 2 — inject prior research notes into the planning agent
 
-**Token math:** Read vault `CLAUDE.md` (~500 tokens) once in orchestrator = 500 tokens. Read in 4 subagent = 2,000 tokens. Pre-compute + inject 200-token distilled block into 4 spawn prompt = 500 + 800 = 1,300 tokens — 35% saving, subagent get higher-quality context because orchestrator curated.
+**Token math:** Reading a vault `CLAUDE.md` (~500 tokens) once in the orchestrator costs 500 tokens. Reading it in 4 subagents costs 2,000 tokens. Pre-computing and injecting a 200-token distilled block into 4 spawn prompts costs 500 + 800 = 1,300 tokens — 35% savings, and subagents get higher-quality context because the orchestrator curated it.
 
 ---
 
@@ -318,14 +318,14 @@ Rules for all teammates:
 - When done, message the lead with your summary and shut down.
 ```
 
-**Key difference from current swarm:** Current SKILL.md describe 5 analyst with elaborate JSON message schema. Agent Teams version drop to 4 (stack-analyst finding fold into security + quality) + use natural language message instead of structured JSON. Agent Teams handle coordination infra — no need define `can_message` array or `TeammateTool.sync()` call (aspirational pseudocode anyway).
+**Key difference from current swarm approach:** The current SKILL.md describes 5 analysts with elaborate JSON message schemas. The Agent Teams version drops to 4 (stack-analyst findings can be folded into security and quality) and uses natural language messages instead of structured JSON. Agent Teams handles the coordination infrastructure -- no need to define `can_message` arrays or `TeammateTool.sync()` calls, which are aspirational pseudocode anyway.
 
-**What to remove from current SKILL.md:**
+**What to remove from the current SKILL.md:**
 
-- Section 3.2 (Inter-Analyst Communication) — replace with "teammate message each other directly using natural language"
-- Section 3.3 (Live Progress Dashboard) — lead track progress via shared task list
-- Section 3.4 (Swarm Synchronization) — Agent Teams handle via idle notification
-- Elaborate `TeammateTool.message()` and `TeammateTool.sync()` pseudocode — not real API call
+- Section 3.2 (Inter-Analyst Communication) -- replace with "teammates message each other directly using natural language"
+- Section 3.3 (Live Progress Dashboard) -- the lead tracks progress via the shared task list
+- Section 3.4 (Swarm Synchronization) -- Agent Teams handles this via idle notifications
+- The elaborate `TeammateTool.message()` and `TeammateTool.sync()` pseudocode blocks -- these are not real API calls
 
 ### 4.2 Parallel-Dev Skill: Full Migration
 
@@ -338,7 +338,7 @@ Spawn agents via Task tool with run_in_background: true
 → No communication between feature agents
 ```
 
-> **Note (2026-04-10):** Monitor tool now cover polling-elimination use case that was primary motivation to migrate parallel-dev to Agent Teams. Monitor give event-driven notification without need Agent Teams infra. Remaining unique value of Agent Teams for parallel-dev = **cross-feature messaging** — teammate coordinate API/interface direct (e.g., "I expose `/api/users`, use that endpoint"). If feature truly independent (no shared API), Monitor + Task mode enough. Migrate to Agent Teams only when cross-feature coordination real need.
+> **Note (2026-04-10):** The Monitor tool now covers the polling elimination use case that was a primary motivation for migrating parallel-dev to Agent Teams. Monitor provides event-driven notifications without requiring Agent Teams infrastructure. The remaining unique value of Agent Teams for parallel-dev is **cross-feature messaging** — teammates coordinating APIs/interfaces directly (e.g., "I'm exposing `/api/users`, use that endpoint"). If your features are truly independent (no shared APIs), Monitor + Task mode is sufficient. Migrate to Agent Teams only when cross-feature coordination is a real need.
 
 **Agent Teams approach:**
 
@@ -386,7 +386,7 @@ Spawn teammate "{feature-id}":
 
 **Phase 4 replacement (monitoring):**
 
-Polling loop disappear entirely. Instead:
+The polling loop disappears entirely. Instead:
 
 ```
 Lead instructions:
@@ -397,24 +397,24 @@ Lead instructions:
 - When all features complete, begin Phase 5 (merge)
 ```
 
-**What this fix over current approach:**
+**What this fixes over the current approach:**
 
 1. ~~No polling loop (idle notifications replace it)~~ — **Now solved by Monitor tool without Agent Teams**
-2. Feature agent coordinate API/interface direct ("I expose `/api/users`, use that endpoint") — **Unique to Agent Teams**
+2. Feature agents can coordinate APIs/interfaces directly ("I'm exposing `/api/users`, use that endpoint") — **Unique to Agent Teams**
 3. ~~Blocker detection is immediate, not on a 30-second poll cycle~~ — **Now solved by Monitor (~2s latency)**
 4. ~~The lead stays responsive instead of sleeping in a loop~~ — **Now solved by Monitor (non-blocking)**
 
-**Revised justification:** Agent Teams migration for parallel-dev only justified when feature have cross-dependency need real-time coordination (point 2). For independent feature, Monitor + Task mode = equivalent responsiveness.
+**Revised justification:** Agent Teams migration for parallel-dev is justified only when features have cross-dependencies requiring real-time coordination (point 2). For independent features, Monitor + Task mode delivers equivalent responsiveness.
 
 ### 4.3 Fulltest Skill: Stay with Subagents (Optimized)
 
-**No migration.** But optimize current approach:
+**No migration.** But optimize the current approach:
 
-1. **Batch page tests:** Instead of 1 subagent per page, batch 3-5 page per subagent
-2. **Share failure context:** Write failure to `.testing/failures.json` that subsequent subagent read
-3. **Serial fixers:** Run fixer sequential (CSS fix, then JS fix), not parallel — fix often interact
+1. **Batch page tests:** Instead of 1 subagent per page, batch 3-5 pages per subagent
+2. **Share failure context:** Write failures to `.testing/failures.json` that subsequent subagents read
+3. **Serial fixers:** Run fixers sequentially (CSS fix, then JS fix), not in parallel -- fixes often interact
 
-"Swarm mode" section in current SKILL.md = aspirational doc for TeammateTool that no exist as described. Consider simplify section to reflect actual Task-based implementation til Agent Teams stable enough to migrate.
+The "swarm mode" sections in the current SKILL.md are aspirational documentation for TeammateTool that does not exist as described. Consider simplifying those sections to reflect the actual Task-based implementation until Agent Teams is stable enough to warrant migration.
 
 ---
 
@@ -433,27 +433,27 @@ Before any migration:
 }
 ```
 
-Verify with manual test:
+Verify it works with a manual test:
 
 ```
 Create a team with 2 teammates. Have one count to 10, the other count
 backwards from 10. Have them compare notes when done.
 ```
 
-If work reliable in terminal env, proceed.
+If this works reliably in your terminal environment, proceed.
 
 ### Phase 1: Manual Validation (Week 1)
 
-**Goal:** Confirm Agent Teams work reliable before touch any skill file.
+**Goal:** Confirm Agent Teams works reliably before touching any skill files.
 
 **Actions:**
 
-1. Run `/cto` in swarm mode on small project (~10 files) manually
-2. When spawn subagent, note:
-   - How long each analyst take
+1. Run `/cto` in swarm mode on a small project (~10 files) manually
+2. When it spawns subagents, note:
+   - How long each analyst takes
    - Total token cost (check usage in Claude dashboard)
-   - Quality of cross-concern detect
-3. Run same review manual using Agent Teams (just type prompt yourself, no skill)
+   - Quality of cross-concern detection
+3. Run the same review manually using Agent Teams (just type the prompt yourself, without the skill)
 4. Compare:
 
 | Metric               | Subagent Run | Agent Teams Run |
@@ -463,21 +463,21 @@ If work reliable in terminal env, proceed.
 | Cross-concerns found |              |                 |
 | Quality of synthesis |              |                 |
 
-**Success criteria:** Agent Teams find at least 1 cross-concern subagent missed. Token cost within 2x of subagent.
+**Success criteria:** Agent Teams finds at least 1 cross-concern that subagents missed. Token cost is within 2x of subagents.
 
 ### Phase 2: Parallel-Dev Migration (Week 2-3)
 
-**Why first:** Parallel-dev clearest win (worktree isolation, need cross-feature coordination) + simplest migration path (replace Task spawn with TeammateTool spawn).
+**Why first:** Parallel-dev has the clearest win (worktree isolation, need for cross-feature coordination) and the simplest migration path (replace Task spawning with TeammateTool spawning).
 
 **Actions:**
 
-1. Create branch: `feature/parallel-dev-agent-teams`
+1. Create a branch: `feature/parallel-dev-agent-teams`
 2. Update `parallel-dev/SKILL.md`:
    - Replace `Task` with `TeammateTool` in allowed-tools
    - Rewrite Phase 3 (Agent Dispatch) per pattern 4.2 above
    - Rewrite Phase 4 (Progress Monitoring) to remove polling loop
    - Add fallback: "If TeammateTool is unavailable, fall back to Task tool"
-3. Test on project with 3 independent feature
+3. Test on a project with 3 independent features
 4. Measure: time to completion, token cost, merge conflict rate
 
 **Fallback clause in SKILL.md:**
@@ -498,7 +498,7 @@ Both modes produce identical outputs. Agent Teams mode adds:
 
 ### Phase 3: CTO Hybrid Mode (Week 4-5)
 
-**Why second:** CTO skill more complex (two mode, 5 analyst vs 4 teammate) + benefit less clearly from Agent Teams than parallel-dev.
+**Why second:** The CTO skill is more complex (two modes, five analysts vs four teammates) and benefits less clearly from Agent Teams than parallel-dev.
 
 **Actions:**
 
@@ -508,31 +508,31 @@ Both modes produce identical outputs. Agent Teams mode adds:
    - Add Agent Teams swarm mode alongside existing swarm pseudocode
    - Reduce analyst count from 5 to 4 (merge stack-analyst into security + quality)
    - Add mode selection logic (Section 4.1)
-   - Remove aspirational pseudocode (TeammateTool.sync, structured JSON message)
-3. Test: run full review on medium project (50+ files)
+   - Remove aspirational pseudocode (TeammateTool.sync, structured JSON messages)
+3. Test: run a full review on a medium project (50+ files)
 4. Compare cross-concern detection quality vs subagent mode
 
 ### Phase 4: Measurement and Decision (Week 6)
 
 **Actions:**
 
-1. Collect token usage data from Phase 2-3 run
-2. Fill table:
+1. Collect token usage data from Phase 2-3 runs
+2. Fill in this table:
 
 | Skill        | Subagent Tokens | Teams Tokens | Quality Delta | Keep Teams? |
 | ------------ | --------------- | ------------ | ------------- | ----------- |
 | parallel-dev |                 |              |               |             |
 | cto (swarm)  |                 |              |               |             |
 
-3. If Agent Teams cost > 3x subagent + no quality improve: revert
-4. If Agent Teams cost 1-2x + quality improve: keep
-5. If Agent Teams unstable (crash, orphan session): keep fallback-only
+3. If Agent Teams costs > 3x subagents with no quality improvement: revert
+4. If Agent Teams costs 1-2x with quality improvement: keep
+5. If Agent Teams is unstable (crashes, orphaned sessions): keep fallback-only
 
 ### Phase 5: Stabilize and Document (Week 7+)
 
 **Actions:**
 
-1. Update memory entity with finding:
+1. Update memory entities with findings:
    ```
    Entity: tech-insight:agent-teams-vs-subagents
    Observations:
@@ -541,8 +541,8 @@ Both modes produce identical outputs. Agent Teams mode adds:
    - "Token multiplier: ~{measured}x vs subagents"
    - "Sweet spot: 3-4 teammates, not 5+"
    ```
-2. Add decision framework to shared reference file
-3. Do NOT migrate fulltest-skill or cpo-ai-skill unless new evidence emerge
+2. Add decision framework to a shared reference file
+3. Do NOT migrate fulltest-skill or cpo-ai-skill unless new evidence emerges
 
 ---
 
@@ -561,10 +561,10 @@ Both modes produce identical outputs. Agent Teams mode adds:
 
 ### Key Principles
 
-1. **Default to subagents.** Agent Teams = exception, not rule.
-2. **Never broadcast when direct message work.** Broadcast cost N context window.
-3. **Shut down finished teammate immediately.** Idle teammate still eat token.
-4. **3-4 teammate max.** Above, coordination degrade + cost explode.
-5. **Always include fallback.** Agent Teams experimental. Every skill use it must work without.
-6. **Measure before commit.** No migration final til token cost measured on real task.
-7. **Leverage 1M context (Opus 4.6).** Max/Team plan now get 1M token by default. Relax context pressure for orchestrator skill — cost calculus for teammate count + spawn prompt size shift toward richer context.
+1. **Default to subagents.** Agent Teams is the exception, not the rule.
+2. **Never broadcast when direct message works.** Broadcasts cost N context windows.
+3. **Shut down finished teammates immediately.** Idle teammates still eat tokens.
+4. **3-4 teammates max.** Above that, coordination degrades and costs explode.
+5. **Always include a fallback.** Agent Teams is experimental. Every skill that uses it must work without it.
+6. **Measure before committing.** No migration is final until token costs are measured on real tasks.
+7. **Leverage 1M context (Opus 4.6).** Max/Team plans now get 1M tokens by default. This relaxes context pressure for orchestrator skills — the cost calculus for teammate count and spawn prompt size shifts in favor of richer context.
