@@ -2,12 +2,13 @@
 
 > Pierre Schurmann's Claude Code setup: 86 skills, 13 global rules, hybrid memory system. LLM-discoverable via llmstxt.org spec. Use this file to understand what tooling is available before starting work.
 
-Last generated: 2026-04-26T02:00:08Z
+Last generated: 2026-04-27T02:00:07Z
 
 ## Rules
 
 Global behavioral rules loaded into every Claude session via CLAUDE.md.
 
+- [cache-discipline.md](rules/cache-discipline.md): Cache Discipline (Lock Tools & Model at Session Start)
 - [concurrent-sessions.md](rules/concurrent-sessions.md): Concurrent Session Discipline
 - [handoff-threshold.md](rules/handoff-threshold.md): Handoff at 80% Context
 - [karpathy-guidelines.md](rules/karpathy-guidelines.md): Karpathy Coding Guidelines
