@@ -14,7 +14,6 @@
 - [personal/host_this_is_mac_mini.md](personal/host_this_is_mac_mini.md) — PERMANENT — when Claude Code runs with hostname Mac-mini.local and user psm2, this session IS the Mac Mini itself. Never SSH to 100.66.244.1
 - [personal/preference_opus_for_coding_logic.md](personal/preference_opus_for_coding_logic.md) — Explicit user preference (2026-04-21) — any subagent or session doing real coding logic must run on Opus, not Sonnet/Haiku
 - [personal/reference_api_keys_keychain.md](personal/reference_api_keys_keychain.md) — All API keys (Resend, Brave, Exa, Turso) stored in macOS Keychain — settings.json uses ${VAR} references, never literal values. Source of tr
-- [personal/rtk-installed.md](personal/rtk-installed.md) — RTK CLI proxy installed globally — Bash output token-compressed via PreToolUse hook in ~/.claude/settings.json
 
 ## Semantic — patterns, mistakes, tech-insights
 
