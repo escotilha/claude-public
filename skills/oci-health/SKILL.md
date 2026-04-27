@@ -4,7 +4,9 @@ description: "Check Contably OCI health: API, dashboards, K8s pods, pipelines. G
 argument-hint: "[environment: staging|production|both]"
 user-invocable: true
 paths:
+  - "**/contably"
   - "**/contably/**"
+  - "**/contably-*"
   - "**/contably-*/**"
   - "**/.claude/contably/**"
 context: fork
