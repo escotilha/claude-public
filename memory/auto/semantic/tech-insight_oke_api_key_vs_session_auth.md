@@ -1,30 +1,48 @@
 ---
 name: tech-insight:oke-api-key-vs-session-auth
-description: Contably OKE cluster on OCI sa-saopaulo-1 rejects API-key-signed kubectl tokens but accepts session-token-signed tokens for the same user OCID — sessions are the only working path until an explicit cluster-admin policy/binding is added
+description: Contably OKE on OCI sa-saopaulo-1 binds RBAC to a specific API key fingerprint, not the user OCID — only the Apr 19 2026 key works; new keys signed by the same user OCID return 401. Recovery from Trash + filesystem search is the first move when "OCI auth broke."
 type: feedback
 originSessionId: b8cba660-2b56-4f56-85b9-ec3bd65ab012
 ---
-The OKE cluster `contably-oke-staging` (cluster ID `ocid1.cluster.oc1.sa-saopaulo-1.aaaaaaaarqeang2k3wo452nek7zaw5ufjtdmaqxupo6m2zgofckxzb7tcsvq`, public endpoint `137.131.210.170:6443`) returns HTTP 401 to `kubectl` tokens generated with API-key authentication, even though:
-- The OCI CLI itself authenticates fine with the API key (`oci iam region list` works)
-- The cluster's `generate-token` endpoint succeeds and emits a token (no OCI-side error)
-- The user is `p@nuvini.com.br` (`ocid1.user.oc1..aaaaaaaaqfokrxa532iror5bq3vnb2dr56tzzrjthklrqqugmtafr4muy6ea`) and is a member of the **Administrators** group of their domain
-- The exact same user OCID works when authenticated via session-token (`oci session authenticate --profile-name oke-session`)
+When Contably OKE kubectl auth breaks on Pierre's Mac Mini (the canonical dev/admin host), the assumption "we need a new API key" wastes hours. The cluster's RBAC is bound to a **specific API key principal**, not just the user OCID — so a freshly-generated key (even with the same user OCID, same fingerprint upload, same Administrators group membership) will return 401 from the OKE token endpoint, while the OCI CLI itself authenticates fine.
 
-So the auth difference is API-key signing vs Oracle's session-key signing of the same principal — the cluster trusts the latter and rejects the former. This is most likely an OKE-internal RBAC binding that names the session-issued principal but not the API-key principal, or a tenancy-level IAM policy that scopes `manage cluster-family` to the session login flow only.
+**Root cause likely:** OKE was bootstrapped with creator-only quick-start RBAC, scoped to whatever principal context the original `kubectl` admin token was issued under (the Apr 19 2026 API key, fingerprint `56:e6:24:a0:f5:1a:83:13:8d:18:cb:dd:fb:01:50:9b`). New keys for the same user OCID are not in that binding.
 
-**Workaround (works today):** keep using session-token auth. Refresh on each expiry (~20 min of inactivity). `~/.kube/config` exec block must include `--profile oke-session --auth security_token`. A known-good kubeconfig is at `~/.kube/config.bak.1776559573`.
+**Recovery procedure (do this BEFORE generating a new key):**
 
-**Permanent fix candidates (untested as of 2026-04-27):**
-1. Add an explicit IAM policy in the root compartment: `Allow group Administrators to manage cluster-family in tenancy where target.cluster.id = '<cluster ocid>'` — sometimes needed for OKE even when Administrators technically inherits everything.
-2. Add a Kubernetes ClusterRoleBinding mapping the user OCID directly: `kubectl create clusterrolebinding pierre-admin --clusterrole=cluster-admin --user='ocid1.user.oc1..aaaaaaaaqfokrxa532iror5bq3vnb2dr56tzzrjthklrqqugmtafr4muy6ea'`. Run from a session-authenticated context first (since you can't apply manifests if API key doesn't work).
-3. Check whether the cluster was created with `oke-cluster-admin-quick-start` policy — if not, the only admin is the original creator's principal and Administrators alone is insufficient.
+1. **Search filesystem for missing private keys.** OCI auto-names downloaded keys `<email>-<ISO-timestamp>.pem`. Standard locations to check:
+   - `~/.Trash/*.pem` — keys often get trashed during cleanup
+   - `~/Downloads/*.pem`
+   - `~/.oci/` and any subdir
+   - `infrastructure/terraform/*/terraform.tfvars` for `private_key_path` references
+2. **Cross-check fingerprints.** OCI shows registered fingerprints in **My Profile → API keys**. For each `.pem` candidate: `openssl rsa -pubout -outform DER -in <file> | openssl md5 -c`. Match against OCI's listing.
+3. **Restore matching key to `~/.oci/keys/`** (chmod 600), update `[DEFAULT]` in `~/.oci/config` (`fingerprint`, `key_file`), then regenerate kubeconfig:
+   ```bash
+   oci ce cluster create-kubeconfig --cluster-id <cluster-ocid> --region sa-saopaulo-1 \
+     --token-version 2.0.0 --kube-endpoint PUBLIC_ENDPOINT --file ~/.kube/config --overwrite
+   ```
+4. **If no recoverable key works**, fall back to session-token auth (`oci session authenticate --profile-name oke-session`), then from inside that session create an explicit ClusterRoleBinding for the new key's principal so future API-key auth is broadened:
+   ```bash
+   kubectl create clusterrolebinding pierre-cluster-admin \
+     --clusterrole=cluster-admin \
+     --user='ocid1.user.oc1..<user-ocid>'
+   ```
 
-**Important context — why old keys don't help:** OCI lists 3 API keys for this user (Mar 8, Apr 19, Apr 27) but the private halves of the first two are *not on this Mac*. The kubeconfig that was "working since April 18" was using session-token auth, never the API key — the Apr 19 key was created but apparently never wired up as the kubectl auth path. Only session auth has actually worked.
+**Symptoms checklist** (when you see these, this memory applies):
+- `oci iam region list` works (auth + key are valid against OCI)
+- `kubectl get ns` returns `error: You must be logged in to the server (Unauthorized)`
+- Direct `curl -k -H "Authorization: Bearer $TOKEN" https://<oke-endpoint>/api/v1/namespaces` returns HTTP 401
+- The user IS in the Administrators group of their domain (verified via `oci iam user list-groups`)
+
+The "you need to fix the IAM policy" rabbit hole is wrong — it's an OKE-cluster RBAC binding, not an OCI-tenancy IAM policy.
+
+**Do NOT save to memory:** the fingerprints themselves (already in CLAUDE.md, fine there since CLAUDE.md is in the Contably repo and not public), the user OCID (semi-public, in CLAUDE.md), the password used during the rotation. Memory keeps the *pattern*, not the credentials.
 
 ---
 
 ## Timeline
 
-- **2026-04-27** — [implementation] During Contably master-password reset for tomorrow's Sevillea demo, switched from broken session auth to fresh API key (fingerprint `81:4f:62:a4:25:65:be:08:ad:73:7e:cd:19:e1:f3:fe`). OCI CLI worked, `kubectl` returned 401. Verified with direct `curl` to `https://137.131.210.170:6443/api/v1/namespaces` — same 401. Reverted to session-token auth via `oci session authenticate --profile-name oke-session` and restored `~/.kube/config.bak.1776559573`; kubectl worked immediately. (Source: implementation — Contably staging+prod password rotation session, Mac Mini 2026-04-27 ~17:00-18:00 local)
-- **2026-04-27** — [user-feedback] Pierre noted the working kubeconfig dated April 18 — confirmed that file existed but auth method was session-token, not API key. (Source: user-feedback — "it was working consistently since the 18th")
-- **2026-04-27** — [research] Filesystem scan (`find / -name '*.pem'`) returned no OCI-related private keys outside `~/.oci/keys/` and `~/.oci/sessions/oke-session/`. The two registered API keys with missing private halves can't be revived; they should be deleted from OCI to reduce attack surface. (Source: implementation — Mac Mini disk scan)
+- **2026-04-27** — [implementation] Spent ~1 hour generating a new API key (Apr 27, fingerprint `81:4f:62:a4:...`) and trying to make OKE accept it. CLI worked, kubectl always 401. Fell back to session-token auth to complete the master-password reset for tomorrow's Sevillea demo. (Source: implementation — Contably staging+prod password rotation, Mac Mini)
+- **2026-04-27** — [implementation] Pierre suggested searching the Contably repo for keys. Found `terraform.tfvars` referencing `~/.oci/contably_api_key.pem` (fingerprint `fc:14:ba:2d:...`, file gone) and — crucially — found the **Apr 19 key** in `~/.Trash/p@nuvini.com.br-2026-04-19T00_43_46.338Z.pem` (1715 bytes, dated April 18). Fingerprint matched OCI's Apr 19 listing exactly. Restored to `~/.oci/keys/oci_api_key_apr19.pem`. (Source: implementation — `find ~/.Trash -name '*.pem'`)
+- **2026-04-27** — [implementation] Tested OKE auth with the recovered Apr 19 key: `curl` to cluster API server returned **HTTP 200**. Today's `81:4f...` key returned 401 against the same endpoint with the same user OCID. **Conclusion:** OKE RBAC is bound to the specific Apr 19 key principal. (Source: implementation — direct curl with bearer token)
+- **2026-04-27** — [implementation] Switched `~/.oci/config` `[DEFAULT]` to use the Apr 19 key, regenerated kubeconfig with no profile/session args. `kubectl get ns` works. No more session expiry, no browser. (Source: implementation — final state of Mac Mini OCI/kubectl config)
