@@ -13,6 +13,7 @@
 - [personal/host_macmini_vs_laptop.md](personal/host_macmini_vs_laptop.md) — Pierre's primary Claude Code host is the Mac Mini — the Mini runs Claude Code sessions AND is the autonomous executor. Default to Mini unles
 - [personal/host_this_is_mac_mini.md](personal/host_this_is_mac_mini.md) — PERMANENT — when Claude Code runs with hostname Mac-mini.local and user psm2, this session IS the Mac Mini itself. Never SSH to 100.66.244.1
 - [personal/preference_opus_for_coding_logic.md](personal/preference_opus_for_coding_logic.md) — Explicit user preference (2026-04-21) — any subagent or session doing real coding logic must run on Opus, not Sonnet/Haiku
+- [personal/contably_roadmap_priorities_2026Q2.md](personal/contably_roadmap_priorities_2026Q2.md) — Pierre's 3 directives for oxi roadmap execution: daily reconciliation, monthly closing, agent onboarding incl. gamification. Master tracker spans 3 docs in /contably/docs/.
 - [personal/reference_api_keys_keychain.md](personal/reference_api_keys_keychain.md) — All API keys (Resend, Brave, Exa, Turso) stored in macOS Keychain — settings.json uses ${VAR} references, never literal values. Source of tr
 
 ## Semantic — patterns, mistakes, tech-insights
