@@ -33,6 +33,10 @@ originSessionId: 94d135c3-3bc2-408d-a0b6-51089b31ad95
 - VPS-side commands via SSH that don't depend on local checkout state
 - Engine state queries (sqlite3 over SSH)
 
+## Contably commit/push rule (2026-04-28)
+
+Commits and pushes to the Contably repo must only happen from the session's own worktree branch — never from the `main` working directory, even for CI/workflow-only files. The workflow files committed today (rollback-production.yml, deploy-production.yml smoke test, soak guard) were pushed directly from `main`; Pierre flagged this as wrong. **Hard rule: if the CWD is `/Volumes/AI/Code/contably` and `git branch` shows `main`, do not commit or push. Create a worktree first.**
+
 ## Timeline
 
 - **2026-04-28** — [user-feedback] Pierre reiterated mid-NFe-Phase-0 review session: "Every time you start up anything here, open a branch." Reinforces the rule one more notch — even for session-startup work like applying review-nit fixes, the FIRST action is `git fetch origin && git worktree add -b <branch> <path> origin/main`. No "I'll just edit this one file in the main checkout" shortcuts. Source: user-feedback during PR #717/#718/#719 review-fix loop. (Source: user-feedback — explicit reiteration on session resume.)
