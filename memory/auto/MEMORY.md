@@ -16,6 +16,7 @@
 - [personal/contably_roadmap_priorities_2026Q2.md](personal/contably_roadmap_priorities_2026Q2.md) — Pierre's 3 directives for oxi roadmap execution: daily reconciliation, monthly closing, agent onboarding incl. gamification. Master tracker spans 3 docs in /contably/docs/.
 - [personal/reference_api_keys_keychain.md](personal/reference_api_keys_keychain.md) — All API keys (Resend, Brave, Exa, Turso) stored in macOS Keychain — settings.json uses ${VAR} references, never literal values. Source of tr
 - [personal/contably_test_user_ana.md](personal/contably_test_user_ana.md) — Ana is the canonical placeholder Sevilha analyst in Contably — use her in narrative examples + test scenarios, not made-up names like Maria
+- [personal/contably_staging_test_users.md](personal/contably_staging_test_users.md) — 6 staging dev-switcher users: Master, Pedro, Sevilha, Ana (analista@sevilha), Carlos (gerente@nuvini), Maria (auxiliar@nuvini) — passwords in Keychain `contably-staging-test-users`
 
 ## Semantic — patterns, mistakes, tech-insights
 
