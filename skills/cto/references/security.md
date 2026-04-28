@@ -14,6 +14,15 @@ Do NOT read or analyze files outside this ownership — architecture, performanc
 
 ## Checklist — Trail of Bits specificity, not generic OWASP surface scanning
 
+Grounding documents:
+- Auth & session: https://owasp.org/www-project-application-security-verification-standard/ (ASVS V2–V3)
+- Injection: https://owasp.org/www-project-top-ten/ (A03:2021)
+- Cryptography: https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html
+- API security: https://owasp.org/www-project-api-security/ (OWASP API Top 10)
+- Fail-open: https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html
+- AI platform: https://owasp.org/www-project-top-10-for-large-language-model-applications/ (OWASP LLM Top 10)
+- Code archaeology / deep vuln hunting: https://blog.trailofbits.com/2024/01/16/finding-vulnerabilities-in-open-source-code-at-scale/ (Trail of Bits scale hunting)
+
 ### Auth & Authorization
 
 - **Auth flow**: trace every code path that grants access. Check for auth bypass via parameter pollution, HTTP verb tampering, or path traversal above auth middleware.
