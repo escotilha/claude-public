@@ -19,6 +19,8 @@
 
 ## Semantic — patterns, mistakes, tech-insights
 
+- [semantic/tech-insight_contably_db_is_mysql_heatwave.md](semantic/tech-insight_contably_db_is_mysql_heatwave.md) — Contably DB is MySQL HeatWave on OCI (not Postgres/Docker). No RETURNING, use kubectl exec for writes, bcrypt on pod scripts.
+
 - [semantic/mistake_committed_hook_breaks_worktrees.md](semantic/mistake_committed_hook_breaks_worktrees.md) — A committed .claude/settings.json hook pointing at a decommissioned CLI breaks every oxi worker worktree dispatch; remove stale hooks after harness cutover
 - [semantic/mistake_hardcoded_legacy_fallback_in_code.md](semantic/mistake_hardcoded_legacy_fallback_in_code.md) — During rename refactors (e.g. `contably-os` → `psos`), hardcoded legacy path fallbacks inside source files (not config) are the sneakiest so
 - [semantic/mistake_nested_asyncio_run_in_async_loop.md](semantic/mistake_nested_asyncio_run_in_async_loop.md) — Calling sync fn from async coroutine where the sync fn does asyncio.run internally raises 'cannot be called from a running event loop' — wrap with asyncio.to_thread
