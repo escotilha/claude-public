@@ -35,4 +35,5 @@ originSessionId: 94d135c3-3bc2-408d-a0b6-51089b31ad95
 
 ## Timeline
 
+- **2026-04-28** — [user-feedback] Pierre reiterated mid-NFe-Phase-0 review session: "Every time you start up anything here, open a branch." Reinforces the rule one more notch — even for session-startup work like applying review-nit fixes, the FIRST action is `git fetch origin && git worktree add -b <branch> <path> origin/main`. No "I'll just edit this one file in the main checkout" shortcuts. Source: user-feedback during PR #717/#718/#719 review-fix loop. (Source: user-feedback — explicit reiteration on session resume.)
 - **2026-04-22** — [user-feedback] Pierre flagged: "Nothing should be running in main. Every one of these should be a worktree, including what we are doing here." During the engine recovery + memory store roadmap session. Until then I had been doing PR work in worktrees but ad-hoc gh pr commands + diagnostics in the main checkout dir. (Source: user-feedback — explicit correction)
