@@ -206,6 +206,48 @@ If everything goes well: you're at 80-100 PRs/day at $50-70/day spend by end of 
 
 ---
 
+## Progress log
+
+### 2026-04-28 08:30 BRT — All 5 P0 fixes shipped + engine running
+
+**Plan:** All 5 P0 items complete. Engine running in production (Mini, tmux).
+
+**Code:** `xurman/main` at `381d320` (fix/saturate: fresh DB connection in auto_merge thread). PRs #241-#243 merged to Xurman/oxi. Contably PRs #4-#9 merged to Contably/oxi (separate fork, also applied — note: deployed engine reads from xurman/main, NOT Contably/oxi).
+
+**Execution:**
+- P0 #4 (observability): DONE — DISPATCH_FAILURE_DIAG events, BUDGET_EXHAUSTED classification
+- P0 #1 (scrub_home): DONE — scrub_home field + wrap_with_ssh. Note: local-spawn (Mini ssh_alias="") is not affected, HOME scrub only fires over SSH. Separate follow-up needed.
+- P0 #3 (shipped-detection): DONE — `shipped_detect.py`, 60 ghost rows reaped on first run
+- P0 #5 (concurrency): DONE — overlap gate hoisted, seed batch 2*concurrency, idle_sleep 15s
+- P0 #2 (per-tier routing): DONE — worker_t0..t4, critic_t0..t3, critic-tier gate, route_for honors task tier
+- PR #242 (per-tier max_turns): T0=30, T1=60, T2=100, T3=180, T4=200, escalation=240
+- PR #243 (auto_merge SQLite-thread fix): fresh db.connect() inside to_thread — auto_merge now working
+
+**Staging/prod status:**
+- Production: HEALTHY. master@contably.com password rotated (both envs). Login confirmed HTTP 200.
+- Staging: HEALTHY. Failed migration jobs from today's engine runs cleaned up. Portal responding.
+- Enum data bug fixed: fiscal_deadlines + deadline_instances — lowercase enum values uppercased to match SQLAlchemy enum names (FEDERAL_TAX, MONTHLY, PENDING). Same fix applied staging + prod.
+- PR #706 (T3-7 Billing): MERGED to contably/contably
+- PR #707 (T3-5 Journal Entry): CLOSED — broken migration (6 tables in model, only 1 created). Split into T3-5a..d.
+- T3-5 roadmap split: T3-5a/b/c/d added to roadmap. Engine dispatched all 4 (~11:16 UTC). T3-5a, T3-5c already merged; T3-5b, T3-5d dispatched (workers in flight).
+
+**Blockers:** none. Engine running autonomously.
+
+**Priorities established (Pierre's directives 2026-04-28):**
+1. Daily reconciliation — go-live-gap-analysis-2026-04-24.md §1
+2. Monthly closing — monthly-closing-inventory-2026-04-23.md
+3. Agent onboarding + gamification — copiloto-gamificacao-apresentacao.md
+
+**Next actions (for resume):**
+1. Check engine status: `tail -20 /Volumes/AI/Code/oxi-runtime/saturate.log`
+2. Check DB state: `sqlite3 /Volumes/AI/Code/contably/.oxi/oxi.db "SELECT status, COUNT(*) FROM task GROUP BY status"`
+3. Wait for T3-5b + T3-5d to land (or fail) — if fail, inspect DIAG events
+4. Remaining open work (P1 week-2, per plan): auto_recover skips critic_rejected, engine_health excludes budget_exhausted, per-tier slot quotas in _pick_next_planned, target_repo regex fix
+5. Code follow-up: fix `Column(Enum(X))` → `Column(Enum(X, values_callable=...))` in deadlines.py to prevent re-introduction of the lowercase enum bug
+6. Roadmap expansion: discuss with Pierre which new items to add aligned with 3 directives above
+
+---
+
 ## Timeline (the page itself)
 
 - **2026-04-27 22:00 BRT** — [research] Four parallel Opus CTO analyses spawned in single message per parallel-first.md rule. (Source: session — oxi cutover Phase 4 night-2)
