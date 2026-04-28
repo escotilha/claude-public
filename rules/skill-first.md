@@ -18,7 +18,9 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Break down hard problem       | `/first-principles`     | Ambiguous or complex problem                             |
 | Run project tests + typecheck | `/verify`               | After making changes, before committing                  |
 | Fix failing tests             | `/test-and-fix`         | Tests are broken, need auto-fix loop                     |
-| Review code before commit     | `/review-changes`       | Uncommitted changes need review                          |
+| Review code before commit     | `/review-changes`       | Uncommitted changes need review (lightweight, single-pass)             |
+| Full multi-reviewer audit     | `/full-review`          | Before/after PR open — 5 parallel reviewers (security, architecture, performance, conventions, code-review-agent swarm) + opus aggregator. Auto-invoked after `gh pr create` per `auto_review_own_prs.md`. |
+| Single-domain code review     | `/code-review`          | code-review-agent swarm only (4-8 specialists by stack). Lighter than /full-review. |
 | Debug a bug (Iron Law)        | `/investigate`          | Bug, 500, regression — enforces root-cause before fix, 3-strike escalation |
 | Safety guardrails for bash    | `/careful`              | Before prod work / deploys — warns on rm, DROP, force-push, kubectl delete |
 | Restrict edits to a directory | `/freeze`               | While debugging — blocks Edit/Write outside chosen path, prevents scope creep |
