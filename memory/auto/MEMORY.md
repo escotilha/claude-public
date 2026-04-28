@@ -15,6 +15,7 @@
 - [personal/preference_opus_for_coding_logic.md](personal/preference_opus_for_coding_logic.md) — Explicit user preference (2026-04-21) — any subagent or session doing real coding logic must run on Opus, not Sonnet/Haiku
 - [personal/contably_roadmap_priorities_2026Q2.md](personal/contably_roadmap_priorities_2026Q2.md) — Pierre's 3 directives for oxi roadmap execution: daily reconciliation, monthly closing, agent onboarding incl. gamification. Master tracker spans 3 docs in /contably/docs/.
 - [personal/reference_api_keys_keychain.md](personal/reference_api_keys_keychain.md) — All API keys (Resend, Brave, Exa, Turso) stored in macOS Keychain — settings.json uses ${VAR} references, never literal values. Source of tr
+- [personal/contably_test_user_ana.md](personal/contably_test_user_ana.md) — Ana is the canonical placeholder Sevilha analyst in Contably — use her in narrative examples + test scenarios, not made-up names like Maria
 
 ## Semantic — patterns, mistakes, tech-insights
 
