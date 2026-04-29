@@ -4,7 +4,6 @@
 
 ## Root
 
-- [feedback_oxi_dogfood_session.md](feedback_oxi_dogfood_session.md) — Patterns from a 4-hour OXi install/release session — when to push back on autonomy, when to do work yourself, when to delegate to the engine
 - [research-finding-karpathy-coding-guidelines.md](research-finding-karpathy-coding-guidelines.md) — CLAUDE.md behavioral rules from Karpathy's LLM coding pitfall observations — 4 principles addressing silent assumptions, over-engineering, o
 
 ## Personal — preferences, credentials, host
@@ -25,12 +24,10 @@
 - [semantic/mistake_committed_hook_breaks_worktrees.md](semantic/mistake_committed_hook_breaks_worktrees.md) — A committed .claude/settings.json hook pointing at a decommissioned CLI breaks every oxi worker worktree dispatch; remove stale hooks after harness cutover
 - [semantic/mistake_hardcoded_legacy_fallback_in_code.md](semantic/mistake_hardcoded_legacy_fallback_in_code.md) — During rename refactors (e.g. `contably-os` → `psos`), hardcoded legacy path fallbacks inside source files (not config) are the sneakiest so
 - [semantic/mistake_nested_asyncio_run_in_async_loop.md](semantic/mistake_nested_asyncio_run_in_async_loop.md) — Calling sync fn from async coroutine where the sync fn does asyncio.run internally raises 'cannot be called from a running event loop' — wrap with asyncio.to_thread
-- [semantic/mistake_oxi_engine_fork_target.md](semantic/mistake_oxi_engine_fork_target.md) — Deployed oxi engine reads from xurman/oxi (NOT Contably/oxi). Always confirm the target fork via git reflog before merging engine PRs.
 - [semantic/mistake_main_dir_edits_during_oxi_run.md](semantic/mistake_main_dir_edits_during_oxi_run.md) — Editing in main working dir while oxi runs caused a stale-tree commit that deleted a file — always use a worktree, no exceptions
 - [semantic/pattern_credential_entry_company_user_only.md](semantic/pattern_credential_entry_company_user_only.md) — Bank credential entry (Pluggy Connect) is the account holder's exclusive right — accounting firms read transactions but cannot enter passwords on the company's behalf
 - [semantic/pattern_typecheck_worktree_via_main_copy.md](semantic/pattern_typecheck_worktree_via_main_copy.md) — Worktrees have no node_modules — to type-check new TS files locally before push, copy them into the main checkout's tree and run tsc there
 - [semantic/tech-insight_github_no_synchronize_on_conflicting_prs.md](semantic/tech-insight_github_no_synchronize_on_conflicting_prs.md) — GitHub does not fire pull_request:synchronize for pushes to a CONFLICTING PR branch — workflows triggered on synchronize silently never run
-- [semantic/tech-insight_oxi_scrub_home_only_via_ssh.md](semantic/tech-insight_oxi_scrub_home_only_via_ssh.md) — oxi scrub_home fix only fires through wrap_with_ssh; local-spawn workers (ssh_alias=None) still walk operator HOME. Follow-up needed for local cache-tax kill.
 - [semantic/mistake_settings_bak_public_leak.md](semantic/mistake_settings_bak_public_leak.md) — 2026-04-21 incident — settings.json.bak-* file with literal API keys force-pushed to public GitHub because its filename didn't match the .ba
 - [semantic/mistake_validate-storage-constraints-before-schema.md](semantic/mistake_validate-storage-constraints-before-schema.md) — Always confirm runtime environment constraints (which databases are available, where the skill runs) before writing schema.sql or any storag
 - [semantic/pattern_autobrowse_failure_to_insight.md](semantic/pattern_autobrowse_failure_to_insight.md) — Self-improving browser automation — failure-to-insight retry loop that graduates winning workflows into reusable skills
@@ -51,7 +48,6 @@
 - [semantic/tech-insight_psos_plan_tier_20x.md](semantic/tech-insight_psos_plan_tier_20x.md) — Pierre's Claude account is Max 20x (not 5x). PSOS + any tool that respects Anthropic plan tiers should default to `plan_tier="20x"` → 900 ms
 - [semantic/tech-insight_pytest-unborn-head-breaks-branch-tests.md](semantic/tech-insight_pytest-unborn-head-breaks-branch-tests.md) — Subtle git quirk that broke 3 hook-script tests in Contably OS v4 Phase 6. Always seed an initial commit.
 - [semantic/tech-insight_skill-tool-args-not-forwarded-from-orchestrator.md](semantic/tech-insight_skill-tool-args-not-forwarded-from-orchestrator.md) — Invoking a skill via the Skill tool from inside an orchestrator context does NOT forward args to the subprocess — the skill body runs but th
-- [semantic/tech-insight-oxi-bare-mode-skips-hooks.md](semantic/tech-insight-oxi-bare-mode-skips-hooks.md) — Oxi workers run `claude -p --bare` by default — skips plugin hooks, auto-memory, and keychain auth for CI reproducibility. Global PreToolUse
 - [semantic/tech-insight-prompt-cache-invalidation.md](semantic/tech-insight-prompt-cache-invalidation.md) — Mid-session tool-list or model changes invalidate the Anthropic prompt cache prefix and drop cache hit rate from ~90% to near 0 for the rest
 - [semantic/tech-insight_oke_api_key_vs_session_auth.md](semantic/tech-insight_oke_api_key_vs_session_auth.md) — Contably OKE rejects API-key kubectl tokens but accepts session-token kubectl for same OCID — sessions are the only working path until cluster RBAC is fixed
 - [semantic/tech-insight:mcp-agent-production-patterns.md](semantic/tech-insight:mcp-agent-production-patterns.md) — Anthropic guide on MCP vs direct API vs CLI for production agents — server design, context-efficient clients, skills pairing, CIMD/Vault aut
@@ -62,8 +58,6 @@
 - [working/contably-os-v4-online-2026-04-21.md](working/contably-os-v4-online-2026-04-21.md) — What's running in production as of 2026-04-21 end-of-day. Resume block for future sessions.
 - [working/resume_2026-04-22_overnight.md](working/resume_2026-04-22_overnight.md) — Resume pointer for the Contably overnight engine session that was rate-limited at 22:40 local. Any new session should read this first.
 - [working/resume_mary_restart_2026-04-23.md](working/resume_mary_restart_2026-04-23.md) — Mary restart COMPLETED 2026-04-23 03:40 — Discord verified end-to-end on Max plan via claude-cli
-- [working/resume_oxi_cutover_2026-04-27.md](working/resume_oxi_cutover_2026-04-27.md) — OXi cutover paused at 22:11 UTC 2026-04-27 (97% context). Engine autonomous on Mini, 16+ PRs merged. Resume at 23:20 UTC / 20:20 BRT.
-- [working/oxi-throughput-plan-2026-04-28.md](working/oxi-throughput-plan-2026-04-28.md) — Plan to take oxi from 26 PRs/day → 60-100/day. 4 parallel Opus CTO reviews synthesized; ordered fixes, dependencies, 4-day sequence.
 
 ## Entities (legacy) — agents, deals, registries
 
