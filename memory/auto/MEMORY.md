@@ -9,6 +9,8 @@
 ## Personal — preferences, credentials, host
 
 - [personal/feedback_format_decisions_as_numbered_lists.md](personal/feedback_format_decisions_as_numbered_lists.md) — Pierre prefers every decision list (options, sub-tasks, halt-points, follow-ups) formatted as a numbered list, not bullets, so he can refer 
+- [personal/feedback_full_review_correct_worktree.md](personal/feedback_full_review_correct_worktree.md) — Always switch to the relevant worktree before running /full-review, /verify, or any branch-scoped review skill — don't review the wrong tree
+- [personal/pierre_all_in_no_tap_outs.md](personal/pierre_all_in_no_tap_outs.md) — Pierre operates all-in. Recommend the next action, never "rest" or "defer to tomorrow." Surface real technical blockers, not wellness advice.
 - [personal/host_macmini_vs_laptop.md](personal/host_macmini_vs_laptop.md) — Pierre's primary Claude Code host is the Mac Mini — the Mini runs Claude Code sessions AND is the autonomous executor. Default to Mini unles
 - [personal/host_this_is_mac_mini.md](personal/host_this_is_mac_mini.md) — PERMANENT — when Claude Code runs with hostname Mac-mini.local and user psm2, this session IS the Mac Mini itself. Never SSH to 100.66.244.1
 - [personal/preference_opus_for_coding_logic.md](personal/preference_opus_for_coding_logic.md) — Explicit user preference (2026-04-21) — any subagent or session doing real coding logic must run on Opus, not Sonnet/Haiku
