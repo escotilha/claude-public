@@ -23,6 +23,7 @@
 
 - [semantic/mistake_committed_hook_breaks_worktrees.md](semantic/mistake_committed_hook_breaks_worktrees.md) — A committed .claude/settings.json hook pointing at a decommissioned CLI breaks every oxi worker worktree dispatch; remove stale hooks after harness cutover
 - [semantic/mistake_hardcoded_legacy_fallback_in_code.md](semantic/mistake_hardcoded_legacy_fallback_in_code.md) — During rename refactors (e.g. `contably-os` → `psos`), hardcoded legacy path fallbacks inside source files (not config) are the sneakiest so
+- [semantic/mistake_orchestrator_inMemory_state.md](semantic/mistake_orchestrator_inMemory_state.md) — Orchestrators tracking in-flight work in RAM re-dispatch on restart; always persist status=dispatched to DB before launching
 - [semantic/mistake_nested_asyncio_run_in_async_loop.md](semantic/mistake_nested_asyncio_run_in_async_loop.md) — Calling sync fn from async coroutine where the sync fn does asyncio.run internally raises 'cannot be called from a running event loop' — wrap with asyncio.to_thread
 - [semantic/mistake_main_dir_edits_during_oxi_run.md](semantic/mistake_main_dir_edits_during_oxi_run.md) — Editing in main working dir while oxi runs caused a stale-tree commit that deleted a file — always use a worktree, no exceptions
 - [semantic/pattern_credential_entry_company_user_only.md](semantic/pattern_credential_entry_company_user_only.md) — Bank credential entry (Pluggy Connect) is the account holder's exclusive right — accounting firms read transactions but cannot enter passwords on the company's behalf
