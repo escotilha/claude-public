@@ -1,7 +1,7 @@
 ---
 name: pr-impact
-description: "PR Impact Optimizer for Nuvini (NVNI). Score, optimize, and backtest press releases for stock impact + SEC compliance. Triggers on: pr impact, press release, optimize pr, score pr, pr analysis, pr optimizer, /pr-impact."
-argument-hint: "<mode: analyze|backtest|simulate|collect> [draft text or .docx path]"
+description: "PR Impact Optimizer for Nuvini (NVNI). Score, optimize, draft-from-source, and backtest press releases for stock impact + SEC compliance. Triggers on: pr impact, press release, optimize pr, score pr, pr analysis, pr optimizer, draft pr, pr from contract, pr from mou, /pr-impact."
+argument-hint: "<mode: analyze|draft|simulate|backtest|collect> [draft text, .docx path, or source contract/MOU path]"
 user-invocable: true
 context: fork
 model: opus
@@ -50,11 +50,15 @@ Analyzes, scores, and optimizes press releases for maximum positive stock price 
 Parse the user's input to determine mode:
 
 1. **`analyze <text or .docx path>`** — Score a PR draft against rubrics + SEC compliance
-2. **`backtest [ticker] [date range]`** — Compare algorithm predictions vs actual stock price impact
-3. **`simulate <draft .docx path>`** — Generate 3 optimized variants, score each
-4. **`collect`** — Re-run the data collection pipeline (scripts 01-09)
+2. **`draft <path-to-source.pdf|.docx>`** — Generate a press release FROM a source document (contract, MOU, term sheet, deal memo). Extracts facts, drafts 3 variants, scores each, and outputs the winner as `.md` + `.docx`.
+3. **`backtest [ticker] [date range]`** — Compare algorithm predictions vs actual stock price impact
+4. **`simulate <draft .docx path>`** — Generate 3 optimized variants of an existing draft, score each
+5. **`collect`** — Re-run the data collection pipeline (scripts 01-09)
 
-If no mode specified, default to `analyze` if text/file is provided, or ask the user.
+If no mode specified:
+- A `.pdf` path → `draft` (only DOCX/text drafts existed before; PDFs are always source docs)
+- A `.docx` path or pasted text → `analyze`
+- Nothing → ask the user.
 
 ---
 
@@ -331,7 +335,108 @@ Report both file paths to the user:
 
 ---
 
-## Mode 2: SIMULATE
+## Mode 2: DRAFT (from source document)
+
+Generate a press release FROM a source document — contract, MOU, term sheet, deal memo, partnership agreement. Pipeline: extract facts → draft 3 variants → score each through the existing analyze pipeline → output the winner as `.md` + `.docx`.
+
+### Step 1: Extract Facts
+
+Run the deterministic extractor:
+
+```bash
+cd /Volumes/AI/Code/pr-impact
+python3 scripts/10_draft_from_source.py "PATH_TO_SOURCE.pdf"
+```
+
+This writes two files into `output/drafts/`:
+
+- `<stem>-<timestamp>.source.txt` — full extracted text
+- `<stem>-<timestamp>.facts.json` — structured fact pack: `doc_type`, `parties`, `money_mentions`, `percentages`, `dates`, `term`, `jurisdiction`, `signed`
+
+Read both files. Use the fact pack to ground the draft and the full text to recover anything the regex-based extractor missed.
+
+### Step 2: Confirm Material Facts With User (HALT POINT)
+
+Before drafting, surface what was extracted and ask the user to confirm or correct:
+
+1. Doc type detected (e.g., MOU, SPA, partnership)
+2. Parties detected
+3. Material amounts / percentages / dates
+4. Whether the document is signed/executed (if NOT signed, this materially affects what can be disclosed — see Compliance Boundaries)
+5. **Announcement angle** — ask which fact is the lead (the deal itself, the dollar amount, the strategic rationale, the customer count, etc.)
+6. **Confidentiality** — confirm the user has the right to publicly disclose. Many MOUs/term sheets contain confidentiality provisions. If unsure, halt and ask.
+7. **Reg FD / 8-K-or-6-K** — if material non-public information, will this be filed simultaneously? Ask before drafting.
+
+Do not proceed to Step 3 until the user has confirmed (a) the deal can be publicly disclosed, (b) the announcement angle, and (c) the material facts.
+
+### Step 3: Generate 3 PR Variants
+
+Load the rubrics + calibration once (same as analyze mode), then write 3 drafts conditioned on the source-doc facts. Each draft must:
+
+- Use ONLY facts present in the source document or the user-confirmed angle. Do NOT invent revenue, customer counts, or growth figures that are not in the source.
+- Include a properly hedged forward-looking statements section with PSLRA safe-harbor language.
+- Include a "About Nuvini" boilerplate (read from prior NVNI PRs in `data/pr_impact.db` if available).
+- Be 800-1500 words (the empirical sweet spot).
+
+The 3 variants follow the same pattern as SIMULATE mode:
+
+- **Variant A — Maximum Clarity**: strict inverted pyramid; lead with the single most material quantitative fact from the source.
+- **Variant B — Narrative-Driven**: lead with strategic rationale; frame the agreement as a milestone in a larger NVNI narrative (compliance recovery, AI strategy, serial acquirer model).
+- **Variant C — Data-Dense**: front-load every quantitative fact pulled from the source (dollar amounts, percentages, term length, customer/country counts).
+
+### Step 4: Score All 3 Variants
+
+Run the full 4-agent ANALYZE pipeline (Sections "Step 4" and "Step 5" of Mode 1) on each variant in parallel — one set of 4 agents per variant, all spawned in a single message (12 agents total).
+
+### Step 5: Output Comparative Report + Final Draft
+
+Pick the highest-scoring variant. Produce two artifacts:
+
+**A. Comparative report** (markdown + docx) with the same table format as SIMULATE mode, plus a fact-trace section showing which source-doc fact each PR claim maps to.
+
+**B. Final PR draft** (markdown + docx) — the winning variant ready for legal review.
+
+Save both:
+
+```bash
+REPORT_DIR="/Volumes/AI/Code/pr-impact/output/reports"
+mkdir -p "$REPORT_DIR"
+TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+SLUG="$(echo "{PR_TITLE_SHORT}" | tr '[:upper:] ' '[:lower:]-' | tr -cd 'a-z0-9-')"
+
+REPORT_MD="$REPORT_DIR/pr-draft-report-${SLUG}-${TIMESTAMP}.md"
+DRAFT_MD="$REPORT_DIR/pr-draft-${SLUG}-${TIMESTAMP}.md"
+
+# Write comparative report → REPORT_MD
+# Write final PR draft → DRAFT_MD
+
+for f in "$REPORT_MD" "$DRAFT_MD"; do
+  pandoc "$f" -o "${f%.md}.docx" --from markdown --to docx \
+    --metadata title="PR Draft: {PR_TITLE}" \
+    --metadata date="$(date +%Y-%m-%d)" \
+    --metadata author="PR Impact Optimizer — Nuvini"
+done
+```
+
+Report all four file paths to the user (report .md + .docx, draft .md + .docx).
+
+### Step 6: Hand Off to Legal
+
+End the response with an explicit reminder:
+
+> **Before distributing**: this draft requires legal review for SEC compliance, confirmation that all material facts are accurate, and verification that public disclosure does not breach confidentiality provisions in the source document. The PSLRA safe-harbor language must be reviewed by counsel for the specific forward-looking statements made.
+
+### DRAFT mode compliance boundaries
+
+In addition to the global SEC Compliance Boundaries below, DRAFT mode adds:
+
+- **Never disclose unsigned/non-binding agreements as if they are signed deals.** If `facts.signed == false`, the draft must explicitly characterize the agreement as a "memorandum of understanding," "letter of intent," "non-binding term sheet," etc. — not as an executed transaction.
+- **Never extrapolate financial impact** beyond what the source document states. If the MOU does not commit to a dollar amount, do not assert one.
+- **Confidentiality first.** If the source document contains a confidentiality clause and the user has not confirmed waiver/release, halt and refuse to draft.
+
+---
+
+## Mode 3: SIMULATE
 
 ### Step 1: Load and Analyze Original Draft
 
@@ -432,7 +537,7 @@ Report both file paths to the user.
 
 ---
 
-## Mode 3: BACKTEST
+## Mode 4: BACKTEST
 
 ### Default: NVNI Backtest
 
@@ -448,7 +553,7 @@ python3 /Volumes/AI/Code/pr-impact/scripts/09_backtest_nvni.py
 
 ---
 
-## Mode 4: COLLECT
+## Mode 5: COLLECT
 
 Re-run the full data pipeline:
 
