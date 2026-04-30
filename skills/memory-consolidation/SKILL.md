@@ -798,6 +798,90 @@ async function generateCrossMemoryInsights(memories, lastConsolidationDate) {
 
 **When to run:** This step executes during every consolidation pass (both full `/consolidate` and `/consolidate --merge-only`). It is lightweight — the LLM reads memory text only, no codebase access needed.
 
+### Step 3.5: Motif Pattern Promotion (≥3 motifs → pattern page)
+
+Salience promotes individual memories that are independently important. This step catches **horizontal patterns** — the same motif repeating across 3+ otherwise-unrelated memories — that per-file salience misses entirely. Adapted from GBrain v0.23.0's `dream` phase (2026-04-30).
+
+**Heuristic:** When the same motif/theme is referenced in **3+ distinct memory files**, auto-generate a `pattern:<motif>.md` (or `mistake:<motif>.md` if the motif is a recurring failure) in `auto/semantic/` that cites each source as evidence.
+
+**Process:**
+
+1. **Build a motif index from the corpus.** Scan all `auto/episodic/` and `auto/working/` memories from the last 30 days. For each memory, extract 3-5 noun-phrase motifs (e.g., "supabase rls", "alembic conflict", "worktree dispatch", "pluggy connect"). Use the LLM, not regex — motifs are semantic, not lexical.
+2. **Count cross-file occurrences.** Build `motif → [files]` map. Drop motifs that appear in fewer than 3 distinct files.
+3. **Classify each surviving motif:**
+   - If the corroborating memories are mostly mistakes/failures → `mistake:<motif>.md`
+   - If they describe reusable techniques → `pattern:<motif>.md`
+   - If they're domain knowledge → `tech-insight:<motif>.md`
+4. **Check for an existing page.** Run `mem-search "<motif>"` first. If a high-relevance match exists, **append the new sources to its timeline** instead of creating a duplicate. The compiled-truth section may need a rewrite if the new evidence shifts the current best understanding (per memory-strategy.md).
+5. **Write the new page** with all corroborating sources cited in the timeline (one bullet per source, with file path and date).
+6. **Cross-link** per memory-strategy.md — back-reference the motif page from each corroborating memory.
+
+**Pseudocode:**
+
+```javascript
+async function promoteMotifPatterns(memories) {
+  const recent = memories.filter((m) =>
+    daysSince(m.lastModified) <= 30 &&
+    (m.tier === "episodic" || m.tier === "working"),
+  );
+
+  // 1. Extract motifs per memory via LLM (batch of ~10 memories per call)
+  const motifIndex = {};
+  for (const batch of chunk(recent, 10)) {
+    const motifsPerFile = await extractMotifs(batch); // returns {file: [motif1, motif2, ...]}
+    for (const [file, motifs] of Object.entries(motifsPerFile)) {
+      for (const motif of motifs) {
+        motifIndex[motif] = motifIndex[motif] || new Set();
+        motifIndex[motif].add(file);
+      }
+    }
+  }
+
+  // 2. Filter to motifs with >= 3 distinct sources
+  const promotable = Object.entries(motifIndex).filter(
+    ([_, files]) => files.size >= 3,
+  );
+
+  // 3-6. Promote each
+  const promoted = [];
+  for (const [motif, files] of promotable) {
+    const slug = slugify(motif);
+    const sources = [...files];
+    const classification = await classifyMotif(motif, sources); // pattern | mistake | tech-insight
+
+    const existing = await memSearch(motif);
+    if (existing.topScore >= 7) {
+      await appendToTimeline(existing.path, sources);
+    } else {
+      await writeNewPage({
+        type: classification,
+        slug,
+        motif,
+        sources,
+        tier: "semantic",
+      });
+    }
+    await crossLinkBack(sources, slug);
+    promoted.push({ motif, classification, sourceCount: files.size });
+  }
+
+  await Bash("~/.claude-setup/tools/mem-search --reindex");
+  return promoted;
+}
+```
+
+**Rate limits:**
+
+- Cap at **5 promotions per consolidation run** to avoid flooding `auto/semantic/` with low-signal pages.
+- Skip motifs that are **too generic** (e.g., "bug", "fix", "test", "deploy") — these would aggregate noise rather than insight. Maintain a stop-list at `~/.claude-setup/memory/auto/_motif_stoplist.txt`.
+- Skip motifs already promoted in the last 7 days — wait for new corroborating evidence before re-running.
+
+**When to run:** Phase 3.5 executes during full consolidation passes only (skip in `--merge-only`). It runs **after** Step 3.4 because cross-memory relations may already cover some motifs — the motif promoter only fires when the relation graph isn't enough.
+
+**Why this complements salience scoring:**
+
+Per-file salience (Phase 2) asks "is this memory important on its own?" Motif promotion asks "is this memory part of a pattern across the corpus?" A memory can be low-salience individually but high-signal as the third instance of a recurring motif — Step 3.5 catches exactly that case.
+
 ---
 
 ## Phase 4: Selective Forgetting
