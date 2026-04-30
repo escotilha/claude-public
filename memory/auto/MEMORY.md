@@ -33,6 +33,8 @@
 - [semantic/tech-insight_github_no_synchronize_on_conflicting_prs.md](semantic/tech-insight_github_no_synchronize_on_conflicting_prs.md) — GitHub does not fire pull_request:synchronize for pushes to a CONFLICTING PR branch — workflows triggered on synchronize silently never run
 - [semantic/mistake_settings_bak_public_leak.md](semantic/mistake_settings_bak_public_leak.md) — 2026-04-21 incident — settings.json.bak-* file with literal API keys force-pushed to public GitHub because its filename didn't match the .ba
 - [semantic/mistake_validate-storage-constraints-before-schema.md](semantic/mistake_validate-storage-constraints-before-schema.md) — Always confirm runtime environment constraints (which databases are available, where the skill runs) before writing schema.sql or any storag
+- [semantic/mistake_rebase_script_stale_origin_main.md](semantic/mistake_rebase_script_stale_origin_main.md) — Rebase helpers must `git fetch origin main` before merging — without it, origin/main is stale and merge is a silent no-op
+- [semantic/mistake_gha_concurrency_cancel_no_replacement.md](semantic/mistake_gha_concurrency_cancel_no_replacement.md) — GHA `concurrency.cancel-in-progress: true` sometimes cancels in-flight run without firing replacement; recover via gh pr close+reopen
 - [semantic/pattern_autobrowse_failure_to_insight.md](semantic/pattern_autobrowse_failure_to_insight.md) — Self-improving browser automation — failure-to-insight retry loop that graduates winning workflows into reusable skills
 - [semantic/pattern_migration_importlib_date_prefix.md](semantic/pattern_migration_importlib_date_prefix.md) — Load date-prefixed Alembic migration files in pytest via importlib.util.spec_from_file_location + stable sys.modules alias; patch.object against the alias
 - [semantic/pattern_db_path_defaults_match_data_location.md](semantic/pattern_db_path_defaults_match_data_location.md) — When a CLI resolves DB path via `defaults.db_path()` with an env override, the default MUST match where data actually lives — otherwise inte
@@ -61,6 +63,7 @@
 - [working/contably-os-v4-online-2026-04-21.md](working/contably-os-v4-online-2026-04-21.md) — What's running in production as of 2026-04-21 end-of-day. Resume block for future sessions.
 - [working/resume_2026-04-22_overnight.md](working/resume_2026-04-22_overnight.md) — Resume pointer for the Contably overnight engine session that was rate-limited at 22:40 local. Any new session should read this first.
 - [working/resume_mary_restart_2026-04-23.md](working/resume_mary_restart_2026-04-23.md) — Mary restart COMPLETED 2026-04-23 03:40 — Discord verified end-to-end on Max plan via claude-cli
+- [working/contably-overnight-cascade-2026-04-30.md](working/contably-overnight-cascade-2026-04-30.md) — Pierre asleep 2026-04-29 22:33; /loop running autonomously through 15-PR cascade; resume here if session drops
 
 ## Entities (legacy) — agents, deals, registries
 
