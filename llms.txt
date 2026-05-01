@@ -2,7 +2,7 @@
 
 > Pierre Schurmann's Claude Code setup: 86 skills, 13 global rules, hybrid memory system. LLM-discoverable via llmstxt.org spec. Use this file to understand what tooling is available before starting work.
 
-Last generated: 2026-05-01T10:52:52Z
+Last generated: 2026-05-01T12:33:32Z
 
 ## Rules
 
@@ -37,6 +37,7 @@ User-invocable skills. Trigger via `/<skill-name>` or natural-language match.
 - [browserless](skills/browserless/SKILL.md): Headless browser via Browserless. PDFs, screenshots, Lighthouse, JS rendering, anti-bot. Triggers on: browserless, headless browser, generate PDF, take screenshot, lighthouse audit, unblock site, brow
 - [careful](skills/careful/SKILL.md): Safety guardrails — warns before rm -rf, DROP TABLE, force-push, kubectl delete. Triggers: careful, careful mode, safety mode.
 - [chief-geo](skills/chief-geo/SKILL.md): Chief GEO Officer for SourceRank AI. Knowledge base, product audit, manual updates, AI visibility testing. Triggers on: chief geo, geo officer, geo audit, geo strategy, geo knowledge, /chief-geo.
+- [claude-api](skills/claude-api/SKILL.md): Build, debug, and optimize Claude API / Anthropic SDK apps. Apps built with this skill should include prompt caching. Also handles migrating existing Claude API code between Claude model versions (4.5
 - [claude-setup-optimizer](skills/claude-setup-optimizer/SKILL.md): Analyze Claude Code changelog and recommend setup improvements. Triggers on: optimize claude setup, check for claude updates, improve my agents, sync with claude changelog, /optimize-setup.
 - [codebase-cleanup](skills/codebase-cleanup/SKILL.md): Identify and remove unused, redundant, or dead code files in a project. Triggers on: clean up unused files, find unnecessary files, remove dead code, codebase cleanup, reduce project bloat.
 - [computer-use](skills/computer-use/SKILL.md): Desktop automation via Claude computer use. macOS apps, GUI tools, government portals, iOS Simulator. Triggers on: computer use, desktop automation, native app, gui automation, government portal, esoc
@@ -85,6 +86,9 @@ User-invocable skills. Trigger via `/<skill-name>` or natural-language match.
 - [parallel-dev](skills/parallel-dev/SKILL.md): Parallel feature development using git worktrees and specialized agents. Orchestrates multiple features in isolation with CI reaction loops, progress monitoring, and progressive merge. Delegates to `a
 - [pinchtab](skills/pinchtab/SKILL.md): Local browser automation via PinchTab. A11y trees, element refs, screenshots, PDFs, JS eval. 5-13x cheaper. Triggers on: pinchtab, browser control, page snapshot, element refs, accessibility tree, pin
 - [platform-sweep](skills/platform-sweep/SKILL.md): Platform health sweep — UX, security, perf, deps. Parallel agents, auto-fixes. Triggers: platform sweep, health sweep, full audit, code sweep.
+- [pluggy-integration](skills/pluggy-integration/SKILL.md): Core Pluggy integration patterns and best practices. Use when setting up Pluggy SDK, implementing Connect Widget, managing Items, or configuring webhooks.
+- [pluggy-open-finance](skills/pluggy-open-finance/SKILL.md): Best practices for Open Finance data retrieval and management. Use when working with accounts, transactions, investments, loans, or identity data.
+- [pluggy-payments](skills/pluggy-payments/SKILL.md): Payment initiation with PIX, Boleto, and Smart Transfers. Use when implementing payment flows, PIX transfers, or preauthorized payments.
 - [pr-impact](skills/pr-impact/SKILL.md): PR Impact Optimizer for Nuvini (NVNI). Score, optimize, draft-from-source, and backtest press releases for stock impact + SEC compliance. Triggers on: pr impact, press release, optimize pr, score pr, 
 - [primer](skills/primer/SKILL.md): Context recovery after compaction or session start. ~500-token summary of memories, project state, git status, pending work. Triggers on: primer, context recovery, where was I, what was i doing, resum
 - [proposal-source](skills/proposal-source/SKILL.md): Generate diagnostic/research proposals for SourceRank AI clients. PDF output in Portuguese. Triggers on: proposal source, proposta sourcerank, gerar proposta, create proposal, client proposal, diagnos
