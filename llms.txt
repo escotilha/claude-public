@@ -2,7 +2,7 @@
 
 > Pierre Schurmann's Claude Code setup: 86 skills, 13 global rules, hybrid memory system. LLM-discoverable via llmstxt.org spec. Use this file to understand what tooling is available before starting work.
 
-Last generated: 2026-05-01T02:00:11Z
+Last generated: 2026-05-01T10:52:52Z
 
 ## Rules
 
