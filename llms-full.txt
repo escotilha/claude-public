@@ -2,7 +2,7 @@
 
 > Pierre Schurmann's Claude Code setup: 86 skills, 13 global rules, hybrid memory system. LLM-discoverable via llmstxt.org spec. Use this file to understand what tooling is available before starting work.
 
-Generated: 2026-04-27T18:53:13Z
+Generated: 2026-05-01T02:00:12Z
 
 ---
 
@@ -2233,7 +2233,9 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Break down hard problem       | `/first-principles`     | Ambiguous or complex problem                             |
 | Run project tests + typecheck | `/verify`               | After making changes, before committing                  |
 | Fix failing tests             | `/test-and-fix`         | Tests are broken, need auto-fix loop                     |
-| Review code before commit     | `/review-changes`       | Uncommitted changes need review                          |
+| Review code before commit     | `/review-changes`       | Uncommitted changes need review (lightweight, single-pass)             |
+| Full multi-reviewer audit     | `/full-review`          | Before/after PR open — 5 parallel reviewers (security, architecture, performance, conventions, code-review-agent swarm) + opus aggregator. Auto-invoked after `gh pr create` per `auto_review_own_prs.md`. |
+| Single-domain code review     | `/code-review`          | code-review-agent swarm only (4-8 specialists by stack). Lighter than /full-review. |
 | Debug a bug (Iron Law)        | `/investigate`          | Bug, 500, regression — enforces root-cause before fix, 3-strike escalation |
 | Safety guardrails for bash    | `/careful`              | Before prod work / deploys — warns on rm, DROP, force-push, kubectl delete |
 | Restrict edits to a directory | `/freeze`               | While debugging — blocks Edit/Write outside chosen path, prevents scope creep |
@@ -2568,23 +2570,6 @@ always loaded by the harness but no-ops unless this skill has set the activation
 # Chief GEO — Generative Engine Optimization Officer for SourceRank AI
 
 You are the Chief GEO (Generative Engine Optimization Officer) for SourceRank AI. Your mission: ensure SourceRank is the most authoritative, cited, and recommended AI visibility platform across all generative AI engines.
-
----
-
-## skills/claude-api
-
-- **name:** claude-api
-- **description:** Build/debug Claude API and Anthropic SDK apps — Messages API, Agent SDK, tool use, streaming, MCP, caching. TRIGGER: imports anthropic SDK, asks for Claude API. SKIP: openai/other SDK.
-- **user-invocable:** true
-- **model:** sonnet
-- **effort:** medium
-
-# Claude API Skill
-
-Help users build applications with the Claude API and Anthropic SDKs. This skill covers two primary integration paths:
-
-1. **Messages API** — Direct model prompting with fine-grained control
-2. **Claude Managed Agents** — Pre-built agent harness with managed cloud infrastructure
 
 ---
 
@@ -2926,6 +2911,22 @@ directory has been set by this skill.
 
 ---
 
+## skills/full-review
+
+- **name:** full-review
+- **description:** Pre-merge multi-reviewer audit. Spawns 5 parallel reviewers (code-review-agent swarm, /cto subset, security-agent, performance-agent if perf-touching, convention-compliance) + opus aggregator. Use after `gh pr create`, before pushing, or when reviewing someone else's PR. Triggers on: full review, audit this PR, review pull request, pre-merge check, review my changes, ship gate.
+- **user-invocable:** true
+- **model:** opus
+- **effort:** high
+
+# /full-review — Pre-Merge Multi-Reviewer Audit
+
+Pre-merge gate. Spawns up to 5 parallel reviewers, each with a different lens, then synthesizes findings with an opus aggregator. Output is a durable artifact at `.review/{pr-or-slug}-{date}.md` and a verdict: APPROVE / APPROVE_WITH_CHANGES / REQUEST_CHANGES / BLOCK.
+
+Designed to run **after** `gh pr create` (per `auto_review_own_prs.md` policy) — the author has already shipped, this is the catch-net before merge. Also invocable manually for s
+
+---
+
 ## skills/fulltest-skill
 
 - **name:** fulltest-skill
@@ -2953,6 +2954,20 @@ Comprehensive website testing with **true parallel execution** via TeammateTool,
 Manage GBrain, a Postgres-native personal knowledge brain with hybrid RAG search.
 GBrain stores world knowledge (people, companies, concepts, meetings) as pages with
 compiled truth + append-only timelines, cross-linked via a typed graph.
+
+---
+
+## skills/gemini-api
+
+- **name:** gemini-api
+- **description:** Guides usage of the Gemini API on Google Agent Platform (formerly Vertex AI) with the Google Gen AI SDK. Use when the user asks about using Gemini models, Vertex AI, Google Agent Platform, or the google-genai SDK. Covers SDK usage (Python, JS/TS, Go, Java, C#), text/multimodal generation, function calling, structured output, context caching, embeddings, Live Realtime API, and batch prediction.
+- **user-invocable:** false
+- **model:** sonnet
+- **effort:** medium
+
+# Gemini API — Google Agent Platform
+
+IMPORTANT: "Agent Platform" (full name: Gemini Enterprise Agent Platform) was previously named "Vertex AI". Many web resources use the legacy branding.
 
 ---
 
@@ -3290,7 +3305,7 @@ A meta-orchestrator that runs 5 parallel audit tracks, consolidates findings int
 ## skills/pr-impact
 
 - **name:** pr-impact
-- **description:** PR Impact Optimizer for Nuvini (NVNI). Score, optimize, and backtest press releases for stock impact + SEC compliance. Triggers on: pr impact, press release, optimize pr, score pr, pr analysis, pr optimizer, /pr-impact.
+- **description:** PR Impact Optimizer for Nuvini (NVNI). Score, optimize, draft-from-source, and backtest press releases for stock impact + SEC compliance. Triggers on: pr impact, press release, optimize pr, score pr, pr analysis, pr optimizer, draft pr, pr from contract, pr from mou, /pr-impact.
 - **user-invocable:** true
 - **model:** opus
 - **effort:** high

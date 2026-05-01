@@ -2,7 +2,7 @@
 
 > Pierre Schurmann's Claude Code setup: 86 skills, 13 global rules, hybrid memory system. LLM-discoverable via llmstxt.org spec. Use this file to understand what tooling is available before starting work.
 
-Last generated: 2026-04-27T18:53:13Z
+Last generated: 2026-05-01T02:00:11Z
 
 ## Rules
 
@@ -37,7 +37,6 @@ User-invocable skills. Trigger via `/<skill-name>` or natural-language match.
 - [browserless](skills/browserless/SKILL.md): Headless browser via Browserless. PDFs, screenshots, Lighthouse, JS rendering, anti-bot. Triggers on: browserless, headless browser, generate PDF, take screenshot, lighthouse audit, unblock site, brow
 - [careful](skills/careful/SKILL.md): Safety guardrails — warns before rm -rf, DROP TABLE, force-push, kubectl delete. Triggers: careful, careful mode, safety mode.
 - [chief-geo](skills/chief-geo/SKILL.md): Chief GEO Officer for SourceRank AI. Knowledge base, product audit, manual updates, AI visibility testing. Triggers on: chief geo, geo officer, geo audit, geo strategy, geo knowledge, /chief-geo.
-- [claude-api](skills/claude-api/SKILL.md): Build/debug Claude API and Anthropic SDK apps — Messages API, Agent SDK, tool use, streaming, MCP, caching. TRIGGER: imports anthropic SDK, asks for Claude API. SKIP: openai/other SDK.
 - [claude-setup-optimizer](skills/claude-setup-optimizer/SKILL.md): Analyze Claude Code changelog and recommend setup improvements. Triggers on: optimize claude setup, check for claude updates, improve my agents, sync with claude changelog, /optimize-setup.
 - [codebase-cleanup](skills/codebase-cleanup/SKILL.md): Identify and remove unused, redundant, or dead code files in a project. Triggers on: clean up unused files, find unnecessary files, remove dead code, codebase cleanup, reduce project bloat.
 - [computer-use](skills/computer-use/SKILL.md): Desktop automation via Claude computer use. macOS apps, GUI tools, government portals, iOS Simulator. Triggers on: computer use, desktop automation, native app, gui automation, government portal, esoc
@@ -60,8 +59,10 @@ User-invocable skills. Trigger via `/<skill-name>` or natural-language match.
 - [firecrawl](skills/firecrawl/SKILL.md): Web scraping, crawling, and data extraction via Firecrawl. Converts sites to LLM-ready markdown. JS rendering, anti-bot, proxy rotation. Triggers on: scrape, crawl, web data, extract website, site map
 - [first-principles](skills/first-principles/SKILL.md): Break down a problem to its fundamentals before implementing. Use for complex or ambiguous problems.
 - [freeze](skills/freeze/SKILL.md): Restrict Edit/Write to one directory. Blocks edits outside path. Triggers: freeze, freeze edits, lock scope.
+- [full-review](skills/full-review/SKILL.md): Pre-merge multi-reviewer audit. Spawns 5 parallel reviewers (code-review-agent swarm, /cto subset, security-agent, performance-agent if perf-touching, convention-compliance) + opus aggregator. Use aft
 - [fulltest-skill](skills/fulltest-skill/SKILL.md): Swarm-enabled full-spectrum site testing via TeammateTool. Parallel page testers, cross-page pattern detection, auto-fix, reports. Triggers on: fulltest, full test, site test, test all pages.
 - [gbrain](skills/gbrain/SKILL.md): GBrain knowledge brain management — setup, import, query, maintain, ingest. Triggers on: gbrain, knowledge brain, brain query, brain search, brain import, brain setup, brain ingest.
+- [gemini-api](skills/gemini-api/SKILL.md): Guides usage of the Gemini API on Google Agent Platform (formerly Vertex AI) with the Google Gen AI SDK. Use when the user asks about using Gemini models, Vertex AI, Google Agent Platform, or the goog
 - [get-api-docs](skills/get-api-docs/SKILL.md): Fetch current API docs for any library/SDK via chub CLI. 1,000+ APIs (Supabase, Anthropic, Clerk, Prisma, Stripe, Playwright). Triggers on: get api docs, fetch docs, chub, api documentation.
 - [growth](skills/growth/SKILL.md): SaaS growth engineering: CRO, pricing, signup, onboarding, SEO/GEO, churn prevention, A/B tests. Triggers on: growth, cro, conversion optimization, pricing strategy, signup flow, onboarding, seo audit
 - [gws](skills/gws/SKILL.md): Google Workspace CLI automation for bulk/complex tasks beyond MCP scope. Drive, Sheets, Gmail, Calendar, Chat, Admin. Triggers on: gws, google workspace automation, bulk drive, sheets pipeline, gmail 
@@ -84,7 +85,7 @@ User-invocable skills. Trigger via `/<skill-name>` or natural-language match.
 - [parallel-dev](skills/parallel-dev/SKILL.md): Parallel feature development using git worktrees and specialized agents. Orchestrates multiple features in isolation with CI reaction loops, progress monitoring, and progressive merge. Delegates to `a
 - [pinchtab](skills/pinchtab/SKILL.md): Local browser automation via PinchTab. A11y trees, element refs, screenshots, PDFs, JS eval. 5-13x cheaper. Triggers on: pinchtab, browser control, page snapshot, element refs, accessibility tree, pin
 - [platform-sweep](skills/platform-sweep/SKILL.md): Platform health sweep — UX, security, perf, deps. Parallel agents, auto-fixes. Triggers: platform sweep, health sweep, full audit, code sweep.
-- [pr-impact](skills/pr-impact/SKILL.md): PR Impact Optimizer for Nuvini (NVNI). Score, optimize, and backtest press releases for stock impact + SEC compliance. Triggers on: pr impact, press release, optimize pr, score pr, pr analysis, pr opt
+- [pr-impact](skills/pr-impact/SKILL.md): PR Impact Optimizer for Nuvini (NVNI). Score, optimize, draft-from-source, and backtest press releases for stock impact + SEC compliance. Triggers on: pr impact, press release, optimize pr, score pr, 
 - [primer](skills/primer/SKILL.md): Context recovery after compaction or session start. ~500-token summary of memories, project state, git status, pending work. Triggers on: primer, context recovery, where was I, what was i doing, resum
 - [proposal-source](skills/proposal-source/SKILL.md): Generate diagnostic/research proposals for SourceRank AI clients. PDF output in Portuguese. Triggers on: proposal source, proposta sourcerank, gerar proposta, create proposal, client proposal, diagnos
 - [qa-conta-gate](skills/qa-conta-gate/SKILL.md): Pre-production UX/UI gate for Contably. Tests actual feature pages in staging with parallel browser testers, fix-loops bugs, writes ux_approved signal. Triggers on: qa conta gate, ux gate, pre-prod qa
