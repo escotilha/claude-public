@@ -1,82 +1,79 @@
 ---
 name: contably-overseer-phase0-progress
-description: oxi v5 overseer Phase 0 + Phase 1 shipped May 1 2026. Engine works end-to-end, feeder ready, awaiting first --apply against real Tier 0.
+description: oxi v5 overseer — Phase 0/1/2 shipped, Phase 6 wave 1 dispatching, target 600 PRs/wk by 2026-05-08. Autonomous mode active.
 type: project
 originSessionId: dd472722-5078-45ac-a33b-0dc045d10a2b
 ---
-oxi v5 overseer is live, verified, and now has a feeder. PRs #793 (smoke) and roadmap parser are landed. Pierre is delivering 472 PRs/week at R$ 146/week — 67× cheaper than top-tier-BR-without-AI. Bottleneck is no longer throughput, it's coordination + dispatch quality at scale.
+oxi v5 overseer is live, verified, autonomous. Pierre target: 600 PRs/wk by week ending 2026-05-08. Current engine producing autonomous PRs (#793 + #794 merged). Phase 6 wave 1 (5 cross-cutting tasks) seeded and dispatching as of 2026-05-01 ~17:05 PT.
 
 ## Today's commits (2026-05-01, all on origin/main)
 
-- **b9af431f9** — docs(overseer): SKILL.md drift fix + start.sh auth pre-check (Phase 0)
-- **a0c1a2635** — fix(overseer): drop --bare from worker_cmd (Phase 0 follow-up; --bare incompatible with Max plan keychain auth)
-- **c08fc3a3c** — feat(overseer): roadmap → tasks.db feeder (Phase 1)
-- **PR #793** — first autonomous engine dispatch, smoke verification, will auto-merge when CI completes
+- **b9af431f9** — Phase 0: SKILL.md drift + start.sh auth pre-check
+- **a0c1a2635** — Phase 0 follow-up: drop --bare from worker_cmd (Max plan keychain compat)
+- **c08fc3a3c** — Phase 1: roadmap → tasks.db feeder
+- **b685078d4** — Phase 2: failure classifier + cascade-prevention breaker
+- **feccb104a** — feed.py staleness check (closes the Tier 0 hole)
+- **7d63028ea** — runtime-tunable max-workers via --max-workers / MAX_WORKERS env var
+- **3e5ced992** — Phase 6 wave 1 seed (5 tasks: P6-OBS-1, P6-SEC-1, P6-INF-1, P6-INF-2, P6-INF-3)
+
+## Two PRs already merged (autonomously)
+
+- **PR #793** — smoke test (engine first-light, May 1)
+- **PR #794** — T0-104 WeasyPrint (worker built and PR auto-merged)
 
 ## Engine state
 
-- tmux session `oxi-overseer` running, pid 74293, ticking every 60s
-- Worker cmd: `claude --dangerously-skip-permissions -p` (NO --bare; uses keychain OAuth)
-- DB: `.oxi/v5/tasks.db` has 2 stale planned tasks (T17, T18 — empty files_touched, can't dispatch)
-- Auth pre-check verified at every restart
-- 136 tests pass (was 117 before today)
+- tmux `oxi-overseer`, pid 77562 (started 15:05 PT)
+- Phase 2 code, cascade-prevention breaker active
+- Worker cmd: `claude --dangerously-skip-permissions -p` (no --bare; Max plan keychain auth)
+- MAX_ACTIVE_WORKERS=3 (default; bump via MAX_WORKERS env var on next restart)
+- Test suite: 170/170 pass
 
-## Phase 1 deliverable: `infra/overseer/feed.py` (270 LOC)
+## Phase 6 wave 1 — what's queued
 
-Two subcommands:
-```
-python -m infra.overseer.feed parse --roadmap docs/contably-product-roadmap-2026-Q3.md --tier 0 [--apply]
-python -m infra.overseer.feed add --id T0-101 --tier 0 --title "..." --files a.py,b.py
-```
+5 tasks, hand-curated, staleness-verified, file-paths-confirmed:
 
-Verified against real Q3 roadmap: parses 42/42 tasks, idempotent. 8/42 have files extracted from prose; rest need hand-enrichment of `files_touched` before they can pass the policy gate.
+| ID | Track | Files | Risk |
+|---|---|---|---|
+| P6-OBS-1 | Observability | infrastructure/monitoring/alerts/ | low (alert YAML only) |
+| P6-SEC-1 | Security | .gitleaks.toml + ci.yml | low (CI config) |
+| P6-INF-1 | Infra | kustomize overlays + 2 workflows | medium (infra refactor) |
+| P6-INF-2 | Infra | scripts/ | low (script + docs) |
+| P6-INF-3 | Infra | scripts/ | low (script + docs) |
 
-## Critical lessons baked in (don't re-learn)
+Stale items audited and explicitly NOT queued:
+- NF-e get_async_session_context bug (module deleted by PR #790)
+- Celery Beat persistence (PR #738 + celery_app.py already done)
+- HIGH #3 / HIGH #4 cert-upload redaction (already on remote-agent calendar 2026-05-08)
 
-1. **`--bare` and Max plan are incompatible.** `claude --bare` refuses to read keychain — only ANTHROPIC_API_KEY or apiKeyHelper. Apr 29 cascade was workers using --bare without an API key. Pierre does NOT want to use API keys (cost). Fix: drop --bare.
+## The 600 PR/wk plan
 
-2. **`claude --print` reads keychain, but `claude --bare` does not.** An auth pre-check using --print does NOT validate worker auth if workers use --bare. Phase 0's pre-check accidentally tested the wrong path; Phase 0-followup made it correct by dropping --bare from workers.
+Per Pierre's POWER LEVEL screenshot 2026-04-23 to 2026-04-30: 472 PR/wk at R$146/wk. Target 600 = +27%. Plan v1 split into 3 tracks:
 
-3. **Always `git fetch origin` before designing changes.** Earlier in this session I committed against a tree 36 commits stale (PR #776 already bumped TOTAL_SLOTS=16/6/12 with proper proportions; my commit only bumped TOTAL_SLOTS and got the proportions wrong). Lesson: fetch before deep-research, not just before push.
+- **Track A** — Phase 6 cross-cutting via overseer. ~30 PRs/wk capacity at MAX_WORKERS=3, ~50-60 at MAX_WORKERS=5-6.
+- **Track B** — Pierre + manual flows continue at 472/wk pace.
+- **Track C** — Phase 7 atlas-tier0 slicing (deferred until Track A proven).
 
-4. **Concurrent sessions are real.** PRs #790-#792 landed during the same session I was working in. Always `gh pr list --state merged --search <topic>` before designing changes that touch shared infra.
+Pierre asked to test the upper limit of MAX_ACTIVE_WORKERS — runtime-tunable via env var now (`MAX_WORKERS=4 bash .claude/skills/contably-overseer/scripts/start.sh`). Strategy: ramp 3→4→5→6 with halt criteria (breaker trip / file conflict / RAM pressure / rate limit). Stop at 6 max for tonight; document ceiling.
 
-5. **Roadmap section 4 ("Dependency Hints") is preview-grade, not authoritative.** Numbering drifts (T0-1 vs T0-101). Body text is the authoritative source for files_touched.
+## Halt conditions for autonomous mode
 
-6. **Workers don't need synthesized done_when.** PR #793 confirmed they derive a usable DONE WHEN block from the approach paragraph during preflight.
+- Any PR touches `apps/api/src/api/routes/` (Phase 1 freeze)
+- Any PR touches auth/scope code (`/full-review` required)
+- Breaker trips (cascade detected — by definition needs operator)
+- More than 1 worker rc!=0 in a row from same Phase-6 batch (suggests batch is mis-curated)
+- Wants to push to main work I didn't author through engine
+- A roadmap-implied scope decision (NF-e flip, holerite, Tier 0/1 audit)
 
-## What's NOT done yet (priority order)
+## Resume context
 
-### Next decision point: `feed --apply` against real Q3 Tier 0
-- 5 tasks (T0-101..T0-105) ready to insert
-- Loop will pick them up immediately on next tick (tier=0 = highest priority)
-- This is the first real autonomous coding work, not a smoke test
-- Pierre is operating at 472 PRs/week → throughput is fine, what matters now is **dispatch quality** (right files, right scope, no foot-guns)
+- Wave 1 dispatches around 20:05-20:30 UTC; first wakeup checks 20:09 UTC
+- If wave clears clean → queue wave 2 (5 more Phase 6 items I haven't drafted yet — observability dashboards, more P6-TST items)
+- If breaker trips or quality bad → halt, report, debug
+- Next morning: optional ramp to MAX_WORKERS=4 via tmux restart with env var
 
-### Phase 2 (failure classifier) — high priority before scale
-At Pierre's volume, a single bad cascade pattern (like Apr 29's auth-as-rc=1) burns dozens of PRs in minutes. The Paperclip stranded_issue_recovery model is the right reference: classify failure_class (auth/infra/scope/logic/unknown), don't increment dispatch_count for adapter failures, circuit-break on N consecutive identical errors.
+## Known landmines
 
-### Tier 2-4 file enrichment
-34/42 tasks in Q3 roadmap have empty files_touched after parsing. Worth a roadmap sweep to add inline `apps/...` refs to prose so the regex catches them. Or: extend feeder to read Section 4 hints if reconciled with body numbering.
-
-### Phase 3+ (Janitor, planner upgrade) — defer until volume justifies
-Janitor (pre-merge lint/types/tests) becomes valuable when worker output volume strains review capacity. At 472 PRs/week that's ALREADY happening, but Pierre's review pipeline (auto-merge-clean.yml + Claude /full-review on every PR) seems to be holding up. Re-evaluate after a week of feed --apply traffic.
-
-## Resume instruction
-
-Pierre will likely say "continue", "feed apply", or "phase 2".
-
-- "**feed --apply tier 0**" → run `python -m infra.overseer.feed parse --roadmap docs/contably-product-roadmap-2026-Q3.md --tier 0 --apply` and watch the loop pick them up. Real autonomous coding starts.
-- "**phase 2**" → start building `infra/overseer/classify.py` (Paperclip pattern: failure_class enum, regex catalog of permanent failures, schema migration to add task.failure_class column, modify _reap_finished in loop.py to skip dispatch_count++ on adapter failures, circuit-break on 3 consecutive identical class+sig).
-- "**enrich roadmap**" → sweep docs/contably-product-roadmap-2026-Q3.md to inline file paths in Tier 2-4 task prose so the next `feed parse --tier 2` extracts useful files_touched.
-
-## Power level context (do not lose this)
-
-Pierre's current delivery rate (per his POWER LEVEL screenshot, 2026-04-23 to 2026-04-30):
-- 472 PRs / 7 days
-- 97 hours worked
-- 4.9 PRs/hour
-- R$ 146 total cost (Claude tokens — keychain auth + Max plan)
-- 67× cheaper than top-tier-BR engineering teams without AI (R$ 7.5-12k/wk for 5-15 PRs)
-
-Implication: the engine doesn't need to be FASTER. It needs to be MORE TRUSTWORTHY at scale. Phase 2 (failure classification + cascade prevention) is the next-most-valuable improvement, not throughput optimizations.
+- `find_next_planned` has no priority col in v5 schema → defaults to rowid order. T17/T18 (no files) rank ahead of P6 in scan but fail policy gate, fallthrough is correct
+- Workers run with --dangerously-skip-permissions: real autonomy, real blast radius. Trust the breaker but don't crank concurrency without monitoring
+- Roadmap-implied scope decisions (NF-e flip, holerite scope, Tier 0/1 audits) STAY operator-decision
