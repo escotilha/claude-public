@@ -215,3 +215,4 @@
 
 # currentDate
 Today's date is 2026-05-01.
+- [working/contably-overseer-phase0-progress.md](working/contably-overseer-phase0-progress.md) — oxi v5 Phase 0 shipped, Level 1 verified, Level 3 + feeder pending; skip Level 2
