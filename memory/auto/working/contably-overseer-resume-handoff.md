@@ -7,29 +7,28 @@ originSessionId: dd472722-5078-45ac-a33b-0dc045d10a2b
 
 # RESUME — Contably overseer, 2026-05-02 ~16:35 UTC
 
-## ⚠️ CRITICAL — staging is uninstallable
+## ⚠️ CRITICAL — staging is still uninstallable (after partial fix)
 
-**130 PRs merged into main today, but the latest Deploy Staging FAILED.** Two real regressions:
+**130 PRs merged into main today.** Three regressions surfaced + 2 fixed, 2 remaining:
 
-### 1. Alembic migration chain broken — 4 unconnected heads
-```
-HEADS (uncalled by anything):
-  046  20260413_180000_046_rename_company_user_roles.py
-  031  20260315_100001_031_add_sefaz_webhook_events.py
-  055  20260414_130000_055_sync_bank_model_columns.py
-  025  20260127_130100_025_extend_uploads_ocr.py
+### ✅ FIXED (committed in `bb518451c` → pushed as `58a44f2`):
+1. **Alembic 10 heads collapsed** — `/alembic-chain-repair` skill found 2 old PRs (`a3f7c8d92e1b`, `3ff426058434`) chained off `066_drop_ticket_sla_fields` BEFORE the 067-072 chain landed, which is why `manager_saas_events_table` could `ALTER fiscal_certificates` before `069_nf_emission_tables` created it. Also created merge migration `20260502_164844_a6e0ddb7cf98_merge_10_heads_from_engine_cron_auto_.py`.
+2. **Ruff regression** in `models/__init__.py` (`analyst_achievements` import out of alphabetical order) — autofixed
+3. **Workflow_call permissions** — Deploy Staging now declares `pull-requests: read` (matches ci.yml)
 
-ORPHANS (down_revision points to nothing):
-  20260414_130000_055_sync_bank_model_columns.py     down=054 (missing)
-  20260127_130100_025_extend_uploads_ocr.py          down=024 (missing)
-  20260315_120000_030_add_lineage_tickets_notifications.py  down=030 (missing)
-  20260413_180000_046_rename_company_user_roles.py   down=045 (missing)
-```
+### 🔴 REMAINING (Pierre + tomorrow's session):
 
-CI symptom: `ProgrammingError: (1146, "Table 'contably_ci.fiscal_certificates' doesn't exist")` when running `ALTER TABLE fiscal_certificates ADD COLUMN manager_saas_cert_id`. Migration ordering broken.
+**3a. `closing_periods` table has no `create_table` migration.**
+- The model exists in `apps/api/src/models/monthly_closing.py`
+- 4 alembic migrations reference `closing_periods` (alter, extend, FK) — NONE create it
+- CI failure: `OperationalError: (1824, "Failed to open the referenced table 'closing_periods'")` when migration `20260510_120000_t2_106a_pending_adjustments.py` (Q3-CLOSE-T2-PENDING-ADJUSTMENTS-MODEL, shipped today) tries to `CREATE TABLE pending_adjustments` with FK to `closing_periods`
+- Latent for who knows how long — was hidden because old tests used `db.create_all()` not `alembic upgrade head`
+- **Fix:** create a NEW migration that does `CREATE TABLE IF NOT EXISTS closing_periods (...)` matching the SQLAlchemy model. Use `IF NOT EXISTS` since the table EXISTS on staging/prod (created via `db.create_all()` in the past). Insert the new migration into the chain BEFORE any migration that references `closing_periods` (i.e. before `3ff426058434_add_closing_period_accounting_period_fk` from 2026-04-20).
 
-### 2. Ruff lint failure in apps/api/src/
-"1 fixable with the --fix option" — single auto-fixable rule violation slipping past CI somehow. Run `ruff check apps/api/src/ --fix` locally to see + fix.
+**3b. `REDIS_URL_STAGING` secret missing.**
+- GL-12's pre-flight check correctly refused to patch K8s `contably-secrets` with empty value
+- **Fix:** `gh secret set REDIS_URL_STAGING --repo Contably/contably` and paste the staging Redis URL
+- Get URL from: `kubectl get secret contably-secrets -n contably-staging -o yaml` (decode base64) OR your password manager OR the previous-known-good kubectl manifest
 
 ## Why this happened
 
