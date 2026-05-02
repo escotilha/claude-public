@@ -21,6 +21,7 @@
 - [personal/host_this_is_mac_mini.md](personal/host_this_is_mac_mini.md) — PERMANENT — when Claude Code runs with hostname Mac-mini.local and user psm2, this session IS the Mac Mini itself. Never SSH to 100.66.244
 - [personal/pierre_all_in_no_tap_outs.md](personal/pierre_all_in_no_tap_outs.md) — Pierre operates all-in. Don't recommend stopping, deferring, or "going to bed." Recommend the next action, even if it's hard or long.
 - [personal/preference_opus_for_coding_logic.md](personal/preference_opus_for_coding_logic.md) — Explicit user preference (2026-04-21) — any subagent or session doing real coding logic must run on Opus, not Sonnet/Haiku
+- [personal/preference_opus_for_spec_drafting.md](personal/preference_opus_for_spec_drafting.md) — HARD RULE: always use Opus for briefs (specs, waves, plans, scoped task drafts). Never sonnet.
 - [personal/reference_api_keys_keychain.md](personal/reference_api_keys_keychain.md) — All API keys (Resend, Brave, Exa, Turso) stored in macOS Keychain — settings.json uses ${VAR} references, never literal values. Source of 
 - [personal/reference_xai_grok_api_key.md](personal/reference_xai_grok_api_key.md) — xAI Grok API key for Contably codegen (PR #942) — stored in macOS Keychain, service=xai-api-key account=psm2
 
