@@ -23,6 +23,7 @@
 - [personal/preference_opus_for_coding_logic.md](personal/preference_opus_for_coding_logic.md) — Explicit user preference (2026-04-21) — any subagent or session doing real coding logic must run on Opus, not Sonnet/Haiku
 - [personal/preference_opus_for_spec_drafting.md](personal/preference_opus_for_spec_drafting.md) — HARD RULE: always use Opus for briefs (specs, waves, plans, scoped task drafts). Never sonnet.
 - [personal/reference_api_keys_keychain.md](personal/reference_api_keys_keychain.md) — All API keys (Resend, Brave, Exa, Turso) stored in macOS Keychain — settings.json uses ${VAR} references, never literal values. Source of 
+- [personal/reference_anthropic_api_key.md](personal/reference_anthropic_api_key.md) — Anthropic API key for oxi engine workers (Max-plan fallback). Keychain service=anthropic-api-key account=psm2. Stored 2026-05-02 post-quota-incident.
 - [personal/reference_xai_grok_api_key.md](personal/reference_xai_grok_api_key.md) — xAI Grok API key for Contably codegen (PR #942) — stored in macOS Keychain, service=xai-api-key account=psm2
 
 ## Semantic — patterns, mistakes, tech-insights
