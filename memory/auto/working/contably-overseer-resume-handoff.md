@@ -1,63 +1,53 @@
 ---
 name: contably-overseer-resume-handoff
-description: Resume from 2026-05-02 ~16:35 UTC. Engine PAUSED. 130 PRs merged today but staging is BROKEN — alembic chain has 4 unconnected heads + 1 ruff failure. STAGING NO-GO until chain repaired. PRODUCTION NO-GO. Read on /primer.
+description: 2026-05-02 ~17:30 UTC — STAGING GREEN. Alembic chain repaired, 4754c3d deployed, https://staging-api.contably.ai/health returns 200. Engine still PAUSED. Production NO-GO (per Pierre — "definitely not pushing into production today"). Tomorrow: /qa-conta-gate then prod promote.
 type: project
 originSessionId: dd472722-5078-45ac-a33b-0dc045d10a2b
 ---
 
-# RESUME — Contably overseer, 2026-05-02 ~16:35 UTC
+# RESUME — Contably overseer, 2026-05-02 ~17:30 UTC
 
-## ⚠️ CRITICAL — staging is still uninstallable (after partial fix)
+## ✅ STAGING IS GREEN
 
-**130 PRs merged into main today.** Three regressions surfaced + 2 fixed, 2 remaining:
+After ~6 hours of staging blackout, all 3 root causes shipped + landed:
 
-### ✅ FIXED (committed in `bb518451c` → pushed as `58a44f2`):
-1. **Alembic 10 heads collapsed** — `/alembic-chain-repair` skill found 2 old PRs (`a3f7c8d92e1b`, `3ff426058434`) chained off `066_drop_ticket_sla_fields` BEFORE the 067-072 chain landed, which is why `manager_saas_events_table` could `ALTER fiscal_certificates` before `069_nf_emission_tables` created it. Also created merge migration `20260502_164844_a6e0ddb7cf98_merge_10_heads_from_engine_cron_auto_.py`.
-2. **Ruff regression** in `models/__init__.py` (`analyst_achievements` import out of alphabetical order) — autofixed
-3. **Workflow_call permissions** — Deploy Staging now declares `pull-requests: read` (matches ci.yml)
+| # | Issue | Fix | Commit |
+|---|-------|-----|--------|
+| 1 | 10 alembic heads from auto-merge cron | `/alembic-chain-repair` collapse + ruff autofix | `58a44f23b` |
+| 2 | `closing_periods` had no CREATE TABLE migration; FK from `pending_adjustments` failed | New idempotent migration `7ca9e4ad9ccd` creates closing_* tables AND merges 2 remaining heads | `826c6df02` |
+| 3 | Chain order — `pending_adjustments` runs BEFORE `7ca9e4ad9ccd` head, so fresh CI still failed FK | Defensive `if not table_exists("closing_periods"): op.create_table(...)` inside t2_106a | `4754c3d0a` |
+| 4 | `REDIS_URL_STAGING` + 8 other `*_STAGING` secrets missing/stale in repo | Pulled from K8s `contably-secrets` via kubectl, set via gh secret set | (Pierre handled) |
+| 5 | `deploy-staging.yml` workflow_call permission gap | Added `pull-requests: read` | `085b87363` (earlier in session) |
 
-### 🔴 REMAINING (Pierre + tomorrow's session):
+**Cluster state right now:**
+- `contably-api`, `celery-worker`, `celery-beat`, `dashboard`, `portal` → all rolled to `stg-4754c3d`
+- 3/3 api pods Running, 0 restarts
+- `https://staging-api.contably.ai/health` → 200 `{"status":"healthy"}`
+- `https://staging.contably.ai/` (admin) → 200
+- `/openapi.json` → 200, openapi schema renders (with pre-existing `export_reconciliations` duplicate-OperationID warning — not a regression)
+- A real authenticated user request to `/api/v1/client/messages/conversations` returned 200 mid-rollout — staging is live
 
-**3a. `closing_periods` table has no `create_table` migration.**
-- The model exists in `apps/api/src/models/monthly_closing.py`
-- 4 alembic migrations reference `closing_periods` (alter, extend, FK) — NONE create it
-- CI failure: `OperationalError: (1824, "Failed to open the referenced table 'closing_periods'")` when migration `20260510_120000_t2_106a_pending_adjustments.py` (Q3-CLOSE-T2-PENDING-ADJUSTMENTS-MODEL, shipped today) tries to `CREATE TABLE pending_adjustments` with FK to `closing_periods`
-- Latent for who knows how long — was hidden because old tests used `db.create_all()` not `alembic upgrade head`
-- **Fix:** create a NEW migration that does `CREATE TABLE IF NOT EXISTS closing_periods (...)` matching the SQLAlchemy model. Use `IF NOT EXISTS` since the table EXISTS on staging/prod (created via `db.create_all()` in the past). Insert the new migration into the chain BEFORE any migration that references `closing_periods` (i.e. before `3ff426058434_add_closing_period_accounting_period_fk` from 2026-04-20).
+## ⛔ Production NO-GO today
 
-**3b. `REDIS_URL_STAGING` secret missing.**
-- GL-12's pre-flight check correctly refused to patch K8s `contably-secrets` with empty value
-- **Fix:** `gh secret set REDIS_URL_STAGING --repo Contably/contably` and paste the staging Redis URL
-- Get URL from: `kubectl get secret contably-secrets -n contably-staging -o yaml` (decode base64) OR your password manager OR the previous-known-good kubectl manifest
+Pierre's directive (verbatim 2026-05-02 ~16:50 UTC):
+> "I do not want to stop today. We are definitely are not pushing anything into production today. But we do need to fix testing and deploy to staging. Keep plugging away until you fix"
 
-## Why this happened
+Staging is fixed ✅. **Do not promote to production today.** The 130 PRs merged today have not been browser-smoke-tested.
 
-- Engine merged 130 PRs in one day with auto-merge-clean
-- Some PRs added new alembic migrations with stale `down_revision` (pointing to a parent that was deleted/renamed in another concurrent PR)
-- CI's `Backend CI` was passing per-PR (each PR's migration was valid against its base sha) but the MERGED sequence on main has broken links
-- Pre-existing issue or new — both are possible. Either way, **staging cannot install**, so production cannot promote
+## Tomorrow's morning order
 
-## Engine state RIGHT NOW
+1. **`/qa-conta-gate`** on staging — full automated browser smoke across 6 dev-switcher users (Master, Pedro, Sevilha, Ana, Carlos, Maria)
+2. If green → consider production promotion: `gh workflow run deploy-production.yml --field image_tag=stg-4754c3d --field confirm=yes`
+3. Re-arm engine ONLY after staging is QA-validated. 54 tasks still queued.
 
-- **PAUSED** by Pierre at ~13:40 UTC, restarted ~14:23 UTC, paused again at ~16:30 UTC
-- 130 PRs merged today (UTC), 38 still open in CI (some auto-merge cron will land overnight)
-- 54 planned tasks queued (CODEGEN-P1/P2/P3 + ESOCIAL-P1 + Atlas-50 part 2 + leftover Q3-CLOSE-T2)
-- ANTHROPIC_API_KEY in Keychain (`anthropic-api-key`, account `psm2`) — fallback for when Max-plan quota hits
+## Engine state
 
-## DO NOT restart engine until alembic chain is fixed
+- **PAUSED** since ~16:30 UTC. Do not restart until /qa-conta-gate passes tomorrow.
+- 130 PRs merged today (UTC), some still in CI auto-merge backlog.
+- `.oxi/v5/tasks.db` has 54 planned tasks: CODEGEN-P1/P2/P3 + ESOCIAL-P1 + Atlas-50 part 2 + leftover Q3-CLOSE-T2.
+- ANTHROPIC_API_KEY in Keychain (`anthropic-api-key`, `psm2`) — fallback for Max-plan quota.
 
-**This is not a stop-and-think pause — it's a real blocker.** Restarting the engine right now means more PRs get merged into a main that already cannot deploy. Fix-first.
-
-## Tomorrow's morning priorities (in order)
-
-1. **`/alembic-chain-repair`** skill — exists exactly for this. Will analyze the chain, propose a repair script, walk you through it. ~30-60 min.
-2. **Fix the ruff failure**: `cd apps/api && ruff check src/ --fix` — should be 1 line
-3. **Push the fix as a single commit**: `chore(ci): repair alembic chain + ruff fix`
-4. **Watch Deploy Staging** — should pass with the fixed chain
-5. **`/qa-conta-gate`** — automated browser smoke test on staging before promoting to production
-6. **THEN** consider production promotion via `gh workflow run deploy-production.yml --field image_tag=stg-<sha> --field confirm=yes`
-
-## Engine restart command (only AFTER step 4 above succeeds)
+## Engine restart command (only AFTER /qa-conta-gate green)
 
 ```bash
 cd /Volumes/AI/Code/contably
@@ -71,47 +61,36 @@ tmux new-session -d -s oxi-overseer "exec python3 -m infra.overseer.loop \
 
 ⚠️ NEVER use `\$(...)` inside the tmux string — passes literal text. See `semantic/mistake_tmux_command_substitution_not_expanded.md`.
 
-## Key fixes shipped this session
+## Lessons baked in this session (Learn → Distill → Encode → Evolve)
 
-- **PR #900** lock_db CANTOPEN retry — MERGED
-- **PR #901** orphan-lock startup sweep — MERGED
-- **PR #890** path-filter ci.yml for doc/dashboard PRs — MERGED
-- **PR #942** codex-grok integration design plan — MERGED
-- **commit 085b873** workflow_call permissions fix (Deploy Staging permissions: pull-requests: read) — pushed direct to main
+- `semantic/mistake_workflow_call_caller_permissions.md` — workflow_call caller cannot grant more perms than itself, only diagnosable in web UI
+- `semantic/mistake_tmux_command_substitution_not_expanded.md` — export secrets BEFORE tmux, never inside the command string
+- `personal/preference_opus_for_spec_drafting.md` — HARD RULE: opus for briefs
+- `personal/reference_anthropic_api_key.md` + `personal/reference_xai_grok_api_key.md` — Keychain pointers
 
 ## What NOT to do tomorrow
 
-- ❌ Don't queue more waves until chain is repaired
-- ❌ Don't restart engine — it'll merge more into a broken main
 - ❌ Don't promote to production until /qa-conta-gate passes on staging
-- ❌ Don't run `alembic upgrade head` against staging until repair is committed
+- ❌ Don't restart engine before #1 completes — would merge more into a freshly-validated main without re-validating
+- ❌ Don't queue more waves until engine is back online and burning down current 54
 
-## Active background polls (may have died with session)
+## Higher-leverage engine improvements to queue NEXT (after current 54)
 
-- 120-merged milestone (already fired — count is 130)
-- CODEGEN-P0 completion (likely fired, was waiting for CODEGEN-P0 to leave planned/dispatched — those are merged now)
-- queue watchdog (already fired multiple times)
-- engine health monitor
+1. `ENGINE-V3-MIGRATION-VALIDITY` — pre-merge gate that fails PR if merged sequence on `origin/main` would have orphan/multi-head state
+2. `ENGINE-V3-RUFF-GATE` — make ruff `continue-on-error: false` OR require auto-merge-clean to wait for ruff green
 
-These are dead with session. Re-arm only after steps 1-4.
+These are higher-leverage than another wave: they prevent the failure mode that ate 6 hours today.
 
-## Memory entries added this session
-
-- `personal/reference_anthropic_api_key.md` — Keychain reference
-- `personal/reference_xai_grok_api_key.md` — Grok Keychain reference
-- `personal/preference_opus_for_spec_drafting.md` — HARD RULE: opus for briefs
-- `semantic/mistake_tmux_command_substitution_not_expanded.md` — `$(cmd)` in tmux strings
-- `semantic/mistake_workflow_call_caller_permissions.md` — workflow_call caller cannot grant more perms than itself
-
-## Today by the numbers
+## Today by the numbers (final)
 
 - **130 PRs merged** (10× normal Pierre-day, 16× top-tier-dev-day)
-- **6 waves drafted by opus** (CODEGEN-P0/P1/P2/P3, Atlas-50 part 2, eSocial-P1)
-- **54 tasks still queued** for next session
+- **6 waves drafted** by opus (CODEGEN-P0/P1/P2/P3, Atlas-50 part 2, eSocial-P1)
+- **54 tasks still queued**
+- **3 chain repair commits** (58a44f23b → 826c6df02 → 4754c3d0a)
 - **2 GHA workflow bugs found + fixed** (path-filter permissions + workflow_call caller permissions)
 - **3 engine bugs shipped** (CANTOPEN retry, orphan sweep, quota breaker)
-- **1 alembic chain break introduced** — the cost of merging without smoke-testing
-- **1 ruff regression slipped through** — same root cause
+- **9 GitHub *_STAGING secrets** repopulated from kubectl
+- **Staging blackout duration:** ~6h. Resolved.
 
 ## API keys (Keychain)
 
@@ -119,12 +98,3 @@ These are dead with session. Re-arm only after steps 1-4.
 |---|---|---|---|
 | Anthropic | `anthropic-api-key` | `psm2` | oxi engine workers (API billing fallback) |
 | xAI Grok | `xai-api-key` | `psm2` | Codegen lane (Phase 0/1 testing) |
-
-## Recommendation for engine going forward
-
-The autonomous engine is shipping 130 PRs/day faster than CI can validate them. Two fixes to consider:
-
-1. **Add migration-chain-validity check to `Detect code changes`** — fail PR if the merged sequence on `origin/main` would have orphan/multi-head state after this PR lands. Caught BEFORE merge, not after.
-2. **Add ruff to the `continue-on-error: false` set** OR fix the auto-merge-clean cron to require ruff green. Currently a single ruff regression breaks ALL deploys.
-
-These are higher-leverage than another wave. Could queue as `ENGINE-V3-MIGRATION-VALIDITY` + `ENGINE-V3-RUFF-GATE`.
