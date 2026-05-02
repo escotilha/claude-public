@@ -1,24 +1,64 @@
 ---
 name: contably-overseer-resume-handoff
-description: Resume block from session ending 2026-05-02 ~13:40 UTC. Engine PAUSED by Pierre. 98 merged today, 46 open, 19 planned tasks. API key in Keychain. Read on /primer.
+description: Resume from 2026-05-02 ~16:35 UTC. Engine PAUSED. 130 PRs merged today but staging is BROKEN — alembic chain has 4 unconnected heads + 1 ruff failure. STAGING NO-GO until chain repaired. PRODUCTION NO-GO. Read on /primer.
 type: project
 originSessionId: dd472722-5078-45ac-a33b-0dc045d10a2b
 ---
 
-# RESUME — Contably overseer, 2026-05-02 ~13:40 UTC
+# RESUME — Contably overseer, 2026-05-02 ~16:35 UTC
 
-**Pierre's directive: consistency over acceleration. Pause → evaluate → adapt → keep going.**
+## ⚠️ CRITICAL — staging is uninstallable
+
+**130 PRs merged into main today, but the latest Deploy Staging FAILED.** Two real regressions:
+
+### 1. Alembic migration chain broken — 4 unconnected heads
+```
+HEADS (uncalled by anything):
+  046  20260413_180000_046_rename_company_user_roles.py
+  031  20260315_100001_031_add_sefaz_webhook_events.py
+  055  20260414_130000_055_sync_bank_model_columns.py
+  025  20260127_130100_025_extend_uploads_ocr.py
+
+ORPHANS (down_revision points to nothing):
+  20260414_130000_055_sync_bank_model_columns.py     down=054 (missing)
+  20260127_130100_025_extend_uploads_ocr.py          down=024 (missing)
+  20260315_120000_030_add_lineage_tickets_notifications.py  down=030 (missing)
+  20260413_180000_046_rename_company_user_roles.py   down=045 (missing)
+```
+
+CI symptom: `ProgrammingError: (1146, "Table 'contably_ci.fiscal_certificates' doesn't exist")` when running `ALTER TABLE fiscal_certificates ADD COLUMN manager_saas_cert_id`. Migration ordering broken.
+
+### 2. Ruff lint failure in apps/api/src/
+"1 fixable with the --fix option" — single auto-fixable rule violation slipping past CI somehow. Run `ruff check apps/api/src/ --fix` locally to see + fix.
+
+## Why this happened
+
+- Engine merged 130 PRs in one day with auto-merge-clean
+- Some PRs added new alembic migrations with stale `down_revision` (pointing to a parent that was deleted/renamed in another concurrent PR)
+- CI's `Backend CI` was passing per-PR (each PR's migration was valid against its base sha) but the MERGED sequence on main has broken links
+- Pre-existing issue or new — both are possible. Either way, **staging cannot install**, so production cannot promote
 
 ## Engine state RIGHT NOW
 
-- **PAUSED** intentionally by Pierre at 13:40 UTC.
-- Tmux server dead. No `infra.overseer.loop` process.
-- **19 tasks planned** in `.oxi/v5/tasks.db`.
-- **46 oxi-v5 PRs open** in GitHub (all in CI or waiting for auto-merge).
-- **98 PRs merged today** (UTC day).
-- **ANTHROPIC_API_KEY** saved in Keychain (`anthropic-api-key`, account `psm2`). Confirmed working (HTTP 200). Use API billing going forward — Max-plan hit org monthly quota at 13:08 UTC.
+- **PAUSED** by Pierre at ~13:40 UTC, restarted ~14:23 UTC, paused again at ~16:30 UTC
+- 130 PRs merged today (UTC), 38 still open in CI (some auto-merge cron will land overnight)
+- 54 planned tasks queued (CODEGEN-P1/P2/P3 + ESOCIAL-P1 + Atlas-50 part 2 + leftover Q3-CLOSE-T2)
+- ANTHROPIC_API_KEY in Keychain (`anthropic-api-key`, account `psm2`) — fallback for when Max-plan quota hits
 
-## How to restart engine
+## DO NOT restart engine until alembic chain is fixed
+
+**This is not a stop-and-think pause — it's a real blocker.** Restarting the engine right now means more PRs get merged into a main that already cannot deploy. Fix-first.
+
+## Tomorrow's morning priorities (in order)
+
+1. **`/alembic-chain-repair`** skill — exists exactly for this. Will analyze the chain, propose a repair script, walk you through it. ~30-60 min.
+2. **Fix the ruff failure**: `cd apps/api && ruff check src/ --fix` — should be 1 line
+3. **Push the fix as a single commit**: `chore(ci): repair alembic chain + ruff fix`
+4. **Watch Deploy Staging** — should pass with the fixed chain
+5. **`/qa-conta-gate`** — automated browser smoke test on staging before promoting to production
+6. **THEN** consider production promotion via `gh workflow run deploy-production.yml --field image_tag=stg-<sha> --field confirm=yes`
+
+## Engine restart command (only AFTER step 4 above succeeds)
 
 ```bash
 cd /Volumes/AI/Code/contably
@@ -30,99 +70,62 @@ tmux new-session -d -s oxi-overseer "exec python3 -m infra.overseer.loop \
   --worker-cmd claude --dangerously-skip-permissions -p"
 ```
 
-⚠️ **CRITICAL**: Export the API key in the PARENT shell BEFORE `tmux new-session`. Never use `\$(...)` inside the tmux string — it passes literal text, not the resolved value.
-
-Verify:
-```bash
-ps -ef | grep "infra.overseer.loop" | grep -v grep
-tail -3 .oxi/v5/overseer.log
-```
-
-## Queue state
-
-- **Dispatched**: 202 (already worked on this session)
-- **Planned**: 19 (CODEGEN-P0-* + Q3-CLOSE-T2-* + ENGINE-V2-* + A-* Atlas)
-- **Failed**: 3 (quota-kills + scope-drift — requeue before restart)
-- **Merged in DB**: 6 (note: actual GitHub merges = 98, `pr_number: null` parsing bug understates)
-
-### Requeue failed tasks before restart
-
-```bash
-sqlite3 /Volumes/AI/Code/contably/.oxi/v5/tasks.db \
-  "SELECT identifier, failure_reason FROM task WHERE status='failed' AND identifier NOT LIKE 'T%';"
-# For each quota-kill (failure_reason='worker rc=1'):
-sqlite3 /Volumes/AI/Code/contably/.oxi/v5/tasks.db \
-  "UPDATE task SET status='planned', branch=NULL, dispatch_count=0, dispatched_at=NULL,
-   failed_at=NULL, failure_class='', failure_reason='', failure_signature=''
-   WHERE status='failed' AND failure_reason='worker rc=1' AND identifier NOT LIKE 'T%';"
-```
-
-## Active background polls (may still be running)
-
-- **120-merged milestone** (`b6u757gy6`) — fires when merged ≥ 120
-- **CODEGEN-P0 completion** (`b60oz8zxx`) — fires when all 4 CODEGEN-P0-* tasks leave planned/dispatched; spawns Phase 1 spec-drafting with **opus** (Pierre's hard rule)
-
-## Today's major waves (what shipped)
-
-| Wave | Tasks | Status |
-|---|---|---|
-| Phase 6 (P6-*) | 34 | ✅ Fully shipped + merged |
-| P9 hooks | 9 | ✅ Fully shipped |
-| Throughput (TP-*) | 35 | ✅ Fully shipped |
-| Engine self-improvement v1 | 12 | ✅ Fully shipped |
-| Sevilha Copiloto base (CSV-P*) | 24 | ✅ Mostly shipped |
-| Gamification (CSV-G*) | 17 | 🔄 ~10 shipped, ~7 in queue |
-| Go-Live wiring (GL-*) | 17 | ✅ Fully shipped |
-| Q3-CLOSE-T2-* | 22 | 🔄 ~8 shipped, ~14 in queue |
-| ENGINE-V2-* | 11 | 🔄 ~8 shipped, ~3 in queue |
-| CODEGEN-P0-* | 4 | ⏳ Queued, not yet dispatched |
-| A-* Atlas-50 | 14 | ⏳ Queued, not yet dispatched |
-
-## PRs to merge when you're back
-
-46 open PRs. Run this to trigger auto-merge-clean:
-
-```bash
-gh workflow run auto-merge-clean.yml --repo Contably/contably
-```
-
-Or check CLEAN PRs:
-```bash
-gh pr list --repo Contably/contably --state open --search "head:feat/oxi-v5" --limit 50 \
-  --json number,mergeStateStatus --jq '[.[] | select(.mergeStateStatus == "CLEAN")] | length'
-```
-
-## Morning priorities
-
-1. Restart engine (command above)
-2. Requeue failed tasks
-3. Trigger auto-merge-clean (46 open, many CLEAN)
-4. Wait for CODEGEN-P0 PRs to merge → Phase 1 spec drafting (opus agent)
-5. Consider MAX_WORKERS 5 → 6 if CI free_slots > 8 consistently
+⚠️ NEVER use `\$(...)` inside the tmux string — passes literal text. See `semantic/mistake_tmux_command_substitution_not_expanded.md`.
 
 ## Key fixes shipped this session
 
-- **PR #900** `fix(overseer): retry lock_db._connect on SQLITE_CANTOPEN race` — MERGED
-- **PR #901** `fix(overseer): sweep orphan locks on engine startup` — MERGED
-- **PR #890** `P6-INF-6: path-filter ci.yml — doc/dashboard PRs skip Backend CI` — MERGED
-- **PR #942** `docs(codegen): design plan for Codex + Grok integration` — MERGED
+- **PR #900** lock_db CANTOPEN retry — MERGED
+- **PR #901** orphan-lock startup sweep — MERGED
+- **PR #890** path-filter ci.yml for doc/dashboard PRs — MERGED
+- **PR #942** codex-grok integration design plan — MERGED
+- **commit 085b873** workflow_call permissions fix (Deploy Staging permissions: pull-requests: read) — pushed direct to main
 
-## API keys (Keychain)
+## What NOT to do tomorrow
 
-| Key | Service | Account | Purpose |
-|---|---|---|---|
-| Anthropic | `anthropic-api-key` | `psm2` | oxi engine workers (API billing, not Max subscription) |
-| xAI Grok | `xai-api-key` | `psm2` | Codegen lane (Phase 0/1 testing) |
+- ❌ Don't queue more waves until chain is repaired
+- ❌ Don't restart engine — it'll merge more into a broken main
+- ❌ Don't promote to production until /qa-conta-gate passes on staging
+- ❌ Don't run `alembic upgrade head` against staging until repair is committed
 
-## Bugs documented / tasks queued
+## Active background polls (may have died with session)
 
-- `ENGINE-V2-QUOTA-BREAKER` — auto-pause on quota wall (tier 5, queued)
-- `ENGINE-V2-POLICY-SKIP-FILELESS` — policy.py skips tasks with no files_touched (tier 5, queued)
-- T17/T18 bumped to tier 9 (manual judgment tasks, no files_touched — won't dispatch autonomously)
+- 120-merged milestone (already fired — count is 130)
+- CODEGEN-P0 completion (likely fired, was waiting for CODEGEN-P0 to leave planned/dispatched — those are merged now)
+- queue watchdog (already fired multiple times)
+- engine health monitor
+
+These are dead with session. Re-arm only after steps 1-4.
 
 ## Memory entries added this session
 
 - `personal/reference_anthropic_api_key.md` — Keychain reference
 - `personal/reference_xai_grok_api_key.md` — Grok Keychain reference
-- `personal/preference_opus_for_spec_drafting.md` — HARD RULE: opus for all briefs
-- `semantic/mistake_tmux_command_substitution_not_expanded.md` — $(cmd) in tmux string
+- `personal/preference_opus_for_spec_drafting.md` — HARD RULE: opus for briefs
+- `semantic/mistake_tmux_command_substitution_not_expanded.md` — `$(cmd)` in tmux strings
+- `semantic/mistake_workflow_call_caller_permissions.md` — workflow_call caller cannot grant more perms than itself
+
+## Today by the numbers
+
+- **130 PRs merged** (10× normal Pierre-day, 16× top-tier-dev-day)
+- **6 waves drafted by opus** (CODEGEN-P0/P1/P2/P3, Atlas-50 part 2, eSocial-P1)
+- **54 tasks still queued** for next session
+- **2 GHA workflow bugs found + fixed** (path-filter permissions + workflow_call caller permissions)
+- **3 engine bugs shipped** (CANTOPEN retry, orphan sweep, quota breaker)
+- **1 alembic chain break introduced** — the cost of merging without smoke-testing
+- **1 ruff regression slipped through** — same root cause
+
+## API keys (Keychain)
+
+| Key | Service | Account | Purpose |
+|---|---|---|---|
+| Anthropic | `anthropic-api-key` | `psm2` | oxi engine workers (API billing fallback) |
+| xAI Grok | `xai-api-key` | `psm2` | Codegen lane (Phase 0/1 testing) |
+
+## Recommendation for engine going forward
+
+The autonomous engine is shipping 130 PRs/day faster than CI can validate them. Two fixes to consider:
+
+1. **Add migration-chain-validity check to `Detect code changes`** — fail PR if the merged sequence on `origin/main` would have orphan/multi-head state after this PR lands. Caught BEFORE merge, not after.
+2. **Add ruff to the `continue-on-error: false` set** OR fix the auto-merge-clean cron to require ruff green. Currently a single ruff regression breaks ALL deploys.
+
+These are higher-leverage than another wave. Could queue as `ENGINE-V3-MIGRATION-VALIDITY` + `ENGINE-V3-RUFF-GATE`.
