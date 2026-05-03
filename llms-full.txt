@@ -2,7 +2,7 @@
 
 > Pierre Schurmann's Claude Code setup: 86 skills, 13 global rules, hybrid memory system. LLM-discoverable via llmstxt.org spec. Use this file to understand what tooling is available before starting work.
 
-Generated: 2026-05-02T02:30:23Z
+Generated: 2026-05-03T02:00:23Z
 
 ---
 
@@ -2573,17 +2573,6 @@ You are the Chief GEO (Generative Engine Optimization Officer) for SourceRank AI
 
 ---
 
-## skills/claude-api
-
-- **name:** claude-api
-- **description:** Build, debug, and optimize Claude API / Anthropic SDK apps. Apps built with this skill should include prompt caching. Also handles migrating existing Claude API code between Claude model versions (4.5 → 4.6, 4.6 → 4.7, retired-model replacements). TRIGGER when: code imports `anthropic`/`@anthropic-ai/sdk`; user asks for the Claude API, Anthropic SDK, or Managed Agents; user adds/modifies/tunes a Claude feature (caching, thinking, compaction, tool use, batch, files, citations, memory) or model (Opus/Sonnet/Haiku) in a file; questions about prompt caching / cache hit rate in an Anthropic SDK project. SKIP: file imports `openai`/other-provider SDK, filename like `*-openai.py`/`*-generic.py`, provider-neutral code, general programming/ML.
-
-# Building LLM-Powered Applications with Claude
-
-This skill helps you build LLM-powered applications with Claude. Choose the right surface based on your needs, detect the project language, then read the relevant language-specific documentation.
-
----
-
 ## skills/claude-setup-optimizer
 
 - **name:** claude-setup-optimizer
@@ -3310,39 +3299,6 @@ Lightweight HTTP server + CLI for AI-controlled Chrome. Uses accessibility tree 
 # Platform Sweep -- Full Platform Health Audit + Fix Pipeline
 
 A meta-orchestrator that runs 5 parallel audit tracks, consolidates findings into a single prioritized report, and after user approval, autonomously fixes all issues in parallel git worktrees.
-
----
-
-## skills/pluggy-integration
-
-- **name:** pluggy-integration
-- **description:** Core Pluggy integration patterns and best practices. Use when setting up Pluggy SDK, implementing Connect Widget, managing Items, or configuring webhooks.
-
-# Pluggy Integration
-
-Comprehensive integration guide for Pluggy Open Finance API. Contains rules across 5 categories, prioritized by impact to guide accurate implementation.
-
----
-
-## skills/pluggy-open-finance
-
-- **name:** pluggy-open-finance
-- **description:** Best practices for Open Finance data retrieval and management. Use when working with accounts, transactions, investments, loans, or identity data.
-
-# Pluggy Open Finance
-
-Comprehensive guide for retrieving and managing Open Finance data through Pluggy. Contains rules across 5 categories, prioritized by impact.
-
----
-
-## skills/pluggy-payments
-
-- **name:** pluggy-payments
-- **description:** Payment initiation with PIX, Boleto, and Smart Transfers. Use when implementing payment flows, PIX transfers, or preauthorized payments.
-
-# Pluggy Payments
-
-Comprehensive guide for implementing payment initiation through Pluggy. Contains rules across 5 categories, prioritized by impact.
 
 ---
 

@@ -1,6 +1,6 @@
 # Memory Index
 
-*Rebuilt 2026-05-01. 190 entries indexed.*
+*Rebuilt 2026-05-02. 197 entries indexed.*
 
 ## Root
 
@@ -15,18 +15,18 @@
 - [personal/contably_staging_test_users.md](personal/contably_staging_test_users.md) — Canonical email + password mapping for the 6 Contably staging dev-switcher users (Master, Pedro, Sevilha, Ana, Carlos, Maria) — passwords 
 - [personal/contably_test_user_ana.md](personal/contably_test_user_ana.md) — Ana is the canonical placeholder Sevilha analyst in Contably for narrative examples and test scenarios — use her, not made-up names
 - [personal/contably_worktree_discipline.md](personal/contably_worktree_discipline.md) — All Contably work must be done in a dedicated worktree — never on main, never on oxi branches
-- [personal/feedback_dep_upgrade_strategy.md](personal/feedback_dep_upgrade_strategy.md) — When a single dep needs upgrading, PAUSE and revise ALL deps as a coordinated set. Surgical single-dep updates cascade into peer-dep + lockfile hell.
+- [personal/feedback_dep_upgrade_strategy.md](personal/feedback_dep_upgrade_strategy.md) — When a single dependency is outdated/needs upgrade, pause and revise ALL dependencies, then upgrade together. Surgical hacks on single deps 
 - [personal/feedback_format_decisions_as_numbered_lists.md](personal/feedback_format_decisions_as_numbered_lists.md) — Pierre prefers every decision list (options, sub-tasks, halt-points, follow-ups) formatted as a numbered list, not bullets, so he can refer 
-- [personal/feedback_no_direct_to_main_ever.md](personal/feedback_no_direct_to_main_ever.md) — ABSOLUTE — never push direct to main, even under pressure. Always worktree + PR + auto-merge label. 18-min PR latency beats hours debugging direct-push surprises.
 - [personal/feedback_full_review_correct_worktree.md](personal/feedback_full_review_correct_worktree.md) — When user asks to run /full-review (or any branch-gating skill) on work that lives in a different worktree, switch cwd to that worktree firs
+- [personal/feedback_no_direct_to_main_ever.md](personal/feedback_no_direct_to_main_ever.md) — ABSOLUTE RULE — never push direct to main, even under pressure or for hot-fixes. Always worktree + PR + auto-merge label. The 10-min auto-
 - [personal/host_macmini_vs_laptop.md](personal/host_macmini_vs_laptop.md) — Pierre's primary Claude Code host is the Mac Mini — the Mini runs Claude Code sessions AND is the autonomous executor. Default to Mini unl
 - [personal/host_this_is_mac_mini.md](personal/host_this_is_mac_mini.md) — PERMANENT — when Claude Code runs with hostname Mac-mini.local and user psm2, this session IS the Mac Mini itself. Never SSH to 100.66.244
 - [personal/pierre_all_in_no_tap_outs.md](personal/pierre_all_in_no_tap_outs.md) — Pierre operates all-in. Don't recommend stopping, deferring, or "going to bed." Recommend the next action, even if it's hard or long.
 - [personal/preference_opus_for_coding_logic.md](personal/preference_opus_for_coding_logic.md) — Explicit user preference (2026-04-21) — any subagent or session doing real coding logic must run on Opus, not Sonnet/Haiku
-- [personal/preference_opus_for_spec_drafting.md](personal/preference_opus_for_spec_drafting.md) — HARD RULE: always use Opus for briefs (specs, waves, plans, scoped task drafts). Never sonnet.
+- [personal/preference_opus_for_spec_drafting.md](personal/preference_opus_for_spec_drafting.md) — Pierre's hard rule — ALWAYS use opus for briefs (specs, waves, plans, scoped task drafts). Never sonnet for these. Established 2026-05-02 
+- [personal/reference_anthropic_api_key.md](personal/reference_anthropic_api_key.md) — Anthropic API key for Contably oxi engine workers — stored in macOS Keychain, retrieve via `security find-generic-password -s anthropic-ap
 - [personal/reference_api_keys_keychain.md](personal/reference_api_keys_keychain.md) — All API keys (Resend, Brave, Exa, Turso) stored in macOS Keychain — settings.json uses ${VAR} references, never literal values. Source of 
-- [personal/reference_anthropic_api_key.md](personal/reference_anthropic_api_key.md) — Anthropic API key for oxi engine workers (Max-plan fallback). Keychain service=anthropic-api-key account=psm2. Stored 2026-05-02 post-quota-incident.
-- [personal/reference_xai_grok_api_key.md](personal/reference_xai_grok_api_key.md) — xAI Grok API key for Contably codegen (PR #942) — stored in macOS Keychain, service=xai-api-key account=psm2
+- [personal/reference_xai_grok_api_key.md](personal/reference_xai_grok_api_key.md) — xAI Grok API key for Contably codegen integration — stored in macOS Keychain, retrieve via `security find-generic-password -s xai-api-key 
 
 ## Semantic — patterns, mistakes, tech-insights
 
@@ -40,9 +40,9 @@
 - [semantic/mistake_orchestrator_inMemory_state.md](semantic/mistake_orchestrator_inMemory_state.md) — Orchestrator tracking in-flight work only in RAM causes re-dispatch loops on restart — always persist status before launching
 - [semantic/mistake_rebase_script_stale_origin_main.md](semantic/mistake_rebase_script_stale_origin_main.md) — Rebase helper that merges origin/main without first fetching it produces a no-op merge — branch ends up still missing the latest main comm
 - [semantic/mistake_settings_bak_public_leak.md](semantic/mistake_settings_bak_public_leak.md) — 2026-04-21 incident — settings.json.bak-* file with literal API keys force-pushed to public GitHub because its filename didn't match the .
-- [semantic/mistake_tmux_command_substitution_not_expanded.md](semantic/mistake_tmux_command_substitution_not_expanded.md) — tmux new-session -d -s X "...$(cmd)..." passes literal $(...) to spawned shell. Always resolve secrets BEFORE tmux.
-- [semantic/mistake_workflow_call_caller_permissions.md](semantic/mistake_workflow_call_caller_permissions.md) — workflow_call caller cannot grant reusable workflow more permissions than itself. startup_failure with no API error. Web UI is only diagnostic surface.
+- [semantic/mistake_tmux_command_substitution_not_expanded.md](semantic/mistake_tmux_command_substitution_not_expanded.md) — tmux new-session -d -s NAME "command with $(subshell)" passes the literal string $(...) to the spawned shell, NOT the result. The subshell n
 - [semantic/mistake_validate-storage-constraints-before-schema.md](semantic/mistake_validate-storage-constraints-before-schema.md) — Always confirm runtime environment constraints (which databases are available, where the skill runs) before writing schema.sql or any storag
+- [semantic/mistake_workflow_call_caller_permissions.md](semantic/mistake_workflow_call_caller_permissions.md) — A reusable workflow (workflow_call) cannot be granted MORE permissions than its caller. If ci.yml declares pull-requests:read but deploy-sta
 - [semantic/pattern_alembic_half_stamped_recovery.md](semantic/pattern_alembic_half_stamped_recovery.md) — Recipe for "Table X already exists" alembic errors — when a migration created a table but failed before recording the revision, leaving DB
 - [semantic/pattern_autobrowse_failure_to_insight.md](semantic/pattern_autobrowse_failure_to_insight.md) — Self-improving browser automation — failure-to-insight retry loop that graduates winning workflows into reusable skills
 - [semantic/pattern_db_path_defaults_match_data_location.md](semantic/pattern_db_path_defaults_match_data_location.md) — When a CLI resolves DB path via `defaults.db_path()` with an env override, the default MUST match where data actually lives — otherwise in
@@ -75,7 +75,7 @@
 - [working/contably-os-v4-online-2026-04-21.md](working/contably-os-v4-online-2026-04-21.md) — What's running in production as of 2026-04-21 end-of-day. Resume block for future sessions.
 - [working/contably-overnight-cascade-2026-04-30.md](working/contably-overnight-cascade-2026-04-30.md) — Autonomous overnight CI cascade resolution — Pierre approved /loop self-pacing through PR merge cascade, throughput-scaling chain still in
 - [working/contably-overseer-phase0-progress.md](working/contably-overseer-phase0-progress.md) — oxi v5 overseer — Phase 0/1/2 shipped, Phase 6 wave 1 dispatching, target 600 PRs/wk by 2026-05-08. Autonomous mode active.
-- [working/contably-overseer-resume-handoff.md](working/contably-overseer-resume-handoff.md) — Resume block from session ending 2026-05-01 ~22:40 UTC. Engine DOWN due to TCC + missing infra/__init__.py; LaunchAgent path partially worki
+- [working/contably-overseer-resume-handoff.md](working/contably-overseer-resume-handoff.md) — 2026-05-02 EOD. Today's actual work all on staging (stg-1bafe2e). Frontend CI broken on main HEAD (f9a26c7) — pnpm-lock + React 19 peer-de
 - [working/resume_2026-04-22_overnight.md](working/resume_2026-04-22_overnight.md) — Resume pointer for the Contably overnight engine session that was rate-limited at 22:40 local. Any new session should read this first.
 - [working/resume_mary_restart_2026-04-23.md](working/resume_mary_restart_2026-04-23.md) — Mary restart COMPLETED 2026-04-23 03:40 — Discord verified end-to-end on Max plan via claude-cli
 
@@ -207,7 +207,7 @@
 ## Reference (legacy)
 
 - [reference/reference_cloudflare.md](reference/reference_cloudflare.md) — Cloudflare API token with Zone.DNS edit for all zones, account details, zone IDs, and where credentials are stored
-- [reference/reference_cloudflare_nuvini.md](reference/reference_cloudflare_nuvini.md) — Cloudflare API token for nuvini.ai domain DNS — separate account (P@nuvini.co) from main (p@nove.co)
+- [reference/reference_cloudflare_nuvini.md](reference/reference_cloudflare_nuvini.md) — Cloudflare API token for nuvini.ai domain DNS — separate account (P@nuvini.co) from main (p@nove.co). Token in keychain svce=cloudflare-nu
 - [reference/reference_contably_repo.md](reference/reference_contably_repo.md) — Contably code lives at Contably/contably (org), not escotilha/contably. escotilha is Pierre's personal GitHub account with admin access to t
 - [reference/reference_gemini_api.md](reference/reference_gemini_api.md) — Google Gemini API key stored in macOS Keychain — retrieve with security find-generic-password
 - [reference/reference_integration_credentials.md](reference/reference_integration_credentials.md) — API credentials for Contably integrations — Nuvem Fiscal, Pluggy, stored in GitHub Secrets
@@ -223,4 +223,4 @@
 - [reference/reference_vps_connection.md](reference/reference_vps_connection.md) — How to reach the Contabo VPS (Claudia, Paperclip) — Tailscale IP, SSH user, hostname, ports
 
 # currentDate
-Today's date is 2026-05-01.
+Today's date is 2026-05-02.
