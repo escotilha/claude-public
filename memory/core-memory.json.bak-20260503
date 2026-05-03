@@ -1,4 +1,12 @@
 {
+  "paths": {
+    "root": "~/.claude-setup",
+    "skills": "~/.claude-setup/skills",
+    "agents": "~/.claude-setup/agents",
+    "memory": "~/.claude-setup/memory",
+    "hooks": "~/.claude-setup/hooks",
+    "rules": "~/.claude-setup/rules"
+  },
   "userProfile": {
     "name": "Pierre Schurmann",
     "username": "psm2",
@@ -16,8 +24,30 @@
     "documentation": "only when explicitly requested",
     "commits": "type(scope): description (conventional commits)"
   },
-  "activeProjects": ["Contably", "AgentCreator", "M&A Toolkit", "NuvinOS"],
+  "lastConsolidation": "2026-04-27",
+  "memoryConfig": {
+    "relevanceThreshold": 5,
+    "decayThresholdDays": 90,
+    "minUsesToRetain": 3
+  },
+  "activeProjects": [
+    "Contably",
+    "AgentCreator",
+    "M&A Toolkit",
+    "NuvinOS"
+  ],
   "integrations": {
-    "github": "escotilha"
+    "github": "escotilha",
+    "resend": {
+      "domains": [
+        "nuvini.ai",
+        "contably.ai"
+      ]
+    },
+    "agentmail": [
+      "xurman@agentmail.to",
+      "marcopolo@agentmail.to",
+      "cris@agentmail.to"
+    ]
   }
 }
