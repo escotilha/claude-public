@@ -20,12 +20,11 @@ LINT_WARNINGS=""
 
 # Format based on file type
 case "$ext" in
-    # JavaScript/TypeScript - Prettier + ESLint
+    # JavaScript/TypeScript - Prettier + ESLint (errors only, capped at 20 lines)
     js|jsx|ts|tsx|mjs|cjs)
         npx prettier --write "$file_path" 2>/dev/null || true
-        # Run ESLint and capture warnings
         if command -v eslint &>/dev/null; then
-            LINT_OUTPUT=$(npx eslint "$file_path" 2>&1 || true)
+            LINT_OUTPUT=$(npx eslint --quiet "$file_path" 2>&1 | head -20 || true)
             if [[ -n "$LINT_OUTPUT" && "$LINT_OUTPUT" != *"0 problems"* ]]; then
                 LINT_WARNINGS="$LINT_OUTPUT"
             fi
@@ -55,10 +54,10 @@ case "$ext" in
         if command -v isort &>/dev/null; then
             isort --quiet "$file_path" 2>/dev/null || true
         fi
-        # Run pylint and capture warnings
+        # Run pylint (errors only, capped at 20 lines)
         if command -v pylint &>/dev/null; then
-            LINT_OUTPUT=$(pylint "$file_path" 2>&1 || true)
-            if [[ "$LINT_OUTPUT" == *"warning"* || "$LINT_OUTPUT" == *"error"* ]]; then
+            LINT_OUTPUT=$(pylint --errors-only "$file_path" 2>&1 | head -20 || true)
+            if [[ "$LINT_OUTPUT" == *"error"* || "$LINT_OUTPUT" == *":E"* ]]; then
                 LINT_WARNINGS="$LINT_OUTPUT"
             fi
         fi

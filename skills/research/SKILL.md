@@ -257,11 +257,47 @@ If content is not relevant to any of these five, score it low and report "No act
 - Every recommendation is its own `#### N.` heading with bullets beneath — never a table row
 - Minimum one recommendation per section that applies; if neither target has any, report "No actionable recommendations"
 
-#### 2b. Ask User What to Apply
+#### 2b. CTO Review (sanity check before user picks)
 
-Use `AskUserQuestion` with recommendations as options. Each option label MUST include the score (e.g., "8/10 — Update /cto with new pattern"). Sort options by score descending. Include "Just save to memory" and "Skip".
+After presenting the numbered recommendations, run a **brief /cto review** of the proposed actions to surface what the analysis missed. The CTO reviews the *recommendations themselves* — not the source URL — to catch:
 
-#### 2c. Queue for Wiki Harvest (Memex)
+- Recommendations that overlap with existing skills/agents/memory the analysis missed
+- Feasibility overstated (effort underestimated, dependencies missing, conflicts with current architecture)
+- Risk/blast radius understated (security, cache invalidation, breaking changes, migration debt)
+- Better alternative approaches the analysis didn't consider
+- Recommendations that should be combined, split, or reordered
+
+Invoke via the Skill tool in **sequential mode** (no swarm), passing the numbered list verbatim:
+
+```
+Skill("cto", args="""
+Review my /research output before I pick what to apply. Sequential mode, READ-ONLY, under 400 words.
+
+## Source
+[url or image path]
+
+## Recommendations to review
+[paste the numbered list from Phase 2a verbatim]
+
+## What I want from you
+For each recommendation: Verdict (Strong yes / Yes with mods / Skip, here's why), one-line risk note, and any alternative approach I should consider. Then a 3-bullet "what the analysis missed" — overlaps, hidden dependencies, blast-radius gotchas. End with a recommended order of operations if I were applying multiple items.
+
+No fluff. Read existing skills/memory directly to verify claims about what already exists.
+""")
+```
+
+Append the CTO output under a `### CTO Review` heading immediately after the recommendations and before the user-question step.
+
+**Skip the CTO review only if:**
+- All recommendations scored < 5 (analysis already said "no actionable recommendations")
+- The user invoked /research as `agent-spawned` (per `invocation-contexts`) — keep agent-spawned output minimal
+- Single recommendation with score >= 9 and effort = Low (no judgment call needed)
+
+#### 2c. Ask User What to Apply
+
+Use `AskUserQuestion` with recommendations as options. Each option label MUST include the score (e.g., "8/10 — Update /cto with new pattern"). Sort options by score descending. Include "Just save to memory" and "Skip". The user now picks with both the analysis's optimistic case AND the CTO's reality check in view.
+
+#### 2d. Queue for Wiki Harvest (Memex)
 
 After presenting the report, **always** queue the researched URL for wiki auto-ingest so it becomes part of the persistent knowledge base:
 
@@ -284,7 +320,7 @@ fi
 
 This feeds into the wiki harvest which ingests queued URLs into the knowledge base.
 
-#### 2d. Do NOT Auto-Install
+#### 2e. Do NOT Auto-Install
 
 Never automatically implement changes (skill edits, new skill creation, project modifications). Only present the recommendations and let the user decide what to do next. If the user explicitly asks you to implement a recommendation, then proceed.
 
